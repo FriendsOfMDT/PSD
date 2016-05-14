@@ -3,26 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installer", "Installer", "{D9F279D4-3F8F-47F7-8F46-8D3E2B20171E}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{9078DD0C-A190-48E7-B87B-2FB684841502}"
-	ProjectSection(SolutionItems) = preProject
-		Scripts\DumpVars.ps1 = Scripts\DumpVars.ps1
-		Scripts\PSDApplyOS.ps1 = Scripts\PSDApplyOS.ps1
-		Scripts\PSDConfigure.ps1 = Scripts\PSDConfigure.ps1
-		Scripts\PSDGather.psm1 = Scripts\PSDGather.psm1
-		Scripts\PSDPartition.ps1 = Scripts\PSDPartition.ps1
-		Scripts\PSDStart.ps1 = Scripts\PSDStart.ps1
-		Scripts\PSDUtility.psm1 = Scripts\PSDUtility.psm1
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{0210A310-DDDE-458F-AF36-92FD5E8F4152}"
-	ProjectSection(SolutionItems) = preProject
-		D:\PSD\Templates\LiteTouchPE.xml = D:\PSD\Templates\LiteTouchPE.xml
-		D:\PSD\Templates\PSDClient.xml = D:\PSD\Templates\PSDClient.xml
-	EndProjectSection
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "PSD", "PSD.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
 EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
