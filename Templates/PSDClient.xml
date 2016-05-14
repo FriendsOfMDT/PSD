@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<sequence version="3.00" name="PSD Client" description="PowerShell client template">
+  <step type="BDD_InstallOS" name="Install Operating System (Disabled)" description="" disable="true" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
+    <defaultVarList>
+      <variable name="OSGUID" property="OSGUID">{77517e0c-c0b1-4c7a-98c9-7aa74eaef39a}</variable>
+      <variable name="DestinationDisk" property="DestinationDisk">0</variable>
+      <variable name="DestinationPartition" property="DestinationPartition">1</variable>
+      <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
+      <variable name="DestinationOSRefresh" property="DestinationOSRefresh"></variable>
+      <variable name="DestinationOSDriveLetter" property="DestinationOSDriveLetter"></variable>
+      <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
+    </defaultVarList>
+    <action>cscript.exe "%SCRIPTROOT%\LTIApply.wsf"</action>
+  </step>
+  <group expand="true" name="State Capture" description="" disable="false" continueOnError="false">
+    <action />
+  </group>
+  <group expand="true" name="Install" description="" disable="false" continueOnError="false">
+    <action />
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Partition Disk" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID"></variable>
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>powershell.exe -file %DeployRoot%\Scripts\PSDPartition.ps1</action>
+    </step>
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Apply Operating System" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID" />
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>powershell.exe -file %DeployRoot%\Scripts\PSDApplyOS.ps1</action>
+    </step>
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Configure" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID" />
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>powershell.exe -file %DeployRoot%\Scripts\PSDConfigure.ps1</action>
+    </step>
+  </group>
+  <group expand="true" name="State Restore" description="" disable="false" continueOnError="false">
+    <action />
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Install Apps" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID" />
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>powershell.exe -file %DeployRoot%\Scripts\PSDApps.ps1</action>
+    </step>
+  </group>
+  <globalVarList>
+    <variable name="OSGUID" property="OSGUID">{77517e0c-c0b1-4c7a-98c9-7aa74eaef39a}</variable>
+    <variable name="DestinationDisk" property="DestinationDisk">0</variable>
+    <variable name="DestinationPartition" property="DestinationPartition">1</variable>
+    <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
+    <variable name="DestinationOSRefresh" property="DestinationOSRefresh"></variable>
+    <variable name="DestinationOSDriveLetter" property="DestinationOSDriveLetter"></variable>
+    <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
+    <variable name="OSGUID" property="OSGUID">{77517e0c-c0b1-4c7a-98c9-7aa74eaef39a}</variable>
+  </globalVarList>
+</sequence>
