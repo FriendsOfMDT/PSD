@@ -34,6 +34,7 @@
     <Folder Include="Scripts\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Installer\Install.ps1" />
     <Compile Include="Scripts\DumpVars.ps1" />
     <Compile Include="Scripts\PSDApplyOS.ps1" />
     <Compile Include="Scripts\PSDConfigure.ps1" />
