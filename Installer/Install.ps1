@@ -25,9 +25,11 @@ $null = New-PSDrive -Name PSD -PSProvider MDTProvider -Root $psDeploymentFolder
 
 # Copy the scripts
 Copy-Item "$install\Scripts\*.*" "$psDeploymentFolder\Scripts" -Recurse
+Dir "$psDeploymentFolder\Scripts\*.ps*" | Unblock-File 
 
 # Copy the templates
 Copy-Item "$install\Templates\*.*" "$psDeploymentFolder\Templates" -Recurse
+Dir "$psDeploymentFolder\Templates\*.*" | Unblock-File
 
 # Copy the provider module files
 if ((Test-Path "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn") -eq $false)

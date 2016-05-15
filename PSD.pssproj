@@ -44,6 +44,7 @@
     <Compile Include="Scripts\PSDUtility.psm1" />
     <Compile Include="Templates\LiteTouchPE.xml" />
     <Compile Include="Templates\PSDClient.xml" />
+    <Compile Include="Templates\Unattend_PE_x64.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />

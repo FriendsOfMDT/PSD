@@ -61,3 +61,7 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+*.ps1    eol=crlf
+*.psm1   eol=crlf
+*.xml    eol=crlf
