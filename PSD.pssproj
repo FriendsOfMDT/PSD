@@ -36,15 +36,19 @@
   <ItemGroup>
     <Compile Include="Installer\Install.ps1" />
     <Compile Include="Scripts\DumpVars.ps1" />
+    <Compile Include="Scripts\PSDApplications.ps1" />
     <Compile Include="Scripts\PSDApplyOS.ps1" />
     <Compile Include="Scripts\PSDConfigure.ps1" />
     <Compile Include="Scripts\PSDGather.psm1" />
     <Compile Include="Scripts\PSDPartition.ps1" />
+    <Compile Include="Scripts\PSDProvider.psm1" />
     <Compile Include="Scripts\PSDStart.ps1" />
     <Compile Include="Scripts\PSDUtility.psm1" />
     <Compile Include="Templates\LiteTouchPE.xml" />
     <Compile Include="Templates\PSDClient.xml" />
     <Compile Include="Templates\Unattend_PE_x64.xml" />
+    <Compile Include="Templates\Unattend_PE_x86.xml" />
+    <Compile Include="Templates\Unattend_x64.xml.10.0" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />

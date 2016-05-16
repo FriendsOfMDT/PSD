@@ -58,7 +58,7 @@
         <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
-      <action>powershell.exe -file %DeployRoot%\Scripts\PSDApps.ps1</action>
+      <action>powershell.exe -file %DeployRoot%\Scripts\PSDApplications.ps1</action>
     </step>
   </group>
   <globalVarList>

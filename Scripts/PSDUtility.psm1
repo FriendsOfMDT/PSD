@@ -1,44 +1,40 @@
 $deployRoot = Split-Path -Path $PSScriptRoot
-Import-Module "$deployRoot\Tools\Modules\Microsoft.BDD.TaskSequenceModule"
+Import-Module "$deployRoot\Tools\Modules\Microsoft.BDD.TaskSequenceModule" -Scope Global
 $caller = Split-Path -Path $MyInvocation.PSCommandPath -Leaf
+$verbosePreference = "Continue"
 Write-Host "Caller $caller from $deployRoot"
 
 function Get-PSDLocalDataPath
 {
     # TODO: Cache the result if possible
 
-    # First look for an existing path
+    # Always prefer the OS volume
+	$localPath = ""
+	if ($tsenv:OSVolumeGuid -ne "")
+	{
+	    # If the OS volume GUID is set, we should use that volume
+	    Write-Verbose "Checking for OS volume using $($tsenv:OSVolumeGuid)."
+		Get-Volume | ? { $_.UniqueID -like "*$($tsenv:OSVolumeGuid)*" } | % {
+		    $localPath = "$($_.DriveLetter):\MININT"
+		}
+	}
+	
+	if ($localPath -eq "")
+	{
+		# Look on all other volumes 
+		Write-Verbose "Checking other volumes for a MININT folder."
+        get-volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\MININT"} | Select-Object -First 1 | % {
+            $localPath = "$($_.DriveLetter):\MININT"
+        }
+	}
 
-    $localPath = ""
-    get-volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\MININT"} | Select-Object -First 1 | % {
-        $localPath = "$($_.DriveLetter):\MININT"
-    }
-
-
-    # Not found, create one
-
+    # Not found on any drive, create one on the current system drive
     if ($localPath -eq "")
     {
-        if ($env:SYSTEMDRIVE -ne "X:")
-        {
             $localPath = "$($env:SYSTEMDRIVE)\MININT"
-        }
-        else
-        {
-            get-volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | Select-Object -First 1 | % {
-                $localPath = "$($_.DriveLetter):\MININT"
-                # TODO: Determine an appropriate drive, not just the first
-            }
-
-            # Last resort, use X:
-
-            if ($localPath -eq "")
-            {
-                return "$($env:SYSTEMDRIVE)\MININT"
-            }
-        }
     }
 
+	# Create the MININT folder if it doesn't exist
     if ((Test-Path $localPath) -eq $false) {
         New-Item -ItemType Directory -Force -Path $localPath | Out-Null
     }
@@ -109,16 +105,24 @@ function Get-PSDContent
       [string] $id
     )
 
-  if ($id -eq "Tools")
+  if ($id -ieq "TaskSequencer")
   {
-    if (Test-Path "X:\Deploy\Tools\$($tsenv:Architecture)") {
+    if (Test-Path "X:\Deploy\Tools\$($tsenv:Architecture)\TSMBootstrap.exe") {
       $path = "X:\Deploy\Tools\$($tsenv:Architecture)"
       return $path
     }
-    if (Test-Path "$($tsenv:DeployRoot)\Tools\$($tsenv:Architecture)") {
-      $path = "$($tsenv:DeployRoot)\Tools\$($tsenv:Architecture)"
-    }
+    $path = "$($tsenv:DeployRoot)\Tools\$($tsenv:Architecture)"
     $destSuffix = "Tools\$($tsenv:Architecture)"
+  }
+  elseif ($id -ieq "Tools")
+  {
+    $path = "$($tsenv:DeployRoot)\Tools\$($tsenv:Architecture)"
+    $destSuffix = "Tools\$($tsenv:Architecture)"
+  }
+  else
+  {
+    $path = "$($tsenv:DeployRoot)\$id"
+	$destSuffix = $id
   }
 
   # If it's on a network drive, copy it locally
@@ -135,8 +139,12 @@ function Get-PSDContent
         Write-Verbose "Copying from $path to $dest"
         Copy-Item -Path $path -Destination $dest -Recurse
     }
+	return $dest
   }
-  return $dest
+  else
+  {
+    return $dest
+  }
 }
 
 function Save-PSDVariables
@@ -158,6 +166,37 @@ function Restore-PSDVariables
     $path = "$(Get-PSDLocaldataPath)\Variables.dat"
     if (Test-Path $path) {
         [xml] $v = Get-Content $path
-        $v.DocumentElement.SelectNodes("var") | % { Set-Item tsenv:$($_.Attributes["name"]) -Value $_.'#text' } 
+        $v | Select-Xml -Xpath "//var" | % { Set-Item tsenv:$($_.Node.name) -Value $_.Node.'#cdata-section' } 
     }
+	return $path
+}
+
+function Clear-PSDInformation
+{
+	# Create a folder for the logs
+	$logDest = "$($env:SystemRoot)\Temp\DeploymentLogs"
+	Initialize-PSDFolder $logDest
+
+	# Process each volume looking for MININT folders
+    get-volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\MININT"} | % {
+
+        $localPath = "$($_.DriveLetter):\MININT"
+
+		# Copy any logs
+		if (Test-Path "$localPath\Logs")
+		{
+			Copy-Item "$localPath\Logs\*.*" $logDest -Force
+		}
+
+	    # Remove the MININT folder
+		try
+		{
+		    Remove-Item "$localPath" -Recurse -Force
+		}
+		catch
+		{
+			Write-Verbose "Unable to completely remove $localPath."
+		}
+    }
+
 }

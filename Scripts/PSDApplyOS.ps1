@@ -1,6 +1,3 @@
-$verbosePreference = "Continue"
-
-
 # Load core modules
 
 Import-Module DISM
@@ -9,6 +6,7 @@ $deployRoot = Split-Path -Path "$PSScriptRoot"
 Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
 Import-Module "$deployRoot\Scripts\PSDUtility.psm1" -Force
 Import-Module "$deployRoot\Scripts\PSDProvider.psm1" -Force
+$verbosePreference = "Continue"
 
 
 # Make sure we run at full power
@@ -47,3 +45,15 @@ else
 $args
 $result = Start-Process -FilePath "bcdboot.exe" -ArgumentList $args -Wait -Passthru
 Write-Verbose "BCDBoot completed, rc = $($result.ExitCode)"
+
+# Fix the EFI partition type
+if ($tsenv:IsUEFI -eq "True")
+{
+	# Fix the EFI partition type
+	@"
+select volume $($tsenv:BootVolume)
+set id=c12a7328-f81f-11d2-ba4b-00a0c93ec93b
+exit
+"@ | diskpart
+
+}

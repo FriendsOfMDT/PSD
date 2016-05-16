@@ -1,5 +1,3 @@
-$verbosePreference = "Continue"
-
 # Load core modules
 
 Import-Module DISM
@@ -7,6 +5,7 @@ $deployRoot = Split-Path -Path "$PSScriptRoot"
 Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
 Import-Module "$deployRoot\Scripts\PSDUtility.psm1" -Force
 Import-Module "$deployRoot\Scripts\PSDProvider.psm1" -Force
+$verbosePreference = "Continue"
 
 
 # Load the unattend.xml
@@ -99,6 +98,21 @@ Initialize-PSDFolder $scratchPath
 Use-WindowsUnattend -UnattendPath $unattendXml -Path "$($tsenv:OSVolume):\" -ScratchDirectory $scratchPath -NoRestart
 
 
-# Reboot
+# Copy needed script files
 
-Exit 3010
+Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Scripts"
+Copy-Item "$deployRoot\Scripts\PSDStart.ps1" "$($tsenv:OSVolume):\MININT\Scripts"
+Copy-Item "$deployRoot\Scripts\PSDUtility.psm1" "$($tsenv:OSVolume):\MININT\Scripts"
+Copy-Item "$deployRoot\Scripts\PSDGather.psm1" "$($tsenv:OSVolume):\MININT\Scripts"
+Copy-Item "$deployRoot\Scripts\ZTIGather.xml" "$($tsenv:OSVolume):\MININT\Scripts"
+
+
+# Copy needed module files
+
+Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Tools\Modules\Microsoft.BDD.TaskSequenceModule"
+Copy-Item "$deployRoot\Tools\Modules\Microsoft.BDD.TaskSequenceModule\*.*" "$($tsenv:OSVolume):\MININT\Tools\Modules\Microsoft.BDD.TaskSequenceModule"
+
+
+# Request a reboot
+
+$tsenv:SMSTSRebootRequested = "true"

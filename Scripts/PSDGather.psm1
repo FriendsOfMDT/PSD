@@ -1,3 +1,10 @@
+# Initialization
+
+$deployRoot = Split-Path -Path "$PSScriptRoot"
+Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
+$verbosePreference = "Continue"
+
+
 Function Get-PSDLocalInfo {
   Process
   {
@@ -257,6 +264,10 @@ Function Get-PSDSettings
           $v = $global:variables | ? {$_.id -ieq $sectionVar}
           if ($v)
           {
+		    if ((get-item tsenv:$v).Value -eq $section[$sectionVar])
+			{
+			  # Do nothing, value unchanged
+			}
             if ((get-item tsenv:$v).Value -eq "" -or $v.overwrite -eq "true") {
               Write-Verbose "Changing $($v.id) to $($section[$sectionVar]), was $((Get-Item tsenv:$($v.id)).Value)"
               Set-Item tsenv:$($v.id) -Value $section[$sectionVar]
@@ -273,9 +284,9 @@ Function Get-PSDSettings
             {
               if ($v.type -eq "list") {
                 Write-Verbose "Adding $($section[$sectionVar]) to $($v.id)"
-                $n = (Get-Item tsenvlist:$($v.id))
-                $n += $section[$sectionVar]
-                Set-Item tsenvlist:$($v.id) -value $n
+                $n = @((Get-Item tsenvlist:$($v.id)).Value)
+                $n += [String] $section[$sectionVar]
+                Set-Item tsenvlist:$($v.id) -Value $n
               }
             }
           }
