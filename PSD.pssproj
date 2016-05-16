@@ -39,10 +39,12 @@
     <Compile Include="Scripts\PSDApplications.ps1" />
     <Compile Include="Scripts\PSDApplyOS.ps1" />
     <Compile Include="Scripts\PSDConfigure.ps1" />
+    <Compile Include="Scripts\PSDFreshen.ps1" />
     <Compile Include="Scripts\PSDGather.psm1" />
     <Compile Include="Scripts\PSDPartition.ps1" />
     <Compile Include="Scripts\PSDProvider.psm1" />
     <Compile Include="Scripts\PSDStart.ps1" />
+    <Compile Include="Scripts\PSDUserState.ps1" />
     <Compile Include="Scripts\PSDUtility.psm1" />
     <Compile Include="Templates\LiteTouchPE.xml" />
     <Compile Include="Templates\PSDClient.xml" />

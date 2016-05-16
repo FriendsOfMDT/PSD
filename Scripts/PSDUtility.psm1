@@ -143,7 +143,8 @@ function Get-PSDContent
   }
   else
   {
-    return $dest
+    Write-Verbose "Path for $id is already local, not copying"
+    return $path
   }
 }
 

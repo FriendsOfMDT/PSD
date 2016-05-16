@@ -18,15 +18,26 @@ function Install-PSDApplication
       [string] $id
     )
 
-	# Get the app
+	# Make sure the app exists
+        if ((Test-Path DeploymentShare:\Applications\$id) -ne $true)
+        {
+            Write-Verbose "Unable to find application $id, skipping."
+            return 0
+        }
+
+        # Get the app
 	$app = Get-Item DeploymentShare:\Applications\$id
+	Write-Verbose "Processing $($app.Name)"
 
 	# Process dependencies (recursive)
-	$app.Dependency | Install-PSDApplication
+        if ($app.Dependency.Count -ne 0)
+        {
+            $app.Dependency | Install-PSDApplication
+        }
 
 	# Check if the app has been installed already
 	$alreadyInstalled = @()
-	$alreadyInstalled = $tsenvlist:InstalledApplications
+	$alreadyInstalled = @((Get-Item tsenvlist:InstalledApplications).Value)
 	$found = $false
 	$alreadyInstalled | ? {$_ -eq $id} | % {$found = $true}
 	if ($found)
@@ -74,7 +85,7 @@ function Install-PSDApplication
         $result = Start-Process -FilePath "$toolRoot\bddrun.exe" -ArgumentList $cmd -Wait -Passthru
 		
 		# TODO: Check return codes
-		Write-Verbose "Application $app.Name return code = $($result.ExitCode)"
+		Write-Verbose "Application $($app.Name) return code = $($result.ExitCode)"
 	}
 
 	# Update list of installed apps
@@ -103,6 +114,22 @@ $toolRoot = Get-PSDContent "Tools"
 
 # Process applications
 
-$tsenv:MandatoryApplications | Install-PSDApplication
-$tsenv:Applications | Install-PSDApplication
+if ($tsenvlist:MandatoryApplications.Count -ne 0)
+{
+    Write-Verbose "Processing $($tsenvlist:MandatoryApplications.Count) mandatory applications."
+    $tsenvlist:MandatoryApplications | Install-PSDApplication
+}
+else
+{
+    Write-Verbose "No mandatory applications specified."
+}
 
+if ($tsenvlist:Applications.Count -ne 0)
+{
+    Write-Verbose "Processing $($tsenvlist:Applications.Count) applications."
+    $tsenvlist:Applications | % { Install-PSDApplication $_ }
+}
+else
+{
+    Write-Verbose "No applications specified."
+}

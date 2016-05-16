@@ -25,17 +25,17 @@ get-volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.Driv
 }
 
 
-# Find the task sequence engine
-
-$tsEngine = Get-PSDContent "TaskSequencer"
-Write-Verbose "Task sequence engine located at $tsEngine."
-
-
 # If a task sequence is in progress, resume it.  Otherwise, start a new one
 
 [Environment]::CurrentDirectory = "$($env:WINDIR)\System32"
 if ($tsInProgress)
 {
+    # Find the task sequence engine
+
+    $tsEngine = Get-PSDContent "TaskSequencer"
+    Write-Verbose "Task sequence engine located at $tsEngine."
+
+
     # Resume task sequence
 
     Stop-PSDLogging
@@ -73,6 +73,11 @@ else
 
 
     # TODO: Process wizard
+
+	# Find the task sequence engine
+
+    $tsEngine = Get-PSDContent "TaskSequencer"
+    Write-Verbose "Task sequence engine located at $tsEngine."
 
 
     # Start task sequence
