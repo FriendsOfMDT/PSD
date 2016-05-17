@@ -7,9 +7,9 @@ $deployRoot = Split-Path -Path $PSScriptRoot
 # Set an install directory if necessary (needed so the provider can find templates
 if ((Test-Path "HKLM:\Software\Microsoft\Deployment 4") -eq $false)
 {
-	New-Item "HKLM:\Software\Microsoft\Deployment 4"
-	Set-ItemProperty "HKLM:\Software\Microsoft\Deployment 4" -Name "Install_Dir" -Value "$deployRoot\"
-	Write-Verbose "Set MDT Install_Dir to $deployRoot\ for MDT Provider."
+    New-Item "HKLM:\Software\Microsoft\Deployment 4"
+    Set-ItemProperty "HKLM:\Software\Microsoft\Deployment 4" -Name "Install_Dir" -Value "$deployRoot\"
+    Write-Verbose "Set MDT Install_Dir to $deployRoot\ for MDT Provider."
 }
 
 # Load the module

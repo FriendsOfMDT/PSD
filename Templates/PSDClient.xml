@@ -17,7 +17,7 @@
   </group>
   <group expand="true" name="State Capture" description="" disable="false" continueOnError="false">
     <action />
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Capture state" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Capture State" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
       <defaultVarList>
         <variable name="PackageID" property="PackageID" />
         <variable name="RunAsUser" property="RunAsUser">false</variable>
@@ -29,9 +29,9 @@
     </step>
     <condition>
       <expression type="SMS_TaskSequence_VariableConditionExpression">
-        <variable name="Variable">SystemDrive</variable>
+        <variable name="Variable">OSVersion</variable>
         <variable name="Operator">notEquals</variable>
-        <variable name="Value">X:</variable>
+        <variable name="Value">WinPE</variable>
       </expression>
     </condition>
   </group>
@@ -90,7 +90,7 @@
       </defaultVarList>
       <action>powershell.exe -file %DeployRoot%\Scripts\PSDApplications.ps1</action>
     </step>
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Capture state" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Restore State" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
       <defaultVarList>
         <variable name="PackageID" property="PackageID" />
         <variable name="RunAsUser" property="RunAsUser">false</variable>

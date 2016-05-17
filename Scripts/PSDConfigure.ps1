@@ -1,3 +1,7 @@
+#
+# PSDConfigure.ps1
+#
+
 # Load core modules
 
 Import-Module DISM
@@ -80,39 +84,28 @@ $config | Select-Xml "//mapping[@type='xml']" | % {
     }
 }
 
-
 # Save the file
-
 $unattend.Save($unattendXml)
 Write-Verbose "Saved $unattendXml."
 
-
 # TODO: Copy patches
 
-
 # Apply the unattend.xml
-
 Write-Verbose "Applying $unattendxml."
 $scratchPath = "$(Get-PSDLocalDataPath)\Scratch"
 Initialize-PSDFolder $scratchPath
 Use-WindowsUnattend -UnattendPath $unattendXml -Path "$($tsenv:OSVolume):\" -ScratchDirectory $scratchPath -NoRestart
 
-
 # Copy needed script files
-
 Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Scripts"
 Copy-Item "$deployRoot\Scripts\PSDStart.ps1" "$($tsenv:OSVolume):\MININT\Scripts"
 Copy-Item "$deployRoot\Scripts\PSDUtility.psm1" "$($tsenv:OSVolume):\MININT\Scripts"
 Copy-Item "$deployRoot\Scripts\PSDGather.psm1" "$($tsenv:OSVolume):\MININT\Scripts"
 Copy-Item "$deployRoot\Scripts\ZTIGather.xml" "$($tsenv:OSVolume):\MININT\Scripts"
 
-
 # Copy needed module files
-
 Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Tools\Modules\Microsoft.BDD.TaskSequenceModule"
 Copy-Item "$deployRoot\Tools\Modules\Microsoft.BDD.TaskSequenceModule\*.*" "$($tsenv:OSVolume):\MININT\Tools\Modules\Microsoft.BDD.TaskSequenceModule"
 
-
 # Request a reboot
-
 $tsenv:SMSTSRebootRequested = "true"

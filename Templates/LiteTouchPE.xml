@@ -44,8 +44,9 @@
 	  <Copy source="%DEPLOYROOT%\Scripts\PSDUtility.psm1" dest="Deploy\Scripts\PSDUtility.psm1" />
 	  <Copy source="%DEPLOYROOT%\Scripts\PSDGather.psm1" dest="Deploy\Scripts\PSDGather.psm1" />
 	  <Copy source="%DEPLOYROOT%\Scripts\ZTIGather.xml" dest="Deploy\Scripts\ZTIGather.xml" />
+    <Copy source="%DEPLOYROOT%\Scripts\PSDWizard.psm1" dest="Deploy\Scripts\PSDWizard.psm1" />
 
-	  <!-- Tools -->
+    <!-- Tools -->
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\BDDRUN.exe" dest="Windows\system32\BDDRUN.exe" />
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\WinRERUN.exe" dest="Deploy\Tools\%PLATFORM%\WinRERUN.exe" />
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\CcmCore.dll" dest="Deploy\Tools\%PLATFORM%\CcmCore.dll" />

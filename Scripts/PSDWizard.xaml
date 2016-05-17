@@ -1,0 +1,41 @@
+<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="PSD Wizard" Height="600" Width="800" WindowStartupLocation="CenterScreen" WindowStyle='SingleBorderWindow' ResizeMode='NoResize'>
+
+    <Grid>
+
+      <StackPanel Orientation="Vertical">
+        <StackPanel Height="500" Orientation="Horizontal">
+          <Grid Height="20" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Margin="10,0,0,0">Task sequence ID:</TextBlock>
+            <TextBox Grid.Column="1" Name="TS_TaskSequenceID" Width="100">ABCDEF</TextBox>
+          </Grid>
+        </StackPanel>
+
+        <Border BorderBrush="#A0A0A0" BorderThickness="0,1,0,0" Padding="7">
+          <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button Name="PART_HelpButton" Grid.Column="0" MinWidth="75" Content="Help" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                  <Button Name="wizCancelButton" Margin="0,0,7,0" MinWidth="75" Content="Cancel" />
+                  <Button Name="wizBackButton" MinWidth="75" Content="Back" />
+                  <Button Name="wizNextButton" MinWidth="75" Content="Next" />
+                  <Button Name="wizFinishButton" Margin="7,0,0,0" MinWidth="75" Content="Finish" />
+                </StackPanel>
+            </Grid>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+    </Grid>
+
+</Window>

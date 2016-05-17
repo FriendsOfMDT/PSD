@@ -46,6 +46,8 @@
     <Compile Include="Scripts\PSDStart.ps1" />
     <Compile Include="Scripts\PSDUserState.ps1" />
     <Compile Include="Scripts\PSDUtility.psm1" />
+    <Compile Include="Scripts\PSDWizard.psm1" />
+    <Compile Include="Scripts\PSDWizard.xaml" />
     <Compile Include="Templates\LiteTouchPE.xml" />
     <Compile Include="Templates\PSDClient.xml" />
     <Compile Include="Templates\Unattend_PE_x64.xml" />

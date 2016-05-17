@@ -1,15 +1,16 @@
-# Initialization
+#
+# PSDGather.psm1
+#
 
+# Initialization
 $deployRoot = Split-Path -Path "$PSScriptRoot"
 Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
 $verbosePreference = "Continue"
-
 
 Function Get-PSDLocalInfo {
   Process
   {
     # Look up OS details
-
     $tsenv:IsServerCoreOS = "False"
     $tsenv:IsServerOS = "False"
 
@@ -32,9 +33,7 @@ Function Get-PSDLocalInfo {
       }
     }
 
-
     # Look up network details
-
     $ipList = @()
     $macList = @()
     $gwList = @()
@@ -49,9 +48,7 @@ Function Get-PSDLocalInfo {
     $tsenvlist:MacAddress = $macList
     $tsenvlist:DefaultGateway = $gwList
 
-
     # Look up asset information
-
     $tsenv:IsDesktop = "False"
     $tsenv:IsLaptop = "False"
     $tsenv:IsServer = "False"
@@ -86,6 +83,7 @@ Function Get-PSDLocalInfo {
       $tsenv:ProcessorSpeed = $_.MaxClockSpeed
       $tsenv:SupportsSLAT = $_.SecondLevelAddressTranslationExtensions
     }
+
     # TODO: Capable architecture
 
     Get-WmiObject Win32_ComputerSystem | % {
@@ -103,7 +101,6 @@ Function Get-PSDLocalInfo {
     }
 
     # UEFI
-
     try
     {
         Get-SecureBootUEFI -Name SetupMode | Out-Null
@@ -227,15 +224,12 @@ Function Get-PSDSettings
       $skipProperties = $false
 
       # Exit if the section doesn't exist
-
       if (-not $section)
       {
         return
       }
 
-
       # Process special sections and exits
-
       if ($section.Contains("UserExit")) {
         Write-Host "TODO: Process UserExit Before"
       }
@@ -255,9 +249,7 @@ Function Get-PSDSettings
         Invoke-PSDRule $section["Subsection"]
       }
 
-
       # Process properties
-
       if (-not $skipProperties) {	
         $section.Keys | % {
           $sectionVar = $_
