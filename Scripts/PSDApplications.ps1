@@ -72,6 +72,10 @@ function Install-PSDApplication
     {
         Write-Verbose "No command line specified (bundle)."
     }
+    elseif ($app.CommandLine -ilike "install-package *")
+    {
+        Invoke-Expression $($app.CommandLine)
+    }
     elseif ($app.CommandLine -icontains ".appx" -or $app.CommandLine -icontains ".appxbundle")
     {
         # TODO: Process modern app
