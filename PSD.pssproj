@@ -53,6 +53,7 @@
     <Compile Include="Templates\Unattend_PE_x64.xml" />
     <Compile Include="Templates\Unattend_PE_x86.xml" />
     <Compile Include="Templates\Unattend_x64.xml.10.0" />
+    <Compile Include="Templates\Unattend_x86.xml.10.0" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
