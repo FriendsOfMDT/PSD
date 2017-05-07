@@ -25,7 +25,7 @@
         <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
-      <action>powershell.exe -file %DeployRoot%\Scripts\PSDUserData.ps1 Capture</action>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDUserData.ps1 Capture</action>
     </step>
     <condition>
       <expression type="SMS_TaskSequence_VariableConditionExpression">
@@ -45,7 +45,7 @@
         <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
-      <action>powershell.exe -file %DeployRoot%\Scripts\PSDPartition.ps1</action>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDPartition.ps1</action>
     </step>
     <step type="SMS_TaskSequence_RunCommandLineAction" name="Apply Operating System" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
       <defaultVarList>
@@ -55,7 +55,7 @@
         <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
-      <action>powershell.exe -file %DeployRoot%\Scripts\PSDApplyOS.ps1</action>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDApplyOS.ps1</action>
     </step>
     <step type="SMS_TaskSequence_RunCommandLineAction" name="Configure" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
       <defaultVarList>
@@ -65,7 +65,7 @@
         <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
-      <action>powershell.exe -file %DeployRoot%\Scripts\PSDConfigure.ps1</action>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDConfigure.ps1</action>
     </step>
   </group>
   <group expand="true" name="State Restore" description="" disable="false" continueOnError="false">
@@ -78,7 +78,7 @@
         <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
-      <action>powershell.exe -file %DeployRoot%\Scripts\PSDFreshen.ps1</action>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDFreshen.ps1</action>
     </step>
     <step type="SMS_TaskSequence_RunCommandLineAction" name="Install Apps" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
       <defaultVarList>
@@ -88,7 +88,7 @@
         <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
-      <action>powershell.exe -file %DeployRoot%\Scripts\PSDApplications.ps1</action>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDApplications.ps1</action>
     </step>
     <step type="SMS_TaskSequence_RunCommandLineAction" name="Restore State" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
       <defaultVarList>
@@ -98,7 +98,7 @@
         <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
-      <action>powershell.exe -file %DeployRoot%\Scripts\PSDUserData.ps1 Restore</action>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDUserData.ps1 Restore</action>
     </step>
   </group>
   <globalVarList>

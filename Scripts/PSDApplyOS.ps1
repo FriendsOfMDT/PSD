@@ -1,13 +1,17 @@
-#
-# PSDApplyOS.ps1
-#
+# // ***************************************************************************
+# // 
+# // PowerShell Deployment for MDT
+# //
+# // File:      PSDApplyOS.ps1
+# // 
+# // Purpose:   Apply the specified operating system.
+# // 
+# // ***************************************************************************
 
 # Load core modules
 Import-Module DISM
-$deployRoot = Split-Path -Path "$PSScriptRoot"
-Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
-Import-Module "$deployRoot\Scripts\PSDUtility.psm1" -Force
-Import-Module "$deployRoot\Scripts\PSDProvider.psm1" -Force
+Import-Module PSDUtility
+Import-Module PSDDeploymentShare
 $verbosePreference = "Continue"
 
 # Make sure we run at full power
@@ -16,7 +20,7 @@ $verbosePreference = "Continue"
 # Get the OS image details
 Write-Verbose "Operating system: $($tsenv:OSGUID)"
 $os = Get-Item "DeploymentShare:\Operating Systems\$($tsenv:OSGUID)"
-$image = "$($tsenv:Deployroot)\$($os.ImageFile.Substring(2))"
+$image = Get-PSDContent "$($os.ImageFile.Substring(2))"
 $index = $os.ImageIndex
 
 # Create a local scratch folder

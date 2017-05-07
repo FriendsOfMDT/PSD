@@ -31,6 +31,16 @@ Dir "$psDeploymentFolder\Scripts\*.ps*" | Unblock-File
 Copy-Item "$install\Templates\*.*" "$psDeploymentFolder\Templates" -Recurse
 Dir "$psDeploymentFolder\Templates\*.*" | Unblock-File
 
+# Copy the script modules to the right places
+"PSDUtility", "PSDDeploymentShare", "PSDGather", "PSDWizard" | % {
+    if ((Test-Path "$psDeploymentFolder\Tools\Modules\$_") -eq $false)
+    {
+        $null = New-Item "$psDeploymentFolder\Tools\Modules\$_" -ItemType directory
+    }
+    Copy-Item "$install\Scripts\$_.psm1" "$psDeploymentFolder\Tools\Modules\$_"
+    Dir "$psDeploymentFolder\Tools\Modules\$_\*.*" | Unblock-File
+}
+
 # Copy the provider module files
 if ((Test-Path "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn") -eq $false)
 {
@@ -59,6 +69,7 @@ Copy-Item "$($mdtDir)Templates\TaskSequences.xsd" "$psDeploymentFolder\Templates
 Copy-Item "$($mdtDir)Templates\Applications.xsd" "$psDeploymentFolder\Templates"
 Copy-Item "$($mdtDir)Templates\Drivers.xsd" "$psDeploymentFolder\Templates"
 Copy-Item "$($mdtDir)Templates\Groups.xsd" "$psDeploymentFolder\Templates"
+Copy-Item "$($mdtDir)Templates\LinkedDeploymentShares.xsd" "$psDeploymentFolder\Templates"
 
 # Update the ISO properties
 Set-ItemProperty PSD: -Name "Boot.x86.LiteTouchISOName" -Value "PSDLiteTouch_x86.iso"

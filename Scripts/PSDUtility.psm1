@@ -1,16 +1,28 @@
-#
-# PSDUtility.psm1
-#
+# // ***************************************************************************
+# // 
+# // PowerShell Deployment for MDT
+# //
+# // File:      PSDUtility.psd1
+# // 
+# // Purpose:   General utility routines useful for all PSD scripts.
+# // 
+# // ***************************************************************************
 
-$deployRoot = Split-Path -Path $PSScriptRoot
-Import-Module "$deployRoot\Tools\Modules\Microsoft.BDD.TaskSequenceModule" -Scope Global
+Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global
 $caller = Split-Path -Path $MyInvocation.PSCommandPath -Leaf
 $verbosePreference = "Continue"
-Write-Host "Caller $caller from $deployRoot"
+$global:psuDataPath = ""
 
 function Get-PSDLocalDataPath
 {
-    # TODO: Cache the result if possible
+    # Return the cached local data path if possible
+    if ($global:psuDataPath -ne "")
+    {
+        if (Test-Path $global:psuDataPath)
+        {
+            return $global:psuDataPath
+        }
+    }
 
     # Always prefer the OS volume
     $localPath = ""
@@ -43,6 +55,7 @@ function Get-PSDLocalDataPath
         New-Item -ItemType Directory -Force -Path $localPath | Out-Null
     }
 
+    $global:psuDataPath = $localPath
     return $localPath
 }
 
@@ -70,87 +83,6 @@ function Stop-PSDLogging
 }
 
 Start-PSDLogging
-
-function Get-PSDConnection
-{
-    param(
-      [string] $uncPath,
-      [string] $username,
-      [string] $password
-    )
-
-    if (!$username -or !$password)
-    {
-        $cred = Get-Credential -Message "Specify credentials needed to connect to $uncPath"
-    }
-    else
-    {
-        $secure = ConvertTo-SecureString $password -AsPlainText -Force
-        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $username, $secure
-    }
-
-    New-PSDrive -Name (Get-PSDAvailableDriveLetter) -PSProvider FileSystem -Root $uncPath -Credential $cred -Scope Global
-}
-
-function Get-PSDAvailableDriveLetter 
-{
-    $drives = (Get-PSDrive -PSProvider filesystem).Name
-    foreach ($letter in "ZYXWVUTSRQPONMLKJIHGFED".ToCharArray()) {
-        if ($drives -notcontains $letter) {
-            return $letter
-            break
-        }
-    }
-} 
-
-function Get-PSDContent
-{
-    param(
-      [string] $id
-    )
-
-    if ($id -ieq "TaskSequencer")
-    {
-        if (Test-Path "X:\Deploy\Tools\$($tsenv:Architecture)\TSMBootstrap.exe") {
-            $path = "X:\Deploy\Tools\$($tsenv:Architecture)"
-            return $path
-        }
-        $path = "$($tsenv:DeployRoot)\Tools\$($tsenv:Architecture)"
-        $destSuffix = "Tools\$($tsenv:Architecture)"
-    }
-    elseif ($id -ieq "Tools")
-    {
-        $path = "$($tsenv:DeployRoot)\Tools\$($tsenv:Architecture)"
-        $destSuffix = "Tools\$($tsenv:Architecture)"
-    }
-    else
-    {
-        $path = "$($tsenv:DeployRoot)\$id"
-        $destSuffix = $id
-    }
-
-    # If it's on a network drive, copy it locally
-
-    $dest = "$(Get-PSDLocalDataPath)\$destSuffix"
-    if ($path -like "\\*")
-    {
-        if (Test-Path $dest)
-        {
-            Write-Verbose "Already copied $id, not copying again."
-        }
-        else
-        {
-            Write-Verbose "Copying from $path to $dest"
-            Copy-Item -Path $path -Destination $dest -Recurse
-        }
-        return $dest
-    }
-    else
-    {
-        Write-Verbose "Path for $id is already local, not copying"
-        return $path
-    }
-}
 
 function Save-PSDVariables
 {

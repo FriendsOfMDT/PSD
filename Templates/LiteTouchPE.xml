@@ -41,10 +41,6 @@
 
 	  <!-- Scripts -->
 	  <Copy source="%DEPLOYROOT%\Scripts\PSDStart.ps1" dest="Deploy\Scripts\PSDStart.ps1" />
-	  <Copy source="%DEPLOYROOT%\Scripts\PSDUtility.psm1" dest="Deploy\Scripts\PSDUtility.psm1" />
-	  <Copy source="%DEPLOYROOT%\Scripts\PSDGather.psm1" dest="Deploy\Scripts\PSDGather.psm1" />
-	  <Copy source="%DEPLOYROOT%\Scripts\ZTIGather.xml" dest="Deploy\Scripts\ZTIGather.xml" />
-    <Copy source="%DEPLOYROOT%\Scripts\PSDWizard.psm1" dest="Deploy\Scripts\PSDWizard.psm1" />
 
     <!-- Tools -->
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\BDDRUN.exe" dest="Windows\system32\BDDRUN.exe" />
@@ -68,11 +64,19 @@
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\00000409\tsres.dll" dest="Deploy\Tools\%PLATFORM%\00000409\tsres.dll" />
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\Microsoft.BDD.Utility.dll" dest="Deploy\Tools\%PLATFORM%\Microsoft.BDD.Utility.dll" />
 
-	  <Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.dll" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.dll" />
+    <!-- Modules -->
+
+    <Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.dll" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.dll" />
 	  <Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.psd1" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.psd1" />
 	  <Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Interop.TSCore.dll" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Interop.TSCore.dll" />
 
-	</Content>
+    <Copy source="%DEPLOYROOT%\Tools\Modules\PSDDeploymentShare\PSDDeploymentShare.psm1" dest="Deploy\Tools\Modules\PSDDeploymentShare\PSDDeploymentShare.psm1" />
+    <Copy source="%DEPLOYROOT%\Tools\Modules\PSDUtility\PSDUtility.psm1" dest="Deploy\Tools\Modules\PSDUtility\PSDUtility.psm1" />
+    <Copy source="%DEPLOYROOT%\Tools\Modules\PSDGather\PSDGather.psm1" dest="Deploy\Tools\Modules\PSDGather\PSDGather.psm1" />
+    <Copy source="%DEPLOYROOT%\Tools\Modules\PSDGather\ZTIGather.xml" dest="Deploy\Tools\Modules\PSDGather\ZTIGather.xml" />
+    <Copy source="%DEPLOYROOT%\Tools\Modules\PSDWizard\PSDWizard.psm1" dest="Deploy\Tools\Modules\PSDWizard\PSDWizard.psm1" />
+
+  </Content>
 
 	<!-- Exits -->
 	<Exits>

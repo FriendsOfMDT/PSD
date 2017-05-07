@@ -1,16 +1,23 @@
-#
-# PSDApplications.ps1
-#
+# // ***************************************************************************
+# // 
+# // PowerShell Deployment for MDT
+# //
+# // File:      PSDApplications.ps1
+# // 
+# // Purpose:   Installs the apps specified in task sequence variables 
+# //            Applications and MandatoryApplications.
+# // 
+# // ***************************************************************************
 
 # Load core modules
 
-$deployRoot = Split-Path -Path "$PSScriptRoot"
-Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
-Import-Module "$deployRoot\Scripts\PSDUtility.psm1" -Force
-Import-Module "$deployRoot\Scripts\PSDProvider.psm1" -Force
+Import-Module PSDUtility
+Import-Module PSDDeploymentShare
 $verbosePreference = "Continue"
 
+# Internal functions
 
+# Function to install a specified app
 function Install-PSDApplication
 {
     param(
@@ -56,7 +63,9 @@ function Install-PSDApplication
     {
         if ($app.WorkingDirectory -like ".\*")
         {
-            $workingDir = "$($tsenv:DeployRoot)\$($app.WorkingDirectory.Substring(2))"
+            # App content is on the deployment share, get it
+            $appContent = Get-PSDContent -Content "$($app.WorkingDirectory.Substring(2))"
+            $workingDir = $appContent
         }
         else
         {
@@ -114,8 +123,10 @@ function Install-PSDApplication
 }
 
 
+# Main code
+
 # Get tools
-$toolRoot = Get-PSDContent "Tools"
+$toolRoot = Get-PSDContent "Tools\$($tsenv:Architecture)"
 
 # Process applications
 if ($tsenvlist:MandatoryApplications.Count -ne 0)

@@ -1,12 +1,16 @@
-#
-# PSDFreshen.ps1
-#
+# // ***************************************************************************
+# // 
+# // PowerShell Deployment for MDT
+# //
+# // File:      PSDFreshen.ps1
+# // 
+# // Purpose:   Update gathered information in the task sequence environment.
+# // 
+# // ***************************************************************************
 
 # Load core module
-$deployRoot = Split-Path -Path "$PSScriptRoot"
-Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
-Import-Module "$deployRoot\Scripts\PSDUtility.psm1" -Force
-Import-Module "$deployRoot\Scripts\PSDGather.psm1" -Force
+Import-Module PSDUtility
+Import-Module PSDGather
 $verbosePreference = "Continue"
 
 # Gather local info to make sure key variables are set (e.g. Architecture)

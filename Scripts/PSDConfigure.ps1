@@ -1,20 +1,23 @@
-#
-# PSDConfigure.ps1
-#
+# // ***************************************************************************
+# // 
+# // PowerShell Deployment for MDT
+# //
+# // File:      PSDConfigure.ps1
+# // 
+# // Purpose:   Configure the unattend.xml to be used with the new OS.
+# // 
+# // ***************************************************************************
 
 # Load core modules
 
 Import-Module DISM
-$deployRoot = Split-Path -Path "$PSScriptRoot"
-Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
-Import-Module "$deployRoot\Scripts\PSDUtility.psm1" -Force
-Import-Module "$deployRoot\Scripts\PSDProvider.psm1" -Force
+Import-Module PSDUtility
+Import-Module PSDDeploymentShare
 $verbosePreference = "Continue"
 
-
 # Load the unattend.xml
-
-[xml] $unattend = Get-Content "$deployRoot\Control\$($tsenv:TaskSequenceID)\unattend.xml"
+$tsInfo = Get-PSDContent "Control\$($tsenv:TaskSequenceID)"
+[xml] $unattend = Get-Content "$tsInfo\unattend.xml"
 $namespaces = @{unattend='urn:schemas-microsoft-com:unattend'}
 $changed = $false
 $unattendXml = "$($tsenv:OSVolume):\Windows\Panther\Unattend.xml"
@@ -23,7 +26,8 @@ Initialize-PSDFolder "$($tsenv:OSVolume):\Windows\Panther"
 
 # Substitute the values in the unattend.xml
 
-[xml] $config = Get-Content "$deployRoot\Scripts\ZTIConfigure.xml"
+$scripts = Get-PSDContent "Scripts"
+[xml] $config = Get-Content "$scripts\ZTIConfigure.xml"
 $config | Select-Xml "//mapping[@type='xml']" | % {
 
     # Process each substitution rule from ZTIConfigure.xml
@@ -96,16 +100,11 @@ $scratchPath = "$(Get-PSDLocalDataPath)\Scratch"
 Initialize-PSDFolder $scratchPath
 Use-WindowsUnattend -UnattendPath $unattendXml -Path "$($tsenv:OSVolume):\" -ScratchDirectory $scratchPath -NoRestart
 
-# Copy needed script files
+# Copy needed script and module files
 Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Scripts"
-Copy-Item "$deployRoot\Scripts\PSDStart.ps1" "$($tsenv:OSVolume):\MININT\Scripts"
-Copy-Item "$deployRoot\Scripts\PSDUtility.psm1" "$($tsenv:OSVolume):\MININT\Scripts"
-Copy-Item "$deployRoot\Scripts\PSDGather.psm1" "$($tsenv:OSVolume):\MININT\Scripts"
-Copy-Item "$deployRoot\Scripts\ZTIGather.xml" "$($tsenv:OSVolume):\MININT\Scripts"
-
-# Copy needed module files
-Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Tools\Modules\Microsoft.BDD.TaskSequenceModule"
-Copy-Item "$deployRoot\Tools\Modules\Microsoft.BDD.TaskSequenceModule\*.*" "$($tsenv:OSVolume):\MININT\Tools\Modules\Microsoft.BDD.TaskSequenceModule"
+$modules = Get-PSDContent "Tools\Modules"
+Copy-Item "$scripts\PSDStart.ps1" "$($tsenv:OSVolume):\MININT\Scripts"
+Copy-Item "$modules\" "$($tsenv:OSVolume):\MININT\Modules"
 
 # Request a reboot
 $tsenv:SMSTSRebootRequested = "true"

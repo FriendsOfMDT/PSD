@@ -1,13 +1,22 @@
-#
-# PSDStart.ps1
-#
+# // ***************************************************************************
+# // 
+# // PowerShell Deployment for MDT
+# //
+# // File:      PSDStart.ps1
+# // 
+# // Purpose:   Start or continue a PSD task sequence.
+# // 
+# // ***************************************************************************
+
+# Set the module path based on the current script path
+$deployRoot = Split-Path -Path "$PSScriptRoot"
+$env:PSModulePath = $env:PSModulePath + ";$deployRoot\Tools\Modules"
 
 # Load core module
-$deployRoot = Split-Path -Path "$PSScriptRoot"
-Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
-Import-Module "$deployRoot\Scripts\PSDUtility.psm1" -Force
-Import-Module "$deployRoot\Scripts\PSDGather.psm1" -Force
-Import-Module "$deployRoot\Scripts\PSDWizard.psm1" -Force
+Import-Module PSDUtility
+Import-Module PSDDeploymentShare
+Import-Module PSDGather
+Import-Module PSDWizard
 $verbosePreference = "Continue"
 
 # Gather local info to make sure key variables are set (e.g. Architecture)
@@ -29,8 +38,23 @@ get-volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.Driv
 if ($tsInProgress)
 {
     # Find the task sequence engine
-    $tsEngine = Get-PSDContent "TaskSequencer"
+    if (Test-Path -Path "X:\Deploy\Tools\$($tsenv:Architecture)\tsmbootstrap.exe")
+    {
+        $tsEngine = "X:\Deploy\Tools\$($tsenv:Architecture)"
+    }
+    else
+    {
+        $tsEngine = Get-PSDContent "Tools\$($tsenv:Architecture)"
+    }
     Write-Verbose "Task sequence engine located at $tsEngine."
+
+    # Get full scripts location
+    $scripts = Get-PSDContent -Content "Scripts"
+    $env:ScriptRoot = $scripts
+
+    # Set the PSModulePath
+    $modules = Get-PSDContent -Content "Tools\Modules"
+    $env:PSModulePath = $env:PSModulePath + ";$modules"
 
     # Resume task sequence
     Stop-PSDLogging
@@ -44,38 +68,57 @@ else
     Write-Verbose "Processing Bootstrap.ini"
     if ($env:SYSTEMDRIVE -eq "X:")
     {
-        Invoke-PSDRules "X:\Deploy\Scripts\Bootstrap.ini"
-        Get-PSDConnection -UncPath $tsenv:DeployRoot -Username "$tsenv:UserDomain\$tsenv:UserID" -Password $tsenv:UserPassword
+        $mappingFile = "X:\Deploy\Tools\Modules\PSDGather\ZTIGather.xml"
+        Invoke-PSDRules -FilePath "X:\Deploy\Scripts\Bootstrap.ini" -MappingFile $mappingFile
+        Get-PSDConnection -DeployRoot $tsenv:DeployRoot -Username "$tsenv:UserDomain\$tsenv:UserID" -Password $tsenv:UserPassword
         $deployRoot = $tsenv:DeployRoot
     }
     else
     {
-        Invoke-PSDRules "$deployRoot\Control\Bootstrap.ini"
+        $mappingFile = "$modules\PSDGather\ZTIGather.xml"
+        $control = Get-PSDContent -Content "Control"
+        Invoke-PSDRules -FilePath "$control\Bootstrap.ini" -MappingFile $mappingFile
         $deployRoot = $tsenv:DeployRoot
     }
     Write-Verbose "New deploy root is $deployRoot."
 
     # Process CustomSettings.ini
+    $control = Get-PSDContent -Content "Control"
     Write-Verbose "Processing CustomSettings.ini"
-    Invoke-PSDRules "$deployRoot\Control\CustomSettings.ini"
+    Invoke-PSDRules -FilePath "$control\CustomSettings.ini" -MappingFile $mappingFile
+
+    # Get full scripts location
+    $scripts = Get-PSDContent -Content "Scripts"
+    $env:ScriptRoot = $scripts
+
+    # Set the PSModulePath
+    $modules = Get-PSDContent -Content "Tools\Modules"
+    $env:PSModulePath = $env:PSModulePath + ";$modules"
 
     # Process wizard
     if ($tsenv:SkipWizard -ine "YES")
     {
-        Show-PSDWizard "$deployRoot\Scripts\PSDWizard.xaml"
+        Show-PSDWizard "$scripts\PSDWizard.xaml"
     }
     if ($tsenv:OSDComputerName -eq "") {
         $tsenv:OSDComputerName = $env:COMPUTERNAME
     }
 
     # Find the task sequence engine
-    $tsEngine = Get-PSDContent "TaskSequencer"
+    if (Test-Path -Path "X:\Deploy\Tools\$($tsenv:Architecture)\tsmbootstrap.exe")
+    {
+        $tsEngine = "X:\Deploy\Tools\$($tsenv:Architecture)"
+    }
+    else
+    {
+        $tsEngine = Get-PSDContent "Tools\$($tsenv:Architecture)"
+    }
     Write-Verbose "Task sequence engine located at $tsEngine."
 
     # Start task sequence
     $variablesPath = Save-PSDVariables
     Copy-Item -Path $variablesPath -Destination $tsEngine -Force
-    Copy-Item -Path "$deployroot\Control\$($tsenv:TaskSequenceID)\ts.xml" -Destination $tsEngine -Force
+    Copy-Item -Path "$control\$($tsenv:TaskSequenceID)\ts.xml" -Destination $tsEngine -Force
 
     Stop-PSDLogging
     $result = Start-Process -FilePath "$tsEngine\TSMBootstrap.exe" -ArgumentList "/env:SAStart" -Wait -Passthru

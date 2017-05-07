@@ -1,11 +1,15 @@
-#
-# PSDPartition.ps1
-#
+# // ***************************************************************************
+# // 
+# // PowerShell Deployment for MDT
+# //
+# // File:      PSDPartition.ps1
+# // 
+# // Purpose:   Partition the disk
+# // 
+# // ***************************************************************************
 
-# Load core module
-$deployRoot = Split-Path -Path "$PSScriptRoot"
-Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
-Import-Module "$deployRoot\Scripts\PSDUtility.psm1" -Force
+# Load core modules
+Import-Module PSDUtility
 $verbosePreference = "Continue"
 
 # Keep the logging out of the way

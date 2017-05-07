@@ -1,11 +1,15 @@
-#
-# PSDGather.psm1
-#
-
-# Initialization
-$deployRoot = Split-Path -Path "$PSScriptRoot"
-Write-Verbose "Using deploy root $deployRoot, based on $PSScriptRoot"
-$verbosePreference = "Continue"
+# // ***************************************************************************
+# // 
+# // PowerShell Deployment for MDT
+# //
+# // File:      PSDGather.psm1
+# // 
+# // Purpose:   Module for gathering information about the OS and environment
+# //            (mostly from WMI), and for processing rules (Bootstrap.ini, 
+# //            CustomSettings.ini).  All the resulting information is saved
+# //            into task sequence variables.
+# // 
+# // ***************************************************************************
 
 Function Get-PSDLocalInfo {
   Process
@@ -128,12 +132,15 @@ Function Invoke-PSDRules {
     Param( 
         [ValidateNotNullOrEmpty()] 
         [Parameter(ValueFromPipeline=$True,Mandatory=$True)] 
-        [string]$FilePath 
+        [string]$FilePath,
+        [ValidateNotNullOrEmpty()] 
+        [Parameter(ValueFromPipeline=$True,Mandatory=$True)] 
+        [string]$MappingFile
     ) 
     Begin
     {
         $global:iniFile = Get-IniContent $FilePath
-        [xml]$global:variableFile = Get-Content "$deployRoot\Scripts\ZTIGather.xml"
+        [xml]$global:variableFile = Get-Content $MappingFile
 
         # Process custom properties
         if ($global:iniFile["Settings"]["Properties"])
