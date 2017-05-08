@@ -104,7 +104,7 @@ Use-WindowsUnattend -UnattendPath $unattendXml -Path "$($tsenv:OSVolume):\" -Scr
 Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Scripts"
 $modules = Get-PSDContent "Tools\Modules"
 Copy-Item "$scripts\PSDStart.ps1" "$($tsenv:OSVolume):\MININT\Scripts"
-Copy-Item "$modules\" "$($tsenv:OSVolume):\MININT\Modules"
+Copy-PSDFolder "$modules" "$($tsenv:OSVolume):\MININT\Tools\Modules" 
 
 # Request a reboot
 $tsenv:SMSTSRebootRequested = "true"

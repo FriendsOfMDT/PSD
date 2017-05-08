@@ -20,7 +20,8 @@ $verbosePreference = "Continue"
 # Get the OS image details
 Write-Verbose "Operating system: $($tsenv:OSGUID)"
 $os = Get-Item "DeploymentShare:\Operating Systems\$($tsenv:OSGUID)"
-$image = Get-PSDContent "$($os.ImageFile.Substring(2))"
+$osSource = Get-PSDContent "$($os.Source.Substring(2))"
+$image = "$osSource$($os.ImageFile.Substring($os.Source.Length))"
 $index = $os.ImageIndex
 
 # Create a local scratch folder
@@ -44,7 +45,6 @@ else
 {
     $args = @("$($tsenv:OSVolume):\Windows", "/s", "$($tsenv:BootVolume):")
 }
-$args
 $result = Start-Process -FilePath "bcdboot.exe" -ArgumentList $args -Wait -Passthru
 Write-Verbose "BCDBoot completed, rc = $($result.ExitCode)"
 

@@ -15,8 +15,12 @@ $global:psuDataPath = ""
 
 function Get-PSDLocalDataPath
 {
+    param (
+        [switch] $move
+    )
+
     # Return the cached local data path if possible
-    if ($global:psuDataPath -ne "")
+    if ($global:psuDataPath -ne "" -and (-not $move))
     {
         if (Test-Path $global:psuDataPath)
         {
@@ -122,7 +126,7 @@ function Clear-PSDInformation
         # Copy any logs
         if (Test-Path "$localPath\Logs")
         {
-            Copy-Item "$localPath\Logs\*.*" $logDest -Force
+            Copy-Item "$localPath\Logs\*" $logDest -Force
         }
 
         # Remove the MININT folder
@@ -136,4 +140,19 @@ function Clear-PSDInformation
         }
     }
 
+}
+
+function Copy-PSDFolder
+{
+    param (
+        [Parameter(Mandatory=$True,Position=1)]
+        [string] $source,
+        [Parameter(Mandatory=$True,Position=2)]
+        [string] $destination
+    )
+
+    $s = $source.TrimEnd("\")
+    $d = $destination.TrimEnd("\")
+    Write-Verbose "Copying folder $source to $destination using XCopy"
+    & xcopy $s $d /s /e /v /d /y /i
 }

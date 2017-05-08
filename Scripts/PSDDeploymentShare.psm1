@@ -102,15 +102,8 @@ function Get-PSDProvider
     }
 
     # Load the PSSnapIn PowerShell provider module
-    if (Test-Path "X:\Deploy\Tools\Modules\Microsoft.BDD.PSSnapIn")
-    {
-        Import-Module "X:\Deploy\Tools\Modules\Microsoft.BDD.PSSnapIn"
-    }
-    else
-    {
-        $path = Get-PSDContent -Content "Tools\Modules\Microsoft.BDD.PSSnapIn"
-        Import-Module "$path"
-    }
+    $modules = Get-PSDContent -Content "Tools\Modules"
+    Import-Module "$modules\Microsoft.BDD.PSSnapIn"
 
     # Create the PSDrive
     Write-Verbose "Creating MDT provider drive DeploymentShare: at $deployRoot"
@@ -141,6 +134,9 @@ function Get-PSDContent
         [string] $destination = ""
     )
 
+    # Track the time
+    $start = Get-Date
+
     # If the destination is blank, use a default value
     if ($destination -eq "")
     {
@@ -169,6 +165,12 @@ function Get-PSDContent
     {
         Write-Verbose "Path for $content is already local, not copying"
     }
+
+    # Report the time
+    $elapsed = (Get-Date) - $start
+    Write-Verbose "Elapsed time to transfer $content : $elapsed"
+
+    # Return the destinationf
     return $dest
 }
 
@@ -181,7 +183,7 @@ function Get-PSDContentUNC
     )
 
     Write-Verbose "Copying from $path to $destination"
-    Copy-Item -Path $content -Destination $destination -Recurse
+    Copy-PSDFolder $content $destination
 }
 
 # Internal function for retrieving content from URL (web server/HTTP)
@@ -191,7 +193,6 @@ function Get-PSDContentWeb
         [string] $content,
         [string] $destination
     )
-
 
     $fullSource = "$($global:psddsDeployRoot)/$content"
     $request = [System.Net.WebRequest]::Create($fullSource)
@@ -257,15 +258,16 @@ function Get-PSDContentWeb
             $wc = New-Object System.Net.WebClient
             $wc.Credentials = $global:psddsCredential
             $results | ? { $_.iscollection -eq "0"} | sort destination | % {
+                $href = $_.href
                 $fullFile = "$destination\$($_.destination)"
-                Write-Verbose "Downloading from $($_.href) to $fullFile"
+                # Write-Verbose "Downloading from $href to $fullFile"
                 try
                 {
-                    $wc.DownloadFile($_.href, $fullFile)
+                    $wc.DownloadFile($href, $fullFile)
                 }
                 catch
                 {
-                    Write-Verbose "Unable to download file $($_.href)."
+                    Write-Verbose "Unable to download file $href."
                     Write-Verbose $_.Exception.InnerException
                 }
             }            
@@ -279,7 +281,7 @@ function Get-PSDContentWeb
                 $sourceUrl += [string]$_.href
                 $fullFile = "$destination\$($_.destination)"
                 $destFile += [string]$fullFile
-                Write-Verbose "Adding $($_.href) to $fullFile"
+                # Write-Verbose "Adding $($_.href) to $fullFile"
             }
 
             # Do the download using BITS

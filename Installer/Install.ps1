@@ -24,12 +24,12 @@ Import-Module "$($mdtDir)Bin\MicrosoftDeploymentToolkit.psd1"
 $null = New-PSDrive -Name PSD -PSProvider MDTProvider -Root $psDeploymentFolder
 
 # Copy the scripts
-Copy-Item "$install\Scripts\*.*" "$psDeploymentFolder\Scripts" -Recurse
+Copy-PSDFolder "$install\Scripts" "$psDeploymentFolder\Scripts"
 Dir "$psDeploymentFolder\Scripts\*.ps*" | Unblock-File 
 
 # Copy the templates
-Copy-Item "$install\Templates\*.*" "$psDeploymentFolder\Templates" -Recurse
-Dir "$psDeploymentFolder\Templates\*.*" | Unblock-File
+Copy-PSDFolder "$install\Templates" "$psDeploymentFolder\Templates"
+Dir "$psDeploymentFolder\Templates\*" | Unblock-File
 
 # Copy the script modules to the right places
 "PSDUtility", "PSDDeploymentShare", "PSDGather", "PSDWizard" | % {
@@ -38,7 +38,7 @@ Dir "$psDeploymentFolder\Templates\*.*" | Unblock-File
         $null = New-Item "$psDeploymentFolder\Tools\Modules\$_" -ItemType directory
     }
     Copy-Item "$install\Scripts\$_.psm1" "$psDeploymentFolder\Tools\Modules\$_"
-    Dir "$psDeploymentFolder\Tools\Modules\$_\*.*" | Unblock-File
+    Dir "$psDeploymentFolder\Tools\Modules\$_\*" | Unblock-File
 }
 
 # Copy the provider module files
