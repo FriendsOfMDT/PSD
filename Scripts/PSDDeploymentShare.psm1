@@ -11,28 +11,13 @@
 
 $verbosePreference = "Continue"
 
+Import-Module BitsTransfer -Global
+
 # Local variables
 $global:psddsDeployRoot = ""
 $global:psddsDeployUser = ""
 $global:psddsDeployPassword = ""
 $global:psddsCredential = ""
-
-# Reconnection logic
-if (Test-Path "tsenv:")
-{
-    if ($tsenv:DeployRoot -ne "")
-    {
-        Write-Verbose "Reconnecting to the deployment share at $($tsenv:DeployRoot)."
-        if ($tsenv:UserDomain -ne "")
-        {
-            Get-PSDConnection -deployRoot $tsenv:DeployRoot -username "$($tsenv:UserDomain)\$($tsenv:UserID)" -password $tsenv:UserPassword
-        }
-        else
-        {
-            Get-PSDConnection -deployRoot $tsenv:DeployRoot -username $tsenv:UserID -password $tsenv:UserPassword
-        }
-    }
-}
 
 # Main function for establishing a connection 
 function Get-PSDConnection 
@@ -195,6 +180,7 @@ function Get-PSDContentWeb
     )
 
     $fullSource = "$($global:psddsDeployRoot)/$content"
+    $fullSource = $fullSource.Replace("\", "/")
     $request = [System.Net.WebRequest]::Create($fullSource)
     $topUri = new-object system.uri $fullSource
     $prefixLen = $topUri.LocalPath.Length
@@ -294,3 +280,20 @@ function Get-PSDContentWeb
 
 Export-ModuleMember -function Get-PSDConnection
 Export-ModuleMember -function Get-PSDContent
+
+# Reconnection logic
+if (Test-Path "tsenv:")
+{
+    if ($tsenv:DeployRoot -ne "")
+    {
+        Write-Verbose "Reconnecting to the deployment share at $($tsenv:DeployRoot)."
+        if ($tsenv:UserDomain -ne "")
+        {
+            Get-PSDConnection -deployRoot $tsenv:DeployRoot -username "$($tsenv:UserDomain)\$($tsenv:UserID)" -password $tsenv:UserPassword
+        }
+        else
+        {
+            Get-PSDConnection -deployRoot $tsenv:DeployRoot -username $tsenv:UserID -password $tsenv:UserPassword
+        }
+    }
+}

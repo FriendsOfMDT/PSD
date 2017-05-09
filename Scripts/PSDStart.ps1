@@ -25,12 +25,27 @@ Get-PSDLocalInfo
 # Check for an in-progress task sequence
 $tsInProgress = $false
 get-volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\_SMSTaskSequence\TSEnv.dat"} | % {
+
+    # Found it, save the location
     Write-Verbose "In-progress task sequence found at $($_.DriveLetter):\_SMSTaskSequence."
     $tsInProgress = $true
     $tsDrive = $_.DriveLetter
 
+    # Restore the task sequence variables
     $variablesPath = Restore-PSDVariables
     Write-Verbose "Restored variables from $variablesPath."
+
+    # Reconnect to the deployment share
+    Write-Verbose "Reconnecting to the deployment share at $($tsenv:DeployRoot)."
+    if ($tsenv:UserDomain -ne "")
+    {
+        Get-PSDConnection -deployRoot $tsenv:DeployRoot -username "$($tsenv:UserDomain)\$($tsenv:UserID)" -password $tsenv:UserPassword
+    }
+    else
+    {
+        Get-PSDConnection -deployRoot $tsenv:DeployRoot -username $tsenv:UserID -password $tsenv:UserPassword
+    }
+
 }
 
 # If a task sequence is in progress, resume it.  Otherwise, start a new one
