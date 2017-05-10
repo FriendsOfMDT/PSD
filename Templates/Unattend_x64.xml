@@ -100,7 +100,7 @@
             </Display>
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>powershell.exe -executionpolicy bypass -file %SystemDrive%\MININT\Scripts\PSDStart.ps1</CommandLine>
+                    <CommandLine>powershell.exe -noprofile -windowstyle minimized -executionpolicy bypass -file %SystemDrive%\MININT\Scripts\PSDStart.ps1 -start</CommandLine>
                     <Description>Lite Touch new OS</Description>
                     <Order>1</Order>
                 </SynchronousCommand>

@@ -22,7 +22,7 @@
                 <RunSynchronousCommand wcm:action="add">
                     <Description>Run PSDStart.ps1</Description>
                     <Order>3</Order>
-                    <Path>powershell.exe -noprofile -file X:\Deploy\Scripts\PSDStart.ps1</Path>
+                    <Path>powershell.exe -noprofile -windowstyle minimized -file X:\Deploy\Scripts\PSDStart.ps1</Path>
                 </RunSynchronousCommand>
             </RunSynchronous>
         </component>

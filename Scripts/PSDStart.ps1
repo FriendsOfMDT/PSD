@@ -8,6 +8,10 @@
 # // 
 # // ***************************************************************************
 
+param (
+    [switch] $start
+)
+
 # Set the module path based on the current script path
 $deployRoot = Split-Path -Path "$PSScriptRoot"
 $env:PSModulePath = $env:PSModulePath + ";$deployRoot\Tools\Modules"
@@ -18,6 +22,23 @@ Import-Module PSDDeploymentShare
 Import-Module PSDGather
 Import-Module PSDWizard
 $verbosePreference = "Continue"
+
+# If running from RunOnce, create a startup folder item and then exit
+if ($start)
+{
+    Write-Verbose "Creating a link to re-run $PSCommandPath from the all users Startup folder"
+
+    # Create a shortcut to run this script
+    $allUsersStartup = [Environment]::GetFolderPath('CommonStartup')
+    $linkPath = "$allUsersStartup\PSDStartup.lnk"
+    $wshShell = New-Object -comObject WScript.Shell
+    $shortcut = $WshShell.CreateShortcut($linkPath)
+    $shortcut.TargetPath = "powershell.exe"
+    $shortcut.Arguments = "-noprofile -executionpolicy bypass -file $PSCommandPath"
+    $shortcut.Save()
+
+    exit 0
+}
 
 # Gather local info to make sure key variables are set (e.g. Architecture)
 Get-PSDLocalInfo
