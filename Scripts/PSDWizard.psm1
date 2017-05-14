@@ -26,6 +26,9 @@ function Get-PSDWizard
     # Attach event handlers
     $wizFinishButton.Add_Click({$script:Wizard.Close()})
 
+    # Initialize panes
+    Populate-Tree -objectPath "DeploymentShare:\Task Sequences" -parent $tsTree
+
     # Return the form to the caller
     return $script:Wizard
 }
@@ -62,3 +65,22 @@ function Show-PSDWizard
     $null = $wizard.ShowDialog()
     Save-PSDWizardResult
 }
+
+function Populate-Tree
+{
+    param(
+        $parent, 
+        $objectPath
+    )
+
+    $parent.Items.Clear
+    Get-ChildItem -Path $objectPath | % {
+        $t = New-Object System.Windows.Controls.TreeViewItem
+        $t.Header = $_.FullName
+        $t.Tag = $_
+        $t.Items.Add("*")
+    }
+}
+
+Export-ModuleMember -function Show-PSDWizard
+

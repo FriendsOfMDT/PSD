@@ -14,6 +14,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock Margin="10,0,0,0">Task sequence ID:</TextBlock>
             <TextBox Grid.Column="1" Name="TS_TaskSequenceID" Width="100">ABCDEF</TextBox>
+            <TreeView Name="tsTree" HorizontalAlignment="Left" Height="400" Margin="10,10,10,10" VerticalAlignment="Top" Width="400" />
           </Grid>
         </StackPanel>
 
