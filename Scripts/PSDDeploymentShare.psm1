@@ -167,8 +167,8 @@ function Get-PSDContentUNC
         [string] $destination
     )
 
-    Write-Verbose "Copying from $path to $destination"
-    Copy-PSDFolder $content $destination
+    Write-Verbose "Copying from $($global:psddsDeployRoot)\$content to $destination"
+    Copy-PSDFolder "$($global:psddsDeployRoot)\$content" $destination
 }
 
 # Internal function for retrieving content from URL (web server/HTTP)

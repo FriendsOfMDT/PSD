@@ -114,6 +114,9 @@ function Restore-PSDVariables
 
 function Clear-PSDInformation
 {
+    # TEMP:  Don't clean up
+    return
+
     # Create a folder for the logs
     $logDest = "$($env:SystemRoot)\Temp\DeploymentLogs"
     Initialize-PSDFolder $logDest
@@ -154,5 +157,5 @@ function Copy-PSDFolder
     $s = $source.TrimEnd("\")
     $d = $destination.TrimEnd("\")
     Write-Verbose "Copying folder $source to $destination using XCopy"
-    & xcopy $s $d /s /e /v /d /y /i
+    & xcopy $s $d /s /e /v /d /y /i | Out-Null
 }

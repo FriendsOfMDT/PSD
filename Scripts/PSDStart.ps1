@@ -106,17 +106,15 @@ else
     {
         $mappingFile = "X:\Deploy\Tools\Modules\PSDGather\ZTIGather.xml"
         Invoke-PSDRules -FilePath "X:\Deploy\Scripts\Bootstrap.ini" -MappingFile $mappingFile
-        Get-PSDConnection -DeployRoot $tsenv:DeployRoot -Username "$tsenv:UserDomain\$tsenv:UserID" -Password $tsenv:UserPassword
-        $deployRoot = $tsenv:DeployRoot
     }
     else
     {
-        $mappingFile = "$modules\PSDGather\ZTIGather.xml"
-        $control = Get-PSDContent -Content "Control"
-        Invoke-PSDRules -FilePath "$control\Bootstrap.ini" -MappingFile $mappingFile
-        $deployRoot = $tsenv:DeployRoot
+        $mappingFile = "$deployRoot\Scripts\ZTIGather.xml"
+        Invoke-PSDRules -FilePath "$deployRoot\Control\Bootstrap.ini" -MappingFile $mappingFile
     }
+    $deployRoot = $tsenv:DeployRoot
     Write-Verbose "New deploy root is $deployRoot."
+    Get-PSDConnection -DeployRoot $tsenv:DeployRoot -Username "$tsenv:UserDomain\$tsenv:UserID" -Password $tsenv:UserPassword
 
     # Process CustomSettings.ini
     $control = Get-PSDContent -Content "Control"

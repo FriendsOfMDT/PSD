@@ -4,6 +4,22 @@
 
 $verbosePreference = "Continue"
 
+# Utility function to copy folders (using XCOPY)
+function Copy-PSDFolder
+{
+    param (
+        [Parameter(Mandatory=$True,Position=1)]
+        [string] $source,
+        [Parameter(Mandatory=$True,Position=2)]
+        [string] $destination
+    )
+
+    $s = $source.TrimEnd("\")
+    $d = $destination.TrimEnd("\")
+    Write-Verbose "Copying folder $source to $destination using XCopy"
+    & xcopy $s $d /s /e /v /d /y /i | Out-Null
+}
+
 # Location and share name for the new deployment share
 $psDeploymentFolder = "C:\PSDeploymentShare"
 $psDeploymentShare = "PSDeploymentShare$"
