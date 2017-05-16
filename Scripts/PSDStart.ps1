@@ -132,7 +132,14 @@ else
     # Process wizard
     if ($tsenv:SkipWizard -ine "YES")
     {
-        Show-PSDWizard "$scripts\PSDWizard.xaml"
+        $result = Show-PSDWizard "$scripts\PSDWizard.xaml"
+        if ($result -eq $false)
+        {
+            Write-Verbose "Cancelling."
+            Stop-PSDLogging
+            Clear-PSDInformation
+            exit 0
+        }
     }
     if ($tsenv:OSDComputerName -eq "") {
         $tsenv:OSDComputerName = $env:COMPUTERNAME

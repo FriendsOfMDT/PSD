@@ -40,8 +40,10 @@ Import-Module "$($mdtDir)Bin\MicrosoftDeploymentToolkit.psd1"
 $null = New-PSDrive -Name PSD -PSProvider MDTProvider -Root $psDeploymentFolder
 
 # Copy the scripts
-Copy-PSDFolder "$install\Scripts" "$psDeploymentFolder\Scripts"
-Dir "$psDeploymentFolder\Scripts\*.ps*" | Unblock-File 
+Copy-PSDFolder "$install\Scripts\*.ps1" "$psDeploymentFolder\Scripts"
+Dir "$psDeploymentFolder\Scripts\*.ps1" | Unblock-File 
+Copy-PSDFolder "$install\Scripts\*.xaml" "$psDeploymentFolder\Scripts"
+Dir "$psDeploymentFolder\Scripts\*.xaml" | Unblock-File 
 
 # Copy the templates
 Copy-PSDFolder "$install\Templates" "$psDeploymentFolder\Templates"
@@ -53,11 +55,13 @@ Dir "$psDeploymentFolder\Templates\*" | Unblock-File
     {
         $null = New-Item "$psDeploymentFolder\Tools\Modules\$_" -ItemType directory
     }
+    Write-Verbose "Copying module $_ to $psDeploymentFolder\Tools\Modules"
     Copy-Item "$install\Scripts\$_.psm1" "$psDeploymentFolder\Tools\Modules\$_"
     Dir "$psDeploymentFolder\Tools\Modules\$_\*" | Unblock-File
 }
 
 # Copy the provider module files
+Write-Verbose "Copying MDT provider files to $psDeploymentFolder\Tools\Modules"
 if ((Test-Path "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn") -eq $false)
 {
     $null = New-Item "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn" -ItemType directory
@@ -72,6 +76,7 @@ Copy-Item "$($mdtDir)Bin\Microsoft.BDD.Core.dll.config" "$psDeploymentFolder\Too
 Copy-Item "$($mdtDir)Bin\Microsoft.BDD.ConfigManager.dll" "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn"
 
 # Copy the provider template files
+Write-Verbose "Copying templates to $psDeploymentFolder\Templates"
 if ((Test-Path "$psDeploymentFolder\Templates") -eq $false)
 {
     $null = New-Item "$psDeploymentFolder\Templates"

@@ -21,13 +21,25 @@ function Get-PSDWizard
     $script:wizard = [Windows.Markup.XamlReader]::Load($reader)
 
     # Store objects in PowerShell variables
-    $script:Xaml.SelectNodes("//*[@Name]") | %{Set-Variable -Name ($_.Name) -Value $script:Wizard.FindName($_.Name)}
+    $script:Xaml.SelectNodes("//*[@Name]") | % {
+        Write-Verbose "Creating variable $($_.Name)"
+        Set-Variable -Name ($_.Name) -Value $script:Wizard.FindName($_.Name) -Scope Global
+    }
 
     # Attach event handlers
-    $wizFinishButton.Add_Click({$script:Wizard.Close()})
+    $wizFinishButton.Add_Click({
+        $script:Wizard.DialogResult = $true
+        $script:Wizard.Close()
+    })
 
-    # Initialize panes
-    Populate-Tree -objectPath "DeploymentShare:\Task Sequences" -parent $tsTree
+    # Attach event handlers
+    $wizCancelButton.Add_Click({
+        $script:Wizard.DialogResult = $false
+        $script:Wizard.Close()
+    })
+
+    # Load wizard script and execute it
+    Invoke-Expression "$($xamlPath).Initialize.ps1" | Out-Null
 
     # Return the form to the caller
     return $script:Wizard
@@ -60,26 +72,11 @@ function Show-PSDWizard
         $xamlPath
     ) 
 
+    Write-Verbose "Processing wizard from $xamlPath"
     $wizard = Get-PSDWizard $xamlPath
     Set-PSDWizardDefault
-    $null = $wizard.ShowDialog()
+    $result = $wizard.ShowDialog()
     Save-PSDWizardResult
-}
-
-function Populate-Tree
-{
-    param(
-        $parent, 
-        $objectPath
-    )
-
-    $parent.Items.Clear
-    Get-ChildItem -Path $objectPath | % {
-        $t = New-Object System.Windows.Controls.TreeViewItem
-        $t.Header = $_.FullName
-        $t.Tag = $_
-        $t.Items.Add("*")
-    }
 }
 
 Export-ModuleMember -function Show-PSDWizard
