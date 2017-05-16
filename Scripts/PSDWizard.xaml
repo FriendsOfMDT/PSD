@@ -7,7 +7,7 @@
 
       <StackPanel Orientation="Vertical">
         <StackPanel Height="500" Orientation="Horizontal">
-          <TreeView Name="tsTree" HorizontalAlignment="Left" Height="400" Margin="10,10,10,10" VerticalAlignment="Top" Width="400" />
+          <TreeView Name="tsTree" HorizontalAlignment="Left" Height="500" Margin="10,10,10,10" VerticalAlignment="Top" Width="400" />
           <TextBox Visibility="Hidden" Name="TS_TaskSequenceID" Width="100">ABCDEF</TextBox>
         </StackPanel>
 
