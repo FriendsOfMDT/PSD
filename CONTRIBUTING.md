@@ -37,20 +37,22 @@ Please share any of the following:
 
 ## Check for existing issues first please
 
-- Before you creating new issues, search first! Make sure your issue hasn't already been reported!
+- Before you creating new issues, search first! 
+- Make sure your issue hasn't already been reported!
 - Be sure to scan through the MOST POPULAR [most popular](https://github.com/<somelink>) feature requests.
-- If you find your issue already exists, make relevant comments and add your [reaction](https://github.com/<somelink>)
+- If you find your issue already exists, provide relevant comments and add your [reaction](https://github.com/<somelink>)
 - Use a **reaction** in place of a "+1" comment:
 * 👍 - upvote
 * 👎 - downvote
-
 
 If you cannot find an existing issue similar to your bug or feature, create a new issue using the guidelines below.
 
 ### Submitting Bug Reports and Feature Requests
 
-- Please only one issue or feature request per submission. Do **not** enumerate multiple bugs or feature requests in the same issue.
-- Do not add your issue as a comment to an existing issue unless it's for the identical input. Many issues look similar, but may have different causes.
+- Please only one issue or feature request per submission. 
+- Do **not** enumerate multiple bugs or feature requests in the same issue.
+- Do not add your issue as a comment to an existing issue unless it's for the identical input. 
+- Many issues look similar, but may have different causes.
 - More information is better, provide sufficient details to reproduce or narrow down the problem. 
 
 ### PSD Contribution Checklist
@@ -62,7 +64,7 @@ Please remember to do the following:
 
 * [ ] **Simplify** your scenario and isolate the problem if possible
 
-* [ ] **Document** your findings by providing logs or log snippets
+* [ ] **Document** your findings by providing logs, log snippets and/or screen shots
 
 * [ ] **Track** your submission and monitor the submission workflow
 
@@ -72,4 +74,4 @@ If you are interested in writing or contirbuting code,
 please see [How to Contribute](https://somelink).
 
 # Thank You!
-Contributions like yours will help to ensure the growth and success of PSD!
+Your contributions and involvement will help to ensure the growth and success of PSD!

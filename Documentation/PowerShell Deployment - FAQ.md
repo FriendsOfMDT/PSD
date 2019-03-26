@@ -1,29 +1,42 @@
-# FQ - PowerShell Deployment Extension Kit
-April 2018
+# Frequent Asked Questions - PowerShell Deployment Extension Kit
+April 2019
 
-This document artifact highlights and documents some of the known issues and limitation of PSD as of the published date above. 
+This document highlights and captures some of the known issues and limitations of PSD (as of the published date above). 
 
 ## Frequently Asked Questions
-Q: Does the installer copy over my existing MDT Deployment Share content?
-
-A: No, users and administrators will need to copy/export any existing components to PSD-enabled using in-built content management features of MDT.
+Q: Does the installer copy over my existing MDT Deployment Share content (e.g. applications, drivers, task sequences, etc) to a new PSD share?
+>A: No, users and administrators will need to copy/export any existing components to *new* PSD shares using in-built content management features of MDT. MDT Shares which have been PSD upgraded will continue to have access to any existing object and artifacts.
 
 Q: Does the installer copy over my existing BootStrap.ini or CustomSettings.ini files to the target PSD repositories?
+>A: No, if you've created a new PSD-enabled deployment share, users and administrators will need to manually copy or reproduce any existing Bootstrap and CustomSettings files to new repositories.
 
-A: No, if you've created a new PSD-enabled deployment share, users and administrators will need to manually copy or reproduce any existing Bootstrap and CustomSettings files to new repositories.
+Q: Does PSD work with Deployment Optimization?
+>A: TBD
+
+Q: Does PSD work with Branch Cache?
+>A: TBD
+
+Q: Does PSD work with Peer Cache?
+>A: TBD
 
 Q: What has PSD been tested against? What are the supported (tested) components?
-
-A: The following components and versions were tested or used in development of PSD for MDT:
+>A: The following components and versions were tested or used in development of PSD for MDT:
 - MDT - version 8456
-- WinPE Add - 
-- ADK - version XXX
-- Windows 10 - 1809 Enterprise
+- WinPE AddOn - 
+- ADK - version 1809
+- Windows 10 - 1809 Enterprise, 1709 Enterprise, x64 English
 - BareMetal via UNC
 - BareMetal via HTTP
 - IIS 
 - WebDAV
 - PXE - Windows Server 2016, Windows Server 2019
+
+Q: What are the client/target hardware requirements for baremetal PSD deployments?
+>A: 
+- At least 1.5GB RAM (WinPE has been extended and requires additional memory)
+- At leaast one (1) network adapter(s)
+- At least one (1) 50GB hard drive (for New/BareMetal deployments)
+- At least one (1) XXX MHz processor (for New/BareMetal deployments)
 
 ## Installation Observations
 
@@ -37,6 +50,8 @@ A: The following components and versions were tested or used in development of P
 Please review the PSD Installation Guide for additional detailed post-installation configuration recomendations.
 
 - Applications specified in the TS or in BS/CS.ini **MUST** have { } brackets around their GUID
+
+- New TS variables **must** be declared explicity in BS/CS.ini
 
 
 
