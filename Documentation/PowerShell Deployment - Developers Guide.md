@@ -11,7 +11,7 @@ PowerShell vxxx is the standard for all PSD development.
 # Scripts, Modules and Libraries
 The following modules and scripts are provided with PSD:
 ## Scripts
-- PSDAppliacations.ps1
+- **PSDAppliacations.ps1** - Installs the apps specified by task sequence variables *Applications* and *MandatoryApplications*. Imports PSDUtility and PSDDeploymentShare. Includes function(s) *Install-PSDApplication* 
 - PSDApplyOS.ps1
 - PSDConifgure.ps1
 - PSDCustomPostWU.ps1
