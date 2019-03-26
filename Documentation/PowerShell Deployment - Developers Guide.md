@@ -1,5 +1,5 @@
 # Developers Guide - PowerShell Deployment Extension Kit
-April 2018
+April 2019
 
 PowerShell vxxx is the standard for all PSD development.
 

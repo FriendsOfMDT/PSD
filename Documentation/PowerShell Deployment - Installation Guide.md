@@ -1,26 +1,26 @@
 # Installation Guide - PowerShell Deployment Extension Kit
-April 2018
+April 2019
 
 ## PSD Installation Checklist
 Please review and or validate the following installation checklist items:
 
 * [ ] **ADK** - Ensure Microsoft ADK is installed and operational
 
-* [ ] **MDT** - Ensure Microsoft ADKis installed and operational
+* [ ] **MDT** - Ensure Microsoft MDT is installed and operational
 
-* [ ] **Source Media - OS** Provide source media for Windows OS
+* [ ] **Source Media - OS** - Provide source media for Windows OS
 
-* [ ] **Source Media - Applications** Provide source media for Applications
+* [ ] **Source Media - Applications** - Provide source media for Applications
 
-* [ ] **Source Media - Drivers** Provide source media for Drivers
+* [ ] **Source Media - Drivers** - Provide source media for Drivers
 
-* [ ] **Source Media - Language Packs** Provide source media for Windows OS Language Packs
+* [ ] **Source Media - Language Packs** - Provide source media for Windows OS Language Packs
 
-* [ ] **WDS** Make sure WDS in installed and available if implementing WinPE based initiation
+* [ ] **WDS** - Make sure WDS in installed and available if implementing WinPE based initiation
 
-* [ ] **Document** your findings by providing logs or log snippets
+* [ ] **SQL** {optional} - SQL for MDT database functionatlity 
 
-* [ ] **Track** your submission and monitor the submission workflow
+* [ ] **Acounts** - Domain Join, Network/Share access, Logging
 
 
 ## PSD Configuration Checklist

@@ -7,7 +7,7 @@ Welcome to PowerShell Deployment (PSD)
 - Infrastructure Architects
 - Solution Architects
 
-The purpose of this project is to create a new version of MDT that provides the same level of automation as MDT but built on a more modern framework. The major pieces are built on PowerShell alone, but still using the MDT Workbench and regular layout. The goal is to support deployment shares using PSD extensions as well as legacy MDT deployment shares.
+The purpose of PowerShell Deployment for MDT is to create a new deployment solution that provides the same level of automation as MDT but built on a more modern framework - PowerShell. The major components and functionality are built on PowerShell alone, but still leverage the MDT Workbench and layout. The goal is to support deployment shares using PSD extensions as well as legacy MDT deployment shares.
 
 Supported deployment scenarios include deployment from the following content repositories:
 
