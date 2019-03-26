@@ -5,8 +5,14 @@ PowerShell vxxx is the standard for all PSD development.
 
 # Coding Standards
 
-# Logging
+# Logging via Write-TSxLog
+Logging in all PSD modules is and should be accomplished via a new **Write-TSxLog** function found in PSDUtility.psm1. Developers, coders and customizers should leverage this new function to capture output for logging and or debug purposes. The following syntax should be used or duplicated:
 
+    Write-TSxLog -Message "$($MyInvocation.MyCommand.Name): <<your message our output>>
+
+This will output your message or text to the logfile along with the calling script. Sample output looks like the following from the Get-PSDLocalDataPath function:
+
+    <![LOG[Get-PSDLocalDataPath: Return the cached local data path if possible]LOG]!><time="20:31:39.462+000" date="03-26-2019" component="PSDUtility.psm1:27" context="" type="1" thread="" file="">
 
 # Scripts, Modules and Libraries
 The following modules and scripts are provided with PSD:

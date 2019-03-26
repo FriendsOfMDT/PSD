@@ -1,4 +1,4 @@
-# PowerShell Deployment Extension Kit
+# README - PowerShell Deployment Extension Kit
 April 2019
 
 Welcome to PowerShell Deployment (PSD)
@@ -25,3 +25,4 @@ The solution file for Visual Studio requires PowerShell for Visual Studio (3rd p
 When using Visual Studio to edit the PowerShell scripts, configure the editor to use spaces instead of tabs for PowerShell.
 
 ## Related References
+(intentionally blank)

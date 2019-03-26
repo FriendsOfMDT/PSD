@@ -20,7 +20,7 @@ Please review and or validate the following installation checklist items:
 
 * [ ] **SQL** {optional} - SQL for MDT database functionatlity 
 
-* [ ] **Acounts** - Domain Join, Network/Share access, Logging
+* [ ] **Accounts** - Domain Join, Network/Share access, Logging
 
 
 ## PSD Configuration Checklist
@@ -48,18 +48,10 @@ The following actions should be completed after PSD installation:
 
 * [ ] **Enable MDT monitoring** - blah
 
-* [ ] **Generate Boot Media** - blah
+* [ ] **Review and adjust PSD Variables** - blah
 
 * [ ] **Update WinPE settings** - blah
 
 * [ ] **Update Background wallpaper** - blah
 
-* [ ] **Update BootStrap.ini** - blah
-
-* [ ] **Create Applications** - blah
-
-* [ ] **Import/Add Drivers** - blah
-
-* [ ] **Import/Add Language Packs** - blah
-
-* [ ] **Update Deployment Share** - blah
+* [ ] **Configure MDT Event Service** - blah

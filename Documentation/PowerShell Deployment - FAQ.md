@@ -4,8 +4,8 @@ April 2019
 This document highlights and captures some of the known issues and limitations of PSD (as of the published date above). 
 
 ## Frequently Asked Questions
-Q: Does the installer copy over my existing MDT Deployment Share content (e.g. applications, drivers, task sequences, etc)?
->A: No, users and administrators will need to copy/export any existing components to PSD-enabled using in-built content management features of MDT.
+Q: Does the installer copy over my existing MDT Deployment Share content (e.g. applications, drivers, task sequences, etc) to a new PSD share?
+>A: No, users and administrators will need to copy/export any existing components to *new* PSD shares using in-built content management features of MDT. MDT Shares which have been PSD upgraded will continue to have access to any existing object and artifacts.
 
 Q: Does the installer copy over my existing BootStrap.ini or CustomSettings.ini files to the target PSD repositories?
 >A: No, if you've created a new PSD-enabled deployment share, users and administrators will need to manually copy or reproduce any existing Bootstrap and CustomSettings files to new repositories.
@@ -22,9 +22,9 @@ Q: Does PSD work with Peer Cache?
 Q: What has PSD been tested against? What are the supported (tested) components?
 >A: The following components and versions were tested or used in development of PSD for MDT:
 - MDT - version 8456
-- WinPE Add - 
-- ADK - version XXX
-- Windows 10 - 1809 Enterprise
+- WinPE AddOn - 
+- ADK - version 1809
+- Windows 10 - 1809 Enterprise, 1709 Enterprise, x64 English
 - BareMetal via UNC
 - BareMetal via HTTP
 - IIS 
