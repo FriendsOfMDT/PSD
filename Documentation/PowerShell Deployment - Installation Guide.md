@@ -2,56 +2,106 @@
 April 2019
 
 ## PSD Installation Checklist
-Please review and or validate the following installation checklist items:
+Please review, validate and/or obtain following installation checklist items:
 
-* [ ] **ADK** - Ensure Microsoft ADK is installed and operational
+* [ ] **ADK** - Download and install Microsoft ADK on a computer to be used to host the MDT workbench. Ensure Microsoft ADK is installed and operational
 
-* [ ] **MDT** - Ensure Microsoft MDT is installed and operational
+* [ ] **MDT** -  Download and install Microsoft MDT on a computer to be used to host the MDT workbench. Ensure Microsoft MDT is installed and operational
 
-* [ ] **Source Media - OS** - Provide source media for Windows OS
+* [ ] **Source Media (OS)** - Obtain source media for Windows OS
 
-* [ ] **Source Media - Applications** - Provide source media for Applications
+* [ ] **Source Media (Applications)** - Obtain source media for any applications to be installed as part of task sequences
 
-* [ ] **Source Media - Drivers** - Provide source media for Drivers
+* [ ] **Source Media (Drivers)** - Obtain source media for OEM hardware drivers
 
-* [ ] **Source Media - Language Packs** - Provide source media for Windows OS Language Packs
+* [ ] **Source Media (Language Packs)** - Obtain source media for Windows OS Language Packs
 
-* [ ] **WDS** - Make sure WDS in installed and available if implementing WinPE based initiation
+* [ ] **WDS** - [optional] Ensure Windows Deployment Services is installed and available if implementing WinPE based initiation
 
-* [ ] **SQL** {optional} - SQL for MDT database functionatlity 
+* [ ] **Wallpaper** - [optional] Obtain any necessary custom backgrounds and wallpapers
 
-* [ ] **Accounts** - Domain Join, Network/Share access, Logging
+* [ ] **SQL** - [optional] - SQL for MDT database functionatlity 
 
+* [ ] **Accounts** - You'll need account(s) with sufficient rights for the following:
+    - Accessing PSD/MDT Share(s)
+    - Accessing log folder location(s)
+    - Joining computers to Active Directory
 
 ## PSD Configuration Checklist
-The following actions should be completed after PSD installation:
+The following actions should be completed as part of PSD installation:
 
-* [ ] **Mount PSD share in MDT** - blah
+* [ ] **Install PSD** - Install PSD on a machine with ADK and MDT already installed. Install PSD either as a NEW deployment share or as an UPGRADE to an existing MDT deployment share. Detailed PSD installation instructions can be found in the [PSD Installation Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20Installation%20Guide.md).
 
-* [ ] **Create PSD Task Sequence** - blah
+* [ ] **Mount PSD share in ADK** - Following installation of PSD, mount (open) the newly created PSD deployment share in the MDT workbench (if NEW)
 
-* [ ] **Create/copy OS entry** - blah
+* [ ] **Import Operating Systems** - Within MDT workbench, on the newly created PSD Deployment share, import any desired Operating Systems. Follow MDT-provided instructions and techniques. 
+    >PRO TIP: You *may* be able to copy OS from other MDT deployment shares.
 
-* [ ] **Update CustomSettings.ini** - blah
+* [ ] **Create Applications** - Within MDT workbench, on the newly created PSD Deployment share, create and impelment any desired Applications. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating application installation using CustomSettings.ini.
+    >PRO TIP: You can copy Applications from other MDT deployment shares.
 
-* [ ] **Update BootStrap.ini** - blah
+* [ ] **Import/Add Drivers** - Within MDT workbench, on the newly created PSD Deployment share, import any desired DRIVERS. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating Language Packs installation using CustomSettings.ini.
+    >PRO TIP: You can copy Drivers from other MDT deployment shares.
 
-* [ ] **Create Applications** - blah
+* [ ] **Import/Add Language Packs** - Within MDT workbench, on the newly created PSD Deployment share, import any desired LANGUAGE PACKS. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating Language Packs installation using CustomSettings.ini.
+    >PRO TIP: You can copy Language entries from other MDT deployment shares.
 
-* [ ] **Import/Add Drivers** - blah
+* [ ] **Check Deployment Share Permissions** - By default, the PSD installer creates an MDT folder structure for PSD. PSD-specific files , scripts and templates are added and a new SMB share is created if specified. Ensure that the necessary domain and/or local computer user accounts have access to the PSD Share. 
 
-* [ ] **Import/Add Language Packs** - blah
+    >PRO TIP: Only grant the *minimum necessary rights* to write logs in the PSD share. Only **READ** rights are required to the share.
 
-* [ ] **Check Deployment Share Permissions** - blah
+* [ ] **Enable MDT/PSD Logging** - By default, the PSD installer pre-creates folders for LOGS and DYNAMIC LOGS in the root of the PSD deployment share along with configuring an SMB share if specified. (You may wish to point PSD logs somewhere else.) Ensure that the necessary domain and/or local computer user accounts have read and write access to the **LOGS** folders. 
 
-* [ ] **Enable Logging** - blah
+    >PRO TIP: Only grant the *minimum necessary rights* to write logs in this location
 
-* [ ] **Enable MDT monitoring** - blah
+* [ ] **Update Deployment Share settings** - Update the MDT WinPE configurations including the following settings:
+- WinPE Custom Wallpaper (see notes below)
+- WinPE Extra Directry (configured by default)
+- ISO File name and generation
+- WIM file name and generation
+    >PRO TIP: Be sure to configure *BOTH* x86 and x64 settings.
+
+* [ ] **Enable MDT monitoring** - Enable MDT Event Monitoring and specify the MDT server name and ports to be used. ![Event Monitoring configuration](images/Config/PSDConfig-Event.png "Event Monitoring")
+
+* [ ] **Update CustomSettings.ini** - Edit Customize CUSTOMSETTINGS.INI to perform the necessary and desired automation and configuration of your OSD deployments. These should be settings to affect the installed OS typcially. Be sure to configure new PSD properties and variables. See XXX for more details.
+    >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from CustomSettings.ini. All other MDT techniques and settings still apply.
+
+* [ ] **Update BootStrap.ini** - Edit Customize BOOTSTRAP.INI for your any necessary and desired  configuration of your OSD deployments. These should be settings to affect the OSD environment typically. Be sure to configure new PSD properties and variables. See XXX for more details.
+    >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from BootStrap.ini. All other MDT techniques and settings still apply.
 
 * [ ] **Review and adjust PSD Variables** - blah
 
-* [ ] **Update WinPE settings** - blah
+* [ ] **Update Background wallpaper** - By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provided. It can be found at XXXXX. Customize the MDT WinPE Customizations tab to reflec this new bmp (or use your own).
+    >PRO TIP: Custom wallpapers should be 800x600 resolution.
 
-* [ ] **Update Background wallpaper** - blah
+* [ ] **Configure WinPE Drivers and Patchs** - Using MDT Selection Profiles, customize your WinPE settings to utilize an appropriate set of MDT objects. Be sure to consider Applications, Drivers, Packages, and Task Sequences.
+    >PRO TIP: You may want to create a new or custom Selection Profile unique to your new PSD-enabled PE environment.
 
-* [ ] **Configure MDT Event Service** - blah
+* [ ] **Generate new Boot Media** - Using MDT workbench techniques, generate new boot media. By default the installer, will configure NEW PSD deployment shares to be PSD_LTI_x64.iso and PSD_LTI_x86.iso. Rename these if necessary.
+    >PRO TIP: PSD increases the size of boot media due to additional components. This may affect your ability to deploy on low-spec equipment.
+
+* [ ] **Content Caching and Network Traffic Shaping** - Integrate, configure and test any necessary or required software and solutions that shape network traffic or cache content. This may include:
+- Peer Caching
+- Branch Cache
+- Delivery Optimization
+- 2 Pint software
+- 1E Nomad
+- hardware based solutions (F5)
+    >PRO TIP: When setting up and testing PSD for the first time, stick to the basics and eliminate caching and traffic shaping until you're comfortable with PSD functionality.
+
+* [ ] **Review Network, Firewall and Active Directory** - If you're deploying Windows 10 for the first time, be sure to review the following:
+- Active Directory Group Policies (specifially for Windows 10 settings)
+- Network Firewall settings
+- Windows 10 firewall settings
+- PXE availability
+- Windows Deployment Services
+    >PRO TIP: Create a new Organizational Unit for both PSD testing and on-going Windows 10 administration
+    >PRO TIP: Be on the lookout for multiple (or roque PXE servers on the network)
+
+* [ ] **Configure IIS for PSD over HTTP/S** - blah blah blah). [Install IIS](http://linke.com)
+- Install IIS
+- install and configure WebDAV
+- Test
+    >PRO TIP: new pro tip
+
+* [ ] **Create PSD Task Sequence** - blah
