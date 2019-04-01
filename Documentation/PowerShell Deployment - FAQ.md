@@ -10,11 +10,18 @@ Q: Does the installer copy over my existing MDT Deployment Share content (e.g. a
 Q: Does the installer copy over my existing BootStrap.ini or CustomSettings.ini files to the target PSD repositories?
 >A: No, if you've created a new PSD-enabled deployment share, users and administrators will need to manually copy or reproduce any existing Bootstrap and CustomSettings files to new repositories.
 
+Q: What are the client/target hardware requirements for baremetal PSD deployments?
+>A: 
+- At least 1.5GB RAM (WinPE has been extended and requires additional memory)
+- At leaast one (1) network adapter(s)
+- At least one (1) 50GB hard drive (for New/BareMetal deployments)
+- At least one (1) XXX MHz processor (for New/BareMetal deployments)
+
 Q: Does PSD work with 2Pint's ACP solution?
 >A: TBD
 
 Q: How does PSD work with 2Pint's ACP solution?
->A: lightweight description here. See [link] http://somedocument.com}
+>A: lightweight description here. See [link](http://somedocument.com}
 
 Q: Does PSD work with 1E's Nomad solution?
 >A: PSD has not been tested in conjunction with 1E's Nomad product (yet)
@@ -34,11 +41,11 @@ Q: What is "Transcript Logging"?
 Q: What do I see frequent references to "Stopping Transcript Logging"?
 >A: (TBA MiNy)
 
+Q: Do i still need to 'add' PowerShell support to my WinPE images?
+>A: No, the PSD installation and scripting takes care of it for you. As a matter of fact, unticking the box on the WinPE Features tab will not affect PSD at all.
+
 Q: Will PSD work on my xxx version of MDT or ADK?
 >A: We've only developed and tested against the versions and platforms listed below. If you have success on additional versions and platforms, please be sure and let us know!
-
-Q: What has PSD been tested against? What are the supported (tested) components?
->A: The following components and versions were tested or used in development of PSD for MDT:
 
 Q: What files are copied or injected into the PSD Boot Media?
 >A: TBA Johan or Mike
@@ -47,8 +54,11 @@ Q: What scripts or files can be safely deleted from my PSD Deployment Share?
 >A: TBA Johan or Mike. 
 - Do NOT delete any PSD*.ps1 or PSD*.psm1 files. 
 - Do NOT delete ZTIGather.xml or ZTIConfigure.xml
+- If desired, many of the legacy MDT .wsf scripts and Wizard files can be removed manually from the PSD Deployment Share scripts folder to thin out the environment. 
 
-
+## Documented Platforms and Scenarios
+Q: What operating systems and components has PSD been tested and or evaluated against?
+>A: TThe following tables identifies tested and validated components, scenarios as well as testing and development status: 
 <style type="text/css">
 .tg  {border-collapse:collapse;border-spacing:0;}
 .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
@@ -123,14 +133,67 @@ Q: What scripts or files can be safely deleted from my PSD Deployment Share?
     <td class="tg-0pky">Microsoft Hyper-V </td>
     <td class="tg-0pky">Client deployments tested against Hyper-V.<br>MDT/PSD tested hosted on Hyper-V</td>
   </tr>
+    <tr>
+    <td class="tg-0pky">Refresh via UNC</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+    <tr>
+    <td class="tg-0pky">Refresh via HTTP</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+    <tr>
+    <td class="tg-0pky">Refresh via HTTPS</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Replace via UNC</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+    <tr>
+    <td class="tg-0pky">Replace via HTTP</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+    <tr>
+    <td class="tg-0pky">Replace via HTTPS</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">BIOS-to-UEFI via UNC</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+    <tr>
+    <td class="tg-0pky">BIOS-to-UEFI  via HTTP</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+    <tr>
+    <td class="tg-0pky">BIOS-to-UEFI via HTTPS</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+        <tr>
+    <td class="tg-0pky">Generic, non-OSD TS via UNC</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+    <tr>
+    <td class="tg-0pky">Generic, non-OSD TS via HTTP</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
+    <tr>
+    <td class="tg-0pky">Generic, non-OSD TS via HTTPS</td>
+    <td class="tg-0pky">n/a</td>
+    <td class="tg-0pky">not yet implemented</td>
+  </tr>
 </table>
-
-Q: What are the client/target hardware requirements for baremetal PSD deployments?
->A: 
-- At least 1.5GB RAM (WinPE has been extended and requires additional memory)
-- At leaast one (1) network adapter(s)
-- At least one (1) 50GB hard drive (for New/BareMetal deployments)
-- At least one (1) XXX MHz processor (for New/BareMetal deployments)
 
 ## Installation Observations
 

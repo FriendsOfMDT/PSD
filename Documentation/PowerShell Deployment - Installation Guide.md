@@ -20,7 +20,7 @@ Please review, validate and/or obtain following installation checklist items:
 
 * [ ] **Wallpaper** - [optional] Obtain any necessary custom backgrounds and wallpapers
 
-* [ ] **SQL** - [optional] - SQL for MDT database functionatlity 
+* [ ] **SQL** - [optional] - SQL installed for MDT database functionatlity 
 
 * [ ] **Accounts** - You'll need account(s) with sufficient rights for the following:
     - Accessing PSD/MDT Share(s)
@@ -32,15 +32,15 @@ The following actions should be completed as part of PSD installation:
 
 * [ ] **Install PSD** - Install PSD on a machine with ADK and MDT already installed. Install PSD either as a NEW deployment share or as an UPGRADE to an existing MDT deployment share. Detailed PSD installation instructions can be found in the [PSD Installation Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20Installation%20Guide.md).
 
-* [ ] **Mount PSD share in ADK** - Following installation of PSD, mount (open) the newly created PSD deployment share in the MDT workbench (if NEW)
+* [ ] **Open PSD share in MDT** - Following installation of PSD, navigate to and open the newly created PSD deployment share in the MDT workbench (if NEW)
 
-* [ ] **Import Operating Systems** - Within MDT workbench, on the newly created PSD Deployment share, import any desired Operating Systems. Follow MDT-provided instructions and techniques. 
-    >PRO TIP: You *may* be able to copy OS from other MDT deployment shares.
+* [ ] **Import Operating Systems** - Within MDT workbench, on the newly created PSD Deployment share, import/create/copy any desired Operating Systems. Follow MDT-provided instructions and techniques. 
+    >PRO TIP: You can copy Operating Systems from other MDT deployment shares.
 
-* [ ] **Create Applications** - Within MDT workbench, on the newly created PSD Deployment share, create and impelment any desired Applications. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating application installation using CustomSettings.ini.
+* [ ] **Create Applications** - Within MDT workbench, on the newly created PSD Deployment share, import/create/copy any desired Applications. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating application installation using CustomSettings.ini.
     >PRO TIP: You can copy Applications from other MDT deployment shares.
 
-* [ ] **Import/Add Drivers** - Within MDT workbench, on the newly created PSD Deployment share, import any desired DRIVERS. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating Language Packs installation using CustomSettings.ini.
+* [ ] **Import/Add Drivers** - Within MDT workbench, on the newly created PSD Deployment share, import/create/copy any desired DRIVERS. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating Language Packs installation using CustomSettings.ini.
     >PRO TIP: You can copy Drivers from other MDT deployment shares.
 
 * [ ] **Import/Add Language Packs** - Within MDT workbench, on the newly created PSD Deployment share, import any desired LANGUAGE PACKS. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating Language Packs installation using CustomSettings.ini.
@@ -66,7 +66,7 @@ The following actions should be completed as part of PSD installation:
 * [ ] **Update CustomSettings.ini** - Edit Customize CUSTOMSETTINGS.INI to perform the necessary and desired automation and configuration of your OSD deployments. These should be settings to affect the installed OS typcially. Be sure to configure new PSD properties and variables. See XXX for more details.
     >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from CustomSettings.ini. All other MDT techniques and settings still apply.
 
-* [ ] **Update BootStrap.ini** - Edit Customize BOOTSTRAP.INI for your any necessary and desired  configuration of your OSD deployments. These should be settings to affect the OSD environment typically. Be sure to configure new PSD properties and variables. See XXX for more details.
+* [ ] **Update BootStrap.ini** - Edit and customize BOOTSTRAP.INI for your any necessary and desired  configuration of your OSD deployments. These should be settings to affect the OSD environment typically. Be sure to configure new PSD properties and variables. See XXX for more details.
     >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from BootStrap.ini. All other MDT techniques and settings still apply.
 
 * [ ] **Review and adjust PSD Variables** - blah
@@ -86,7 +86,7 @@ The following actions should be completed as part of PSD installation:
 - Delivery Optimization
 - 2 Pint software
 - 1E Nomad
-- hardware based solutions (F5)
+- hardware-based solutions (F5)
     >PRO TIP: When setting up and testing PSD for the first time, stick to the basics and eliminate caching and traffic shaping until you're comfortable with PSD functionality.
 
 * [ ] **Review Network, Firewall and Active Directory** - If you're deploying Windows 10 for the first time, be sure to review the following:
