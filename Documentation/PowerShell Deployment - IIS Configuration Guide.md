@@ -11,6 +11,9 @@ Please review and or validate the following IIS/WEbDAV installation checklist:
 
 * [ ] **Windows Server Version** - blah
 * [ ] **Firewall** - blah
+    - open port 80 for HTTP
+    - open port 443 for HTTPS
+    - open porx XXXX 9080 for MDT Event Monitoring 
 * [ ] **Install IIS** - blah
 * [ ] **Install IIS Components** - blah
 * [ ] **Install WebDAV** - blah
@@ -23,10 +26,11 @@ Please review and or validate the following IIS/WEbDAV installation checklist:
 ## Detailed Configuration Steps
 
 ## Caveats
-Not all MDT features for Lite Touch deployments are available in PSD (yet). The following items have not yet been developed or finalized:
+Not all MDT features for Lite Touch deployments are available for PSD over HTTP/S (yet). The following items have not yet been developed or finalized:
 - something about Logs and Dynamic Logging (SLSHARE)
 - something about MDT Database
 - something about MDT Event Monitoring Service
+- something about DaRT
 
 ## PSD IIS Installation Script
 (in development)

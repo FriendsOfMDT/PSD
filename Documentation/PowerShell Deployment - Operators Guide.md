@@ -9,7 +9,7 @@ Additionally, PSD deployments can be implemented from not only UNC paths (tradit
 ## Installation
 Installation is relatively straight forward. You can either install PSD and specify a NEW deployment repository and share -or- you can upgrade (and extend) an existing MDT deployment share and add-on PSD functionality. Installation is run by downloading the PSD solution from GitHub [here] http://somelink.com using the following syntax from and elevated PowerShell ISE prompt: 
 
-.\PSD_Install.ps1 -psdDeploymentFolder <folder> -psdDeploymentShare <sharename> (-Upgrade)
+    .\PSD_Install.ps1 -psdDeploymentFolder <folder> -psdDeploymentShare <sharename> (-Upgrade)
 
 Refer to the PSD Installation Guide [here] <PSD Install guide link>
 >PRO TIP: You may want to experiment with the PSD Kit outside of production envrionments initially. 
@@ -42,16 +42,16 @@ Bootstrap.ini and CustomSettings.ini function as before in MDT. Both can be used
 - MDT Database integration (future)
 
 ## PSDDeployRoots
-A new TS variable PSDDeployRoots has been implemented so that designers and implementers can support *multiple* deployment roots. PSDDeployRoots takes a string of potential content repositories and feeds into PSD scripts for evaluation. At present, the list of deployment shares is processed in the order specified and the first successfully validated (and online) deployment share wins and will be used to provide content to the task sequence on the target device.
+A new TS variable (PSDDeployRoots) has been implemented so that designers and implementers can support *multiple* deployment roots. PSDDeployRoots takes a string of potential content repositories and feeds into PSD scripts for evaluation. At present, the list of deployment shares is processed in the order specified and the first successfully validated (and online) deployment share wins and will be used to provide content to the task sequence on the target device.
 
 As an example, the following BootStrap.ini snippet is provided...
 
-- [Settings]
-- Priority= PDSVars, PSDLogs, Default
-- Properties=IsOnBattery, PSDDeployRoots
+    - [Settings]
+    - Priority= PDSVars, PSDLogs, Default
+    - Properties=IsOnBattery, PSDDeployRoots
 
-- [Default]
-- PSDDeployRoots=http://someserver.off/nothing, https://SecureServer.off/Nothing, http://foo.bar.xyz/psd, \\\SomeServer\SomeShare$
+    - [Default]
+    - PSDDeployRoots=http://someserver.off/nothing, https://SecureServer.off/Nothing, http://foo.bar.xyz/psd, \\SomeServer\SomeShare$
 
 # Your first PSD Task Sequence
 Make sure your target device meets the following minimum hardware specifications:
@@ -61,12 +61,44 @@ Make sure your target device meets the following minimum hardware specifications
 - At least 50GB hard drive (for New/BareMetal deployments)
 - At least XXX MHz processor (for New/BareMetal deployments)
 
-BLAH checklist
-BLAH debug
-BLAH wallpaper
+- BLAH checklist
+- BLAH debug
+- BLAH wallpaper
 
+# Troubleshooting PSD
+blah 
+## Simple PSD Testing and Development Environment
+Some PSD functionality can be tested and developed using a technique similar to that for LTI deployments. It's a bit more complicated than it was for legacy MDT though.....
 
+1. Create a new empty VM wtih sufficient and approriate network, RAM and disk settings
+1. Create a new Task Sequcne using the PSD RnD template
+1. Create a new Boot ISO and mount it in your new VM
+1. Boot your VM using the new PSD Boot media
+1. The VM should start and launch a PowerShell window
+1. At this point, you should have a TS environment, access to TS variables. You can import modules, create PSDrives, and run many of the scripts and modules provided by PSD. The default script normally run first is PSDStart.ps1. You may need to map shares, and copy files locacally. Have fun!
 
+# PSD and 2Pint ACP
+This section for how to install and configure PSD in conjunction with 2Pint softaware
+
+### Pint Overview
+tba Andreas
+
+### Pre Requisites
+- item 1
+- item 2
+
+### Installing 2Pint software for PSD
+as;dlfkjas;lkdjf
+- item 1
+- item 2
+
+### Configuring 2Pint software for PSD
+- item 1
+- item 2
+
+### Testing, Validating and Troubleshooting 2Pint software for PSD
+- item 1
+- item 2
 
 # Appendix - PSD Variables 
 ## Environmental Variables
@@ -78,14 +110,14 @@ The following variables may be useful when automating or customizing PSD capabil
 | **IsVM** | Optional | Caclulated value during Gather. TRUE if target computer is a virtual machine, otherwise FALSE.
 | **IsSFF** | Optional | Caclulated value during Gather. TRUE if target computer eclosure is type 34, 35 or 36 (Small Form Factor)
 | **IsTablet** | Optional | Caclulated value during Gather. TRUE if target computer eclosure is type 13, 33, 31, or 32 (Tablet)
-| **PSDDeployRoots** | Optional | PSDDeployRoots is used to define multiple deployroots of either UNC, HTTP or HTTPS formats. Can *NOT* be called in conjuction wtih DeployRoot. See additonal notes [here] (https://foo.link)
+| **PSDDeployRoots** | Optional | PSDDeployRoots is used to define multiple deployroots of either UNC, HTTP or HTTPS formats. Can *NOT* be called in conjuction wtih DeployRoot. See additonal notes [here](https://foo.link)
 
 ## Development and Debugging Variables
 The following variables may be useful when customizing or developing PSD capabiltiies. 
 
 | **Variable** | **Mandatory/Optional** | Description
 |--------------|:------------:|-----------|
-| **DevCleanUp** | Optional | Used to control cleanup up log files. When set to TRUE, removes all log files. When FALSE, log files are left in place.
+| **DevCleanUp** | Optional | Used to the control cleanup up log files. When set to TRUE, the task sequence engine removes all log files. When FALSE, log files are left in place (C:\MININT)
 | **DevDebugLogging** | Optional | blah blah blah
 | **DevVerboseScreenLogging** | Optional | blah blah blah 
 
