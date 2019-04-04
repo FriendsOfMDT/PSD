@@ -68,33 +68,25 @@ Q: What MDT components are copied or injected into the PSD Boot Media?
 
 Q: What files and or components are copied or injected into the PSD-enabled Boot Media?
 >A: As defined by **LiteTouchPE.XML**, the following files are injected into MDT and PSD boot media by default:
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg .tg-kiyi{font-weight:bold;border-color:inherit;text-align:left}
-.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
-.tg .tg-xldj{border-color:inherit;text-align:left}
-.tg .tg-fymr{font-weight:bold;border-color:inherit;text-align:left;vertical-align:top}
-</style>
-<table class="tg">
+
+<table>
   <tr>
-    <th class="tg-kiyi">COMPONENTS</th>
-    <th class="tg-kiyi">TOOLS</th>
-    <th class="tg-0pky"><span style="font-weight:bold">CONFIG</span></th>
+    <th>COMPONENTS</th>
+    <th>TOOLS</th>
+    <th>CONFIG</th>
   </tr>
   <tr>
-    <td class="tg-xldj">winpe-hta<br>winpe-scripting<br>winpe-wmi<br>winpe-securestartup<br>winpe-fmapi<br>winpe-netfx<br>winpe-powershell<br>winpe-dismcmdlets<br>winpe-storagewmi<br>winpe-enhancedstorage<br>winpe-securebootcmdlets</td>
-    <td class="tg-0pky" rowspan="3">BDDRUN.exe<br>WinRERUN.exe<br>CcmCore.dll<br>CcmUtilLib.dll<br>Smsboot.exe<br>SmsCore.dll<br>TsCore.dll<br>TSEnv.exe<br>TsManager.exe<br>TsmBootstrap.exe<br>TsMessaging.dll<br>TsmBootstrap.exe<br>TsProgressUI.exe<br>TSResNlc.dll<br>CommonUtils.dll<br>ccmgencert.dll<br>msvcp120.dll<br>msvcr120.dll<br>00000409\tsres.dll<br>Microsoft.BDD.Utility.dll</td>
-    <td class="tg-0pky">Bootstrap.ini<br>Unattend.xml<br>winpeshl.ini<br></td>
+    <td>winpe-hta<br>winpe-scripting<br>winpe-wmi<br>winpe-securestartup<br>winpe-fmapi<br>winpe-netfx<br>winpe-powershell<br>winpe-dismcmdlets<br>winpe-storagewmi<br>winpe-enhancedstorage<br>winpe-securebootcmdlets</td>
+    <td rowspan="3">BDDRUN.exe<br>WinRERUN.exe<br>CcmCore.dll<br>CcmUtilLib.dll<br>Smsboot.exe<br>SmsCore.dll<br>TsCore.dll<br>TSEnv.exe<br>TsManager.exe<br>TsmBootstrap.exe<br>TsMessaging.dll<br>TsmBootstrap.exe<br>TsProgressUI.exe<br>TSResNlc.dll<br>CommonUtils.dll<br>ccmgencert.dll<br>msvcp120.dll<br>msvcr120.dll<br>00000409\tsres.dll<br>Microsoft.BDD.Utility.dll</td>
+    <td>Bootstrap.ini<br>Unattend.xml<br>winpeshl.ini<br></td>
   </tr>
   <tr>
-    <td class="tg-fymr">MODULES<br></td>
-    <td class="tg-fymr">SCRIPTS</td>
+    <td>MODULES<br></td>
+    <td>SCRIPTS</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSeqeenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
-    <td class="tg-0pky">PSDStart.ps1<br>PSDHelper.ps1<br></td>
+    <td>PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSeqeenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
+    <td>PSDStart.ps1<br>PSDHelper.ps1<br></td>
   </tr>
 </table>
 
