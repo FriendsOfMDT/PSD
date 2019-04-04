@@ -47,13 +47,62 @@ Q: Do i still need to 'add' PowerShell support to my WinPE images?
 Q: Will PSD work on my xxx version of MDT or ADK?
 >A: We've only developed and tested against the versions and platforms listed below. If you have success on additional versions and platforms, please be sure and let us know!
 
-Q: What files are copied or injected into the PSD Boot Media?
->A: TBA Johan or Mike
+Q: Do I need to add PowerShell to my boot media images?
+
+A: **NO**, PSD and MDT automatically handle this for you. By default LiteTouchPE.XML automatically injects PowerShell into Boot Media (despite what may or may not be configured in the MDT WinPE tab)
+
+Q: What MDT components are copied or injected into the PSD Boot Media?
+>A: As defined by **LiteTouchPE.XML**, the following files are injected into MDT and PSD boot media by default:
+
+- winpe-dismcmdlets
+- winpe-enhancedstorage
+- winpe-fmapi
+- winpe-hta
+- winpe-netfx
+- **winpe-powershell**
+- winpe-scripting
+- winpe-securebootcmdlets
+- winpe-securestartup
+- winpe-storagewmi
+- winpe-wmi
+
+Q: What files and or components are copied or injected into the PSD-enabled Boot Media?
+>A: As defined by **LiteTouchPE.XML**, the following files are injected into MDT and PSD boot media by default:
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-kiyi{font-weight:bold;border-color:inherit;text-align:left}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-xldj{border-color:inherit;text-align:left}
+.tg .tg-fymr{font-weight:bold;border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-kiyi">COMPONENTS</th>
+    <th class="tg-kiyi">TOOLS</th>
+    <th class="tg-0pky"><span style="font-weight:bold">CONFIG</span></th>
+  </tr>
+  <tr>
+    <td class="tg-xldj">winpe-hta<br>winpe-scripting<br>winpe-wmi<br>winpe-securestartup<br>winpe-fmapi<br>winpe-netfx<br>winpe-powershell<br>winpe-dismcmdlets<br>winpe-storagewmi<br>winpe-enhancedstorage<br>winpe-securebootcmdlets</td>
+    <td class="tg-0pky" rowspan="3">BDDRUN.exe<br>WinRERUN.exe<br>CcmCore.dll<br>CcmUtilLib.dll<br>Smsboot.exe<br>SmsCore.dll<br>TsCore.dll<br>TSEnv.exe<br>TsManager.exe<br>TsmBootstrap.exe<br>TsMessaging.dll<br>TsmBootstrap.exe<br>TsProgressUI.exe<br>TSResNlc.dll<br>CommonUtils.dll<br>ccmgencert.dll<br>msvcp120.dll<br>msvcr120.dll<br>00000409\tsres.dll<br>Microsoft.BDD.Utility.dll</td>
+    <td class="tg-0pky">Bootstrap.ini<br>Unattend.xml<br>winpeshl.ini<br></td>
+  </tr>
+  <tr>
+    <td class="tg-fymr">MODULES<br></td>
+    <td class="tg-fymr">SCRIPTS</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSeqeenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
+    <td class="tg-0pky">PSDStart.ps1<br>PSDHelper.ps1<br></td>
+  </tr>
+</table>
 
 Q: What scripts or files can be safely deleted from my PSD Deployment Share?
 >A: TBA Johan or Mike. 
 - Do NOT delete any PSD*.ps1 or PSD*.psm1 files. 
 - Do NOT delete ZTIGather.xml or ZTIConfigure.xml
+- If installing applications as part of the TS, do not delete ZTIUtility.vbs as it is called during the deployment
 - If desired, many of the legacy MDT .wsf scripts and Wizard files can be removed manually from the PSD Deployment Share scripts folder to thin out the environment. 
 
 ## Documented Platforms and Scenarios

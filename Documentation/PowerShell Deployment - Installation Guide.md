@@ -59,7 +59,7 @@ The following actions should be completed as part of PSD installation:
 - WinPE Extra Directry (configured by default)
 - ISO File name and generation
 - WIM file name and generation
-    >PRO TIP: Be sure to configure *BOTH* x86 and x64 settings.
+    >PRO TIP: Be sure to configure *BOTH* x86 and x64 WinPE settings.
 
 * [ ] **Enable MDT monitoring** - Enable MDT Event Monitoring and specify the MDT server name and ports to be used. ![Event Monitoring configuration](images/Config/PSDConfig-Event.png "Event Monitoring")
 
@@ -86,7 +86,7 @@ The following actions should be completed as part of PSD installation:
 - Delivery Optimization
 - 2 Pint software
 - 1E Nomad
-- hardware-based solutions (F5)
+- Hardware-based content caching solutions (F5)
     >PRO TIP: When setting up and testing PSD for the first time, stick to the basics and eliminate caching and traffic shaping until you're comfortable with PSD functionality.
 
 * [ ] **Review Network, Firewall and Active Directory** - If you're deploying Windows 10 for the first time, be sure to review the following:
@@ -96,7 +96,8 @@ The following actions should be completed as part of PSD installation:
 - PXE availability
 - Windows Deployment Services
     >PRO TIP: Create a new Organizational Unit for both PSD testing and on-going Windows 10 administration
-    >PRO TIP: Be on the lookout for multiple (or roque PXE servers on the network)
+
+    >PRO TIP: Be on the lookout for multiple (or roque) PXE servers on the network
 
 * [ ] **Configure IIS for PSD over HTTP/S** - blah blah blah). [Install IIS](http://linke.com)
 - Install IIS
