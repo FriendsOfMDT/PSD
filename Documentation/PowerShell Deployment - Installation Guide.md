@@ -20,7 +20,7 @@ Please review, validate and/or obtain following installation checklist items:
 
 * [ ] **Wallpaper** - [optional] Obtain any necessary custom backgrounds and wallpapers
 
-* [ ] **SQL** - [optional] - SQL installed for MDT database functionatlity 
+* [ ] **SQL** - [optional] - SQL installed for MDT database functionality 
 
 * [ ] **Accounts** - You'll need account(s) with sufficient rights for the following:
     - Accessing PSD/MDT Share(s)
@@ -56,14 +56,14 @@ The following actions should be completed as part of PSD installation:
 
 * [ ] **Update Deployment Share settings** - Update the MDT WinPE configurations including the following settings:
 - WinPE Custom Wallpaper (see notes below)
-- WinPE Extra Directry (configured by default)
+- WinPE Extra Directory (configured by default)
 - ISO File name and generation
 - WIM file name and generation
-    >PRO TIP: Be sure to configure *BOTH* x86 and x64 settings.
+    >PRO TIP: Be sure to configure *BOTH* x86 and x64 WinPE settings.
 
 * [ ] **Enable MDT monitoring** - Enable MDT Event Monitoring and specify the MDT server name and ports to be used. ![Event Monitoring configuration](images/Config/PSDConfig-Event.png "Event Monitoring")
 
-* [ ] **Update CustomSettings.ini** - Edit Customize CUSTOMSETTINGS.INI to perform the necessary and desired automation and configuration of your OSD deployments. These should be settings to affect the installed OS typcially. Be sure to configure new PSD properties and variables. See XXX for more details.
+* [ ] **Update CustomSettings.ini** - Edit Customize CUSTOMSETTINGS.INI to perform the necessary and desired automation and configuration of your OSD deployments. These should be settings to affect the installed OS typically. Be sure to configure new PSD properties and variables. See XXX for more details.
     >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from CustomSettings.ini. All other MDT techniques and settings still apply.
 
 * [ ] **Update BootStrap.ini** - Edit and customize BOOTSTRAP.INI for your any necessary and desired  configuration of your OSD deployments. These should be settings to affect the OSD environment typically. Be sure to configure new PSD properties and variables. See XXX for more details.
@@ -71,10 +71,10 @@ The following actions should be completed as part of PSD installation:
 
 * [ ] **Review and adjust PSD Variables** - blah
 
-* [ ] **Update Background wallpaper** - By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provided. It can be found at XXXXX. Customize the MDT WinPE Customizations tab to reflec this new bmp (or use your own).
+* [ ] **Update Background wallpaper** - By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provided. It can be found at XXXXX. Customize the MDT WinPE Customizations tab to reflect this new bmp (or use your own).
     >PRO TIP: Custom wallpapers should be 800x600 resolution.
 
-* [ ] **Configure WinPE Drivers and Patchs** - Using MDT Selection Profiles, customize your WinPE settings to utilize an appropriate set of MDT objects. Be sure to consider Applications, Drivers, Packages, and Task Sequences.
+* [ ] **Configure WinPE Drivers and Patches** - Using MDT Selection Profiles, customize your WinPE settings to utilize an appropriate set of MDT objects. Be sure to consider Applications, Drivers, Packages, and Task Sequences.
     >PRO TIP: You may want to create a new or custom Selection Profile unique to your new PSD-enabled PE environment.
 
 * [ ] **Generate new Boot Media** - Using MDT workbench techniques, generate new boot media. By default the installer, will configure NEW PSD deployment shares to be PSD_LTI_x64.iso and PSD_LTI_x86.iso. Rename these if necessary.
@@ -86,17 +86,18 @@ The following actions should be completed as part of PSD installation:
 - Delivery Optimization
 - 2 Pint software
 - 1E Nomad
-- hardware-based solutions (F5)
+- Hardware-based content caching solutions (F5)
     >PRO TIP: When setting up and testing PSD for the first time, stick to the basics and eliminate caching and traffic shaping until you're comfortable with PSD functionality.
 
 * [ ] **Review Network, Firewall and Active Directory** - If you're deploying Windows 10 for the first time, be sure to review the following:
-- Active Directory Group Policies (specifially for Windows 10 settings)
+- Active Directory Group Policies (specifically for Windows 10 settings)
 - Network Firewall settings
 - Windows 10 firewall settings
 - PXE availability
 - Windows Deployment Services
     >PRO TIP: Create a new Organizational Unit for both PSD testing and on-going Windows 10 administration
-    >PRO TIP: Be on the lookout for multiple (or roque PXE servers on the network)
+
+    >PRO TIP: Be on the lookout for multiple (or roue) PXE servers on the network
 
 * [ ] **Configure IIS for PSD over HTTP/S** - blah blah blah). [Install IIS](http://linke.com)
 - Install IIS
