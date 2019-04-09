@@ -24,26 +24,29 @@ The following PowerShell modules and scripts are provided with PSD:
 ## PSD Scripts
 | Script               	| Description 	| Equivalent LTI script
 |----------------------	|-------------	| ---------------|
-| PSDAppliacations.ps1 	| Installs the apps specified by task sequence variables *Applications* and *MandatoryApplications*. Downloads applicatoins to the PSD cache after validating platform and checking for existing or previous installation. Supports MSIExe.exe, .CMD and cscript installations.           	|
-| PSDApplyOS.ps1       	| Sets POwerCFG to full power profiles. Applies the OS image and injects drivers using DISM. Modifies boot configurations          	|
-| PSDConifgure.ps1     	| Customizes and configures Unattend.xml file.        |
+| PSDApplications.ps1 	| Installs the apps specified by task sequence variables *Applications* and *MandatoryApplications*. Downloads applications to the PSD cache after validating platform and checking for existing or previous installation. Supports MSIExe.exe, .CMD and cscript installations.           	|
+| PSDApplyOS.ps1       	| Sets PowerCFG to full power profiles. Applies the OS image and injects drivers using DISM. Modifies boot configurations          	|
+| PSDConfigure.ps1     	| Customizes and configures Unattend.xml file.        |
 | PSDCustomPostWU.ps1  	| Incomplete. Installs customizations POST Windows Update           	|
-| PSDCustomPreWU.ps1   	| Incomplete. Installs customizations PRE Windows Update            	|
-| PSDDrivers.ps1       	| Copies drivers to PSD Cacahe on target systems.             	|
-| PSDErrorInTS.ps1     	| Incomplete             	|
-| PSDGather.ps1        	| Runs PSDGather from PSDGather.psm1 and gather environment and target device information and details             	| LITGather.wsf
-| PSDHelper.ps1        	| Incomplete. Imports modules PSDUtility, PSDDeploymentShare, PSDGather. blah foo            	|
+| PSDCustomPreWU.ps1   	| Incomplete. Installs customizations PRE Windows Update | |
+| PSDDrivers.ps1       	| Copies drivers to PSD cache on target systems. | |
+| PSDErrorInTS.ps1     	| Incomplete | |
+| PSDGather.ps1        	| Runs PSDGather from PSDGather.psm1 and gather environment and target device information and details | LITGather.wsf
+| PSDHelper.ps1        	| Incomplete. Imports modules PSDUtility, PSDDeploymentShare, PSDGather. blah foo |
 | PSDNextPhase.ps1     	| Manages the execution order of the Task Sequence engine |            	|
-| PSDFreshen.ps1       	| Updates information from Gather to the Task Sequence environment. INITIALIZATION -> VALIDATION -> STATECAPTURE -> PREINSTALL -> POSTINSTALL -> STATERESTORE            	|
-| PSDPartition.ps1     	| Partitions and configured disks. Disk partitioning details are hardcoded inside this script. Do NOT change.              	|
-| PSDSetVariable.ps1   	| MiNy?             	|
-| PSDStart.ps1         	| Starts or continues a PSD-enabled task sequence.            	| LITWizard.wsf
-| PSDTBA.ps1           	| Placeholder script for LTI scripts not yet convertied | varies
-| PSDTemplate.ps1      	| Sample PowerShell template for PSD development            	| template |
-| PSDUserState.ps1     	| not yet impelmented            	|
-| PSDValidate.ps1      	|             	|
-| PSDWindowsUpdate.ps1 	|             	|
-|        
+| PSDFreshen.ps1       	| Updates information from Gather to the Task Sequence environment. INITIALIZATION -> VALIDATION -> STATECAPTURE -> PREINSTALL -> POSTINSTALL -> STATERESTORE |  |
+| PSDPartition.ps1     	| Partitions and configured disks. Disk partitioning details are hardcoded inside this script. Do NOT change. |   |
+| PSDSetVariable.ps1   	| MiNy? |  |            	|
+| PSDStart.ps1         	| Starts or continues a PSD-enabled task sequence.| LTIWizard.wsf |
+| PSDTBA.ps1           	| Placeholder script for LTI scripts not yet converted | varies |
+| PSDTemplate.ps1      	| Sample PowerShell template for PSD development | template |
+| PSDUserState.ps1     	| not yet implemented |  ZTIUserState.wsf| 
+| PSDValidate.ps1      	|             	| ZTIValidate.wsf |
+| PSDWindowsUpdate.ps1 	|             	|          |
+| PSDGroups.ps1         |v07| ZTIGroups.wsf |
+| PSDNICConfig.ps1      |v07| ZTINicConfig.wsf |
+| PSDApplyWinPE.ps1     |v07|   |
+| PSDDisableBDEProtectors.ps1 | v07 | ZTIDisableBDEProtectors.wsf |        
 
 ## PSD Modules
 | Module                	| Description 	|
@@ -89,14 +92,14 @@ The following table identifies the dependencies and interactions between the var
   </tr>
   <tr>
     <td class="tg-0pky">PSDApplyOS.ps1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSqeunce Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
+    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
     <td class="tg-0pky">none</td>
     <td class="tg-0pky">none</td>
     <td class="tg-0pky">none</td>
   </tr>
   <tr>
     <td class="tg-0pky">PSDConfigure.ps1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSqeunce Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
+    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
     <td class="tg-0pky">none</td>
     <td class="tg-0pky">none</td>
     <td class="tg-0pky">none</td>
@@ -131,7 +134,7 @@ The following table identifies the dependencies and interactions between the var
   </tr>
   <tr>
     <td class="tg-0pky">PSDErrorInTS.ps1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSqeunce Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
+    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
     <td class="tg-0pky">none</td>
     <td class="tg-0pky">none</td>
     <td class="tg-0pky">none</td>
@@ -194,8 +197,8 @@ The following table identifies the dependencies and interactions between the var
   </tr>
   <tr>
     <td class="tg-0pky">PSDUtility.psm1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSqeunce Module</td>
-    <td class="tg-0pky">Get-PSDLocalDataPath<br>Initialize PSDFolder<br>Start-PSDLogging<br>Clear-PSDInformation<br>Copy-PSDFolder<br>Set-FailTaskSequence<br>Stop-PSDLogging<br>Write-TSxLog<br>Invoke-TSxUnZip<br>Invoke-TSxZtip<br>Get-TSxDriverInfo<br>Restore-PSDVariables</td>
+    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module</td>
+    <td class="tg-0pky">Get-PSDLocalDataPath<br>Initialize PSDFolder<br>Start-PSDLogging<br>Clear-PSDInformation<br>Copy-PSDFolder<br>Set-FailTaskSequence<br>Stop-PSDLogging<br>Write-TSxLog<br>Invoke-TSxUnZip<br>Invoke-TSxZip<br>Get-TSxDriverInfo<br>Restore-PSDVariables</td>
     <td class="tg-0pky">Start-PSDLogging</td>
     <td class="tg-0pky">none</td>
   </tr>
@@ -221,8 +224,8 @@ The following table identifies the dependencies and interactions between the var
     <td class="tg-0pky">none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">ZTIUtilty.psm1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSqeunce Module</td>
+    <td class="tg-0pky">ZTIUtility.psm1</td>
+    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module</td>
     <td class="tg-0pky">none</td>
     <td class="tg-0pky">none</td>
     <td class="tg-0pky">none</td>

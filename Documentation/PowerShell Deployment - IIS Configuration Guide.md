@@ -4,7 +4,7 @@ April 2019
 ## Introduction: 
 In order to support OS deployments using PSD and content hosted on a web server(s), a substantial number of configuration items must be completed. This document highlights and outlines the settings and steps known to work with PSD.
 
-> NOTE: Your security team and environment may require additional settings or lockdown.
+> NOTE: Your security team and environment may require additional settings or lock down.
 
 ## High Level Overview and Checklist
 Please review and or validate the following IIS/WEbDAV installation checklist:
@@ -13,7 +13,7 @@ Please review and or validate the following IIS/WEbDAV installation checklist:
 * [ ] **Firewall** - blah
     - open port 80 for HTTP
     - open port 443 for HTTPS
-    - open porx XXXX 9080 for MDT Event Monitoring 
+    - open port XXXX 9080 for MDT Event Monitoring 
 * [ ] **Install IIS** - blah
 * [ ] **Install IIS Components** - blah
 * [ ] **Install WebDAV** - blah

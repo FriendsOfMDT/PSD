@@ -11,9 +11,9 @@ Q: Does the installer copy over my existing BootStrap.ini or CustomSettings.ini 
 >A: No, if you've created a new PSD-enabled deployment share, users and administrators will need to manually copy or reproduce any existing Bootstrap and CustomSettings files to new repositories.
 
 Q: What are the client/target hardware requirements for baremetal PSD deployments?
->A: 
+>A: PSD requires roughly the same hardware as is required for Windows 10 and MDT deployments:
 - At least 1.5GB RAM (WinPE has been extended and requires additional memory)
-- At leaast one (1) network adapter(s)
+- At least one (1) network adapter(s)
 - At least one (1) 50GB hard drive (for New/BareMetal deployments)
 - At least one (1) XXX MHz processor (for New/BareMetal deployments)
 
@@ -36,12 +36,12 @@ Q: Does PSD work with Peer Cache?
 >A: TBD
 
 Q: What is "Transcript Logging"?
->A: Logs (for exmaple PSD.LOG, and BDD.log) are what we explicitly write, Transcript logs captures everything that happens on the screen. PSD Transcript lgos are much better suited and useful for troubleshooting, but may be visually "sub-optimal".
+>A: Logs (for example PSD.LOG, and BDD.log) are what we explicitly write, Transcript logs captures everything that happens on the screen. PSD Transcript logs are much better suited and useful for troubleshooting, but may be visually "sub-optimal".
 
 Q: What do I see frequent references to "Stopping Transcript Logging"?
 >A: (TBA MiNy)
 
-Q: Do i still need to 'add' PowerShell support to my WinPE images?
+Q: Do I still need to 'add' PowerShell support to my WinPE images?
 >A: No, the PSD installation and scripting takes care of it for you. As a matter of fact, unticking the box on the WinPE Features tab will not affect PSD at all.
 
 Q: Will PSD work on my xxx version of MDT or ADK?
@@ -51,7 +51,7 @@ Q: Do I need to add PowerShell to my boot media images?
 
 A: **NO**, PSD and MDT automatically handle this for you. By default LiteTouchPE.XML automatically injects PowerShell into Boot Media (despite what may or may not be configured in the MDT WinPE tab)
 
-Q: What MDT components are copied or injected into the PSD Boot Media?
+Q: Which MDT components are copied or injected into the PSD Boot Media?
 >A: As defined by **LiteTouchPE.XML**, the following files are injected into MDT and PSD boot media by default:
 
 - winpe-dismcmdlets
@@ -85,21 +85,21 @@ Q: What files and or components are copied or injected into the PSD-enabled Boot
     <td>SCRIPTS</td>
   </tr>
   <tr>
-    <td>PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSeqeenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
+    <td>PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
     <td>PSDStart.ps1<br>PSDHelper.ps1<br></td>
   </tr>
 </table>
 
 Q: What scripts or files can be safely deleted from my PSD Deployment Share?
->A: TBA Johan or Mike. 
+>A: This is still being refined and defined. For now: 
 - Do NOT delete any PSD*.ps1 or PSD*.psm1 files. 
 - Do NOT delete ZTIGather.xml or ZTIConfigure.xml
-- If installing applications as part of the TS, do not delete ZTIUtility.vbs as it is called during the deployment
+- If installing applications as part of the task sequence, do not delete ZTIUtility.vbs as it is called during the deployment
 - If desired, many of the legacy MDT .wsf scripts and Wizard files can be removed manually from the PSD Deployment Share scripts folder to thin out the environment. 
 
 ## Documented Platforms and Scenarios
 Q: What operating systems and components has PSD been tested and or evaluated against?
->A: TThe following tables identifies tested and validated components, scenarios as well as testing and development status: 
+>A: The following tables identifies tested and validated components, scenarios as well as testing and development status: 
 <style type="text/css">
 .tg  {border-collapse:collapse;border-spacing:0;}
 .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
@@ -238,17 +238,17 @@ Q: What operating systems and components has PSD been tested and or evaluated ag
 
 ## Installation Observations
 
-- The PSD installer will create the -psDeploymentShare name *exactly* as specified. The PSD installer does **not** handle or change the hidden share $ character in any form or fashion.
+- The PSD installer will create the -psDeploymentShare name *exactly* as specified. The PSD installer does **not** handle or change the hidden share ($) character in any form or fashion.
 
-- The PSD installer does **not** automatically mount a new PSD-created deployment share respository. Users will need to mount newly created PSD deployment shares manually.
+- The PSD installer does **not** automatically mount a new PSD-created deployment share repository. Users will need to mount newly created PSD deployment shares manually.
 
-- The PSD installer does **not** automatically copy over any existing MDT artifacts and components to a new PSD-created deployment share respositories. Users will need to manually copy over, re-import or instatiate applications, drivers, etc. manually.
+- The PSD installer does **not** automatically copy over any existing MDT artifacts and components to a new PSD-created deployment share repositories. Users will need to manually copy over, re-import or instantiate applications, drivers, etc. manually.
 
 ## Operational Observations
-Please review the PSD Installation Guide for additional detailed post-installation configuration recomendations.
+Please review the PSD Installation Guide for additional detailed post-installation configuration recommendations.
 
-- Applications specified in the TS or in BS/CS.ini **MUST** have { } brackets around their GUID
-- New TS variables **must** be declared explicity in BS/CS.ini
+- Applications specified in task sequences or in BOOTSTRAP/CUSTOMSETTINGS **MUST** have { } brackets around their GUID
+- New TS variables **must** be declared explicitly in BOOTSTRAP/CUSTOMSETTINGS
 
 
 

@@ -12,12 +12,12 @@ Installation is relatively straight forward. You can either install PSD and spec
     .\PSD_Install.ps1 -psdDeploymentFolder <folder> -psdDeploymentShare <sharename> (-Upgrade)
 
 Refer to the PSD Installation Guide [here] <PSD Install guide link>
->PRO TIP: You may want to experiment with the PSD Kit outside of production envrionments initially. 
+>PRO TIP: You may want to experiment with the PSD Kit outside of production environments initially. 
 
 ## Configuration and Automation
 
 ### New PSD Variables - Overview
-The following new TS variables are provided in conjuction with PSD. Any new or additional Task Sequence variables **must** be instatiated and called via Bootstrap.ini or CustomSettings.ini !! Do NOT edit or modify ZTIGather.xml.
+The following new TS variables are provided in conjunction with PSD. Any new or additional Task Sequence variables **must** be instantiated and called via Bootstrap.ini or CustomSettings.ini !! Do NOT edit or modify ZTIGather.xml.
 
 ### PSD Environmental Variables
 The following new environmental variables are pre-configured and/or defined as part of PSD. See below in this document for details on new PSD variables.
@@ -70,15 +70,15 @@ blah
 ## Simple PSD Testing and Development Environment
 Some PSD functionality can be tested and developed using a technique similar to that for LTI deployments. It's a bit more complicated than it was for legacy MDT though.....
 
-1. Create a new empty VM wtih sufficient and approriate network, RAM and disk settings
-1. Create a new Task Sequcne using the PSD RnD template
+1. Create a new empty VM with sufficient and appropriate network, RAM and disk settings
+1. Create a new Task Sequence using the PSD RnD template
 1. Create a new Boot ISO and mount it in your new VM
 1. Boot your VM using the new PSD Boot media
 1. The VM should start and launch a PowerShell window
-1. At this point, you should have a TS environment, access to TS variables. You can import modules, create PSDrives, and run many of the scripts and modules provided by PSD. The default script normally run first is PSDStart.ps1. You may need to map shares, and copy files locacally. Have fun!
+1. At this point, you should have a TS environment, access to TS variables. You can import modules, create PSDrives, and run many of the scripts and modules provided by PSD. The default script normally run first is PSDStart.ps1. You may need to map shares, and copy files locally. Have fun!
 
 # PSD and 2Pint ACP
-This section for how to install and configure PSD in conjunction with 2Pint softaware
+This section for how to install and configure PSD in conjunction with 2Pint software
 
 ### Pint Overview
 tba Andreas
@@ -102,18 +102,18 @@ as;dlfkjas;lkdjf
 
 # Appendix - PSD Variables 
 ## Environmental Variables
-The following variables may be useful when automating or customizing PSD capabiltiies. 
+The following variables may be useful when automating or customizing PSD capabilities. 
 
 | **Variable** | **Mandatory/Optional** | Description
 |--------------|:------------:|-----------|
-| **IsOnBattery** | Optional | Caclulated value during Gather. TRUE if target computer is a laptop and is running on AC. FALSE if desktop or laptop running on battery.
-| **IsVM** | Optional | Caclulated value during Gather. TRUE if target computer is a virtual machine, otherwise FALSE.
-| **IsSFF** | Optional | Caclulated value during Gather. TRUE if target computer eclosure is type 34, 35 or 36 (Small Form Factor)
-| **IsTablet** | Optional | Caclulated value during Gather. TRUE if target computer eclosure is type 13, 33, 31, or 32 (Tablet)
-| **PSDDeployRoots** | Optional | PSDDeployRoots is used to define multiple deployroots of either UNC, HTTP or HTTPS formats. Can *NOT* be called in conjuction wtih DeployRoot. See additonal notes [here](https://foo.link)
+| **IsOnBattery** | Optional | Calculated value during Gather. TRUE if target computer is a laptop and is running on AC. FALSE if desktop or laptop running on battery.
+| **IsVM** | Optional | Calculated value during Gather. TRUE if target computer is a virtual machine, otherwise FALSE.
+| **IsSFF** | Optional | Calculated value during Gather. TRUE if target computer enclosure is type 34, 35 or 36 (Small Form Factor)
+| **IsTablet** | Optional | Calculated value during Gather. TRUE if target computer enclosure is type 13, 33, 31, or 32 (Tablet)
+| **PSDDeployRoots** | Optional | PSDDeployRoots is used to define multiple deployroots of either UNC, HTTP or HTTPS formats. Can *NOT* be called in conjunction with DeployRoot. See additional notes [here](https://foo.link)
 
 ## Development and Debugging Variables
-The following variables may be useful when customizing or developing PSD capabiltiies. 
+The following variables may be useful when customizing or developing PSD capabilities. 
 
 | **Variable** | **Mandatory/Optional** | Description
 |--------------|:------------:|-----------|
