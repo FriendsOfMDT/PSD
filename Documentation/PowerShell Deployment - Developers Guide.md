@@ -5,7 +5,17 @@ PowerShell vxxx is the standard for all PSD development.
 
 ## Table of Contents 
 
-<!-- TOC -->autoauto- [Developers Guide - PowerShell Deployment Extension Kit](#developers-guide---powershell-deployment-extension-kit)auto    - [Table of Contents](#table-of-contents)auto- [Coding Standards](#coding-standards)auto- [Logging via Write-TSxLog](#logging-via-write-tsxlog)auto- [Scripts, Modules and Libraries](#scripts-modules-and-libraries)auto    - [PSD Scripts](#psd-scripts)auto    - [PSD Modules](#psd-modules)auto    - [Other](#other)auto- [PSD Script Mapping](#psd-script-mapping)auto- [MDT Dependencies](#mdt-dependencies)autoauto<!-- /TOC -->
+<!-- TOC -->
+
+- [Coding Standards](#coding-standards)
+- [Logging via Write-TSxLog](#logging-via-write-tsxlog)
+- [Scripts, Modules and Libraries](#scripts-modules-and-libraries)
+- [PSD Scripts](#psd-scripts)
+- [PSD Modules](#psd-modules)
+- [PSD Other Files ](#PSD-other-files)
+- [PSD Script Mapping](#psd-script-mapping)
+- [MDT Dependencies](#mdt-dependencies)
+<!-- /TOC -->
 
 # Coding Standards
 
@@ -14,7 +24,7 @@ Logging in all PSD modules is and should be accomplished via a new **Write-TSxLo
 
     Write-TSxLog -Message "$($MyInvocation.MyCommand.Name): <<your message our output>>
 
-This will output your message or text to the logfile along with the calling script. Sample output looks like the following from the Get-PSDLocalDataPath function:
+This will output your message or text to the log file along with the calling script. Sample output looks like the following from the Get-PSDLocalDataPath function:
 
     <![LOG[Get-PSDLocalDataPath: Return the cached local data path if possible]LOG]!><time="20:31:39.462+000" date="03-26-2019" component="PSDUtility.psm1:27" context="" type="1" thread="" file="">
 
@@ -58,7 +68,7 @@ The following PowerShell modules and scripts are provided with PSD:
 | ZTIUtility.psm1   	    |             	|
 
 
-## Other
+## PSD Other Files
 | Module                	    | Description 	|
 |------------------------	    |-------------	|
 | PSDWizard.xaml   	            | blah        	|
@@ -68,169 +78,165 @@ The following PowerShell modules and scripts are provided with PSD:
 # PSD Script Mapping
 The following table identifies the dependencies and interactions between the various PSD scripts and modules:
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg .tg-fymr{font-weight:bold;border-color:inherit;text-align:left;vertical-align:top}
-.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
-</style>
-<table class="tg">
+<table>
   <tr>
-    <th class="tg-fymr">PowerShell Script</th>
-    <th class="tg-fymr">Imports</th>
-    <th class="tg-fymr">Functions</th>
-    <th class="tg-fymr">Starts</th>
-    <th class="tg-fymr">Export</th>
+    <th>PowerShell Script</th>
+    <th>Imports</th>
+    <th>Functions</th>
+    <th>Starts</th>
+    <th>Export</th>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDApplications.ps1</td>
-    <td class="tg-0pky">PSDUtility<br>PSDDeploymentShare</td>
-    <td class="tg-0pky">Install-PSDApplication</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDApplications.ps1</td>
+    <td>PSDUtilityPSDDeploymentShare</td>
+    <td>Install-PSDApplication</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDApplyOS.ps1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDApplyOS.ps1</td>
+    <td>Microsoft.BDD.TaskSequence Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDConfigure.ps1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDConfigure.ps1</td>
+    <td>Microsoft.BDD.TaskSequence.Module</td>
+    <td>DISM</td>
+    <td>PSDUtility</td>
+    <td>PSDDeploymentShare</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDCustomPostWU.ps1</td>
-    <td class="tg-0pky">Import-PSDUtility</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDCustomPostWU.ps1</td>
+    <td>Import-PSDUtility</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDCustomPreWU.ps1</td>
-    <td class="tg-0pky">Import-PSDUtility</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDCustomPreWU.ps1</td>
+    <td>Import-PSDUtility</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDDrivers.ps1</td>
-    <td class="tg-0pky">Import-PSDUtility</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDDrivers.ps1</td>
+    <td>Import-PSDUtility</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDeploymentShare.ps1</td>
-    <td class="tg-0pky">BitsTransfer</td>
-    <td class="tg-0pky">Get-PSDConnection<br>Get-PSDProvider<br>Get-PSDAvailableDriveLetter<br>Get-PSDContent<br>Get-PSDContentUNC<br>Get-PSDContentWeb</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">Get-PSDConnection<br>Get-PSDContent</td>
+    <td>PSDeploymentShare.ps1</td>
+    <td>BitsTransfer</td>
+    <td>Get-PSDConnection<br>Get-PSDProvider<br>Get-PSDAvailableDriveLetter<br>Get-PSDContent<br>Get-PSDContentUNC<br>Get-PSDContentWeb</td>
+    <td>none</td>
+    <td>Get-PSDConnection<br>Get-PSDContent</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDErrorInTS.ps1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDErrorInTS.ps1</td>
+    <td>Microsoft.BDD.TaskSequence Module<br>DISM<br>PSDUtility<br>PSDDeploymentShare</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDFreshen.ps1</td>
-    <td class="tg-0pky">PSDUtility<br>PSDGAther</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDFreshen.ps1</td>
+    <td>PSDUtility<br>PSDGather</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDGather.psm1</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">Get-PSDLocalInfo<br>Invoke-PSDRules<br>Invoke-PSDRule<br>Get-PSDSettings<br>Get-INIContent</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDGather.psm1</td>
+    <td>none</td>
+    <td>Get-PSDLocalInfo<br>Invoke-PSDRules<br>Invoke-PSDRule<br>Get-PSDSettings<br>Get-INIContent</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDPartition.ps1</td>
-    <td class="tg-0pky">PSDUtility</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDPartition.ps1</td>
+    <td>PSDUtility</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDSetVariable.ps1</td>
-    <td class="tg-0pky">PSDUtility</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDSetVariable.ps1</td>
+    <td>PSDUtility</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDStart.ps1</td>
-    <td class="tg-0pky">PSDUtility<br>PSDDeploymentShare<br>PSDGather<br>PSDWizard</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">Get-PSDLogging<br>Start-PSDLogging</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDStart.ps1</td>
+    <td>PSDUtility<br>PSDDeploymentShare<br>PSDGatherPSDWizard</td>
+    <td>none</td>
+    <td>Get-PSDLogging<br>Start-PSDLogging</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDTBA.ps1</td>
-    <td class="tg-0pky">PSDUtility<br>PSDDeploymentShare</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDTBA.ps1</td>
+    <td>PSDUtility<br>PSDDeploymentShare</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDTemplate.ps1</td>
-    <td class="tg-0pky">PSDUtility<br>PSDDeploymentShare</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDTemplate.ps1</td>
+    <td>PSDUtility<br>PSDDeploymentShare</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDUserState.ps1</td>
-    <td class="tg-0pky">PSDUtility<br></td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDUserState.ps1</td>
+    <td>PSDUtility</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDUtility.psm1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module</td>
-    <td class="tg-0pky">Get-PSDLocalDataPath<br>Initialize PSDFolder<br>Start-PSDLogging<br>Clear-PSDInformation<br>Copy-PSDFolder<br>Set-FailTaskSequence<br>Stop-PSDLogging<br>Write-TSxLog<br>Invoke-TSxUnZip<br>Invoke-TSxZip<br>Get-TSxDriverInfo<br>Restore-PSDVariables</td>
-    <td class="tg-0pky">Start-PSDLogging</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDUtility.psm1</td>
+    <td>Microsoft.BDD.TaskSequence Module</td>
+    <td>Get-PSDLocalDataPath<br>Initialize-PSDFolder<br>Start-PSDLogging<br>Clear-PSDInformation<br>Copy-PSDFolder<br>Set-FailTaskSequence<br>Stop-PSDLogging<br>Write-TSxLog<br>Invoke-TSxUnZip<br>Invoke-TSxZip<br>Get-TSxDriverInfo<br>Restore-PSDVariables</td>
+    <td>Start-PSDLogging</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDWizard.psm1</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">Get-PSDWizard<br>Save-PSDWizardResult<br>Set-PSDWizardDefault<br>Show-PSDWizard</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">Show-PSDWizard</td>
+    <td>PSDWizard.psm1</td>
+    <td>none</td>
+    <td>Get-PSDWizard<br>Save-PSDWizardResult<br>Set-PSDWizardDefault<br>Show-PSDWizard</td>
+    <td>none</td>
+    <td>Show-PSDWizard</td>
   </tr>
   <tr>
-    <td class="tg-0pky">PSDWizard.xaml.initialize</td>
-    <td class="tg-0pky">Validate-Wizard</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>PSDWizard.xaml.initialize</td>
+    <td>Validate-Wizard</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">TSxUtility.psm1</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>TSxUtility.psm1</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
   <tr>
-    <td class="tg-0pky">ZTIUtility.psm1</td>
-    <td class="tg-0pky">Microsoft.BDD.TaskSequence Module</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
-    <td class="tg-0pky">none</td>
+    <td>ZTIUtility.psm1</td>
+    <td>Microsoft.BDD.TaskSequence Module</td>
+    <td>none</td>
+    <td>none</td>
+    <td>none</td>
   </tr>
 </table>
+
+
+
 
 # MDT Dependencies
 The following MDT components and files are utilized, consumed, and or referenced by PSD:

@@ -7,6 +7,9 @@ This document highlights and captures some of the known issues and limitations o
 Q: Does the installer copy over my existing MDT Deployment Share content (e.g. applications, drivers, task sequences, etc) to a new PSD share?
 >A: No, users and administrators will need to copy/export any existing components to *new* PSD shares using in-built content management features of MDT. MDT Shares which have been PSD upgraded will continue to have access to any existing object and artifacts.
 
+Q: Can the installer (PSD_Install.ps1) be executed remotely?
+>A: No, PSD_Install.ps1 must be run locally with administrative rights on the target/intended MDT installation.
+
 Q: Does the installer copy over my existing BootStrap.ini or CustomSettings.ini files to the target PSD repositories?
 >A: No, if you've created a new PSD-enabled deployment share, users and administrators will need to manually copy or reproduce any existing Bootstrap and CustomSettings files to new repositories.
 

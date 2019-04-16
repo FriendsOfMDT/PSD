@@ -53,12 +53,12 @@ As an example, the following BootStrap.ini snippet is provided...
     - [Default]
     - PSDDeployRoots=http://someserver.off/nothing, https://SecureServer.off/Nothing, http://foo.bar.xyz/psd, \\SomeServer\SomeShare$
 
-# Your first PSD Task Sequence
+# Your First PSD Task Sequence
 Make sure your target device meets the following minimum hardware specifications:
 - 1.5GB RAM or better 
-    > NOTE: WinPE under PSD has been extended and requires additional memory
-- Network adapter(s)
-- At least 50GB hard drive (for New/BareMetal deployments)
+    > NOTE: WinPE has been extended under PSD and requires additional memory
+- At least one (1) active network adapter(s)
+- At least one (1) 50GB hard drive (for New/BareMetal deployments)
 - At least XXX MHz processor (for New/BareMetal deployments)
 
 - BLAH checklist
@@ -66,7 +66,8 @@ Make sure your target device meets the following minimum hardware specifications
 - BLAH wallpaper
 
 # Troubleshooting PSD
-blah 
+Troubleshooting PSD is very similar to a tradtional MDT environment. Except, nearly everything occurs via connectivity to a PSDrive and within a BDD/MDT Task Sequence engine.
+ 
 ## Simple PSD Testing and Development Environment
 Some PSD functionality can be tested and developed using a technique similar to that for LTI deployments. It's a bit more complicated than it was for legacy MDT though.....
 
