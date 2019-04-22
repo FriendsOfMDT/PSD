@@ -72,3 +72,4 @@ Not all MDT features for Lite Touch Installations are available for PSD over HTT
 To simplify installation and configuration of IIS for PSD-enabled deployments, installers and implementers should run the PSD-Install-IIS.ps1 script. <<ADD A LINK>>
 
 TODO: Add in instructions for running PSD-Install-IIS.ps1
+TODO: test johan
