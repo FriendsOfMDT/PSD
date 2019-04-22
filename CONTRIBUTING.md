@@ -2,24 +2,41 @@
 
 Welcome to PSD and thank you for your interest in contributing!
 
-There are many ways that you can contribute, beyond writing or coding. The goal of this document is to provide a high-level overview of how you can get involved.
+There are many ways that you can contribute, beyond writing or coding. The goal of this document is to provide a high-level overview of how you can get involved and how to interact.
 
 ## Contributor Agreement
-
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
+This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
-When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+When you submit a pull request, a CLA-bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions provided by the bot. You will only need to do this once across all repos using our CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-## Asking Questions
+## PSD Development Tools
+If you want to contribute, you'll need to download, install and configure the following tools and request access to our PSD GitHub Repo
+- [ ] [GitHub Account](http://github.com)
+- [ ] [GitHub Desktop](https://desktop.github.com)
+- [ ] [Visual Studio Code](https://code.visualstudio.com)
+- [ ] [PowerShell Extensions for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.PowerShell)
+- [ ] Request access to [https://github/FriendsOfMDT/PSD](https://github.com/FriendsOfMDT/PSD). You'll need to share your GitHub account and or email address.
 
+We'll leave installation and configuration to you. As they say in mathematics classes - it should be obvious to the casual observer. :)
+
+### PSD Development and Contribution Steps
+1. Fork a copy of the [FriendsOfMDT/PSD](https://github.com/FriendsOfMDT/PSD) repository using your GitHub account
+1. Clone your PSD fork locally to your computer
+    > ProTip: You may want to clone it to your OneDrive folder so that it's available on all your shared systems.
+1. Open and edit files and scripts using Visual Studio Code
+1. Save your changes in VSC
+1. When ready to upload, 
+    - open GitHub Desktop and your repository
+    - Update the **Summary** input field (lower left)
+    - Update the **Description** input field (lower left)
+
+
+## Asking Questions
 Have a question? Open an issue using the question template and the `question` label.  
 
 The active community will be eager to assist you. Your well-worded question will serve as a resource to others searching for help.
