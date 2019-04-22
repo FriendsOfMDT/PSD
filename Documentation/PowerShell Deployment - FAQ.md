@@ -100,6 +100,12 @@ Q: What scripts or files can be safely deleted from my PSD Deployment Share?
 - If installing applications as part of the task sequence, do not delete ZTIUtility.vbs as it is called during the deployment
 - If desired, many of the legacy MDT .wsf scripts and Wizard files can be removed manually from the PSD Deployment Share scripts folder to thin out the environment. 
 
+Q: What do I need to do after upgrading to a new PSD versions?
+>A: This is still being refined and defined. For now: 
+- Generate new boot image(s) by updating the deployment share.
+- Replace any existing PSD boot images in WDS with the updated ones.
+- If the new PSD version have updated task sequence templates, you need to create new task sequences for those changes to take effect. Note that not all new versions will have new task sequence templates. Read the version relase notes to find out.
+
 ## Documented Platforms and Scenarios
 Q: What operating systems and components has PSD been tested and or evaluated against?
 >A: The following tables identifies tested and validated components, scenarios as well as testing and development status: 
