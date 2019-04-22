@@ -7,11 +7,11 @@ PSD enabled deployments are very much like legacy MDT Lite Touch Deployments. Th
 Additionally, PSD deployments can be implemented from not only UNC paths (traditional Deployment Shares), but also from HTTP and HTTPS deployment shares. This opens up a new capability for bare metal wipe and load scenarios across the Internet! 
 
 ## Installation
-Installation is relatively straight forward. You can either install PSD and specify a NEW deployment repository and share -or- you can upgrade (and extend) an existing MDT deployment share and add-on PSD functionality. Installation is run by downloading the PSD solution from GitHub [here] http://somelink.com using the following syntax from and elevated PowerShell ISE prompt: 
+Installation is relatively straight forward. You can either install PSD and specify a NEW deployment repository and share -or- you can upgrade (and extend) an existing MDT deployment share and add-on PSD functionality. Installation is completed by downloading the PSD solution from [GitHub.com/FriendsOfMDT](https://github.com/FriendsOfMDT/PSD) and running the PSD_Install.ps1 script using the following syntax from an elevated PowerShell ISE prompt: 
 
     .\PSD_Install.ps1 -psdDeploymentFolder <folder> -psdDeploymentShare <sharename> (-Upgrade)
 
-Refer to the PSD Installation Guide [here] <PSD Install guide link>
+Refer to the  [PSD Installation Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20Installation%20Guide.md) for detailed installation instructions.
 >PRO TIP: You may want to experiment with the PSD Kit outside of production environments initially. 
 
 ## Configuration and Automation
@@ -53,12 +53,12 @@ As an example, the following BootStrap.ini snippet is provided...
     - [Default]
     - PSDDeployRoots=http://someserver.off/nothing, https://SecureServer.off/Nothing, http://foo.bar.xyz/psd, \\SomeServer\SomeShare$
 
-# Your first PSD Task Sequence
+# Your First PSD Task Sequence
 Make sure your target device meets the following minimum hardware specifications:
 - 1.5GB RAM or better 
-    > NOTE: WinPE under PSD has been extended and requires additional memory
-- Network adapter(s)
-- At least 50GB hard drive (for New/BareMetal deployments)
+    > NOTE: WinPE has been extended under PSD and requires additional memory
+- At least one (1) active network adapter(s)
+- At least one (1) 50GB hard drive (for New/BareMetal deployments)
 - At least XXX MHz processor (for New/BareMetal deployments)
 
 - BLAH checklist
@@ -66,7 +66,8 @@ Make sure your target device meets the following minimum hardware specifications
 - BLAH wallpaper
 
 # Troubleshooting PSD
-blah 
+Troubleshooting PSD is very similar to a traditional MDT environment. Except, nearly everything occurs via connectivity to a PSDrive and within a BDD/MDT Task Sequence engine.
+ 
 ## Simple PSD Testing and Development Environment
 Some PSD functionality can be tested and developed using a technique similar to that for LTI deployments. It's a bit more complicated than it was for legacy MDT though.....
 

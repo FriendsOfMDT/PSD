@@ -7,6 +7,9 @@ This document highlights and captures some of the known issues and limitations o
 Q: Does the installer copy over my existing MDT Deployment Share content (e.g. applications, drivers, task sequences, etc) to a new PSD share?
 >A: No, users and administrators will need to copy/export any existing components to *new* PSD shares using in-built content management features of MDT. MDT Shares which have been PSD upgraded will continue to have access to any existing object and artifacts.
 
+Q: Can the installer (PSD_Install.ps1) be executed remotely?
+>A: No, PSD_Install.ps1 must be run locally with administrative rights on the target/intended MDT installation.
+
 Q: Does the installer copy over my existing BootStrap.ini or CustomSettings.ini files to the target PSD repositories?
 >A: No, if you've created a new PSD-enabled deployment share, users and administrators will need to manually copy or reproduce any existing Bootstrap and CustomSettings files to new repositories.
 
@@ -18,22 +21,25 @@ Q: What are the client/target hardware requirements for baremetal PSD deployment
 - At least one (1) XXX MHz processor (for New/BareMetal deployments)
 
 Q: Does PSD work with 2Pint's ACP solution?
->A: TBD
+  >A: TBD
 
 Q: How does PSD work with 2Pint's ACP solution?
->A: lightweight description here. See [link](http://somedocument.com}
+  >A: lightweight description here. See [link] (http://somedocument.com}
 
 Q: Does PSD work with 1E's Nomad solution?
->A: PSD has not been tested in conjunction with 1E's Nomad product (yet)
+  >A: PSD has not been tested in conjunction with 1E's Nomad product (yet)
 
 Q: Does PSD work with Deployment Optimization?
->A: TBD
+  >A: TBD
 
 Q: Does PSD work with Branch Cache?
->A: TBD
+  >A: TBD
 
 Q: Does PSD work with Peer Cache?
 >A: TBD
+
+Q: Why does the PowerShell window appear to flash and then change size?
+>A: The default window is resized by PSDStart by design. You should observe it to change from full screen to roughly one third the screen early in the boot/start process. This is again by design.
 
 Q: What is "Transcript Logging"?
 >A: Logs (for example PSD.LOG, and BDD.log) are what we explicitly write, Transcript logs captures everything that happens on the screen. PSD Transcript logs are much better suited and useful for troubleshooting, but may be visually "sub-optimal".
@@ -100,155 +106,147 @@ Q: What scripts or files can be safely deleted from my PSD Deployment Share?
 ## Documented Platforms and Scenarios
 Q: What operating systems and components has PSD been tested and or evaluated against?
 >A: The following tables identifies tested and validated components, scenarios as well as testing and development status: 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg .tg-fymr{font-weight:bold;border-color:inherit;text-align:left;vertical-align:top}
-.tg .tg-xldj{border-color:inherit;text-align:left}
-.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
-</style>
-<table class="tg">
+<table>
   <tr>
-    <th class="tg-fymr">Component</th>
-    <th class="tg-fymr">Version</th>
-    <th class="tg-fymr">Notes</th>
+    <th>Component</th>
+    <th>Version</th>
+    <th>Notes</th>
   </tr>
   <tr>
-    <td class="tg-xldj">MDT</td>
-    <td class="tg-0pky">8456</td>
-    <td class="tg-0pky"></td>
+    <td>MDT</td>
+    <td>8456</td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-0pky">ADK</td>
-    <td class="tg-0pky">1809</td>
-    <td class="tg-0pky"></td>
+    <td>ADK</td>
+    <td>1809</td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-0pky">WinPe addon</td>
-    <td class="tg-0pky">1809</td>
-    <td class="tg-0pky"></td>
+    <td>WinPe addon</td>
+    <td>1809</td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-0pky">Target client OS</td>
-    <td class="tg-0pky">Windows 10 ENT x64 EN 1809<br>Windows 10 ENT x64 EN 1709</td>
-    <td class="tg-0pky">MSDN media tested</td>
+    <td>Target client OS</td>
+    <td>Windows 10 ENT x64 EN 1809Windows 10 ENT x64 EN 1709</td>
+    <td>MSDN media tested</td>
   </tr>
   <tr>
-    <td class="tg-0pky">BareMetal via UNC</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">Tested and working</td>
+    <td>BareMetal via UNC</td>
+    <td>n/a</td>
+    <td>Tested and working</td>
   </tr>
   <tr>
-    <td class="tg-0pky">BareMetal via HTTP</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">Tested and working</td>
+    <td>BareMetal via HTTP</td>
+    <td>n/a</td>
+    <td>Tested and working</td>
   </tr>
   <tr>
-    <td class="tg-0pky">BareMetal via HTTPS</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet tested</td>
+    <td>BareMetal via HTTPS</td>
+    <td>n/a</td>
+    <td>not yet tested</td>
   </tr>
   <tr>
-    <td class="tg-0pky">IIS</td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
+    <td>IIS</td>
+    <td></td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-0pky">WebDAV</td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
+    <td>WebDAV</td>
+    <td></td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-0pky">PXE</td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
+    <td>PXE</td>
+    <td></td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-0pky">Host Server OS</td>
-    <td class="tg-0pky">Windows Server 2016 ENT </td>
-    <td class="tg-0pky"></td>
-  </tr>
-    <tr>
-    <td class="tg-0pky">Virtual Machines</td>
-    <td class="tg-0pky">Microsoft Hyper-V </td>
-    <td class="tg-0pky">Client deployments tested against Hyper-V.<br>MDT/PSD tested hosted on Hyper-V</td>
-  </tr>
-    <tr>
-    <td class="tg-0pky">Refresh via UNC</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
-  </tr>
-    <tr>
-    <td class="tg-0pky">Refresh via HTTP</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
-  </tr>
-    <tr>
-    <td class="tg-0pky">Refresh via HTTPS</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
+    <td>Host Server OS</td>
+    <td>Windows Server 2016 ENT </td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-0pky">Replace via UNC</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
-  </tr>
-    <tr>
-    <td class="tg-0pky">Replace via HTTP</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
-  </tr>
-    <tr>
-    <td class="tg-0pky">Replace via HTTPS</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
+    <td>Virtual Machines</td>
+    <td>Microsoft Hyper-V </td>
+    <td>Client deployments tested against Hyper-V.MDT/PSD tested hosted on Hyper-V</td>
   </tr>
   <tr>
-    <td class="tg-0pky">BIOS-to-UEFI via UNC</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
+    <td>Refresh via UNC</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
   </tr>
-    <tr>
-    <td class="tg-0pky">BIOS-to-UEFI  via HTTP</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
+  <tr>
+    <td>Refresh via HTTP</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
   </tr>
-    <tr>
-    <td class="tg-0pky">BIOS-to-UEFI via HTTPS</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
+  <tr>
+    <td>Refresh via HTTPS</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
   </tr>
-        <tr>
-    <td class="tg-0pky">Generic, non-OSD TS via UNC</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
+  <tr>
+    <td>Replace via UNC</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
   </tr>
-    <tr>
-    <td class="tg-0pky">Generic, non-OSD TS via HTTP</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
+  <tr>
+    <td>Replace via HTTP</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
   </tr>
-    <tr>
-    <td class="tg-0pky">Generic, non-OSD TS via HTTPS</td>
-    <td class="tg-0pky">n/a</td>
-    <td class="tg-0pky">not yet implemented</td>
+  <tr>
+    <td>Replace via HTTPS</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
+  </tr>
+  <tr>
+    <td>BIOS-to-UEFI via UNC</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
+  </tr>
+  <tr>
+    <td>BIOS-to-UEFI&nbsp;&nbsp;via HTTP</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
+  </tr>
+  <tr>
+    <td>BIOS-to-UEFI via HTTPS</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
+  </tr>
+  <tr>
+    <td>Generic, non-OSD TS via UNC</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
+  </tr>
+  <tr>
+    <td>Generic, non-OSD TS via HTTP</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
+  </tr>
+  <tr>
+    <td>Generic, non-OSD TS via HTTPS</td>
+    <td>n/a</td>
+    <td>not yet implemented</td>
   </tr>
 </table>
 
 ## Installation Observations
 
-- The PSD installer will create the -psDeploymentShare name *exactly* as specified. The PSD installer does **not** handle or change the hidden share ($) character in any form or fashion.
+- The PSD installer will create the -psDeploymentShare name *exactly* as specified. The PSD installer does **NOT** handle or change the hidden share ($) character in any form or fashion.
 
-- The PSD installer does **not** automatically mount a new PSD-created deployment share repository. Users will need to mount newly created PSD deployment shares manually.
+- The PSD installer **should** automatically mount a new PSD-created deployment share repository. Users may need to refresh the workbench or manually mount newly created PSD deployment shares.
 
-- The PSD installer does **not** automatically copy over any existing MDT artifacts and components to a new PSD-created deployment share repositories. Users will need to manually copy over, re-import or instantiate applications, drivers, etc. manually.
+- The PSD installer does **NOT** automatically copy over any existing MDT artifacts and components to a new PSD-created deployment share repositories. Users will need to manually copy over, re-import or instantiate applications, drivers, etc.
 
 ## Operational Observations
-Please review the PSD Installation Guide for additional detailed post-installation configuration recommendations.
+Please review the  [PSD Installation Guide](https://github.com/soupman98/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20Installation%20Guide.md) for additional detailed post-installation configuration recommendations.
 
-- Applications specified in task sequences or in BOOTSTRAP/CUSTOMSETTINGS **MUST** have { } brackets around their GUID
-- New TS variables **must** be declared explicitly in BOOTSTRAP/CUSTOMSETTINGS
+- Applications specified in task sequences BootStrap.ini or CustomSettings.ini **MUST** have { } brackets around their GUID
+- New TS variables **must** be declared explicitly in BootStrap.ini or CustomSettings.ini
 
 
 

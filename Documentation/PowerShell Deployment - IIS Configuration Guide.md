@@ -10,13 +10,13 @@ In order to support OS deployments using PSD and content hosted on a web server(
 Please review and or validate the following IIS/WEbDAV installation checklist:
 
 * [ ] **Windows Server Version** - blah
-* [ ] **Firewall** - blah
-    - open port 80 for HTTP
-    - open port 443 for HTTPS
-    - open port XXXX 9080 for MDT Event Monitoring 
 * [ ] **Install IIS** - blah
 * [ ] **Install IIS Components** - blah
 * [ ] **Install WebDAV** - blah
+* [ ] **Install WebDAV Components** - blah
+* [ ] **Configure IIS** - blah
+* [ ] **Configure WebDAV** - blah
+* [ ] **Firewall Ports** - blah
 * [ ] **Application Pool** - blah
 * [ ] **File Permissions** - Blah
 * [ ] **MIME Types** - blah
@@ -24,13 +24,52 @@ Please review and or validate the following IIS/WEbDAV installation checklist:
 * [ ] **Certificates** - blah
 
 ## Detailed Configuration Steps
+### Install IIS
+blah
+
+### Install IIS Components
+blah
+
+### Install WebDAV
+blah
+
+### Install WebDAV Components
+blah
+
+### Configure IIS
+blah
+
+### Configure WebDAV
+blah
+
+### Firewall** - blah
+    - open port 80 for HTTP
+    - open port 443 for HTTPS
+    - open port XXXX 9080 for MDT Event Monitoring 
+### Application Pool
+blah
+
+### File Permissions
+Blah
+
+### MIME Types
+blah
+
+### Accounts
+blah
+
+### Certificates
+blah
 
 ## Caveats
-Not all MDT features for Lite Touch deployments are available for PSD over HTTP/S (yet). The following items have not yet been developed or finalized:
-- something about Logs and Dynamic Logging (SLSHARE)
-- something about MDT Database
-- something about MDT Event Monitoring Service
-- something about DaRT
+Not all MDT features for Lite Touch Installations are available for PSD over HTTP/S (yet). The following items have not yet been developed or finalized:
+- SLShareDynamicLogging will not be available over HTTP/S
+- MDT Database connectivity and functionality has not yet been implemented
+- MDT Event Monitoring Service connectivity and functionality has not yet been implemented
+- DaRT functionality and integration has not been implemented
 
 ## PSD IIS Installation Script
-(in development)
+To simplify installation and configuration of IIS for PSD-enabled deployments, installers and implementers should run the PSD-Install-IIS.ps1 script. <<ADD A LINK>>
+
+TODO: Add in instructions for running PSD-Install-IIS.ps1
+TODO: test johan
