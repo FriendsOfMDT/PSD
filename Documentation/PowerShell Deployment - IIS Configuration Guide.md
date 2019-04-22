@@ -9,11 +9,61 @@ In order to support OS deployments using PSD and content hosted on a web server(
 ## High Level Overview and Checklist
 Please review and or validate the following IIS/WEbDAV installation checklist:
 
-* [ ] **Windows Server Version** - blah
-* [ ] **Install IIS** - blah
-* [ ] **Install IIS Components** - blah
-* [ ] **Install WebDAV** - blah
-* [ ] **Install WebDAV Components** - blah
+* [ ] **Windows Server Version**
+
+       Windows Server 2012R2 - Not Supported - May Work
+       Windows Server 2016 - Supported - And Verified
+       Windows Server 2019 - Supported - And Verified
+
+* [ ] **Install IIS**
+
+Currently the IIS installation and configure script does NOT support a server that already has IIS or a server you have manually installed IIS on. The Script we have provided will handle the instalation of IIS for you. 
+
+
+* [ ] **Install IIS Components**
+
+The following IIS components are required to ensure that PSD functions as expected and can all be found under "Web Server (IIS)" in Server Manager. 
+
+* Common HTTP Features
+
+     * Default Document
+     * Directory Browsing
+     * HTTP Errors
+     * Static Content
+     * HTTP Redirection
+     * WebDav Publishing
+
+* Health and Diagnostics
+
+     * HTTP Logging
+     * Custom Logging
+     * Logging Tools
+     * Request Monitor
+     * Tracing
+     
+* Performance
+
+     * Static Content Compression
+
+* Security 
+
+     * Request Filtering
+     * Basic Authentication
+     * Digest Authentication
+     * URL Authorization
+     * Windows Authentication
+     
+* Management Tools
+     * IIS Management Compatability 
+     * IIS 6 Management Compatibility
+          * IIS 6 Metabase Compatability
+
+* [ ] **Install WebDAV**
+
+The PSD extension for MDT requires the WebDAV Redirector to be installed. This is a feature and not a role in Server Manager. This feature does require a reboot.
+
+*  WebDAV Redirector
+
 * [ ] **Configure IIS** - blah
 * [ ] **Configure WebDAV** - blah
 * [ ] **Firewall Ports** - blah
