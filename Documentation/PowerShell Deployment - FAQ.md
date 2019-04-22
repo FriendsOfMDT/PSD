@@ -247,6 +247,7 @@ Please review the  [PSD Installation Guide](https://github.com/soupman98/PSD/blo
 
 - Applications specified in task sequences BootStrap.ini or CustomSettings.ini **MUST** have { } brackets around their GUID
 - New TS variables **must** be declared explicitly in BootStrap.ini or CustomSettings.ini
+- You many notice that during the Post OS install phases of the PSD Task Sequence (OOBE) that the screen briefly flashes a window and the PowerShell window appears to refresh. This is expected when a script is executed.
 
 
 
