@@ -34,7 +34,7 @@ PSD installation requires the following:
 - Downloaded or local copy of the PSD solution and it's installer.
 
 1) If open, close the MDT Workbench.
-1) Download or clone the PSD content from [PSD GitHub Home](https://github.com/FriendsOfMDT/PSD)
+1) Download or clone the PSD content from the [PSD GitHub Home](https://github.com/FriendsOfMDT/PSD)
 1) Open an elevated Powershell command prompt, run one of the following commands
     - For **NEW** installations of PSD run:
         - ./PSD_Install.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name>
