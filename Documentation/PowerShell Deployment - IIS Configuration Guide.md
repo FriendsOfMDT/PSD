@@ -64,14 +64,38 @@ The PSD extension for MDT requires the WebDAV Redirector to be installed. This i
 
 *  WebDAV Redirector
 
-* [ ] **Configure IIS** - blah
-* [ ] **Configure WebDAV** - blah
+* [ ] **Configure IIS**
+
+The PSD Extension for MDT requires some configuration changes to IIS in order to function. Most of these changes have to do with configuring IIS to work properly with WebDav. If you use the installation script these will be automatically configured for you. Detailed steps regarding its configuration are incldued in the Detailed Configuration Steps section.
+
+     * Create New Virtual Directory
+     * Enable Directory Browsing
+     * Disable Anonymous Authentication
+     * Enable Windows Authentication
+     * Create and add new MIME type 
+     
+* [ ] **Configure WebDAV**
+
+The PSD Extension for MDT Requires some configuration changes to WebDAV in order to function. Most of the changes have to do with rules and properties that allow specific types of data. If you use the installation script these will be automatically configured for you. Detailed steps regarding its configuration are incldued in the Detailed Configuration Steps section. 
+
+     * Enable WebDAV
+     * Create new WebDav Authoring Rule
+     * Modify WebDAV Settings
+         * Allow File Extension Filtering
+         * Allow Hidden Segment Filtering
+         * Allow Verb Filtering
+     * Modify Default MIME type
+
 * [ ] **Firewall Ports** - blah
+
 * [ ] **Application Pool** - blah
+
 * [ ] **File Permissions** - Blah
-* [ ] **MIME Types** - blah
-* [ ] **Accounts** - blah
-* [ ] **Certificates** - blah
+
+* [ ] **MIME Types**
+
+The PSD Extension for MDT Requires some configuration changes to MIME types in order to function. The current known required change is to add an additional MIME type. Details on the mime type changes can be found in the Detailed Configuration Steps section. 
+
 
 ## Detailed Configuration Steps
 ### Install IIS
