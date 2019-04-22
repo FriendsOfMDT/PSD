@@ -37,6 +37,7 @@ Recording log and event information is done via log files
 ### IIS
 
 ### DaRT
+TODO: document DART limitations, and security considerations (TEST)
 
 ## Firewall and Ports
 MDT and PSD utilized the following ports:
