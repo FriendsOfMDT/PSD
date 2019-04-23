@@ -240,11 +240,7 @@ The following table identifies the dependencies and interactions between the var
 
 # MDT Dependencies
 The following MDT components and files are utilized, consumed, and or referenced by PSD:
-- ZTIUtility.vbs - can't be deleted if applications are called via BS/CS.ini
 - ZTIGather.xml
 - ZTIConfigure.xml
-- xxx.bdd.xxx
-- xxx.bbb.xxx
-
 
 
