@@ -20,6 +20,9 @@ Q: What are the client/target hardware requirements for baremetal PSD deployment
 - At least one (1) 50GB hard drive (for New/BareMetal deployments)
 - At least one (1) XXX MHz processor (for New/BareMetal deployments)
 
+Q: Are system clocks synchronized?
+  >A: Yes, PSDStart.ps1 will attempt to synchronize the time are deployment target computers. Deployment Roots servers and or the HTTP/S target servers will be NTP synchronized.
+
 Q: Does PSD work with 2Pint's ACP solution?
   >A: TBD
 
