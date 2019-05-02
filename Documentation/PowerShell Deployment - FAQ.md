@@ -103,7 +103,7 @@ Q: What scripts or files can be safely deleted from my PSD Deployment Share?
 >A: This is still being refined and defined. For now: 
 - Do NOT delete any PSD*.ps1 or PSD*.psm1 files. 
 - Do NOT delete ZTIGather.xml or ZTIConfigure.xml
-- If installing applications as part of the task sequence, do not delete ZTIUtility.vbs as it is called during the deployment
+- If installing applications as part of the task sequence, do not delete ZTIUtility.vbs as it **might** be called during the deployment.
 - If desired, many of the legacy MDT .wsf scripts and Wizard files can be removed manually from the PSD Deployment Share scripts folder to thin out the environment. 
 
 ## Documented Platforms and Scenarios
@@ -117,23 +117,39 @@ Q: What operating systems and components has PSD been tested and or evaluated ag
   </tr>
   <tr>
     <td>MDT</td>
-    <td>8456</td>
+    <td>6.3.8456.1000 - (8456)</td>
     <td></td>
   </tr>
   <tr>
     <td>ADK</td>
-    <td>1809</td>
+    <td>10.1.16299 - (1709)<br>10.1.17763.1 - (1809)</td>
     <td></td>
   </tr>
   <tr>
-    <td>WinPe addon</td>
-    <td>1809</td>
+    <td>MDT WinPE addon</td>
+    <td>10.1.17763.1 - (1809)</td>
     <td></td>
   </tr>
   <tr>
     <td>Target client OS</td>
-    <td>Windows 10 ENT x64 EN 1809Windows 10 ENT x64 EN 1709</td>
+    <td>Windows 10 ENT x64 EN 1809<br>
+    Windows 10 ENT x64 EN 1709</td>
     <td>MSDN media tested</td>
+  </tr>
+    <tr>
+    <td>IIS</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>WebDAV</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>PXE</td>
+    <td></td>
+    <td></td>
   </tr>
   <tr>
     <td>BareMetal via UNC</td>
@@ -150,21 +166,7 @@ Q: What operating systems and components has PSD been tested and or evaluated ag
     <td>n/a</td>
     <td>not yet tested</td>
   </tr>
-  <tr>
-    <td>IIS</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>WebDAV</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>PXE</td>
-    <td></td>
-    <td></td>
-  </tr>
+
   <tr>
     <td>Host Server OS</td>
     <td>Windows Server 2016 ENT </td>
@@ -173,7 +175,7 @@ Q: What operating systems and components has PSD been tested and or evaluated ag
   <tr>
     <td>Virtual Machines</td>
     <td>Microsoft Hyper-V </td>
-    <td>Client deployments tested against Hyper-V.MDT/PSD tested hosted on Hyper-V</td>
+    <td>Client deployments tested against Hyper-V.<br>MDT/PSD tested hosted on Hyper-V</td>
   </tr>
   <tr>
     <td>Refresh via UNC</td>

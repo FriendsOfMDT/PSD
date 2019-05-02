@@ -6,7 +6,7 @@ In order to support OS deployments using PSD and content hosted on a web server(
 
 > NOTE: Your security team and environment may require additional settings or lock down.
 
-## High Level Overview and Checklist
+## High Level Script Overview and Checklist
 Please review and or validate the following IIS/WEbDAV installation checklist:
 
 * [ ] **Windows Server Version** - blah
@@ -23,7 +23,7 @@ Please review and or validate the following IIS/WEbDAV installation checklist:
 * [ ] **Accounts** - blah
 * [ ] **Certificates** - blah
 
-## Detailed Configuration Steps
+## Detailed Script Execution Steps
 ### Install IIS
 blah
 
@@ -73,3 +73,33 @@ To simplify installation and configuration of IIS for PSD-enabled deployments, i
 
 TODO: Add in instructions for running PSD-Install-IIS.ps1
 TODO: test johan
+
+# Hydration
+The New-PSDHydration.ps1 script will completely build out a basic Windows Server in about 20m. The hydration script calls the PSD Installer script (Install-PSD.ps1) and the PSD Installation script (New-PSDWebInstance.ps1) as part of it's activities.
+
+## Hydration Prerequisites Checklist
+* [ ] **Windows Server 2019** - basic Windows 2019 Server **without** IIS or WebDAV pre-installed or configured. This server should be as vanilla as possible.
+* [ ] **Download PSD** - download and store the PSD content including Documentation, Installers, Scripts and Tools.
+* [ ] **Download ADK** - download and store the appropriate ADK installer for your environment. You can optionally also run the ADK in advance and download the actual ADK content in advance.
+* [ ] **Download ADK for PE** - download and store the appropriate ADK for PE installer for your environment. You can optionally also run the ADK PE Installer in advance and download the actual ADK content in advance.
+* [ ] **Download MDT** - download and store the appropriate MDT installer for your environment. 
+* [ ] **Download Windows 10** - download and store an appropriate Windows 10 ISO for your environment. 
+    >PRO TIP: You may want to avoid **Evaluation** media 
+* [ ] **Network Access Account** - (pre)create a domain or local account that can be used to access the deployment share.
+    >PRO TIP: Make sure this account has the least privileges needed. At a minimum, read/execute/list for the deployment share. This account doesn't need JoinDomain or Logon rights. 
+* [ ] **Create Deployment Share Location** - The Hydration script expects a target share folder to already be created.
+* [ ] **Run the PSD Hydration script** - The Hydration script will run mostly silent by default, but will require some info and iteration by a user. The Hydration script generates a log in the same directory it was run from.
+    >PRO TIP: Run the PSD hydration script from an Elevated PowerShell prompt with the -verbose flag for maximum visibility.
+
+## Post Hydration Tasks
+You'll still need to do some things after hydration is finished.
+- Configure Firewall ports
+- Configure certificates
+- Customize wallpaper
+- customize Bootstrap.ini
+- Customize CustomSettings.ini
+- (Optional) Edit your task sequence
+- Add drivers
+- Add applications
+- etc and more
+
