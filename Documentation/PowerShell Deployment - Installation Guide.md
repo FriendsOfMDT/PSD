@@ -92,6 +92,11 @@ The following actions should be completed as part of PSD installation:
 * [ ] **Update Background wallpaper** - By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provided. It can be found at Samples folder of the MDT installation. Adjust the MDT WinPE Customizations tab to reflect this new bmp (or use your own).
     >PRO TIP: Custom wallpapers should be 800x600 resolution.
 
+* [ ] **Configure Extra Files** - Create and populate an ExtraFiles folder that contains anything you want to add to WinPE or images. Things like CMTRACE.EXE, wallpapers, etc.
+    >PRO TIP: Create the same folder structure as where you want the files to land (e.g. \Windows\System32\)
+
+    >PRO TIP WARNING: If using WinPE v1809, you **MUST** source and stage **BCP47Langs.dll** and **BCP47mrm.dll**, otherwise the PSD deployment wizard and final WinForms will crash.
+
 * [ ] **Configure WinPE Drivers and Patches** - Using MDT Selection Profiles, customize your WinPE settings to utilize an appropriate set of MDT objects. Be sure to consider Applications, Drivers, Packages, and Task Sequences.
     >PRO TIP: You may want to create a new or custom Selection Profile unique to your new PSD-enabled PE environment.
 
@@ -115,12 +120,14 @@ The following actions should be completed as part of PSD installation:
 - Windows Deployment Services
     >PRO TIP: Create a new Organizational Unit for both PSD testing and on-going Windows 10 administration
 
-    >PRO TIP: Be on the lookout for multiple (or roue) PXE servers on the network
+    >PRO TIP: Be on the lookout for multiple (or rogue) PXE servers on the network
 
 * [ ] **Configure IIS for PSD over HTTP/S** - Install and configure IIS and WebDAV). See the [IIS Configuration Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20IIS%20Configuration%20Guide.md) for details.
     - [ ] Install IIS
     - [ ] Install and configure WebDAV
     - [ ] Test your HTTP/S PSD functionality
-    >PRO TIP: new pro tip
+    >PRO TIP: The PSD IIS installation script expects to find a clean environment without IIS or WebDAV installed.
 
-* [ ] **Create PSD Task Sequence** - You **MUST** create a new Task Sequence from the PSD Templates within the workbench. PSD will fail otherwise. Do not attempt to clone/copy/import or otherwise work around this step. Some steps are required for PSD functionality. Do not delete any of the PSD task sequence steps - you may disable steps. 
+* [ ] **Create PSD Task Sequence** - You **MUST** create a new Task Sequence from the PSD Templates within the workbench. PSD will fail otherwise. Do not attempt to clone/copy/import or otherwise work around this step. Some steps are required for PSD functionality. Do not delete any of the PSD task sequence steps - you may disable steps in the PSD Template task sequences if you choose.
+
+    >PRO TIP: If you upgrade PSD version at a later date, **expect** to recreate your task sequences from the new PSD templates.
