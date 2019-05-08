@@ -238,11 +238,10 @@ function Get-PSDContentWeb
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to retrieve directory listing!"
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($_.Exception.InnerException)"
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $response"
-        $Message = "Unable to Retrieve directory listing of $($fullSource) via WebDAV. Error message: $($_.Exception.Message)"
-        Show-PSDInfo -Message "$($Message)" -Severity Error
-        Start-Process PowerShell -Wait
-        Break 
-
+        #$Message = "Unable to Retrieve directory listing of $($fullSource) via WebDAV. Error message: $($_.Exception.Message)"
+        #Show-PSDInfo -Message "$($Message)" -Severity Error
+        #Start-Process PowerShell -Wait
+        #Break 
     }
 	
 	if ($response -ne $null)
