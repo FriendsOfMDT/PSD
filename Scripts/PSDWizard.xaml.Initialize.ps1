@@ -13,7 +13,7 @@ Get-ChildItem -Path "DeploymentShare:\Task Sequences" | % {
     $t = New-Object System.Windows.Controls.TreeViewItem
     $t.Header = $_.Name
     $t.Tag = $_
-    Write-Verbose $t.Tag.PSPath 
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($t.Tag.PSPath)"
     if ($_.PSIsContainer) {
         $t.Items.Add("*")
     }
@@ -30,7 +30,8 @@ Get-ChildItem -Path "DeploymentShare:\Task Sequences" | % {
         $current.Items.clear()
         $pos = $current.Tag.PSPath.IndexOf("::") + 2
         $path = $current.Tag.PSPath.Substring($pos)
-        Write-Verbose $path
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $path"
+
         Get-ChildItem -Path $path | % {
             $t = New-Object System.Windows.Controls.TreeViewItem
             $t.Header = $_.Name

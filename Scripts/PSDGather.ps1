@@ -2,7 +2,7 @@
 # // 
 # // PowerShell Deployment for MDT
 # //
-# // File:      PSDFreshen.ps1
+# // File:      PSDGather.ps1
 # // 
 # // Purpose:   Update gathered information in the task sequence environment.
 # // 
@@ -24,6 +24,8 @@ $verbosePreference = "Continue"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Deployroot is now $($tsenv:DeployRoot)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now $env:PSModulePath"
+
+Write-PSDEvent -MessageID 41000 -severity 1 -Message "Starting: $($MyInvocation.MyCommand.Name)"
 
 # Gather local info to make sure key variables are set (e.g. Architecture)
 #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Gather local info to make sure key variables are set (e.g. Architecture)"
