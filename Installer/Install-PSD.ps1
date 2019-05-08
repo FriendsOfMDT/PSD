@@ -45,7 +45,7 @@ function Copy-PSDFolder
     $s = $source.TrimEnd("\")
     $d = $destination.TrimEnd("\")
     Write-Verbose "Copying folder $source to $destination using XCopy"
-    & xcopy $s $d /s /e /v /d /y /i | Out-Null
+    & xcopy $s $d /s /e /v /y /i | Out-Null
 }
 
 #TODO - Check for ADK installed and version
@@ -62,10 +62,22 @@ Write-Verbose "MDT installed version== $mdtVer"
 # Create the folder and share
 if (Test-Path -path $psDeploymentFolder)
 {
-    if(!($Upgrade))
+    Write-Verbose -Message "The Deployment folder already exists"
+    if(Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder})
     {
-        Write-Warning "PSD Folder already exist, will break"
-        BREAK
+        Write-Verbose -Message "The Deployment share has already been created as a share checking if upgrade flag is set"
+        if(!($Upgrade))
+        {
+            Write-Verbose "The deployment share already exists"
+            Write-Warning "PSD Folder already exist, will break"
+            BREAK
+        }
+    }
+    elseIf(!(Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder}))
+    {
+        Write-Verbose -Message "The Deployment folder was NOT shared now attempting to share the folder"
+        New-SmbShare -Name $psDeploymentShare -Path $psDeploymentFolder -FullAccess Administrators
+        Write-Verbose -Message "The Deployment folder has now been shared as $($psDeploymentshare)"
     }
 }
 else
@@ -170,7 +182,7 @@ $null = New-Item -ItemType directory -Path $psDeploymentFolder\DriverSources -Fo
 Write-verbose "Creating DriverPackages folder in $psdeploymentshare"
 $null = New-Item -ItemType directory -Path $psDeploymentFolder\DriverPackages -Force
 
-#Relax Permissions on DeploymentShare (added admminy)
+#Relax Permissions on DeploymentShare
 if(!($Upgrade))
 {
     Write-verbose "Relaxing permissons on $psDeploymentShare"
