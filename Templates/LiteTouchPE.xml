@@ -41,6 +41,7 @@
 
 	  <!-- Scripts -->
 	  <Copy source="%DEPLOYROOT%\Scripts\PSDStart.ps1" dest="Deploy\Scripts\PSDStart.ps1" />
+	  <Copy source="%DEPLOYROOT%\Scripts\PSDHelper.ps1" dest="Deploy\Scripts\PSDHelper.ps1" />
 
     <!-- Tools -->
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\BDDRUN.exe" dest="Windows\system32\BDDRUN.exe" />
@@ -67,8 +68,8 @@
     <!-- Modules -->
 
     <Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.dll" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.dll" />
-	  <Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.psd1" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.psd1" />
-	  <Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Interop.TSCore.dll" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Interop.TSCore.dll" />
+	<Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.psd1" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.psd1" />
+	<Copy source="%DEPLOYROOT%\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Interop.TSCore.dll" dest="Deploy\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Interop.TSCore.dll" />
 
     <Copy source="%DEPLOYROOT%\Tools\Modules\PSDDeploymentShare\PSDDeploymentShare.psm1" dest="Deploy\Tools\Modules\PSDDeploymentShare\PSDDeploymentShare.psm1" />
     <Copy source="%DEPLOYROOT%\Tools\Modules\PSDUtility\PSDUtility.psm1" dest="Deploy\Tools\Modules\PSDUtility\PSDUtility.psm1" />

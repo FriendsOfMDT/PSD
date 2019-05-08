@@ -9,9 +9,11 @@
 # // 
 # // ***************************************************************************
 
-$verbosePreference = "Continue"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Importing module Bitstransfer"
+#$VerbosePreference = "SilentlyContinue"
 
 Import-Module BitsTransfer -Global
+#$verbosePreference = "Continue"
 
 # Local variables
 $global:psddsDeployRoot = ""
@@ -32,6 +34,10 @@ function Get-PSDConnection
     $global:psddsDeployRoot = $deployRoot
     $global:psddsDeployUser = $username
     $global:psddsDeployPassword = $password
+
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psddsDeployRoot is now $global:psddsDeployRoot"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psddsDeployUser is now $global:psddsDeployUser"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psddsDeployPassword is now $global:psddsDeployPassword"
 
     # Get credentials
     if (!$global:psddsDeployUser -or !$global:psddsDeployPassword)
@@ -59,7 +65,14 @@ function Get-PSDConnection
     }
     elseif ($global:psddsDeployRoot -like "\\*") {
         # Connect to a UNC path
-        New-PSDrive -Name (Get-PSDAvailableDriveLetter) -PSProvider FileSystem -Root $global:psddsDeployRoot -Credential $loalCredential -Scope Global
+        try
+        {
+            New-PSDrive -Name (Get-PSDAvailableDriveLetter) -PSProvider FileSystem -Root $global:psddsDeployRoot -Credential $global:psddsCredential -Scope Global
+        }
+        catch
+        {
+            
+        }
         Get-PSDProvider -DeployRoot $global:psddsDeployRoot
     }
     else
@@ -78,20 +91,25 @@ function Get-PSDProvider
         [string] $deployRoot
     )
 
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): deployRoot is now $deployRoot"
+
     # Set an install directory if necessary (needed so the provider can find templates)
     if ((Test-Path "HKLM:\Software\Microsoft\Deployment 4") -eq $false)
     {
         $null = New-Item "HKLM:\Software\Microsoft\Deployment 4"
         Set-ItemProperty "HKLM:\Software\Microsoft\Deployment 4" -Name "Install_Dir" -Value "$deployRoot\"
-        Write-Verbose "Set MDT Install_Dir to $deployRoot\ for MDT Provider."
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Set MDT Install_Dir to $deployRoot\ for MDT Provider."
     }
 
     # Load the PSSnapIn PowerShell provider module
     $modules = Get-PSDContent -Content "Tools\Modules"
+    $VerbosePreference = "SilentlyContinue"
     Import-Module "$modules\Microsoft.BDD.PSSnapIn"
+    $verbosePreference = "Continue"
+
 
     # Create the PSDrive
-    Write-Verbose "Creating MDT provider drive DeploymentShare: at $deployRoot"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating MDT provider drive DeploymentShare: at $deployRoot"
     New-PSDrive -Name DeploymentShare -PSProvider MDTProvider -Root $deployRoot -Scope Global
 }
 
@@ -107,7 +125,6 @@ function Get-PSDAvailableDriveLetter
     }
 } 
 
-
 # Function for finding and retrieving the specified content.  The source location specifies
 # a relative path within the deployment share.  The destination specifies the local path where
 # the content should be placed.  If no destination is specified, it will be placed in a
@@ -119,43 +136,63 @@ function Get-PSDContent
         [string] $destination = ""
     )
 
+    $verbosePreference = "Continue"
+    $dest = ""
+
     # Track the time
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Track the time"
     $start = Get-Date
 
     # If the destination is blank, use a default value
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): If the destination is blank, use a default value"
     if ($destination -eq "")
     {
-        $dest = "$(Get-PSDLocalDataPath)\Cache\$content"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination is blank, setting value Dest"
+        $PSDLocalDataPath = Get-PSDLocalDataPath
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDLocalDataPath is $PSDLocalDataPath"
+        $dest = "$PSDLocalDataPath\Cache\$content"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Dest is $dest"
     }
     else
     {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination is NOT blank"
         $dest = $destination
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Dest is $dest"
     }
 
     # If the destination already exists, assume the content was already downloaded.
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): If the destination already exists, assume the content was already downloaded."
     # Otherwise, download it, copy it, .
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Otherwise, download it, copy it."
+
     if (Test-Path $dest)
     {
-        Write-Verbose "Already copied $content, not copying again."
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Access to $dest is OK"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Already copied $content, not copying again."
     }
     elseif ($global:psddsDeployRoot -ilike "http*")
     {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psddsDeployRoot is now $global:psddsDeployRoot"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running Get-PSDContentWeb -content $content -destination $dest"
         Get-PSDContentWeb -content $content -destination $dest
     }
     elseif ($global:psddsDeployRoot -like "\\*")
     {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psddsDeployRoot is now $global:psddsDeployRoot"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running Get-PSDContentUNC -content $content -destination $dest"
         Get-PSDContentUNC -content $content -destination $dest
     }
     else
     {
-        Write-Verbose "Path for $content is already local, not copying"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Path for $content is already local, not copying again"
     }
 
     # Report the time
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Report the time"
     $elapsed = (Get-Date) - $start
-    Write-Verbose "Elapsed time to transfer $content : $elapsed"
-
-    # Return the destinationf
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Elapsed time to transfer $content : $elapsed"
+    # Return the destination
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Return the destination $dest"
     return $dest
 }
 
@@ -167,7 +204,7 @@ function Get-PSDContentUNC
         [string] $destination
     )
 
-    Write-Verbose "Copying from $($global:psddsDeployRoot)\$content to $destination"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copying from $($global:psddsDeployRoot)\$content to $destination"
     Copy-PSDFolder "$($global:psddsDeployRoot)\$content" $destination
 }
 
@@ -178,7 +215,7 @@ function Get-PSDContentWeb
         [string] $content,
         [string] $destination
     )
-
+    
     $fullSource = "$($global:psddsDeployRoot)/$content"
     $fullSource = $fullSource.Replace("\", "/")
     $request = [System.Net.WebRequest]::Create($fullSource)
@@ -191,16 +228,21 @@ function Get-PSDContentWeb
     $request.Headers.Set("Depth", "infinity")
     $request.Credentials = $global:psddsCredential
           
-    Write-Verbose "Retrieving directory listing of $fullSource via WebDAV."
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Retrieving directory listing of $fullSource via WebDAV."
     try
     {  
         $response = $request.GetResponse()
     }
     catch
     {
-        Write-Verbose "Unable to retrieve directory listing."
-        Write-Verbose $_.Exception.InnerException
-        Write-Verbose $response
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to retrieve directory listing!"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($_.Exception.InnerException)"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $response"
+        $Message = "Unable to Retrieve directory listing of $($fullSource) via WebDAV. Error message: $($_.Exception.Message)"
+        Show-PSDInfo -Message "$($Message)" -Severity Error
+        Start-Process PowerShell -Wait
+        Break 
+
     }
 	
 	if ($response -ne $null)
@@ -221,7 +263,7 @@ function Get-PSDContentWeb
             }
             $results += $obj
         }
-        Write-Verbose "Directory listing retrieved with $($results.Count) items."
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Directory listing retrieved with $($results.Count) items."
 
         # Create the folder structure
         $results | ? { $_.iscollection -eq "1"} | sort destination | % {
@@ -236,25 +278,64 @@ function Get-PSDContentWeb
             }
         }
 
-        # If possible, do the transfer using BITS.  Otherwise, download the files one at a time
-        if ($env:SYSTEMDRIVE -eq "X:") {
+        # If possible, do the transfer using ACP or BITS.  Otherwise, download the files one at a time
+        if($tsenv:SMSTSDownloadProgram)
+        {
+            #We are using an ACP/ assume it works in WinPE as well. We use ACP as BITS does not function as regular BITS in WinPE, so cannot use PS cmdlet.
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using ACP."
 
+            # Begin create regular ACP style .ini file
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Create regular ACP style .ini file"
+
+            #Needed, do not remove.
+            $PSDPkgId = "PSD12345" 
+
+            # Create regular ACP style .ini file
+            $iniPath = "$env:tmp\$PSDPkgId"+"_Download.ini"
+            Set-Content -Value '[Download]' -Path $iniPath -Force -Encoding Ascii
+            Add-Content -Value "Source=$topUri" -Path $iniPath
+            Add-Content -Value "Destination=$destination" -Path $iniPath
+            Add-Content -Value "MDT=true" -Path $iniPath
+            
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination=$destination"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Source=$topUri"
+
+            # ToDo, check that the ini file exists before we try...
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading information saved to $iniPath so starting $tsenv:SMSTSDownloadProgram"
+
+            if((Test-Path -Path $iniPath) -eq $true)
+            {
+                #Start-Process -Wait -FilePath "$tsenv:SMSTSDownloadProgram" -ArgumentList "$iniPath $PSDPkgId `"$($destination)`""
+                Start-Process -Wait -WindowStyle Hidden -FilePath "$tsenv:SMSTSDownloadProgram" -ArgumentList "$iniPath $PSDPkgId `"$($destination)`""
+                # ToDo hash verification?
+            }
+            else
+            {
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to access $iniPath, aborting..."
+                Show-PSDInfo -Message "Unable to access $iniPath, aborting..." -Severity Information
+                Start-Process PowerShell -Wait
+                Exit 1
+            }
+        }
+
+        # If possible, do the transfer using BITS.  Otherwise, download the files one at a time
+        elseif ($env:SYSTEMDRIVE -eq "X:")
+        {
             # In Windows PE, download the files one at a time using WebClient
-            Write-Verbose "Downloading files using WebClient."
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using WebClient."
             $wc = New-Object System.Net.WebClient
             $wc.Credentials = $global:psddsCredential
             $results | ? { $_.iscollection -eq "0"} | sort destination | % {
                 $href = $_.href
                 $fullFile = "$destination\$($_.destination)"
-                # Write-Verbose "Downloading from $href to $fullFile"
                 try
                 {
                     $wc.DownloadFile($href, $fullFile)
                 }
                 catch
                 {
-                    Write-Verbose "Unable to download file $href."
-                    Write-Verbose $_.Exception.InnerException
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to download file $href."
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($_.Exception.InnerException)"
                 }
             }            
         }
@@ -267,15 +348,12 @@ function Get-PSDContentWeb
                 $sourceUrl += [string]$_.href
                 $fullFile = "$destination\$($_.destination)"
                 $destFile += [string]$fullFile
-                # Write-Verbose "Adding $($_.href) to $fullFile"
             }
-
             # Do the download using BITS
-            Write-Verbose "Downloading files using BITS."
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using BITS."
             $bitsJob = Start-BitsTransfer -Authentication Ntlm -Credential $global:psddsCredential -Source $sourceUrl -Destination $destFile -TransferType Download -DisplayName "PSD Transfer" -Priority High
         }
     }
-    
 }
 
 Export-ModuleMember -function Get-PSDConnection
@@ -286,7 +364,7 @@ if (Test-Path "tsenv:")
 {
     if ($tsenv:DeployRoot -ne "")
     {
-        Write-Verbose "Reconnecting to the deployment share at $($tsenv:DeployRoot)."
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Reconnecting to the deployment share at $($tsenv:DeployRoot)."
         if ($tsenv:UserDomain -ne "")
         {
             Get-PSDConnection -deployRoot $tsenv:DeployRoot -username "$($tsenv:UserDomain)\$($tsenv:UserID)" -password $tsenv:UserPassword
