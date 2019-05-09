@@ -1,9 +1,12 @@
 <#
 .SYNOPSIS
-
+	 Hydration Kit for the PSD Hydration toolkit 
 .DESCRIPTION
+	 This script installs the ADK instlals the PE installs MDT and then imports and extends the PSD environment for it. Once completed it installs and configures IIS for the PSD
+     	 Solution. This then calls for a reboot. Once the server is rebooted please run the script a second time. This will then cause the IIS environment to get configured. 
 
 .LINK
+	  https://github.com/FriendsOfMDT/PSD
 
 .NOTES
           FileName: New-PSDHydration.PS1
@@ -30,6 +33,9 @@
                [] Test the process and confirm that the hydrated environment works. 
 
 .Example
+	.\New-PSHydration.Ps1 -verbose
+	
+	This runs the script with the verbose commadn and logs the output to the screen.
 
 #>
 
