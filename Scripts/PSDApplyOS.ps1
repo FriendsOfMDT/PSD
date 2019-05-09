@@ -1,13 +1,27 @@
-# // ***************************************************************************
-# // 
-# // PowerShell Deployment for MDT
-# //
-# // File:      PSDApplyOS.ps1
-# // 
-# // Purpose:   Apply the specified operating system.
-# // 
-# // 
-# // ***************************************************************************
+<#
+.SYNOPSIS
+
+.DESCRIPTION
+
+.LINK
+
+.NOTES
+          FileName: PSDApplyOS.ps1
+          Solution: PowerShell Deployment for MDT
+          Purpose: Apply the specified operating system.
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2019-05-09
+
+          Version - 0.0.0 - () - Finalized functional version 1.
+          Version - 0.1.0 - (2019-05-09) - Check access to image file
+
+          TODO:
+
+.Example
+#>
 
 param (
 
