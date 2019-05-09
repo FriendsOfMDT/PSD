@@ -19,6 +19,8 @@
                                          - Remediated Displaying the FILE Path in the proper order for ADK content Download
                                          - Remediated Displaying the File PAth in the Proper order for the ADK PE Content Download if needed 
           Version - 0.1.2 - (2019-05-03) - Corrected spelling issue in the Get-IISInfo
+          Version - 0.1.3 - (2019-05-09) - Corrected bs.ini and cs.ini
+		  
 
 
 
@@ -661,25 +663,39 @@ process
           Write-PSDInstallLog -Message "Now Generating the task sequences"
           Import-MDTTaskSequence -Path "PSD:\Task Sequences" -Name "$($OSInfo.OSName) - Enterprise" -Template "PSDClient.xml" -Comments "" -ID "W10$($OSInfo.OSVersion)1" -Version "1.0" -OperatingSystemPath "PSD:\Operating Systems\$($OSInfo.OSName)\Windows 10 Enterprise in $($OSInfo.OSFolderName) install.wim" -FullName "ViaMonstra" -OrgName "ViaMonstra" -HomePage "about:blank" -Verbose
           Import-MDTTaskSequence -Path "PSD:\Task Sequences" -Name "$($OSInfo.OSName) - Pro" -Template "PSDClient.xml" -Comments "" -ID "W10$($OSInfo.OSVersion)2" -Version "1.0" -OperatingSystemPath "PSD:\Operating Systems\$($OSInfo.OSName)\Windows 10 Pro in $($OSInfo.OSFolderName) install.wim" -FullName "ViaMonstra" -OrgName "ViaMonstra" -HomePage "about:blank" -Verbose
-     $PSINI=@"
+$BSINI=@"
 [Settings]
-Properties=DevCleanup,DEVDebugLogging,DEVVerboseScreenLogging,PSDDeployRoots
 Priority=Default
+Properties=PSDDebug,DevCleanup,DEVDebugLogging,DEVVerboseScreenLogging,PSDDeployRoots
 
 [Default]
 PSDDeployRoots=http://$($ENV:ComputerName)/$($IISVirtualInfo),\\$($ENV:ComputerName)\$($psDeploymentShare)
-EventService=http://$($ENV:ComputerName):9800
 DEVVerboseScreenLogging=YES
 DevCleanup=NO
 DEVDebugLogging=YES
 UserID=$($AccountInfo.UserName)
 UserPassword=$([System.Runtime.InteropServices.Marshal]::PtrToStringAuto($([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($AccountInfo.Password))))
 UserDomain=$($AccountInfo.MachineorDomain)
+PSDDebug=YES
 "@
-          Write-PSDInstallLog "Created INI file to variable now forcing overwrite in the PSD Generated share"
-          $PSINI | Out-File -Force "\\$($ENV:ComputerName)\$($psDeploymentShare)\control\bootstrap.ini"
-          $PSINI | Out-File -Force "\\$($ENV:ComputerName)\$($psDeploymentShare)\control\CustomSettings.ini"
-          Write-PSDInstallLog -Message "Created the INI file over the top of existing files"
+          Write-PSDInstallLog "Created bootstrap.ini file to variable now forcing overwrite in the PSD Generated share"
+          $BSINI | Out-File -Force "\\$($ENV:ComputerName)\$($psDeploymentShare)\control\bootstrap.ini"
+$CSINI=@"
+[Settings]
+Priority=Default
+Properties=PSDDebug,DevCleanup,DEVDebugLogging,DEVVerboseScreenLogging,PSDDeployRoots
+
+[Default]
+OSInstall=Y
+DEVVerboseScreenLogging=YES
+DevCleanup=NO
+DEVDebugLogging=YES
+PSDDebug=YES
+EventService=http://$($ENV:ComputerName):9800
+"@
+
+          $CSINI | Out-File -Force "\\$($ENV:ComputerName)\$($psDeploymentShare)\control\CustomSettings.ini"
+          Write-PSDInstallLog -Message "Created the customsettings.ini file over the top of existing files"
           Write-PSDInstallLog -Message "Now enabling monitoring on the server"
           Set-ItemProperty -Path PSD: -Name MonitorHost -Value $ENV:ComputerName
           write-PSDInstallLog -Message "Now disabling the creation of 32bit boot media"
