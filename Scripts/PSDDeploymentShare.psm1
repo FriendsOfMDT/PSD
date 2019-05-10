@@ -1,19 +1,31 @@
-# // ***************************************************************************
-# // 
-# // PowerShell Deployment for MDT
-# //
-# // File:      PSDDeploymentShare.psd1
-# // 
-# // Purpose:   Connect to a deployment share and obtain content from it, using
-# //            either HTTP or SMB as needed.
-# // 
-# // ***************************************************************************
+<#
+.SYNOPSIS
+
+.DESCRIPTION
+
+.LINK
+
+.NOTES
+          FileName: PSDDeploymentShare.psd1
+          Solution: PowerShell Deployment for MDT
+          Purpose: Connect to a deployment share and obtain content from it, using either HTTP or SMB as needed.
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2019-05-09
+
+          Version - 0.0.0 - () - Finalized functional version 1.
+          Version - 0.1.1 - () - Removed blocker if we item could not be found, instead we continue and log, error handling must happen when object is needed, not when downloading.
+
+          TODO:
+
+.Example
+#>
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Importing module Bitstransfer"
-#$VerbosePreference = "SilentlyContinue"
 
 Import-Module BitsTransfer -Global
-#$verbosePreference = "Continue"
 
 # Local variables
 $global:psddsDeployRoot = ""

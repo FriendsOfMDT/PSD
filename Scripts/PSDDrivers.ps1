@@ -1,19 +1,31 @@
-# // ***************************************************************************
-# // 
-# // PowerShell Deployment for MDT
-# //
-# // File:      PSDDrivers.ps1
-# // 
-# // Purpose:   Apply the specified operating system.
-# // 
-# // 
-# // ***************************************************************************
+<#
+.SYNOPSIS
+
+.DESCRIPTION
+
+.LINK
+
+.NOTES
+          FileName: PSDDrivers.ps1
+          Solution: PowerShell Deployment for MDT
+          Purpose: Download and install drivers
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2019-05-09
+
+          Version - 0.0.0 - () - Finalized functional version 1.
+
+          TODO:
+          Add support for PNP
+
+.Example
+#>
 
 param (
 
 )
-
-
 
 # Load core modules
 Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global

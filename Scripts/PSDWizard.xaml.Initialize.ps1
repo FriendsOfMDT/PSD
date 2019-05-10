@@ -1,6 +1,26 @@
-#
-# PSDWizard.xaml.ps1
-#
+<#
+.SYNOPSIS
+
+.DESCRIPTION
+
+.LINK
+
+.NOTES
+          FileName: PSDWizard.xaml.ps1
+          Solution: PowerShell Deployment for MDT
+          Purpose: Script to initialize the wizard content in PSD
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2019-05-09
+
+          Version - 0.0.0 - () - Finalized functional version 1.
+
+          TODO:
+
+.Example
+#>
 
 function Validate-Wizard
 {
