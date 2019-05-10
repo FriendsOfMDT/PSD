@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sequence version="3.00" name="PSD Standard Client Task Sequence" description="A complete task sequence for deploying a client operating system using PowerShell">
+<sequence version="3.00" name="PSD Standard Client Task Sequence (AutoPilot)" description="A complete task sequence for deploying a client operating system using PowerShell">
   <group expand="false" name="Initialization" description="" disable="false" continueOnError="false">
     <action />
     <step type="BDD_Gather" name="Gather" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
@@ -309,7 +309,17 @@
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
     </step>
-    <step type="BDD_InjectDrivers" name="Inject Drivers" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Download and Install drivers" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID" />
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDDrivers.ps1</action>
+    </step>
+    <step type="BDD_InjectDrivers" name="Inject Drivers" description="" disable="true" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
         <variable name="DriverSelectionProfile" property="DriverSelectionProfile">Nothing</variable>
         <variable name="DriverInjectionMode" property="DriverInjectionMode">ALL</variable>
@@ -423,7 +433,7 @@
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTIGather.wsf"</action>
     </step>
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Pause with PowerShell" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Run cmd /c start &quot;PowerShell&quot; /wait PowerShell" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
       <defaultVarList>
         <variable name="PackageID" property="PackageID" />
         <variable name="RunAsUser" property="RunAsUser">false</variable>
@@ -453,7 +463,17 @@
         <action>smsboot.exe /target:WinPE</action>
       </step>
     </group>
-    <step type="BDD_InstallApplication" name="Install Applications" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Install Apps" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID" />
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>powershell.exe -file %SCRIPTROOT%\PSDApplications.ps1</action>
+    </step>
+    <step type="BDD_InstallApplication" name="Install Applications" disable="true" continueOnError="false" successCodeList="0 3010" description="" startIn="">
       <action>cscript.exe "%SCRIPTROOT%\ZTIApplications.wsf"</action>
       <defaultVarList>
         <variable name="ApplicationGUID" property="ApplicationGUID"></variable>
@@ -660,7 +680,7 @@
     <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
     <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
   </globalVarList>
-  <group expand="false" name="Post Config (Placeholder)" description="" disable="false" continueOnError="false">
+  <group expand="true" name="Post Config (Placeholder)" description="" disable="false" continueOnError="false">
     <action />
     <step type="SMS_TaskSequence_RebootAction" name="Restart computer" description="" disable="true" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>

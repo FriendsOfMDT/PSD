@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sequence version="3.00" name="PSD Standard Client Task Sequence" description="A complete task sequence for deploying a client operating system using PowerShell">
+<sequence version="3.00" name="PSD Standard Server Task Sequence" description="A complete task sequence for deploying a server operating system using PowerShell">
   <group expand="false" name="Initialization" description="" disable="false" continueOnError="false">
     <action />
     <step type="BDD_Gather" name="Gather" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
@@ -342,7 +342,7 @@
   <group expand="false" name="Install" description="" disable="false" continueOnError="false">
     <step type="BDD_InstallOS" name="Install Operating System" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
-        <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
+        <variable name="OSGUID" property="OSGUID">{262d9ac6-4cec-44d9-8a69-707eb8155148}</variable>
         <variable name="DestinationDisk" property="DestinationDisk">0</variable>
         <variable name="DestinationPartition" property="DestinationPartition">1</variable>
         <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
@@ -651,14 +651,14 @@
     </condition>
   </group>
   <globalVarList>
-    <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
+    <variable name="OSGUID" property="OSGUID">{262d9ac6-4cec-44d9-8a69-707eb8155148}</variable>
     <variable name="DestinationDisk" property="DestinationDisk">0</variable>
     <variable name="DestinationPartition" property="DestinationPartition">1</variable>
     <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
     <variable name="DestinationOSRefresh" property="DestinationOSRefresh"></variable>
     <variable name="DestinationOSDriveLetter" property="DestinationOSDriveLetter"></variable>
     <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
-    <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
+    <variable name="OSGUID" property="OSGUID">{262d9ac6-4cec-44d9-8a69-707eb8155148}</variable>
   </globalVarList>
   <group expand="false" name="Post Config (Placeholder)" description="" disable="false" continueOnError="false">
     <action />

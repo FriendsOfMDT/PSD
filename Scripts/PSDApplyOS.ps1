@@ -17,6 +17,7 @@
 
           Version - 0.0.0 - () - Finalized functional version 1.
           Version - 0.1.0 - (2019-05-09) - Check access to image file
+          Version - 0.1.1 - (2019-05-09) - Cleanup white space
 
           TODO:
 
@@ -35,20 +36,16 @@ Import-Module PSDDeploymentShare
 
 $verbosePreference = "Continue"
 
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Deployroot is now $($tsenv:DeployRoot)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now $env:PSModulePath"
 
 # Make sure we run at full power
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Make sure we run at full power"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Make sure we run at full power"
 & powercfg.exe /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
 
 # Get the OS image details
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Get the OS image details"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Get the OS image details"
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Operating system: $($tsenv:OSGUID)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Operating system: $($tsenv:OSGUID)"
 $os = Get-Item "DeploymentShare:\Operating Systems\$($tsenv:OSGUID)"
 $osSource = Get-PSDContent "$($os.Source.Substring(2))"
@@ -69,20 +66,16 @@ if((Test-Path -Path $image) -ne $true)
 }
 
 # Create a local scratch folder
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Create a local scratch folder"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Create a local scratch folder"
 $scratchPath = "$(Get-PSDLocalDataPath)\Scratch"
 Initialize-PSDFolder $scratchPath
 
 # Apply the image
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Apply the image"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Apply the image"
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Applying image $image index $index to $($tsenv:OSVolume)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Applying image $image index $index to $($tsenv:OSVolume)"
 $startTime = Get-Date
 Expand-WindowsImage -ImagePath $image -Index $index -ApplyPath "$($tsenv:OSVolume):\" -ScratchDirectory $scratchPath
 $duration = $(Get-Date) - $startTime
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Time to apply image: $($duration.ToString('hh\:mm\:ss'))"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Time to apply image: $($duration.ToString('hh\:mm\:ss'))"
 
 # Inject drivers using DISM if Setup.exe is missing
@@ -107,9 +100,7 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Time to apply image: $($
 #}
 
 # Make the OS bootable
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Make the OS bootable"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Make the OS bootable"
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Configuring volume $($tsenv:BootVolume) to boot $($tsenv:OSVolume):\Windows."
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Configuring volume $($tsenv:BootVolume) to boot $($tsenv:OSVolume):\Windows."
 if ($tsenv:IsUEFI -eq "True")
 {
@@ -120,20 +111,16 @@ else
     $args = @("$($tsenv:OSVolume):\Windows", "/s", "$($tsenv:BootVolume):")
 }
 #Added for troubleshooting (admminy)
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Running bcdboot.exe with the following arguments: $args"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running bcdboot.exe with the following arguments: $args"
 
 $result = Start-Process -FilePath "bcdboot.exe" -ArgumentList $args -Wait -Passthru
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): BCDBoot completed, rc = $($result.ExitCode)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): BCDBoot completed, rc = $($result.ExitCode)"
 
 # Fix the EFI partition type
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Fix the EFI partition type if using UEFI"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Fix the EFI partition type if using UEFI"
 if ($tsenv:IsUEFI -eq "True")
 {
 	# Fix the EFI partition type
-    #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Fix the EFI partition type"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Fix the EFI partition type"
 	@"
 select volume $($tsenv:BootVolume)

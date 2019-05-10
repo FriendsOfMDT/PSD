@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sequence version="3.07" name="PSD RnD" description="PSD RnD test TS">
+<sequence version="3.00" name="PSD RnD" description="PSD RnD test TS">
   <group expand="true" name="Initialization" description="" disable="false" continueOnError="false">
     <action />
     <step type="BDD_InstallOS" name="Install Operating System (Disabled)" description="" disable="true" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
