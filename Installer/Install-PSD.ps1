@@ -11,14 +11,14 @@ Param(
 )
 
 if($psDeploymentFolder -eq 'NA'){
-    Write-Error "You have not specified the -psDeploymentfolder"
-    Write-Error "Run the installer script again and specify -psDeploymentFolder and -psDeploymentShare"
+    Write-Error "You have not specified: -psDeploymentfolder"
+    Write-Error "Run the installer script again and specify: -psDeploymentFolder and -psDeploymentShare"
     Break
 }
 
 if($psDeploymentShare -eq 'NA'){
-    Write-Error "You have not specified the -psDeploymentfolder"
-    Write-Error "Run the installer script again and specify -psDeploymentFolder and -psDeploymentShare"
+    Write-Error "You have not specified: -psDeploymentfolder"
+    Write-Error "Run the installer script again and specify: -psDeploymentFolder and -psDeploymentShare"
     Break
 }
 
@@ -28,7 +28,7 @@ $verbosePreference = "Continue"
 
 if($Upgrade)
 {
-    Write-Verbose "Installer running in upgrade mode"
+    Write-Verbose "The installer is running in upgrade mode."
 }
 
 
@@ -44,7 +44,7 @@ function Copy-PSDFolder
 
     $s = $source.TrimEnd("\")
     $d = $destination.TrimEnd("\")
-    Write-Verbose "Copying folder $source to $destination using XCopy"
+    Write-Verbose "Copying folder $source to $destination using Xcopy."
     & xcopy $s $d /s /e /v /y /i | Out-Null
 }
 
@@ -62,22 +62,22 @@ Write-Verbose "MDT installed version== $mdtVer"
 # Create the folder and share
 if (Test-Path -path $psDeploymentFolder)
 {
-    Write-Verbose -Message "The Deployment folder already exists"
+    Write-Verbose -Message "The deployment folder already exists."
     if(Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder})
     {
-        Write-Verbose -Message "The Deployment share has already been created as a share checking if upgrade flag is set"
+        Write-Verbose -Message "The deployment share has already been created as a share. Checking if upgrade flag is set."
         if(!($Upgrade))
         {
-            Write-Verbose "The deployment share already exists"
-            Write-Warning "PSD Folder already exist, will break"
-            BREAK
+            Write-Verbose "The deployment share already exists."
+            Write-Warning "PSD folder already exists. Now breaking."
+            Break
         }
     }
     elseIf(!(Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder}))
     {
-        Write-Verbose -Message "The Deployment folder was NOT shared now attempting to share the folder"
+        Write-Verbose -Message "The deployment folder was NOT shared. Now attempting to share the folder."
         New-SmbShare -Name $psDeploymentShare -Path $psDeploymentFolder -FullAccess Administrators
-        Write-Verbose -Message "The Deployment folder has now been shared as $($psDeploymentshare)"
+        Write-Verbose -Message "The deployment folder has now been shared as: $($psDeploymentshare)"
     }
 }
 else
@@ -101,16 +101,16 @@ if(!($Upgrade))
 
 # Copy the scripts
 Copy-PSDFolder "$install\Scripts\*.ps1" "$psDeploymentFolder\Scripts"
-Dir "$psDeploymentFolder\Scripts\*.ps1" | Unblock-File 
+Get-ChildItem "$psDeploymentFolder\Scripts\*.ps1" | Unblock-File 
 Copy-PSDFolder "$install\Scripts\*.xaml" "$psDeploymentFolder\Scripts"
-Dir "$psDeploymentFolder\Scripts\*.xaml" | Unblock-File 
+Get-ChildItem "$psDeploymentFolder\Scripts\*.xaml" | Unblock-File 
 
 # Copy the templates
 Copy-PSDFolder "$install\Templates" "$psDeploymentFolder\Templates"
-Dir "$psDeploymentFolder\Templates\*" | Unblock-File
+Get-ChildItem "$psDeploymentFolder\Templates\*" | Unblock-File
 
 # Copy the script modules to the right places
-write-verbose "Copying PSD Modules to $psdeploymentfolder......."
+write-verbose "Copying PSD Modules to $psdeploymentfolder..."
 "PSDGather", "PSDDeploymentShare", "PSDUtility", "PSDWizard" | % {
     if ((Test-Path "$psDeploymentFolder\Tools\Modules\$_") -eq $false)
     {
@@ -118,7 +118,7 @@ write-verbose "Copying PSD Modules to $psdeploymentfolder......."
     }
     Write-Verbose "Copying module $_ to $psDeploymentFolder\Tools\Modules"
     Copy-Item "$install\Scripts\$_.psm1" "$psDeploymentFolder\Tools\Modules\$_"
-    Dir "$psDeploymentFolder\Tools\Modules\$_\*" | Unblock-File
+    Get-ChildItem "$psDeploymentFolder\Tools\Modules\$_\*" | Unblock-File
 }
 
 # Copy the provider module files
@@ -156,7 +156,7 @@ Copy-Item "$($mdtDir)Templates\LinkedDeploymentShares.xsd" "$psDeploymentFolder\
 # Update the ISO properties
 if(!($Upgrade))
 {
-    Write-Verbose "Updating PSD ISO properties"
+    Write-Verbose "Updating PSD ISO properties."
     Set-ItemProperty PSD: -Name "Boot.x86.LiteTouchISOName" -Value "PSDLiteTouch_x86.iso"
     Set-ItemProperty PSD: -Name "Boot.x86.LiteTouchWIMDescription" -Value "PowerShell Deployment Boot Image (x86)"
     Set-ItemProperty PSD: -Name "Boot.x64.LiteTouchISOName" -Value "PSDLiteTouch_x64.iso"
@@ -164,7 +164,7 @@ if(!($Upgrade))
 }
 
 #Add ZTIGather.XML to correct folder (The file is missing after install) (added by admminy)
-Write-verbose "Adding ZTIGather.XML to correct folder"
+Write-verbose "Adding ZTIGather.XML to correct folder."
 Copy-Item "$($mdtDir)Templates\Distribution\Scripts\ZTIGather.xml" "$psDeploymentFolder\Tools\Modules\PSDGather"
 
 #Add UNC Path to DeploymentShare (TBA)

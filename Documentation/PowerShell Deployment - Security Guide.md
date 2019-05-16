@@ -5,7 +5,7 @@ April 2019
 Security for PSD-enabled MDT solutions is essentially and effectively identical to a traditional MDT environment. Passwords are hidden and obfuscated from logs but may be transmitted in the clear over the wire.
 
 ## Accounts and Permissions
-- PSD Installation - Installation of PSD requires administrative privileges and the execution of PSD_Install.ps1 from an elevated permissions Powershell prompt
+- PSD Installation - Installation of PSD requires administrative privileges and the execution of PSD_Install.ps1 from an elevated Powershell prompt.
 
 ### PSD/MDT Shares and Content
 Operation of PSD-enabled task sequences requires the following:
@@ -26,7 +26,7 @@ Recording log and event information is done via log files
 
 ### Active Directory
 - Account specified in BS/CS.ini
-    - JOINDOMAIN - set to target domain name
+    - JOINDOMAIN - Set to target domain name
     - DOMAINADMIN - AD account with rights to create and delete AD computer objects
     - DOMAINADMINPASSWORD = AD account password
     - DOMAINADMINDOMAN - blah
@@ -37,7 +37,7 @@ Recording log and event information is done via log files
 ### IIS
 
 ### DaRT
-TODO: document DART limitations, and security considerations (TEST)
+TODO: document DaRT limitations, and security considerations (TEST)
 
 ## Firewall and Ports
 MDT and PSD utilized the following ports:

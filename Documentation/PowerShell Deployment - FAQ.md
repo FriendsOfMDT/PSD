@@ -4,8 +4,8 @@ April 2019
 This document highlights and captures some of the known issues and limitations of PSD (as of the published date above). 
 
 ## Frequently Asked Questions
-Q: Does the installer copy over my existing MDT Deployment Share content (e.g. applications, drivers, task sequences, etc) to a new PSD share?
->A: No, users and administrators will need to copy/export any existing components to *new* PSD shares using in-built content management features of MDT. MDT Shares which have been PSD upgraded will continue to have access to any existing object and artifacts.
+Q: Does the installer copy over my existing MDT deployment share content (e.g. applications, drivers, task sequences, etc) to a new PSD share?
+>A: No, users and administrators will need to copy/export any existing components to *new* PSD shares using in-built content management features of MDT. MDT shares which have been PSD upgraded will continue to have access to any existing objects and artifacts.
 
 Q: Can the installer (PSD_Install.ps1) be executed remotely?
 >A: No, PSD_Install.ps1 must be run locally with administrative rights on the target/intended MDT installation.
@@ -13,7 +13,7 @@ Q: Can the installer (PSD_Install.ps1) be executed remotely?
 Q: Does the installer copy over my existing BootStrap.ini or CustomSettings.ini files to the target PSD repositories?
 >A: No, if you've created a new PSD-enabled deployment share, users and administrators will need to manually copy or reproduce any existing Bootstrap and CustomSettings files to new repositories.
 
-Q: What are the client/target hardware requirements for baremetal PSD deployments?
+Q: What are the client/target hardware requirements for BareMetal PSD deployments?
 >A: PSD requires roughly the same hardware as is required for Windows 10 and MDT deployments:
 - At least 1.5GB RAM (WinPE has been extended and requires additional memory)
 - At least one (1) network adapter(s)
@@ -21,22 +21,22 @@ Q: What are the client/target hardware requirements for baremetal PSD deployment
 - At least one (1) XXX MHz processor (for New/BareMetal deployments)
 
 Q: Are system clocks synchronized?
-  >A: Yes, PSDStart.ps1 will attempt to synchronize the time are deployment target computers. Deployment Roots servers and or the HTTP/S target servers will be NTP synchronized.
+>A: Yes, PSDStart.ps1 will attempt to synchronize the time on deployment target computers. Deployment root servers and/or the HTTP/S target servers will be NTP synchronized.
 
 Q: Does PSD work with 2Pint's ACP solution?
-  >A: TBD
+>A: TBD
 
 Q: How does PSD work with 2Pint's ACP solution?
-  >A: lightweight description here. See [link] (http://somedocument.com}
+>A: lightweight description here. See [link] (http://somedocument.com}
 
 Q: Does PSD work with 1E's Nomad solution?
-  >A: PSD has not been tested in conjunction with 1E's Nomad product (yet)
+>A: PSD has not been tested in conjunction with 1E's Nomad product (yet)
 
 Q: Does PSD work with Deployment Optimization?
-  >A: TBD
+>A: TBD
 
 Q: Does PSD work with Branch Cache?
-  >A: TBD
+>A: TBD
 
 Q: Does PSD work with Peer Cache?
 >A: TBD
@@ -45,20 +45,19 @@ Q: Why does the PowerShell window appear to flash and then change size?
 >A: The default window is resized by PSDStart by design. You should observe it to change from full screen to roughly one third the screen early in the boot/start process. This is again by design.
 
 Q: What is "Transcript Logging"?
->A: Logs (for example PSD.LOG, and BDD.log) are what we explicitly write, Transcript logs captures everything that happens on the screen. PSD Transcript logs are much better suited and useful for troubleshooting, but may be visually "sub-optimal".
+>A: Logs (for example PSD.LOG, and BDD.log) are what we explicitly write, Transcript logs capture everything that happens on the screen. PSD Transcript logs are much better suited and useful for troubleshooting, but may be visually "sub-optimal".
 
 Q: What do I see frequent references to "Stopping Transcript Logging"?
 >A: (TBA MiNy)
 
 Q: Do I still need to 'add' PowerShell support to my WinPE images?
->A: No, the PSD installation and scripting takes care of it for you. As a matter of fact, unticking the box on the WinPE Features tab will not affect PSD at all.
+>A: No, the PSD installation and scripting takes care of it for you. As a matter of fact, un-ticking the box on the WinPE Features tab will not affect PSD at all.
 
 Q: Will PSD work on my xxx version of MDT or ADK?
 >A: We've only developed and tested against the versions and platforms listed below. If you have success on additional versions and platforms, please be sure and let us know!
 
 Q: Do I need to add PowerShell to my boot media images?
-
-A: **NO**, PSD and MDT automatically handle this for you. By default LiteTouchPE.XML automatically injects PowerShell into Boot Media (despite what may or may not be configured in the MDT WinPE tab)
+>A: **NO**, PSD and MDT automatically handle this for you. By default LiteTouchPE.XML automatically injects PowerShell into Boot Media (despite what may or may not be configured in the MDT WinPE tab)
 
 Q: Which MDT components are copied or injected into the PSD Boot Media?
 >A: As defined by **LiteTouchPE.XML**, the following files are injected into MDT and PSD boot media by default:
@@ -108,7 +107,7 @@ Q: What scripts or files can be safely deleted from my PSD Deployment Share?
 
 ## Documented Platforms and Scenarios
 Q: What operating systems and components has PSD been tested and or evaluated against?
->A: The following tables identifies tested and validated components, scenarios as well as testing and development status: 
+>A: The following table identifies tested and validated components and scenarios as well as testing and development status: 
 <table>
   <tr>
     <th>Component</th>
