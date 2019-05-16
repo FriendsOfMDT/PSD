@@ -2,7 +2,7 @@
     $MDTDSRoot
 )
 
-# Hard Coded Variables
+# Hard Coded Variables:
 $PSDriveName = "MDT001"
 #$MDTDSRoot = "E:\PSProduction"
 
@@ -31,7 +31,7 @@ foreach($DriverFolder in $DriverFolders){
     $FileName = ($DriverFolder.BaseName).replace(" ","_") + ".zip"
     $DestinationFolderPath = $MDTDSRoot + "\DriverPackages\" + ($DriverFolder.name).replace(" ","_")
     New-Item -Path $DestinationFolderPath -ItemType Directory -Force
-    Add-Type -Assembly ‘System.IO.Compression.FileSystem’ -PassThru | Select -First 1 | foreach {
+    Add-Type -Assembly ‘System.IO.Compression.FileSystem’ -PassThru | Select-Object -First 1 | ForEach-Object {
         [IO.Compression.ZIPFile]::CreateFromDirectory("$($DriverFolder.fullname)", "$($DestinationFolderPath)" + "\" + $FileName)
     }
 }
