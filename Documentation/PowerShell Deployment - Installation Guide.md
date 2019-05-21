@@ -80,6 +80,7 @@ The following actions should be completed as part of PSD installation:
     >PRO TIP: Be sure to configure *BOTH* x86 and x64 WinPE settings.
 
 * [ ] **Enable MDT monitoring** - Enable MDT Event Monitoring and specify the MDT server name and ports to be used. ![Event Monitoring configuration](images/Config/PSDConfig-Event.png "Event Monitoring")
+    >PRO TIP: Azure hosted VMs FQDNs will likely not work when configuring MDT Event Monitoring. Just use the internal network name in the MDT configuration panel and be sure to specify the internet-facing Azure VM name in BootStrap and CustomSettings files. 
 
 * [ ] **Update CustomSettings.ini** - Edit and Customize CUSTOMSETTINGS.INI to perform the necessary and desired automation and configuration of your OSD deployments. These should be settings to affect the installed OS typically. Be sure to configure new PSD properties and variables. See XXX for more details.
     >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from CustomSettings.ini. All other MDT techniques and settings still apply.
@@ -122,6 +123,8 @@ The following actions should be completed as part of PSD installation:
 
     >PRO TIP: Be on the lookout for multiple (or rogue) PXE servers on the network
 
+    >PRO TIP: You'll need to enable TCP ports 80, 443, 9800 and 9801 for many scenarios.
+
 * [ ] **Configure IIS for PSD over HTTP/S** - Install and configure IIS and WebDAV). See the [IIS Configuration Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20IIS%20Configuration%20Guide.md) for details.
     - [ ] Install IIS
     - [ ] Install and configure WebDAV
@@ -131,3 +134,7 @@ The following actions should be completed as part of PSD installation:
 * [ ] **Create PSD Task Sequence** - You **MUST** create a new Task Sequence from the PSD Templates within the workbench. PSD will fail otherwise. Do not attempt to clone/copy/import or otherwise work around this step. Some steps are required for PSD functionality. Do not delete any of the PSD task sequence steps - you may disable steps in the PSD Template task sequences if you choose.
 
     >PRO TIP: If you upgrade PSD version at a later date, **expect** to recreate your task sequences from the new PSD templates.
+
+# Troubleshooting
+The following links are provided to assist in troubleshooting.
+- [MDT Event Service troubleshooting](https://blogs.technet.microsoft.com/mniehaus/2012/05/10/troubleshooting-mdt-2012-monitoring/)
