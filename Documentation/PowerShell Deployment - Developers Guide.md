@@ -25,13 +25,14 @@ The following PowerShell modules and scripts are provided with PSD:
 
 ## PSD Scripts
 The following PowerShell scripts are included in PSD:
+
 | Script               	| Description 	| Equivalent LTI script
 |----------------------	|-------------	| ---------------|
 | PSDApplications.ps1 	| Installs the apps specified by task sequence variables *Applications* and *MandatoryApplications*. Downloads applications to the PSD cache after validating platform and checking for existing or previous installation. Supports MSIExe.exe, .CMD and cscript installations. | ZTIApplications.wsf |
 | PSDApplyOS.ps1       	| Sets PowerCFG to full power profiles. Applies the OS image using DISM. Modifies boot configurations | LTIApply.wsf |   
 | PSDApplyWinPE.ps1     | Applies WinPE, supports reboot scenarios and disk operations  | n/a  |
 | PSDConfigure.ps1     	| Customizes and configures the Unattend.xml file  | ZTIConfigure.wsf |
-| PSDCustomPostWU.ps1  	| Incomplete. Installs customizations and custom actions POST Windows Update | n/a   |
+| PSDCustomPostWU.ps1  	| Incomplete. Installs customizations and custom actions POST Windows Update | n/a |
 | PSDCustomPreWU.ps1   	| Incomplete. Installs customizations and custom actions PRE Windows Update | n/a |
 | PSDDisableBDEProtectors.ps1 | Disables BitLocker protection | ZTIDisableBDEProtectors.wsf |  
 | PSDDrivers.ps1       	| Copies drivers to PSD cache on target systems and does offline install of those drivers | ZTIDrivers.wsf |
@@ -53,13 +54,14 @@ The following PowerShell scripts are included in PSD:
     
 ## PSD Modules
 The following PowerShell script modules and function libraries are included in PSD:
+
 | Module                	| Description 	|
 |------------------------	|-------------	|
-| PSDGather.psm1    	    | Module for gathering information about the OS and environment (mostly from WMI), and for processing rules (Bootstrap.ini, CustomSettings.ini).  All the resulting information is saved into task sequence variables	|
+| PSDGather.psm1    	    | Module for gathering information about the OS and environment (mostly from WMI), and for processing rules (Bootstrap.ini, CustomSettings.ini).  All the resulting information is saved into task sequence variables |
 | PSDUtility.psm1         | General utility routines useful for all PSD scripts	|
-| PSDWizard.psm1     	    | Module containing utilities for generating and processing the PSD Wizard |
+| PSDWizard.psm1          | Module containing utilities for generating and processing the PSD Wizard |
 | PSDDeploymentshare.psm1 | Connect to a deployment share and obtain content from it, using either HTTP(s) or SMB as needed |
-| ZTIUtility.psm1 | Not really used, left over MDT relic |
+| ZTIUtility.psm1         | Not really used, left over MDT relic |
 
 
 ## PSD Other Files

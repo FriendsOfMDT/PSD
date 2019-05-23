@@ -97,29 +97,29 @@ By default, a self signed cert (named PSDRoot.cer) must be generated and used wi
   </tr>
   <tr>
     <td>Create PSD self-signed certificate</td>
-    <td>Open IIS Manager<br>Navigate to the PSD server<br>Navigate to Default Web Site (or appropriate<br>Click on **Certificates**<br>(image)</td>
+    <td>- Open IIS Manager<br>- Navigate to the PSD server<br>- Navigate to Default Web Site (or appropriate)<br>- Click on **Certificates**<br>(image)</td>
   </tr>
   <tr>
     <td>Bind certificate to IIS</td>
-    <td>Navigate to the PSD server<br>Navigate to Default Web Site (or appropriate<br>Click on **Bindings**<br></td>
+    <td>- Navigate to the PSD server<br>- Navigate to Default Web Site (or appropriate)<br>- Click on **Bindings**<br></td>
   </tr>
   <tr>
-    <td>Copy PSDRoot.cer and certutil.exe to PSD Deployment Share</td>
-    <td>Windows 10 ENT x64 EN 1809<br>
-    Windows 10 ENT x64 EN 1709</td>
+    <td>Copy cert files and tools to MDT/PSD</td>
+    <td>Copy certutil.exe to PSD Deployment Share<br>
+   Copy PSDRoot.cer to PSD Deployment Share</td>
   </tr>
   <tr>
     <td>Regenerate PSD boot media</td>
-    <td>Windows 7 ENT x64 SP1<br></td>
+    <td>- Select PSD Deployment share in MDT Workbench<br>- Update Deployment Share and completely generate new boot media</td>
   </tr>
   <tr>
-    <td>Target client OS</td>
-    <td>Windows 7 ENT x32 SP1<br>Windows 8.x </td>
+    <td>Task Sequence(s)</td>
+    <td>- blah </td>
   </tr>
   </table>
 
-# Hydration
-The New-PSDHydration.ps1 script will completely build out a basic Windows Server in about 20m. The hydration script calls the PSD Installer script (Install-PSD.ps1) and the PSD Installation script (New-PSDWebInstance.ps1) as part of it's activities.
+# PSD Hydration
+The **New-PSDHydration.ps1** script will completely build out a basic Windows Server in about 20 minutes. The PSD Hydration script calls the PSD Installer script (Install-PSD.ps1) and the PSD Installation script (New-PSDWebInstance.ps1) as part of it's activities.
 
 ## Hydration Prerequisites Checklist
 * [ ] **Windows Server 2019** - basic Windows 2019 Server **without** IIS or WebDAV pre-installed or configured. This server should be as vanilla as possible.
@@ -128,22 +128,22 @@ The New-PSDHydration.ps1 script will completely build out a basic Windows Server
 * [ ] **Download ADK for PE** - download and store the appropriate ADK for PE installer for your environment. You can optionally also run the ADK PE Installer in advance and download the actual ADK content in advance.
 * [ ] **Download MDT** - download and store the appropriate MDT installer for your environment. 
 * [ ] **Download Windows 10** - download and store an appropriate Windows 10 ISO for your environment. 
-    >PRO TIP: You may want to avoid **Evaluation** media 
-* [ ] **Network Access Account** - (pre)create a domain or local account that can be used to access the deployment share.
-    >PRO TIP: Make sure this account has the least privileges needed. At a minimum, read/execute/list for the deployment share. This account doesn't need JoinDomain or Logon rights. 
-* [ ] **Create Deployment Share Location** - The Hydration script expects a target share folder to already be created.
-* [ ] **Run the PSD Hydration script** - The Hydration script will run mostly silent by default, but will require some info and iteration by a user. The Hydration script generates a log in the same directory it was run from.
-    >PRO TIP: Run the PSD hydration script from an Elevated PowerShell prompt with the -verbose flag for maximum visibility.
+    >PRO TIP: You may want to avoid the use of **Evaluation** media as it's not been thoroughly tested. 
+* [ ] **Network Access Account** - (pre)create a domain or local account that can be used to access the PSD deployment share.
+    >PRO TIP: Make sure this account has the least privileges needed. At a minimum, read/execute/list for the deployment share. This account does not require JoinDomain or Logon rights. 
+* [ ] **Create Deployment Share Location** - The Hydration script expects a target share folder to already have been created.
+* [ ] **Run the PSD Hydration script** - The PSD Hydration script will run mostly silent by default, but will require some info and input to complete. The PSD Hydration script generates a log in the same directory it was run from.
+    >PRO TIP: Run the PSD hydration script from an elevated PowerShell prompt with the **-verbose** option for maximum visibility.
 
 ## Post Hydration Tasks
-You'll still need to do some things after hydration is finished.
+You'll still need to do some things after PSD hydration is finished:
 - Configure Firewall ports
 - Configure certificates 
 - Customize wallpaper(s)
 - Customize Bootstrap.ini
 - Customize CustomSettings.ini
 - (Optional) Edit your task sequence
-- Add hardware drivers
-- Add applications
-- etc and more
+- Add your hardware drivers
+- Add your applications
+- etc (and more)
 
