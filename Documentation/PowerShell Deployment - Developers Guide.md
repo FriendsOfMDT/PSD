@@ -66,10 +66,11 @@ The following PowerShell script modules and function libraries are included in P
 
 ## PSD Other Files
 The following additional files are included in PSD:
+
 | Module                	    | Description 	|
 |------------------------	    |-------------	|
-| PSDWizard.xaml   	          | Defines PSD Wizard content and UI, based on WPF |
-| PSDWizard.xaml.initialize.ps1 | Script to initialize the wizard content in PSD	|
+| PSDWizard.xaml              | Defines PSD Wizard content and UI, based on WPF |
+| PSDWizard.xaml.initialize.ps1 | Script to initialize the wizard content in PSD |
 
 
 # PSD Script Mapping
