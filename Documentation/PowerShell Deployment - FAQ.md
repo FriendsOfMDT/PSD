@@ -281,10 +281,11 @@ Please review the  [PSD Installation Guide](https://github.com/soupman98/PSD/blo
 The following items are not yet working, coded or tested.
 
 - Patching 
-- installation of language packs
+- Installation of language packs
 - %variables% in BootStrap and CustomSettings.ini
 - Evaluation Media (not yet supported)
 - DaRT
+- SLShare logging
 - SLShareDynamicLogging
 - MDT Database connectivity
 - SLSHARE across the internet
