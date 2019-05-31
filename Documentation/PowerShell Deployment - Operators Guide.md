@@ -80,17 +80,17 @@ Some PSD functionality can be tested and developed using a technique similar to 
 1. At this point, you should have a TS environment, access to TS variables. You can import modules, create PSDrives, and run many of the scripts and modules provided by PSD. The default script normally run first is PSDStart.ps1. You may need to map shares, and copy files locally. Have fun!
 
 # PSD and 2Pint ACP
-This section for how to install and configure PSD in conjunction with 2Pint software
+This section for how to install and configure PSD in conjunction with 2Pint software. [in progress]
 
 ### Pint Overview
-tba Andreas
+[In Progress]
 
 ### Pre Requisites
 - item 1
 - item 2
 
 ### Installing 2Pint software for PSD
-as;dlfkjas;lkdjf
+[In Progress]
 - item 1
 - item 2
 
@@ -121,6 +121,7 @@ The following variables may be useful when customizing or developing PSD capabil
 | **Variable** | **Mandatory/Optional** | Description
 |--------------|:------------:|-----------|
 | **DevCleanUp** | Optional | Used to the control cleanup up log files. When set to TRUE, the task sequence engine removes all log files. When FALSE, log files are left in place (C:\MININT)
-| **DevDebugLogging** | Optional | blah blah blah
-| **DevVerboseScreenLogging** | Optional | blah blah blah 
+| **DevDebugLogging** | Optional | [In Progress]
+| **DevVerboseScreenLogging** | Optional | [In Progress]
+ 
 
