@@ -14,6 +14,11 @@ Installation is relatively straight forward. You can either install PSD and spec
 Refer to the  [PSD Installation Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20Installation%20Guide.md) for detailed installation instructions.
 >PRO TIP: You may want to experiment with the PSD Kit outside of production environments initially. 
 
+Note: If you upgrade an existing PSD deployment share with the -upgrade parameter, you need to do the following after the upgrade
+- Generate new boot image(s) by updating the deployment share.
+- Replace any existing PSD boot images in WDS with the updated ones.
+- If the new PSD version have updated task sequence templates, you need to create new task sequences for those changes to take effect. Note that not all new versions will have new task sequence templates. Read the version relase notes to find out.
+
 ## Configuration and Automation
 
 ### New PSD Variables - Overview
