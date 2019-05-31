@@ -1,6 +1,26 @@
-#
-# PSDWizard.xaml.ps1
-#
+<#
+.SYNOPSIS
+
+.DESCRIPTION
+
+.LINK
+
+.NOTES
+          FileName: PSDWizard.xaml.ps1
+          Solution: PowerShell Deployment for MDT
+          Purpose: Script to initialize the wizard content in PSD
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2019-05-09
+
+          Version - 0.0.0 - () - Finalized functional version 1.
+
+          TODO:
+
+.Example
+#>
 
 function Validate-Wizard
 {
@@ -13,7 +33,7 @@ Get-ChildItem -Path "DeploymentShare:\Task Sequences" | % {
     $t = New-Object System.Windows.Controls.TreeViewItem
     $t.Header = $_.Name
     $t.Tag = $_
-    Write-Verbose $t.Tag.PSPath 
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($t.Tag.PSPath)"
     if ($_.PSIsContainer) {
         $t.Items.Add("*")
     }
@@ -30,7 +50,8 @@ Get-ChildItem -Path "DeploymentShare:\Task Sequences" | % {
         $current.Items.clear()
         $pos = $current.Tag.PSPath.IndexOf("::") + 2
         $path = $current.Tag.PSPath.Substring($pos)
-        Write-Verbose $path
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $path"
+
         Get-ChildItem -Path $path | % {
             $t = New-Object System.Windows.Controls.TreeViewItem
             $t.Header = $_.Name

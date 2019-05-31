@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<sequence version="3.00" name="PSD Standard Client Task Sequence" description="A complete task sequence for deploying a client operating system using PowerShell">
-  <group expand="false" name="Initialization" description="" disable="false" continueOnError="false">
+<sequence version="3.00" name="PSD Standard Client Task Sequence (2Pint)" description="A complete task sequence for deploying a client operating system using PowerShell">
+  <group expand="true" name="Initialization" description="" disable="false" continueOnError="false">
     <action />
     <step type="BDD_Gather" name="Gather" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
@@ -249,6 +249,70 @@
         </defaultVarList>
         <action>cscript.exe "%SCRIPTROOT%\ZTIDiskpart.wsf"</action>
       </step>
+      <group expand="false" name="2Pint Software Configuration" description="" disable="false" continueOnError="false">
+        <action />
+        <group expand="false" name="Set Variables" description="" disable="false" continueOnError="false">
+          <step type="SMS_TaskSequence_SetVariableAction" name="Set Alternative Content Provider (BITS)" description="BITSACP.EXE has to be present on the system for this to work." disable="false" continueOnError="false" successCodeList="0 3010">
+            <defaultVarList>
+              <variable name="VariableName" property="VariableName">SMSTSDownloadProgram</variable>
+              <variable name="VariableValue" property="VariableValue">BITSACP.exe</variable>
+            </defaultVarList>
+            <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+          </step>
+          <step type="SMS_TaskSequence_SetVariableAction" name="Set the BranchCache Version Variable" description="Set version 1.0 for Windows 7, and version 2.0 for Windows 8.1 and above" disable="false" continueOnError="false" successCodeList="0 3010">
+            <defaultVarList>
+              <variable name="VariableName" property="VariableName">BCVERSION</variable>
+              <variable name="VariableValue" property="VariableValue">2.0</variable>
+            </defaultVarList>
+            <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+          </step>
+          <step type="SMS_TaskSequence_SetVariableAction" name="Set the BranchCache Port Variable" description="the default is 80 so we want to change this to avoid conflicts with other apps that might use that port." disable="false" continueOnError="false" successCodeList="0 3010">
+            <defaultVarList>
+              <variable name="VariableName" property="VariableName">BCPORT</variable>
+              <variable name="VariableValue" property="VariableValue">1337</variable>
+            </defaultVarList>
+            <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+          </step>
+          <step type="SMS_TaskSequence_SetVariableAction" name="Set the BranchCache Cache Age Variable" description="Sets the age in days for how long untouched data will remain in the cache before being cleaned out." disable="false" continueOnError="false" successCodeList="0 3010">
+            <defaultVarList>
+              <variable name="VariableName" property="VariableName">BCTTL</variable>
+              <variable name="VariableValue" property="VariableValue">365</variable>
+            </defaultVarList>
+            <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+          </step>
+          <action />
+        </group>
+        <group expand="false" name="BITS and BranchCache Configuration" description="" disable="false" continueOnError="false">
+          <step type="SMS_TaskSequence_RunCommandLineAction" name="Enable BranchCache &amp; BITS Services" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+            <defaultVarList>
+              <variable name="PackageID" property="PackageID" />
+              <variable name="RunAsUser" property="RunAsUser">false</variable>
+              <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+              <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+              <variable name="LoadProfile" property="LoadProfile">false</variable>
+            </defaultVarList>
+            <action>BCEnabler.exe Enable %_SMSTSMDataPath%\BCCache %BCVERSION% %BCPORT%</action>
+          </step>
+          <step type="SMS_TaskSequence_RunCommandLineAction" name="Pause" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+            <defaultVarList>
+              <variable name="PackageID" property="PackageID" />
+              <variable name="RunAsUser" property="RunAsUser">false</variable>
+              <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+              <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+              <variable name="LoadProfile" property="LoadProfile">false</variable>
+            </defaultVarList>
+            <action>cmd /c start "Paused TS: Close this to continue" /wait cmd</action>
+          </step>
+          <action />
+        </group>
+        <condition>
+          <expression type="SMS_TaskSequence_VariableConditionExpression">
+            <variable name="Variable">2PEnabled</variable>
+            <variable name="Operator">equals</variable>
+            <variable name="Value">YES</variable>
+          </expression>
+        </condition>
+      </group>
       <condition>
         <expression type="SMS_TaskSequence_VariableConditionExpression">
           <variable name="Variable">DeploymentType</variable>
@@ -396,6 +460,27 @@
         <variable name="PackageSelectionProfile" property="PackageSelectionProfile">All Packages</variable>
       </defaultVarList>
     </step>
+    <group expand="false" name="2Pint Software Configuration" description="" disable="false" continueOnError="false">
+      <action />
+      <step type="SMS_TaskSequence_RunCommandLineAction" name="Move BranchCache Cache" description="" disable="false" continueOnError="true" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+        <defaultVarList>
+          <variable name="PackageID" property="PackageID" />
+          <variable name="RunAsUser" property="RunAsUser">false</variable>
+          <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+          <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+          <variable name="LoadProfile" property="LoadProfile">false</variable>
+        </defaultVarList>
+        <action>BCEnabler.exe Move %OSVolume%:</action>
+        <condition></condition>
+      </step>
+      <condition>
+        <expression type="SMS_TaskSequence_VariableConditionExpression">
+          <variable name="Variable">2PEnabled</variable>
+          <variable name="Operator">equals</variable>
+          <variable name="Value">YES</variable>
+        </expression>
+      </condition>
+    </group>
     <step name="Next Phase" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
       <action>powershell.exe -file "%SCRIPTROOT%\PSDNextPhase.ps1"</action>
       <defaultVarList>
@@ -422,16 +507,6 @@
         <variable name="RulesFile" property="RulesFile"></variable>
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTIGather.wsf"</action>
-    </step>
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Pause with PowerShell" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-      <defaultVarList>
-        <variable name="PackageID" property="PackageID" />
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-      <action>cmd /c start "PowerShell" /wait PowerShell</action>
     </step>
     <group name="Custom Tasks Pre Windows Update" disable="false" continueOnError="false" expand="false" description="">
       <step type="SMS_TaskSequence_RunCommandLineAction" name="Custom task script before Windows Update" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
