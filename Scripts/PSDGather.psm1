@@ -11,7 +11,10 @@
 # // 
 # // ***************************************************************************
 
-Function Get-PSDLocalInfo {
+#$verbosePreference = "Continue"
+
+Function Get-PSDLocalInfo
+{
   Process
   {
     # Look up OS details
@@ -56,12 +59,17 @@ Function Get-PSDLocalInfo {
     $tsenv:IsDesktop = "False"
     $tsenv:IsLaptop = "False"
     $tsenv:IsServer = "False"
+    $tsenv:IsSFF = "False"
+    $tsenv:IsTablet = "False"
     Get-WmiObject Win32_SystemEnclosure | % {
       $tsenv:AssetTag = $_.SMBIOSAssetTag.Trim()
       if ($_.ChassisTypes[0] -in "8", "9", "10", "11", "12", "14", "18", "21") { $tsenv:IsLaptop = "True" }
       if ($_.ChassisTypes[0] -in "3", "4", "5", "6", "7", "15", "16") { $tsenv:IsDesktop = "True" }
       if ($_.ChassisTypes[0] -in "23") { $tsenv:IsServer = "True" }
+      if ($_.ChassisTypes[0] -in "34", "35", "36") { $tsenv:IsSFF = "True" }
+      if ($_.ChassisTypes[0] -in "13", "31", "32", "30") { $tsenv:IsTablet = "True" } 
     }
+
     Get-WmiObject Win32_BIOS | % {
       $tsenv:SerialNumber = $_.SerialNumber.Trim()
     }
@@ -89,11 +97,12 @@ Function Get-PSDLocalInfo {
     }
 
     # TODO: Capable architecture
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: Capable architecture" 
 
     Get-WmiObject Win32_ComputerSystem | % {
       $tsenv:Manufacturer = $_.Manufacturer
       $tsenv:Model = $_.Model
-      $tsenv:Memory = [int] ($m.TotalPhysicalMemory / 1024 / 1024)
+      $tsenv:Memory = [int] ($_.TotalPhysicalMemory / 1024 / 1024)
     }
 
     Get-WmiObject Win32_ComputerSystemProduct | % {
@@ -115,19 +124,84 @@ Function Get-PSDLocalInfo {
         $tsenv:IsUEFI = "False"
     }
 
-    # TODO: Battery
+    # TEST: Battery
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TEST: Battery" 
+
+ 	$bFoundAC = $false
+    $bOnBattery = $false
+	$bFoundBattery = $false
+    foreach($Battery in (Get-WmiObject -Class Win32_Battery))
+    {
+        $bFoundBattery = $true
+        if ($Battery.BatteryStatus -eq "2")
+        {
+            $bFoundAC = $true
+        }
+    }
+    If ($bFoundBattery -and !$bFoundAC)
+    {
+        $tsenv.IsOnBattery = $true
+    }
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): bFoundAC: $bFoundAC" 
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): bOnBattery :$bOnBattery" 
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): bFoundBattery: $bFoundBattery"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv.IsOnBattery is now $($tsenv.IsOnBattery)"
 
     # TODO: GetDP
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: GetDP" 
+
     # TODO: GetWDS
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: GetWDS" 
+
     # TODO: GetHostName
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: GetHostName" 
+    
     # TODO: GetOSSKU
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: GetOSSKU" 
+
     # TODO: GetCurrentOSInfo
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: GetCurrentOSInfo" 
+
     # TODO: Virtualization
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TEST: Virtualization" 
+    
+    $Win32_ComputerSystem = Get-WmiObject -Class Win32_ComputerSystem
+    switch ($Win32_ComputerSystem.model)
+    {
+        "Virtual Machine"
+        {
+            $tsenv:IsVM = "True"
+        }
+        "VMware Virtual Platform"
+        {
+            $tsenv:IsVM = "True"
+        }
+        "VMware7,1"
+        {
+            $tsenv:IsVM = "True"
+        }
+        "Virtual Box"
+        {
+            $tsenv:IsVM = "True"
+        }
+        Default
+        {
+            $tsenv:IsVM = "False"
+        }
+    }
+
+    
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Model is $($Win32_ComputerSystem.model)" 
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:IsVM is now $tsenv:IsVM" 
+    
     # TODO: BitLocker
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: BitLocker" 
+
   }
 }
 
-Function Invoke-PSDRules {
+Function Invoke-PSDRules
+{
     [CmdletBinding()] 
     Param( 
         [ValidateNotNullOrEmpty()] 
@@ -159,7 +233,7 @@ Function Invoke-PSDRules {
             }
             $newVar.overwrite = "false"
             $newVar.description = "Custom property"
-            Write-Verbose "Adding custom property $($newVar.id)"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Adding custom property $($newVar.id)" 
             $null = $global:variableFile.properties.appendChild($newVar)
           }
         }
@@ -185,27 +259,28 @@ Function Invoke-PSDRule
     }
     Process
     {
-        Write-Verbose "Processing rule $RuleName"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing rule $RuleName" 
+
         $v = $global:variables | ? {$_.id -ieq $RuleName}
         if ($RuleName.ToUpper() -eq "DEFAULTGATEWAY") {
-            Write-Host "TODO: Process default gateway"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: Process default gateway" 
         }
         elseif ($v) {
             if ($v.type -eq "list") {
-              Write-Verbose "Processing values of $RuleName" 
-              (get-item tsenvlist:$($v.id)).Value | Invoke-PSDRule
+              Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing values of $RuleName" 
+              (Get-Item tsenvlist:$($v.id)).Value | Invoke-PSDRule
             }
             else
             {
               $s = (Get-Item tsenv:$($v.id)).Value
               if ($s -ne "")
               {
-                Write-Verbose "Processing value of $RuleName"
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing value of $RuleName" 
                 Invoke-PSDRule $s
               }
               else
               {
-                Write-Verbose "Skipping rule $RuleName, value is blank"
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Skipping rule $RuleName, value is blank" 
               }
             }
         }
@@ -237,22 +312,23 @@ Function Get-PSDSettings
       }
 
       # Process special sections and exits
-      if ($section.Contains("UserExit")) {
-        Write-Host "TODO: Process UserExit Before"
+      if ($section.Contains("UserExit"))
+      {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: Process UserExit Before" 
       }
 
       if ($section.Contains("SQLServer")) {
         $skipProperties = $true
-        Write-Host "TODO: Database"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: Database" 
       }
 
       if ($section.Contains("WebService")) {
         $skipProperties = $true
-        Write-Host "TODO: WebService"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: WebService" 
       }
 
       if ($section.Contains("Subsection")) {
-        Write-Verbose "Processing subsection"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing subsection" 
         Invoke-PSDRule $section["Subsection"]
       }
 
@@ -263,16 +339,18 @@ Function Get-PSDSettings
           $v = $global:variables | ? {$_.id -ieq $sectionVar}
           if ($v)
           {
-		    if ((get-item tsenv:$v).Value -eq $section[$sectionVar])
+		    if ((Get-Item tsenv:$v).Value -eq $section[$sectionVar])
 			{
 			  # Do nothing, value unchanged
 			}
-            if ((get-item tsenv:$v).Value -eq "" -or $v.overwrite -eq "true") {
-              Write-Verbose "Changing $($v.id) to $($section[$sectionVar]), was $((Get-Item tsenv:$($v.id)).Value)"
+            if ((Get-Item tsenv:$v).Value -eq "" -or $v.overwrite -eq "true") {
+              $Value = $((Get-Item tsenv:$($v.id)).Value)
+              if($value -eq ''){$value = "EMPTY"}
+              Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Changing PROPERTY $($v.id) to $($section[$sectionVar]), was $Value" 
               Set-Item tsenv:$($v.id) -Value $section[$sectionVar]
             }
-            elseif ((get-item tsenv:$v).Value -ne "") {
-              Write-Verbose "Ignoring new value for $($v.id)"
+            elseif ((Get-Item tsenv:$v).Value -ne "") {
+              Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Ignoring new value for $($v.id)" 
             }
           }
           else
@@ -282,7 +360,7 @@ Function Get-PSDSettings
             if ($v)
             {
               if ($v.type -eq "list") {
-                Write-Verbose "Adding $($section[$sectionVar]) to $($v.id)"
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Adding $($section[$sectionVar]) to $($v.id)" 
                 $n = @((Get-Item tsenvlist:$($v.id)).Value)
                 $n += [String] $section[$sectionVar]
                 Set-Item tsenvlist:$($v.id) -Value $n
@@ -293,13 +371,14 @@ Function Get-PSDSettings
       }
 
       if ($section.Contains("UserExit")) {
-        Write-Host "TODO: Process UserExit After"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: Process UserExit After" 
       }
 
     }
 }
 
-Function Get-IniContent { 
+Function Get-IniContent
+{ 
     <# 
     .Synopsis 
         Gets the content of an INI file 
@@ -351,7 +430,8 @@ Function Get-IniContent {
     #> 
      
     [CmdletBinding()] 
-    Param( 
+    Param
+    ( 
         [ValidateNotNullOrEmpty()] 
         [ValidateScript({(Test-Path $_) -and ((Get-Item $_).Extension -eq ".ini")})] 
         [Parameter(ValueFromPipeline=$True,Mandatory=$True)] 
@@ -359,11 +439,13 @@ Function Get-IniContent {
     ) 
      
     Begin 
-        {Write-Verbose "$($MyInvocation.MyCommand.Name):: Function started"} 
+    {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Function started"
+    } 
          
     Process 
     { 
-        Write-Verbose "$($MyInvocation.MyCommand.Name):: Processing file: $Filepath" 
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing file: $Filepath"
              
         $ini = @{} 
         switch -regex -file $FilePath 
@@ -397,10 +479,12 @@ Function Get-IniContent {
                 $ini[$section][$name] = $value 
             } 
         } 
-        Write-Verbose "$($MyInvocation.MyCommand.Name):: Finished Processing file: $FilePath" 
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Finished Processing file: $FilePath" 
         Return $ini 
     } 
          
     End 
-        {Write-Verbose "$($MyInvocation.MyCommand.Name):: Function ended"} 
+    {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Function ended" 
+    } 
 }

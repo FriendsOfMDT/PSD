@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<sequence version="3.00" name="PSD RnD" description="PSD RnD test TS">
+  <group expand="true" name="Initialization" description="" disable="false" continueOnError="false">
+    <action />
+    <step type="BDD_InstallOS" name="Install Operating System (Disabled)" description="" disable="true" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
+      <defaultVarList>
+        <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
+        <variable name="DestinationDisk" property="DestinationDisk">0</variable>
+        <variable name="DestinationPartition" property="DestinationPartition">1</variable>
+        <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
+        <variable name="DestinationOSRefresh" property="DestinationOSRefresh"></variable>
+        <variable name="DestinationOSDriveLetter" property="DestinationOSDriveLetter"></variable>
+        <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
+      </defaultVarList>
+      <action>cscript.exe "%SCRIPTROOT%\LTIApply.wsf"</action>
+    </step>
+  </group>
+  <group expand="true" name="Test" description="" disable="false" continueOnError="false">
+    <step type="SMS_TaskSequence_SetVariableAction" name="Set DriverGroup001" description="" disable="false" continueOnError="false" successCodeList="0 3010">
+      <defaultVarList>
+        <variable name="VariableName" property="VariableName">DriverGroup001</variable>
+        <variable name="VariableValue" property="VariableValue">Client\Windows 10 1709\%model%</variable>
+      </defaultVarList>
+      <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+    </step>
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Run cmd /c start &quot;PowerShell&quot; /wait PowerShell" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID" />
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>cmd /c start "PowerShell" /wait PowerShell</action>
+    </step>
+    <action />
+  </group>
+  <globalVarList>
+    <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
+    <variable name="DestinationDisk" property="DestinationDisk">0</variable>
+    <variable name="DestinationPartition" property="DestinationPartition">1</variable>
+    <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
+    <variable name="DestinationOSRefresh" property="DestinationOSRefresh"></variable>
+    <variable name="DestinationOSDriveLetter" property="DestinationOSDriveLetter"></variable>
+    <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
+    <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
+  </globalVarList>
+  <group expand="true" name="DEV" description="" disable="true" continueOnError="false">
+    <action />
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Run cmd /c start &quot;PowerShell&quot; /wait PowerShell" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID" />
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>cmd /c start "PowerShell" /wait PowerShell</action>
+    </step>
+  </group>
+  <group expand="true" name="Blow it Up" description="" disable="false" continueOnError="false">
+    <action />
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Run Command Line" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID"></variable>
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>foo.vbs</action>
+    </step>
+  </group>
+</sequence>
