@@ -7,7 +7,7 @@ In order to support OS deployments using PSD and content hosted on a web server(
 > NOTE: Your security team and environment may require additional settings or lock down.
 
 ## High Level Script Overview and Checklist
-Please review and or validate the following IIS/WEbDAV installation checklist:
+Please review and/or validate the following IIS/WebDAV installation checklist:
 
 * [ ] **Windows Server Version**
 
@@ -17,7 +17,7 @@ Please review and or validate the following IIS/WEbDAV installation checklist:
 
 * [ ] **Install IIS**
 
-Currently the IIS installation and configure script does NOT support a server that already has IIS or a server you have manually installed IIS on. The Script we have provided will handle the instalation of IIS for you. 
+Currently the IIS installation and configurartion script does NOT support a server that already has IIS or a server you have manually installed IIS on. The script we have provided will handle the installation of IIS for you. 
 
 
 * [ ] **Install IIS Components**
@@ -54,21 +54,21 @@ The following IIS components are required to ensure that PSD functions as expect
      * Windows Authentication
      
 * Management Tools
-     * IIS Management Compatability 
+     * IIS Management Compatibility 
      * IIS 6 Management Compatibility
-          * IIS 6 Metabase Compatability
+          * IIS 6 Metabase Compatibility
 
 * [ ] **Install WebDAV**
 
-The PSD extension for MDT requires the WebDAV Redirector to be installed. This is a feature and not a role in Server Manager. This feature does require a reboot.
+The PSD extension for MDT requires the WebDAV Redirector to be installed. This is a feature, not a role in Server Manager. This feature does require a reboot.
 
 *  WebDAV Redirector
 
 * [ ] **Configure IIS**
 
-The PSD Extension for MDT requires some configuration changes to IIS in order to function. Most of these changes have to do with configuring IIS to work properly with WebDav. If you use the installation script these will be automatically configured for you. Detailed steps regarding its configuration are incldued in the Detailed Configuration Steps section.
+The PSD Extension for MDT requires some configuration changes to IIS in order to function. Most of these changes have to do with configuring IIS to work properly with WebDav. If you use the installation script, these will be automatically configured for you. Detailed steps regarding its configuration are included in the Detailed Configuration Steps section.
 
-     * Create New Virtual Directory
+     * Create new Virtual Directory
      * Enable Directory Browsing
      * Disable Anonymous Authentication
      * Enable Windows Authentication
@@ -76,7 +76,7 @@ The PSD Extension for MDT requires some configuration changes to IIS in order to
      
 * [ ] **Configure WebDAV**
 
-The PSD Extension for MDT Requires some configuration changes to WebDAV in order to function. Most of the changes have to do with rules and properties that allow specific types of data. If you use the installation script these will be automatically configured for you. Detailed steps regarding its configuration are incldued in the Detailed Configuration Steps section. 
+The PSD Extension for MDT requires some configuration changes to WebDAV in order to function. Most of the changes have to do with rules and properties that allow specific types of data. If you use the installation script these will be automatically configured for you. Detailed steps regarding its configuration are included in the Detailed Configuration Steps section. 
 
      * Enable WebDAV
      * Create new WebDav Authoring Rule
@@ -92,7 +92,7 @@ The PSD Extension for MDT Requires some configuration changes to WebDAV in order
 
 * [ ] **File Permissions** - Blah
 
-* [ ] **MIME Types** - The PSD Extension for MDT Requires some configuration changes to MIME types in order to function. The current known required change is to add an additional MIME type. Details on the mime type changes can be found in the Detailed Configuration Steps section. 
+* [ ] **MIME Types** - The PSD Extension for MDT requires some configuration changes to MIME types in order to function. The current known required change is to add an additional MIME type. Details on the mime type changes can be found in the Detailed Configuration Steps section. 
 
 * [ ] **Accounts** - blah
 
@@ -137,8 +137,8 @@ The PSD Extension for MDT Requires some configuration changes to WebDAV in order
 - blah
 
 ## Caveats
-Not all MDT features for Lite Touch Installations are available for PSD over HTTP/S (yet). The following items have not yet been developed or finalized:
-- SLShareDynamicLogging will not be available over HTTP/S
+Not all MDT features for Lite Touch Installation (LTI) are available for PSD over HTTP/S (yet). The following items have not yet been developed or finalized:
+- SLShareDynamicLogging will **NOT** be available over HTTP/S
 - MDT Database connectivity and functionality has not yet been implemented
 - DaRT functionality and integration has not been implemented, attempted or tested
 
@@ -149,7 +149,7 @@ TODO: Add in instructions for running PSD-Install-IIS.ps1
 
 #Configure PSD for HTTP/S operation
 ## HTTPS configuration checklist
-In order to connect to a PSD Deployment Share via HTTPS, certificate based authentication is required. Administrators will need to generate a self-signed cert from the IIS server hosting the PSD Deployment Share, bind that cert to the IIS server, inject the cert into Windows PE and finally import and apply the cert into the new target computer. While a self signed cert may satisfy authentication and access concerns for most organizations, others may want to leverage certs from a commercial or private cert solution. Only a self-signed approach is supported by default. 
+In order to connect to a PSD deployment share via HTTPS, certificate based authentication is required. Administrators will need to generate a self-signed cert from the IIS server hosting the PSD deployment share, bind that cert to the IIS server, inject the cert into Windows PE and finally import and apply the cert into the new target computer. While a self signed cert may satisfy authentication and access concerns for most organizations, others may want to leverage certs from a commercial or private cert solution. Only a self-signed approach is supported by default. 
 
 By default, a self signed cert (named PSDRoot.cer) must be generated and used within PSDStart.ps1 to enable HTTPS PSD connectivity. 
 
@@ -158,11 +158,11 @@ By default, a self signed cert (named PSDRoot.cer) must be generated and used wi
 * [ ] **Bind self-signed cert to IIS site** - using Windows IIS Manager
 * [ ] **Verify PSDRoot cert exits in cert store**  - using Windows Certificate Manager
 * [ ] **Export PSDRoot cert** - using Windows Certificate Manager
-* [ ] **Copy PSDRoot cert to PSD Deployment Share**
-* [ ] **Copy certutil.exe to PSD Deployment Share**
+* [ ] **Copy PSDRoot cert to PSD deployment share**
+* [ ] **Copy certutil.exe to PSD deployment share**
 * [ ] **Regenerate PSD boot media** - using MDT Workbench
 * [ ] **Manually run certutil command during PSDStart.ps1** or modify PSDStart.ps1 to autorun
-* [ ] **Adjust post-OSD deployment steps to clean up and or remove PSD certificate** (Optional)
+* [ ] **Adjust post-OSD deployment steps to clean up and/or remove PSD certificate** (Optional)
 
 ## HTTPS configuration step-by-step
 <table>
@@ -180,12 +180,12 @@ By default, a self signed cert (named PSDRoot.cer) must be generated and used wi
   </tr>
   <tr>
     <td>Copy cert files and tools to MDT/PSD</td>
-    <td>Copy certutil.exe to PSD Deployment Share<br>
-   Copy PSDRoot.cer to PSD Deployment Share</td>
+    <td>Copy certutil.exe to PSD deployment share<br>
+   Copy PSDRoot.cer to PSD deployment share</td>
   </tr>
   <tr>
     <td>Regenerate PSD boot media</td>
-    <td>- Select PSD Deployment share in MDT Workbench<br>- Update Deployment Share and completely generate new boot media</td>
+    <td>- Select PSD Deployment share in MDT Workbench<br>- Update deployment share and completely generate new boot media</td>
   </tr>
   <tr>
     <td>Task Sequence(s)</td>
@@ -194,20 +194,20 @@ By default, a self signed cert (named PSDRoot.cer) must be generated and used wi
   </table>
 
 # PSD Hydration
-The **New-PSDHydration.ps1** script will completely build out a basic Windows Server in about 20 minutes. The PSD Hydration script calls the PSD Installer script (Install-PSD.ps1) and the PSD Installation script (New-PSDWebInstance.ps1) as part of it's activities.
+The **New-PSDHydration.ps1** script will completely build out a basic Windows Server in about 20 minutes. The PSD Hydration script calls the PSD installer script (Install-PSD.ps1) and the PSD installation script (New-PSDWebInstance.ps1) as part of it's activities.
 
 ## Hydration Prerequisites Checklist
-* [ ] **Windows Server 2019** - basic Windows 2019 Server **without** IIS or WebDAV pre-installed or configured. This server should be as vanilla as possible.
-* [ ] **Download PSD** - download and store the PSD content including Documentation, Installers, Scripts and Tools.
-* [ ] **Download ADK** - download and store the appropriate ADK installer for your environment. You can optionally also run the ADK in advance and download the actual ADK content in advance.
-* [ ] **Download ADK for PE** - download and store the appropriate ADK for PE installer for your environment. You can optionally also run the ADK PE Installer in advance and download the actual ADK content in advance.
-* [ ] **Download MDT** - download and store the appropriate MDT installer for your environment. 
-* [ ] **Download Windows 10** - download and store an appropriate Windows 10 ISO for your environment. 
+* [ ] **Windows Server 2019** - Basic Windows 2019 Server **without** IIS or WebDAV pre-installed or configured. This server should be as vanilla as possible.
+* [ ] **Download PSD** - Download and store the PSD content including Documentation, Installers, Scripts and Tools.
+* [ ] **Download ADK** - Download and store the appropriate ADK installer for your environment. You can optionally also run the ADK in advance and download the actual ADK content in advance.
+* [ ] **Download ADK for PE** - Download and store the appropriate ADK for PE installer for your environment. You can optionally also run the ADK PE Installer in advance and download the actual ADK content in advance.
+* [ ] **Download MDT** - Download and store the appropriate MDT installer for your environment. 
+* [ ] **Download Windows 10** - Download and store an appropriate Windows 10 ISO for your environment. 
     >PRO TIP: You may want to avoid the use of **Evaluation** media as it's not been thoroughly tested. 
 * [ ] **Network Access Account** - (pre)create a domain or local account that can be used to access the PSD deployment share.
     >PRO TIP: Make sure this account has the least privileges needed. At a minimum, read/execute/list for the deployment share. This account does not require JoinDomain or Logon rights. 
-* [ ] **Create Deployment Share Location** - The Hydration script expects a target share folder to already have been created.
-* [ ] **Run the PSD Hydration script** - The PSD Hydration script will run mostly silent by default, but will require some info and input to complete. The PSD Hydration script generates a log in the same directory it was run from.
+* [ ] **Create deployment share Location** - The Hydration script expects a target share folder to already have been created.
+* [ ] **Run the PSD Hydration script** - The PSD hydration script will run mostly silent by default, but will require some info and input to complete. The PSD Hydration script generates a log in the same directory it was run from.
     >PRO TIP: Run the PSD hydration script from an elevated PowerShell prompt with the **-verbose** option for maximum visibility.
 
 ## Post Hydration Tasks
