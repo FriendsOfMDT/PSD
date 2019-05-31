@@ -73,13 +73,14 @@ The following actions should be completed as part of PSD installation:
     >PRO TIP: Only grant the *minimum necessary permissions and access* to write logs in your location
 
 * [ ] **Update Windows PE settings** - Update the MDT WinPE configurations panels including the following settings:
-- WinPE Custom Wallpaper (see notes below)
-- WinPE Extra Directory (configured by default)
-- ISO File name and generation
-- WIM file name and generation
-    >PRO TIP: Be sure to configure *BOTH* x86 and x64 WinPE settings.
+    - WinPE Custom Wallpaper (see notes below)
+    - WinPE Extra Directory (configured by default)
+    - ISO File name and generation
+    - WIM file name and generation
+        >PRO TIP: Be sure to configure *BOTH* x86 and x64 WinPE settings.
 
 * [ ] **Enable MDT monitoring** - Enable MDT Event Monitoring and specify the MDT server name and ports to be used. ![Event Monitoring configuration](images/Config/PSDConfig-Event.png "Event Monitoring")
+    >PRO TIP: Azure hosted VMs FQDNs will likely not work when configuring MDT Event Monitoring. Just use the internal network name in the MDT configuration panel and be sure to specify the internet-facing Azure VM name in BootStrap and CustomSettings files. 
 
 * [ ] **Update CustomSettings.ini** - Edit and Customize CUSTOMSETTINGS.INI to perform the necessary and desired automation and configuration of your OSD deployments. These should be settings to affect the installed OS typically. Be sure to configure new PSD properties and variables. See XXX for more details.
     >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from CustomSettings.ini. All other MDT techniques and settings still apply.
@@ -92,10 +93,16 @@ The following actions should be completed as part of PSD installation:
 * [ ] **Update Background wallpaper** - By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provided. It can be found at Samples folder of the MDT installation. Adjust the MDT WinPE Customizations tab to reflect this new bmp (or use your own).
     >PRO TIP: Custom wallpapers should be 800x600 resolution.
 
-* [ ] **Configure Extra Files** - Create and populate an ExtraFiles folder that contains anything you want to add to WinPE or images. Things like CMTRACE.EXE, wallpapers, etc.
+* [ ] **Configure Extra Files** - Create and populate an ExtraFiles folder that contains anything you want to add to WinPE. Things like CMTRACE.EXE, wallpapers, etc.
     >PRO TIP: Create the same folder structure as where you want the files to land (e.g. \Windows\System32\)
 
     >PRO TIP WARNING: If using WinPE v1809, you **MUST** source and stage **BCP47Langs.dll** and **BCP47mrm.dll**, otherwise the PSD deployment wizard and final WinForms will crash.
+
+* [ ] **Include Custom Branding files** - Populate the appropriate PSD Resource folder with branding files. These include PSD_Progress01.png, Branding.txt and blah. Copy these to <Deployment Share\Resources\Branding>. PSD Scripts will inject the branding files and text to the appropriate location(s).
+
+* [ ] **Include Certificates for HTTPS** - Populate the appropriate PSD Resource folder a certificate named **PSDRoot.cer** that will be used to authenticate target clients to download PSD/MDT content via HTTPS (443) and for secure transfer and access to the MDT Event Monitoring Service on 9800/9801. Copy the cert to <Deployment Share\Resources\Certs> and PSD Scripts will inject the cert to the appropriate locations.
+
+* [ ] **Include Custom Autopilot JSON file** - Populate the appropriate PSD Resource folder with your JSON file for AutoPilot Deployments. Copy a json file named PSD_AutopilotConfig.json to <Deployment Share\Resources\AutoPilot>. PSD Scripts will inject the JSON file and to the appropriate location.
 
 * [ ] **Configure WinPE Drivers and Patches** - Using MDT Selection Profiles, customize your WinPE settings to utilize an appropriate set of MDT objects. Be sure to consider Applications, Drivers, Packages, and Task Sequences.
     >PRO TIP: You may want to create a new or custom Selection Profile unique to your new PSD-enabled PE environment.
@@ -107,7 +114,7 @@ The following actions should be completed as part of PSD installation:
 - Peer Caching
 - Branch Cache
 - Delivery Optimization
-- 2 Pint software
+- 2Pint software
 - 1E Nomad
 - Hardware-based content caching solutions (F5)
     >PRO TIP: When setting up and testing PSD for the first time, stick to the basics and eliminate caching and traffic shaping until you're comfortable with PSD functionality.
@@ -117,10 +124,12 @@ The following actions should be completed as part of PSD installation:
 - Network Firewall settings
 - Windows 10 firewall settings
 - PXE availability
-- Windows Deployment Services
-    >PRO TIP: Create a new Organizational Unit for both PSD testing and on-going Windows 10 administration
+- Windows Deployment Services (WDS)
+    >PRO TIP: Create a new Organizational Unit (OU) for both PSD testing and on-going Windows 10 administration
 
-    >PRO TIP: Be on the lookout for multiple (or rogue) PXE servers on the network
+    >PRO TIP: Be on the lookout for multiple (or rogue) PXE servers on  network segments
+
+    >PRO TIP: You'll need to enable TCP ports 80, 443, 9800 and 9801 for most scenarios.
 
 * [ ] **Configure IIS for PSD over HTTP/S** - Install and configure IIS and WebDAV). See the [IIS Configuration Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20IIS%20Configuration%20Guide.md) for details.
     - [ ] Install IIS
@@ -128,6 +137,10 @@ The following actions should be completed as part of PSD installation:
     - [ ] Test your HTTP/S PSD functionality
     >PRO TIP: The PSD IIS installation script expects to find a clean environment without IIS or WebDAV installed.
 
-* [ ] **Create PSD Task Sequence** - You **MUST** create a new Task Sequence from the PSD Templates within the workbench. PSD will fail otherwise. Do not attempt to clone/copy/import or otherwise work around this step. Some steps are required for PSD functionality. Do not delete any of the PSD task sequence steps - you may disable steps in the PSD Template task sequences if you choose.
+* [ ] **Create PSD Task Sequence** - You **MUST** create a new Task Sequence from the PSD Templates within the workbench. PSD will fail otherwise. Do not attempt to clone/copy/import or otherwise work around this step. Some task sequence steps are required for PSD functionality. Do not delete any of the PSD task sequence steps - you may disable steps in the PSD Template task sequences if you choose.
 
-    >PRO TIP: If you upgrade PSD version at a later date, **expect** to recreate your task sequences from the new PSD templates.
+    >PRO TIP: If you upgrade PSD version at a later date, **expect** to have to recreate your task sequences from the new PSD templates and to update any associated boot media.
+
+# Troubleshooting
+The following links are provided to assist in troubleshooting.
+- [MDT Event Service troubleshooting](https://blogs.technet.microsoft.com/mniehaus/2012/05/10/troubleshooting-mdt-2012-monitoring/)

@@ -106,6 +106,12 @@ Q: What scripts or files can be safely deleted from my PSD Deployment Share?
 - If installing applications as part of the task sequence, do not delete ZTIUtility.vbs as it **might** be called during the deployment.
 - If desired, many of the legacy MDT .wsf scripts and Wizard files can be removed manually from the PSD Deployment Share scripts folder to thin out the environment. 
 
+Q: What limitations are there with respect to certs and HTTPS?
+>A: By default, PSDStart expects to find an IIS self-signed cert file named PSDRoot.cer to be injected into WinPE and Windows as part of PSD. You can change this via custom scripting but it's not recommended at this time.
+
+Q: What happens to the PSD cert after a PSD Task Sequence completes?
+>A: By default, the PSD Self signed cert is left in the deployed computer's certificate store. If desired, this can be removed manually, via script, group policy at the organization's discretion.
+
 ## Documented Platforms and Scenarios
 Q: What operating systems and components has PSD been tested and or evaluated against?
 >A: The following tables identifies tested and validated components, scenarios as well as testing and development status: 
@@ -134,11 +140,22 @@ Q: What operating systems and components has PSD been tested and or evaluated ag
     <td>Target client OS</td>
     <td>Windows 10 ENT x64 EN 1809<br>
     Windows 10 ENT x64 EN 1709</td>
-    <td>MSDN media tested</td>
+    <td>MSDN media tested and working as expected</td>
+  </tr>
+    <tr>
+    <td>Target client OS</td>
+    <td>Windows 7 ENT x64 SP1<br></td>
+    <td>Tested, may work<br>NOT SUPPORTED</td>
+  </tr>
+    </tr>
+    <tr>
+    <td>Target client OS</td>
+    <td>Windows 7 ENT x32 SP1<br>Windows 8.x </td>
+    <td>NOT TESTED<br>NOT SUPPORTED</td>
   </tr>
     <tr>
     <td>IIS</td>
-    <td></td>
+    <td>10.1.17763.1 - (1809)</td>
     <td></td>
   </tr>
   <tr>
@@ -176,6 +193,11 @@ Q: What operating systems and components has PSD been tested and or evaluated ag
     <td>Virtual Machines</td>
     <td>Microsoft Hyper-V </td>
     <td>Client deployments tested against Hyper-V.<br>MDT/PSD tested hosted on Hyper-V</td>
+  </tr>
+    <tr>
+    <td>PSD boot and deploy via WDS/td>
+    <td>n/a</td>
+    <td>not yet tested</td>
   </tr>
   <tr>
     <td>Refresh via UNC</td>
@@ -253,6 +275,22 @@ Please review the  [PSD Installation Guide](https://github.com/soupman98/PSD/blo
 - Applications specified in task sequences BootStrap.ini or CustomSettings.ini **MUST** have { } brackets around their GUID
 - New TS variables **must** be declared explicitly in BootStrap.ini or CustomSettings.ini
 - You many notice that during the Post OS install phases of the PSD Task Sequence (OOBE) that the screen briefly flashes a window and the PowerShell window appears to refresh. This is expected when a script is executed.
+
+# Known Limitations
+
+The following items are not yet working, coded or tested.
+
+- Patching 
+- Installation of language packs
+- %variables% in BootStrap and CustomSettings.ini
+- Evaluation Media (not yet supported)
+- DaRT
+- SLShare logging
+- SLShareDynamicLogging
+- MDT Database connectivity
+- SLSHARE across the internet
+- Domain Join across the internet
+
 
 
 

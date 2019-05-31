@@ -17,7 +17,7 @@ Refer to the  [PSD Installation Guide](https://github.com/FriendsOfMDT/PSD/blob/
 ## Configuration and Automation
 
 ### New PSD Variables - Overview
-The following new TS variables are provided in conjunction with PSD. Any new or additional Task Sequence variables **must** be instantiated and called via Bootstrap.ini or CustomSettings.ini !! Do NOT edit or modify ZTIGather.xml.
+The following new TS variables are provided in conjunction with PSD. Any new or additional Task Sequence variables **must** be instantiated and called via Bootstrap.ini or CustomSettings.ini !! Do NOT edit or modify ZTIGather.xml (ever).
 
 ### PSD Environmental Variables
 The following new environmental variables are pre-configured and/or defined as part of PSD. See below in this document for details on new PSD variables.
@@ -26,6 +26,7 @@ The following new environmental variables are pre-configured and/or defined as p
 - IsSFF
 - IsTablet
 - PSDDeployRoots
+- AutoPilot
 
 ### PSD Debug Flow Control Variables
 - DevCleanUp
@@ -47,8 +48,8 @@ A new TS variable (PSDDeployRoots) has been implemented so that designers and im
 As an example, the following BootStrap.ini snippet is provided...
 
     - [Settings]
-    - Priority= PDSVars, PSDLogs, Default
-    - Properties=IsOnBattery, PSDDeployRoots
+    - Priority = PDSVars, PSDLogs, Default
+    - Properties = IsOnBattery, PSDDeployRoots
 
     - [Default]
     - PSDDeployRoots=http://someserver.off/nothing, https://SecureServer.off/Nothing, http://foo.bar.xyz/psd, \\SomeServer\SomeShare$
@@ -66,13 +67,13 @@ Make sure your target device meets the following minimum hardware specifications
 - BLAH wallpaper
 
 # Troubleshooting PSD
-Troubleshooting PSD is very similar to a traditional MDT environment. Except, nearly everything occurs via connectivity to a PSDrive and within a BDD/MDT Task Sequence engine.
+Troubleshooting PSD is very similar to a traditional MDT environment. Except, nearly everything occurs via connectivity to a PSDrive and within a BDD/MDT Task Sequence.
  
 ## Simple PSD Testing and Development Environment
 Some PSD functionality can be tested and developed using a technique similar to that for LTI deployments. It's a bit more complicated than it was for legacy MDT though.....
 
 1. Create a new empty VM with sufficient and appropriate network, RAM and disk settings
-1. Create a new Task Sequence using the PSD RnD template
+1. Create a new Task Sequence using the **PSD RnD template**
 1. Create a new Boot ISO and mount it in your new VM
 1. Boot your VM using the new PSD Boot media
 1. The VM should start and launch a PowerShell window
@@ -105,13 +106,14 @@ as;dlfkjas;lkdjf
 ## Environmental Variables
 The following variables may be useful when automating or customizing PSD capabilities. 
 
-| **Variable** | **Mandatory/Optional** | Description
+| **Variable** | **Mandatory/Optional** | Description |
 |--------------|:------------:|-----------|
-| **IsOnBattery** | Optional | Calculated value during Gather. TRUE if target computer is a laptop and is running on AC. FALSE if desktop or laptop running on battery.
-| **IsVM** | Optional | Calculated value during Gather. TRUE if target computer is a virtual machine, otherwise FALSE.
-| **IsSFF** | Optional | Calculated value during Gather. TRUE if target computer enclosure is type 34, 35 or 36 (Small Form Factor)
+| **IsOnBattery** | Optional | Calculated value during PSDGather. TRUE if target computer is a laptop and is running on AC. FALSE if desktop or laptop running on battery.
+| **IsVM** | Optional | Calculated value during PSDGather. TRUE if target computer is a virtual machine, otherwise FALSE.
+| **IsSFF** | Optional | Calculated value during PSDGather. TRUE if target computer enclosure is type 34, 35 or 36 (Small Form Factor)
 | **IsTablet** | Optional | Calculated value during Gather. TRUE if target computer enclosure is type 13, 33, 31, or 32 (Tablet)
-| **PSDDeployRoots** | Optional | PSDDeployRoots is used to define multiple deployroots of either UNC, HTTP or HTTPS formats. Can *NOT* be called in conjunction with DeployRoot. See additional notes [here](https://foo.link)
+| **PSDDeployRoots** | Optional | PSDDeployRoots is used to define multiple deployroots of either UNC, HTTP or HTTPS formats. Can *NOT* be called in conjunction with DeployRoot. See additional [notes](https://foo.link)
+| **AutoPilot** | Optional | Used to define how a target computer will be built using Autopilot. JSON is used if the target computer will only have the JSON file processed while SYSPREP is defined if the system should be prepared by running sysprep.exe and then completing an Autopilot deployment.
 
 ## Development and Debugging Variables
 The following variables may be useful when customizing or developing PSD capabilities. 
