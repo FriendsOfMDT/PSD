@@ -60,7 +60,7 @@ The following PowerShell script modules and function libraries are included in P
 | PSDGather.psm1    	    | Module for gathering information about the OS and environment (mostly from WMI), and for processing rules (Bootstrap.ini, CustomSettings.ini).  All the resulting information is saved into task sequence variables |
 | PSDUtility.psm1         | General utility routines useful for all PSD scripts	|
 | PSDWizard.psm1          | Module containing utilities for generating and processing the PSD Wizard |
-| PSDDeploymentshare.psm1 | Connect to a deployment share and obtain content from it, using either HTTP(s) or SMB as needed |
+| PSDDeploymentshare.psm1 | Connect to a deployment share and obtain content from it, using either HTTP(s) or SMB as needed | 
 | ZTIUtility.psm1         | Not really used, left over MDT relic |
 
 
