@@ -2,9 +2,9 @@
 # // 
 # // PowerShell Deployment for MDT
 # //
-# // File:      PSDFreshen.ps1
+# // File:      PSDNextPhase.ps1
 # // 
-# // Purpose:   Update gathered information in the task sequence environment.
+# // Purpose:   Next PHASE
 # // 
 # // 
 # // ***************************************************************************
@@ -13,24 +13,35 @@ param (
 
 )
 
-# Load core module
+# Load core modules
 Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global
 Import-Module PSDUtility
-Import-Module PSDGather
+Import-Module PSDDeploymentShare
 
 $verbosePreference = "Continue"
 
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Load core module"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Deployroot is now $($tsenv:DeployRoot)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now $env:PSModulePath"
 
-# Gather local info to make sure key variables are set (e.g. Architecture)
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Gather local info to make sure key variables are set (e.g. Architecture)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Gather local info to make sure key variables are set (e.g. Architecture)"
-Get-PSDLocalInfo
+#Next Phase
+$PHASE = $tsenv:PHASE
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Current Phase is $PHASE"
 
-# Save all the current variables for later use
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Save all the current variables for later use"
+switch ($PHASE)
+{
+    INITIALIZATION {$PHASE = "VALIDATION"}
+    VALIDATION {$PHASE = "STATECAPTURE"}
+    STATECAPTURE {$PHASE = "PREINSTALL"}
+    PREINSTALL {$PHASE = "INSTALL"}
+    INSTALL {$PHASE = "POSTINSTALL"}
+    POSTINSTALL {$PHASE = "STATERESTORE"}
+    STATERESTORE {$PHASE = ""}
+}
+
+$tsenv:PHASE = $Phase
+
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): --------------------"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Next Phase is $PHASE"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Save all the current variables for later use"
 Save-PSDVariables

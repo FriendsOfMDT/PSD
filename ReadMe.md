@@ -19,10 +19,5 @@ Supported deployment scenarios include deployment from the following content rep
 
 PSD is very much a work-in-progress solution, so stay tuned as we rapidly move forward on this.
 
-## Visual Studio Notes
-The solution file for Visual Studio requires PowerShell for Visual Studio (3rd party extension for Visual Studio 2015).
-
-When using Visual Studio to edit the PowerShell scripts, configure the editor to use spaces instead of tabs for PowerShell.
-
 ## Related References
 (intentionally blank)
