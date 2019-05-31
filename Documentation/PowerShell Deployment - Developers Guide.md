@@ -12,7 +12,7 @@ There are three (3) critical files to the PSD execution environment.  These file
 >WARNING: Whatever you do, DO NOT EDIT or alter these files as you will destabilize your PSD experience and environment.
 
 # Logging via Write-PSDLog
-Logging in all PSD modules is and should be accomplished via a new **Write-PSDLog** function found in PSDUtility.psm1. Developers, coders and customizers should leverage this new function to capture output for logging and or debug purposes. The following syntax should be used or duplicated:
+Logging in all PSD modules is and should be accomplished via a new **Write-PSDLog** function found in PSDUtility.psm1. Developers, coders and customizers should leverage this new function to capture output for logging and/or debug purposes. The following syntax should be used or duplicated:
 
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): <<your message our output>>
 
@@ -182,7 +182,7 @@ The following table identifies the dependencies and interactions between the var
 </table>
 
 # MDT Dependencies
-The following MDT components and files are utilized, consumed, and or referenced by PSD:
+The following MDT components and files are utilized, consumed, and/or referenced by PSD:
 - ZTIGather.xml
 - ZTIConfigure.xml
 
