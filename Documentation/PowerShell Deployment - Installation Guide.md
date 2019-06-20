@@ -1,55 +1,124 @@
 # Installation Guide - PowerShell Deployment Extension Kit
 April 2019
 
-## PSD Installation Checklist
-Please review, validate and/or obtain the following installation checklist items:
+## PSD Installation Materials Checklist
+In order to install PSD you'll need to obtain the following installation media and checklist items:
 
 * [ ] **ADK** - Download and install Microsoft ADK on a computer to be used to host the MDT Workbench. Ensure Microsoft ADK is installed and operational
 
 * [ ] **MDT** -  Download and install Microsoft MDT on a computer to be used to host the MDT Workbench. Ensure Microsoft MDT is installed and operational
 
-* [ ] **Source Media (OS)** - Obtain source media for Windows OS
-
-* [ ] **Source Media (Applications)** - Obtain source media for any applications to be installed as part of task sequences
-
-* [ ] **Source Media (Drivers)** - Obtain source media for OEM hardware drivers
+* [ ] **Source Media (OS)** - Obtain source media for Windows client (or server) OS you intend to deploy
 
 * [ ] **Source Media (Language Packs)** - Obtain source media for Windows OS Language Packs
 
-* [ ] **WDS** - [optional] Ensure Windows Deployment Services is installed and available if implementing WinPE based initiation
+* [ ] **Source Media (Applications)** - Obtain source media for any applications to be installed as part of task sequences
+
+* [ ] **Source Media (Drivers)** - Obtain source media and drivers for OEM hardware and peripherals
 
 * [ ] **Wallpaper** - [optional] Obtain any necessary custom backgrounds and wallpapers
 
-* [ ] **SQL** - [optional] - SQL installed for MDT database functionality 
+* [ ] **WDS** - [optional] Ensure Windows Deployment Services is installed and available (if implementing WDS-based initiation)
 
-* [ ] **Accounts** - You'll need account(s) with sufficient rights for the following:
+* [ ] **SQL** - [optional] - SQL installed for MDT database functionality and integration
+
+* [ ] **Accounts** - You'll need account(s) with sufficient rights for the following actions and activities:
+    - Installing SQL
+    - Installing IIS and WebDAV
+    - Installation of MDT and PSD
     - Accessing PSD/MDT Share(s)
     - Accessing log folder location(s)
-    - Joining computers to Active Directory
+    - Domain joining computers to Active Directory
 
-# Installing PSD
-PSD installation requires the following:
+# PSD Installation Options
+PSD can be installed and configured either manually or via PSD installation and hydration scripts. Both approaches are covered in this document:
+- **Manual** - useful when you have an existing server with MDT already installed, you want more explicit control over the installation of PSD or you're updating to a new version of MDT or PSD. 
+    >NOTE: Manual installation should be used for **production** environments when there are multiple installation and configuration considerations
+- **Hydration** - Primarily intended to quickly setup and test PSD in a non-production environment. Useful if you have a bare server and want to minimize the number of configurations required
+    >NOTE: Hydration of PSD is should only be used for **test** environments. There are no considerations for customization in this release!
+
+# PSD Hydration
+The PSD solution provides three scripts to automate and simplify the installation and configuration of PSD:
+
+1) **New-PSDHydration** - used to automate the installation and configuration of PSD. Calls Install-PSD.ps1 and New-PSDWebInstance.ps1
+1) **Install-PSD.ps1** - used to install PSD on top of an MDT installation
+1) **New-PSDWebInstance.ps1** - used to install and configure IIS and WebDAV on a fresh server
+
+## PSD Hydration Step-by-Step
+>NOTE: This version of hydration only supports installation to C: as default for all components and options.
+
+The PSD hydration script (New-PSDHydration.ps1) should only be used in test or evaluation environments. It calls two other scripts from the PSD solution payload as part of it's execution: Install-PSD.ps1 and New-PSDWebInstance.ps1.  It will install and configure the following components to default locations on C: drive:
+
+- Install ADK
+- Install ADK PE extensions (if required)
+- Install MDT
+- Install PSD
+- Install PSD templates and samples
+- Import and instantiate an OS from ISO (future will support WIM too)
+- Create an initial PSD task sequence 
+- Create PSD boot media
+- Enable MDT Monitoring
+- Update and customize WinPE
+- Install and configure IIS
+- Install and configure WebDAV
+
+>NOTE: On decent hardware, PSD Hydration will require approximately 20-25 minutes after completing the wizards.
+
+## PSD Hydration Environment
+To install PSD using the included hydration scripts, you'll need to provide a fresh, bare Windows Server with nothing but patches and network connectivity. Normal hardware requirements for MDT should be satisfied (e.g. CPU, RAM, Disk, network). The server can be either workplace or domain joined. As with any server, the network IP address(es) should be static and not DHCP due to the use of IIS.
+>PRO TIP: You'll want to have at least 20-30G of free space on the C: drive to hold all the downloads, installers, and the resulting MDT/PSD installation. 
+
+## PSD Hydration high-level instructions
+1) Logon to the target PSD server with administrative rights
+1) Download the entire PSD source content from the [PSD GitHub](https://github.com/FriendsOfMDT/PSD) repository locally to the target server
+1) The hydration script will prompt for the files above as it executes. Download or have access to the necessary source files:
+    - MDT - [Download MDT](https://www.microsoft.com/en-us/download/details.aspx?id=54259)
+    - ADK - [Download ADK](https://docs.microsoft.com/en-us/windows-hardware/get-started/adk-install)
+    - ADK for WinPE - [Download ADKPE](https://docs.microsoft.com/en-us/windows-hardware/get-started/adk-install)
+    - PSD Install script (Install-PSD.ps1) - [Download PSD](https://github.com/friedsofmdt/PSD)
+    - Windows 10 OS ISO - [MSDN](https://msdn.microsoft.com) or [Volume License Servicing Center (VLSC)](https://www.microsoft.com/licensing/servicecenter/default.aspx)
+
+    >NOTE: You can either download just the ADKSetup.exe or go ahead and run the installation of ADKSetup.exe before hand (-layout).
+1) Open an **elevated** PowerShell prompt
+    >PRO TIP: **Avoid using PowerShell ISE**, there's some bugginess with it when used in conjunction with the PSD Hydration and Installation scripts.
+1) Navigate to the PSD Hydration script location in "Tools" folder and execute ./New-Hydration.ps1
+    >PRO TIP: Add the -verbose command for maximum output visibility
+1) Respond to the PSD Hydration script prompts for inputs and locations of installation files 
+![PSD Hydration Wizard](images/Config/PSDHydration-Wizard.png "PSD Hydration Wizard")
+    >PRO TIP: Make sure the target folder for PSD is **EMPTY** -or- alternatively ensure you use the -upgrade parameter
+1) New-PSDHydration.ps1 will complete
+1) Reboot and run New-PSDHydration.ps1 -verbose again to complete IIS installation
+1) Review the New-PSDHydration output log file 
+1) You'll need to still need to populate PSD with your OS files, applications and drivers along with creating task sequences and generating boot media
+    - Refer to the PSD Configuration Checklist below for detailed configuration guidance
+    - If you used a "Business Editions" ISO, you may want to delete any N or EDU Operating Systems from the workbench
+    - Only ENT and PRO task sequences will be created from a "Business Editions" ISO
+
+# Manually Installing PSD
+PSD, IIS, WebDAV and other components can also be installed manually if substantial customization is required or you're installing into an existing environment. Manual PSD installation requires the following:
+- Administrative rights on the MDT Workbench computer 
 - Existing installation of MDT Workbench and ADK
-- Administrative rights on the MDT Workbench computer
-- Downloaded or local copy of the PSD solution and it's installer
+- Downloaded or local copy of the PSD solution and it's installers
 
-1) If open, close the MDT Workbench.
+1) Install ADK (make note of the version)
+1) Install ADK for PE (if needed) (make note of version)
+1) Install MDT (make note of version)
 1) Download or clone the PSD content from the [PSD GitHub Home](https://github.com/FriendsOfMDT/PSD)
-1) Open an elevated PowerShell command prompt, run one of the following commands
+1) Open an elevated PowerShell command prompt, run one of the following commands:
     - For **NEW** installations of PSD run:
         - ./PSD_Install.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name>
     - To **UPGRADE** an existing MDT/PSD installation run: 
-        - ./PSD_Install.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name> **-upgrade**
+        - ./PSD_Install.ps1 -psDeploymentFolder \<your folder path>  **-upgrade**
 1) Review the command window and PSD installation log (future) for errors
 1) You should see PSD folders ./SCRIPTS and ./TOOLS in your MDT Workbench
     >PRO TIP: You may need to refresh or open and close your Workbench for the PSD deployment share to appear.
 
-## PSD Configuration Checklist
-The following actions should be completed as part of PSD installation:
+# PSD Configuration Checklist
+The following actions should be completed as part of PSD configuration regardless of installation technique.
 
 * [ ] **Install PSD** - Install PSD on a machine with ADK and MDT already installed. Install PSD either as a NEW deployment share or as an UPGRADE to an existing MDT deployment share. Detailed PSD installation instructions can be found in the [PSD Installation Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20Installation%20Guide.md).
 
-* [ ] **Open PSD share in MDT** - Following installation of PSD, navigate to and open the newly created PSD deployment share in the MDT Workbench
+* [ ] **Setup PSD in MDT** - Following installation of PSD, navigate to and open the newly created PSD deployment share in the MDT Workbench
 
 * [ ] **Import Operating Systems** - Within MDT Workbench, on the newly created PSD Deployment share, import/create/copy any desired Operating Systems. Follow MDT-provided instructions and techniques. 
     >PRO TIP: You can copy Operating Systems from other MDT deployment shares.
@@ -63,7 +132,7 @@ The following actions should be completed as part of PSD installation:
 * [ ] **Import/Add Language Packs** - Within MDT Workbench, on the newly created PSD Deployment share, import any desired LANGUAGE PACKS. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating language packs installation using CustomSettings.ini.
     >PRO TIP: You can copy **Language** entries from other MDT deployment shares.
 
-* [ ] **Check deployment share Permissions** - By default, the PSD installer creates an MDT folder structure for PSD. PSD-specific files , scripts and templates are added and a new SMB share is created if specified. Ensure that the necessary domain and/or local computer user accounts have access to the PSD share. 
+* [ ] **Check deployment share Permissions** - By default, the PSD installer creates an MDT folder structure for PSD. PSD-specific files, scripts and templates are added and a new SMB share is created if specified. Ensure that the necessary domain and/or local computer user accounts have access to the PSD share. 
 
     >PRO TIP: Only grant the *minimum necessary rights* to write logs in the PSD share. Only **READ** rights are required for the 
     PSD/MDT share.
