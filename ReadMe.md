@@ -15,7 +15,6 @@ Supported deployment scenarios include deployment from the following content rep
   -  IIS over HTTP with BITS & BranchCache using PowerShell (No BITS available in WinPE)
   -  IIS over HTTP using WebClient (Native PS)
   -  UNC (\\server\share)
-  -  Local Media
 
 PSD is very much a work-in-progress solution, so stay tuned as we rapidly move forward on this.
 
