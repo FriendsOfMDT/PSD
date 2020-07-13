@@ -1,14 +1,13 @@
 <#
 .SYNOPSIS
-
+    Module for the PSD Wizard
 .DESCRIPTION
-
+    Module for the PSD Wizard
 .LINK
-
+    https://github.com/FriendsOfMDT/PSD
 .NOTES
           FileName: PSDWizard.psm1
           Solution: PowerShell Deployment for MDT
-          Purpose: Module for the PSD Wizard
           Author: PSD Development Team
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
           Primary: @Mikael_Nystrom 
@@ -21,6 +20,16 @@
 
 .Example
 #>
+
+# Check for debug in PowerShell and TSEnv
+if($TSEnv:PSDDebug -eq "YES"){
+    $Global:PSDDebug = $true
+}
+if($PSDDebug -eq $true)
+{
+    $verbosePreference = "Continue"
+}
+
 
 $script:Wizard = $null
 $script:Xaml = $null
@@ -72,6 +81,15 @@ function Save-PSDWizardResult
         $value = $control.Text
         Set-Item -Path tsenv:$name -Value $value 
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Set variable $name using form value $value"
+        if($name -eq "TaskSequenceID"){
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking TaskSequenceID value"
+            if ($value -eq ""){
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TaskSequenceID is empty!!!"
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Re-Running Wizard, TaskSequenceID must not be empty..."
+                Show-PSDSimpleNotify -Message "No Task Sequence selected, restarting wizard..."
+                Show-PSDWizard "$scripts\PSDWizard.xaml"
+            }
+        }
     }
 }
 
@@ -90,7 +108,6 @@ function Show-PSDWizard
     Param( 
         $xamlPath
     ) 
-
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing wizard from $xamlPath"
     $wizard = Get-PSDWizard $xamlPath
     Set-PSDWizardDefault

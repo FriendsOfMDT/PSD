@@ -41,7 +41,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Name="wizCancelButton" Margin="0,0,7,0" MinWidth="75" Content="Cancel" />
-                            <Button Name="wizFinishButton" Margin="7,0,0,0" MinWidth="75" Content="Finish" />
+                            <Button Name="wizFinishButton" Margin="7,0,0,0" MinWidth="75" Content="Start" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>

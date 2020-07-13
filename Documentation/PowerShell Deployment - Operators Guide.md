@@ -1,132 +1,53 @@
-# Operators Guide - PowerShell Deployment Extension Kit
-April 2019
+# Operations Guide
 
 ## Introduction
-PSD enabled deployments are very much like legacy MDT Lite Touch Deployments. They can be initiated via PXE and WDS or via Boot Media. The primary difference is that just about everything from MDT has been replaced with PowerShell scripts to accomplish the same functionality. 
+PSD enabled deployments works the same as standard MDT Lite Touch Deployments. They can be initiated via PXE, or via Boot Media (ISO/USB). Here follows a list of common operations actions for the PSD solution
 
-Additionally, PSD deployments can be implemented from not only UNC paths (traditional deployment shares), but also from HTTP and HTTPS deployment shares. This opens up a new capability for bare metal wipe and load scenarios across the Internet! 
+* **Import Operating Systems** - Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired Operating Systems. Follow MDT-provided instructions and techniques. 
+    >PRO TIP: You can copy Operating Systems from other MDT deployment shares.
 
-## Installation
-Installation is relatively straightforward. You can either install PSD and specify a new deployment repository and share -or- you can upgrade (and extend) an existing MDT deployment share and add on PSD functionality. Installation is completed by downloading the PSD solution from [GitHub.com/FriendsOfMDT](https://github.com/FriendsOfMDT/PSD) and running the PSD_Install.ps1 script using the following syntax from an elevated PowerShell ISE prompt: 
+* [ ] **Create PSD Task Sequence** - You **MUST** create a new Task Sequence from the PSD Templates within the workbench. PSD will fail otherwise. Do not attempt to clone/copy/import or otherwise work around this step. Some steps are required for PSD functionality. Do not delete any of the PSD task sequence steps - you may disable steps in the PSD Template task sequences if you choose.
 
-   .\PSD_Install.ps1 -psdDeploymentFolder <folder> -psdDeploymentShare <sharename> (-Upgrade)
+    >PRO TIP: If you upgrade PSD version at a later date, **expect** to recreate your task sequences from the new PSD templates.
 
-Refer to the [PSD Installation Guide](https://github.com/FriendsOfMDT/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20Installation%20Guide.md) for detailed installation instructions.
->PRO TIP: You may want to experiment with the PSD Extension Kit outside of production environments initially. 
+* **Create Applications** - Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired Applications. Follow MDT-provided instructions and techniques. Make note of application's unique GUIDs for use automating application installation with CustomSettings.ini.
+    >PRO TIP: You can copy Applications from other MDT deployment shares.
 
-Note: If you upgrade an existing PSD deployment share with the -upgrade parameter, you need to do the following after the upgrade
-- Generate new boot image(s) by updating the deployment share.
-- Replace any existing PSD boot images in WDS with the updated ones.
-- If the new PSD version have updated task sequence templates, you need to create new task sequences for those changes to take effect. Note that not all new versions will have new task sequence templates. Read the version relase notes to find out.
+* **Import/Add Drivers** - Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired DRIVERS. Follow MDT-provided instructions and techniques. After adding new drivers to MDT using the "total control method" (OS/Model), you need to run the New-PSDDriverPackage.ps1 to generate the ZIP archives. One ZIP archive is created for each OS and Model.
+    >PRO TIP: You can copy Drivers from other MDT deployment shares.
 
-## Configuration and Automation
+* **Check Deployment Share Permissions** - By default, the PSD installer creates an MDT folder structure for PSD. PSD-specific files , scripts and templates are added and a new SMB share is created if specified. Ensure that the necessary domain and/or local computer user accounts have access to the PSD Share. 
 
-### New PSD Variables - Overview
-The following new TS variables are provided in conjunction with PSD. Any new or additional Task Sequence variables **MUST** be instantiated and called via Bootstrap.ini or CustomSettings.ini !! Do **NOT** edit or modify ZTIGather.xml (ever).
+    >PRO TIP: Only grant the *minimum necessary rights* to write logs in the PSD share. Only **READ** rights are required for the 
+    PSD/MDT share.
 
-### PSD Environmental Variables
-The following new environmental variables are pre-configured and/or defined as part of PSD. See below in this document for details on new PSD variables.
-- IsOnBattery
-- IsVM
-- IsSFF
-- IsTablet
-- PSDDeployRoots
-- AutoPilot
+* **Update Windows PE settings** - Update the MDT WinPE configurations panels including the following settings:
+- WinPE Custom Wallpaper (see notes below)
+- WinPE Extra Directory (configured by default)
+- ISO File name and generation
+- WIM file name and generation
+  
+* **Enable MDT monitoring** - Enable MDT Event Monitoring and specify the MDT server name and ports to be used. 
 
-### PSD Debug Flow Control Variables
-- DevCleanUp
-- DevDebugLogging
-- DevVerboseScreenLogging
+* **Update CustomSettings.ini** - Edit and Customize CUSTOMSETTINGS.INI to perform the necessary and desired automation and configuration of your OSD deployments. These should be settings to affect the installed OS typically. Be sure to configure new PSD properties and variables. See XXX for more details.
+    >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from CustomSettings.ini. 
 
-## Bootstrap and CustomSettings INI files
-Bootstrap.ini and CustomSettings.ini function as before in MDT. Both can be used to automate OS deployments using PSD. PSD supports the following:
-- Custom Properties (variables)
-- Custom Priorities
-- Single instance variables
-- Array variables
-- User Exit Scripts
-- MDT Database integration (future)
+* **Update BootStrap.ini** - Edit and customize BOOTSTRAP.INI for your any necessary and desired  configuration of your OSD deployments. These should be settings to affect the OSD environment typically. Be sure to configure new PSD properties and variables. See XXX for more details.
+    >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from BootStrap.ini. 
 
-## PSDDeployRoots
-A new TS variable (PSDDeployRoots) has been implemented so that designers and implementers can support *multiple* deployment roots. PSDDeployRoots takes a string of potential content repositories and feeds into PSD scripts for evaluation. At present, the list of deployment shares is processed in the order specified and the first successfully validated (and online) deployment share wins and will be used to provide content to the task sequence on the target device.
+* **Update Background wallpaper** - By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provided. It can be found at Samples folder of the MDT installation. Adjust the MDT WinPE Customizations tab to reflect this new bmp (or use your own).
+    
+* **Configure Extra Files** - Create and populate an ExtraFiles folder that contains anything you want to add to WinPE or images. Things like CMTRACE.EXE, wallpapers, etc.
+    >PRO TIP: Create the same folder structure as where you want the files to land (e.g. \Windows\System32\)
 
-As an example, the following BootStrap.ini snippet is provided...
+    >PRO TIP WARNING: If using WinPE v1809, you **MUST** source and stage **BCP47Langs.dll** and **BCP47mrm.dll**, otherwise the PSD deployment wizard and final WinForms will crash.
 
-    - [Settings]
-    - Priority = PDSVars, PSDLogs, Default
-    - Properties = IsOnBattery, PSDDeployRoots
+* **Configure WinPE Drivers** - Using MDT Selection Profiles, customize your WinPE settings to utilize an appropriate set of MDT objects. Be sure to consider Applications, Drivers, Packages, and Task Sequences.
 
-    - [Default]
-    - PSDDeployRoots=http://someserver.off/nothing, https://SecureServer.off/Nothing, http://foo.bar.xyz/psd, \\SomeServer\SomeShare$
+* **Generate new Boot Media** - Using MDT Deployment workbench techniques, generate new boot media. By default the installer, will configure NEW PSD deployment shares to be PSDLiteTouch_x64.iso and PSDLiteTouch_x86.iso. Rename these if necessary.
+    
+* **Content Caching and Peer to Peer support** - Currently under development
 
-# Your First PSD Task Sequence
-Make sure your target device meets the following minimum hardware specifications:
-- 1.5GB RAM or better 
-    > NOTE: WinPE has been extended under PSD and requires additional memory
-- At least one (1) active network adapter(s)
-- At least one (1) 50GB hard drive (for New/BareMetal deployments)
-- At least XXX MHz processor (for New/BareMetal deployments)
 
-- BLAH checklist
-- BLAH debug
-- BLAH wallpaper
 
-# Troubleshooting PSD
-Troubleshooting PSD is very similar to a traditional MDT environment except, nearly everything occurs via connectivity to a PSDrive and within a BDD/MDT task sequence.
- 
-## Simple PSD Testing and Development Environment
-Some PSD functionality can be tested and developed using a technique similar to that for LTI deployments. It's a bit more complicated than it was for legacy MDT though.....
-
-1. Create a new empty VM with sufficient and appropriate network, RAM and disk settings
-1. Create a new Task Sequence using the **PSD RnD template**
-1. Create a new Boot ISO and mount it in your new VM
-1. Boot your VM using the new PSD Boot media
-1. The VM should start and launch a PowerShell window
-1. At this point, you should have a TS environment, access to TS variables. You can import modules, create PSDrives, and run many of the scripts and modules provided by PSD. The default script normally run first is PSDStart.ps1. You may need to map shares, and copy files locally. Have fun!
-
-# PSD and 2Pint ACP
-This section for how to install and configure PSD in conjunction with 2Pint software. [in progress]
-
-### Pint Overview
-[In Progress]
-
-### Pre Requisites
-- item 1
-- item 2
-
-### Installing 2Pint software for PSD
-[In Progress]
-- item 1
-- item 2
-
-### Configuring 2Pint software for PSD
-- item 1
-- item 2
-
-### Testing, Validating and Troubleshooting 2Pint software for PSD
-- item 1
-- item 2
-
-# Appendix - PSD Variables 
-## Environmental Variables
-The following variables may be useful when automating or customizing PSD capabilities. 
-
-| **Variable** | **Mandatory/Optional** | Description |
-|--------------|:------------:|-----------|
-| **IsOnBattery** | Optional | Calculated value during PSDGather. TRUE if target computer is a laptop and is running on AC. FALSE if desktop or laptop running on battery.
-| **IsVM** | Optional | Calculated value during PSDGather. TRUE if target computer is a virtual machine, otherwise FALSE.
-| **IsSFF** | Optional | Calculated value during PSDGather. TRUE if target computer enclosure is type 34, 35 or 36 (Small Form Factor)
-| **IsTablet** | Optional | Calculated value during Gather. TRUE if target computer enclosure is type 13, 33, 31, or 32 (Tablet)
-| **PSDDeployRoots** | Optional | PSDDeployRoots is used to define multiple DeployRoots of either UNC, HTTP or HTTPS formats. Can *NOT* be called in conjunction with DeployRoot. See additional [notes](https://foo.link)
-| **AutoPilot** | Optional | Used to define how a target computer will be built using Autopilot. JSON is used if the target computer will only have the JSON file processed while SYSPREP is defined if the system should be prepared by running sysprep.exe and then completing an Autopilot deployment.
-
-## Development and Debugging Variables
-The following variables may be useful when customizing or developing PSD capabilities. 
-
-| **Variable** | **Mandatory/Optional** | Description
-|--------------|:------------:|-----------|
-| **DevCleanUp** | Optional | Used to the control cleanup up log files. When set to TRUE, the task sequence engine removes all log files. When FALSE, log files are left in place (C:\MININT)
-| **DevDebugLogging** | Optional | [In Progress]
-| **DevVerboseScreenLogging** | Optional | [In Progress]
- 
 

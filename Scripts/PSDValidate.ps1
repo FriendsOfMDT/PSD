@@ -18,11 +18,15 @@ Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global
 Import-Module PSDUtility
 Import-Module PSDDeploymentShare
 
-$verbosePreference = "Continue"
-
+# Check for debug in PowerShell and TSEnv
+if($TSEnv:PSDDebug -eq "YES"){
+    $Global:PSDDebug = $true
+}
+if($PSDDebug -eq $true)
+{
+    $verbosePreference = "Continue"
+}
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Deployroot is now $($tsenv:DeployRoot)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now $env:PSModulePath"
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:ImageSize $($tsenv:ImageSize)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:ImageProcessorSpeed $($tsenv:ImageProcessorSpeed)"
@@ -35,6 +39,7 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:VerifyOS $($tsenv:
     '//----------------------------------------------------------------------------
 #>
 
+# TODO: The logic is only used when running in Windows, the logic needs to change from using DeploymentType to detect we are running inside Windows or not
 If($TSEnv:DeploymentType -eq "REFRESH")
 {
 	If ($TSEnv:VerifyOS -eq "CLIENT")

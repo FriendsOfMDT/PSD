@@ -8,7 +8,7 @@
 .NOTES
           FileName: PSDDeploymentShare.psd1
           Solution: PowerShell Deployment for MDT
-          Purpose: Connect to a deployment share and obtain content from it, using either HTTP or SMB as needed.
+          Purpose: Connect to a deployment share and obtain content from it, using either HTTP(s) or SMB as needed.
           Author: PSD Development Team
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
           Primary: @Mikael_Nystrom 
@@ -23,9 +23,18 @@
 .Example
 #>
 
+# Check for debug in PowerShell and TSEnv
+if($TSEnv:PSDDebug -eq "YES"){
+    $Global:PSDDebug = $true
+}
+if($PSDDebug -eq $true)
+{
+    $verbosePreference = "Continue"
+}
+
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Importing module Bitstransfer"
 
-Import-Module BitsTransfer -Global
+Import-Module BitsTransfer -Global -Force
 
 # Local variables
 $global:psddsDeployRoot = ""
@@ -42,6 +51,18 @@ function Get-PSDConnection
         [string] $password
     )
 
+    if(($username -eq "\") -or ($username -eq "")){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No UserID specified"
+        $username = Get-PSDInputFromScreen -Header UserID -Message "Enter User ID [DOMAIN\Username] or [COMPUTER\Username]" -ButtonText Ok
+        $tsenv:UserDomain = $username | Split-Path
+        $tsenv:UserID = $username | Split-Path -Leaf
+    }
+    if($password -eq ""){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No UserPassword specified"
+        $Password = Get-PSDInputFromScreen -Header UserPassword -Message "Enter Password"  -ButtonText Ok -PasswordText
+        $tsenv:UserPassword = $Password
+    }
+    Save-PSDVariables
     # Save values in local variables
     $global:psddsDeployRoot = $deployRoot
     $global:psddsDeployUser = $username
@@ -115,14 +136,12 @@ function Get-PSDProvider
 
     # Load the PSSnapIn PowerShell provider module
     $modules = Get-PSDContent -Content "Tools\Modules"
-    $VerbosePreference = "SilentlyContinue"
     Import-Module "$modules\Microsoft.BDD.PSSnapIn"
-    $verbosePreference = "Continue"
-
 
     # Create the PSDrive
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating MDT provider drive DeploymentShare: at $deployRoot"
-    New-PSDrive -Name DeploymentShare -PSProvider MDTProvider -Root $deployRoot -Scope Global
+    $Result = New-PSDrive -Name DeploymentShare -PSProvider MDTProvider -Root $deployRoot -Scope Global
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating MDT provider drive $($Result.name): at $($result.Root)"
 }
 
 # Internal function for getting the next available drive letter.
@@ -148,7 +167,6 @@ function Get-PSDContent
         [string] $destination = ""
     )
 
-    $verbosePreference = "Continue"
     $dest = ""
 
     # Track the time
@@ -307,9 +325,16 @@ function Get-PSDContentWeb
             Add-Content -Value "Source=$topUri" -Path $iniPath
             Add-Content -Value "Destination=$destination" -Path $iniPath
             Add-Content -Value "MDT=true" -Path $iniPath
-            
+
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination=$destination"
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Source=$topUri"
+
+            if((Get-Process | Where-Object Name -EQ TSManager).count -ne 0)
+            {
+                Add-Content -Value "Username=$($tsenv:UserDomain)\$($tsenv:UserID)" -Path $iniPath
+                Add-Content -Value "Password=$($tsenv:UserPassword)" -Path $iniPath
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Username=$($tsenv:UserDomain)\$($tsenv:UserID)"
+            }
 
             # ToDo, check that the ini file exists before we try...
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading information saved to $iniPath so starting $tsenv:SMSTSDownloadProgram"

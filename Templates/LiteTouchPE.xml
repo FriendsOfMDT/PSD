@@ -64,6 +64,8 @@
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\msvcr120.dll" dest="Deploy\Tools\%PLATFORM%\msvcr120.dll" />
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\00000409\tsres.dll" dest="Deploy\Tools\%PLATFORM%\00000409\tsres.dll" />
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\Microsoft.BDD.Utility.dll" dest="Deploy\Tools\%PLATFORM%\Microsoft.BDD.Utility.dll" />
+	  <Copy source="%DEPLOYROOT%\PSDResources\BootImageFiles\%PLATFORM%" dest="" />
+	  <Copy source="%DEPLOYROOT%\PSDResources\Certificates" dest="Deploy\Certificates" />
 
     <!-- Modules -->
 
@@ -81,7 +83,7 @@
 
 	<!-- Exits -->
 	<Exits>
-	  <Exit>cscript.exe "%INSTALLDIR%\Samples\UpdateExit.vbs"</Exit>
+	  <Exit>powershell.exe -File "%DEPLOYROOT%\Scripts\PSDUpdateExit.ps1"</Exit>
 	</Exits>
 
   </WindowsPE>

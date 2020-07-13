@@ -1,14 +1,13 @@
 <#
 .SYNOPSIS
-
+    Apply the specified operating system.
 .DESCRIPTION
-
+    Apply the specified operating system.
 .LINK
-
+    https://github.com/FriendsOfMDT/PSD
 .NOTES
           FileName: PSDApplyOS.ps1
           Solution: PowerShell Deployment for MDT
-          Purpose: Apply the specified operating system.
           Author: PSD Development Team
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
           Primary: @Mikael_Nystrom 
@@ -34,11 +33,16 @@ Import-Module DISM
 Import-Module PSDUtility
 Import-Module PSDDeploymentShare
 
-$verbosePreference = "Continue"
+# Check for debug in PowerShell and TSEnv
+if($TSEnv:PSDDebug -eq "YES"){
+    $Global:PSDDebug = $true
+}
+if($PSDDebug -eq $true)
+{
+    $verbosePreference = "Continue"
+}
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Deployroot is now $($tsenv:DeployRoot)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now $env:PSModulePath"
 
 # Make sure we run at full power
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Make sure we run at full power"

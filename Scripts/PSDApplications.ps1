@@ -1,14 +1,25 @@
-# // ***************************************************************************
-# // 
-# // PowerShell Deployment for MDT
-# //
-# // File:      PSDApplications.ps1
-# // 
-# // Purpose:   Installs the apps specified in task sequence variables 
-# //            Applications and MandatoryApplications.
-# // 
-# // ***************************************************************************
+<#
+.SYNOPSIS
+    Installs the apps specified in task sequence variables Applications and MandatoryApplications.
+.DESCRIPTION
+    Installs the apps specified in task sequence variables Applications and MandatoryApplications.
+.LINK
+    https://github.com/FriendsOfMDT/PSD
+.NOTES
+          FileName: PSDApplications.ps1
+          Solution: PowerShell Deployment for MDT
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy, @AndHammarskjold
+          Primary: @jarwidmark 
+          Created: 
+          Modified: 2019-05-17
 
+          Version - 0.0.0 - () - Finalized functional version 1.
+
+          TODO:
+
+.Example
+#>
 param (
 
 )
@@ -17,12 +28,16 @@ param (
 Import-Module PSDUtility
 Import-Module PSDDeploymentShare
 
-$verbosePreference = "Continue"
+# Check for debug in PowerShell and TSEnv
+if($TSEnv:PSDDebug -eq "YES"){
+    $Global:PSDDebug = $true
+}
+if($PSDDebug -eq $true)
+{
+    $verbosePreference = "Continue"
+}
 
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Deployroot is now $($tsenv:DeployRoot)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now $env:PSModulePath"
 
 # Internal functions
 

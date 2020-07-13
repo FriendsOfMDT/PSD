@@ -1,5 +1,5 @@
 # README - PowerShell Deployment Extension Kit
-April 2019
+June 2020 (ver 0.2.0.1)
 
 Welcome to PowerShell Deployment (PSD)
 

@@ -19,6 +19,6 @@ Import-Module PSDUtility -Force -Verbose
 Import-Module PSDDeploymentShare -Force -Verbose
 Import-Module PSDGather -Force -Verbose
 
-dir tsenv: | Out-File "$($env:SystemDrive)\DumpVars.log"
-Get-Content -Path "$($env:SystemDrive)\DumpVars.log"
+dir tsenv: | Out-File "$($env:SystemDrive)\PSDDumpVars.log"
+Get-Content -Path "$($env:SystemDrive)\PSDDumpVars.log"
 

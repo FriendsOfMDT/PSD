@@ -1,23 +1,7 @@
 <?xml version="1.0"?>
 <sequence version="3.00" name="PSD Standard Client Task Sequence" description="A complete task sequence for deploying a client operating system using PowerShell">
-  <group expand="false" name="Initialization" description="" disable="false" continueOnError="false">
+  <group expand="true" name="Initialization" description="" disable="false" continueOnError="false">
     <action />
-    <step type="BDD_Gather" name="Gather" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
-      <defaultVarList>
-        <variable name="GatherLocalOnly" property="GatherLocalOnly">true</variable>
-        <variable name="RulesFile" property="RulesFile"></variable>
-      </defaultVarList>
-      <action>cscript.exe "%SCRIPTROOT%\ZTIGather.wsf"</action>
-    </step>
-  </group>
-  <group name="Validation" disable="false" continueOnError="false" description="" expand="false">
-    <condition>
-      <expression type="SMS_TaskSequence_VariableConditionExpression">
-        <variable name="Variable">PHASE</variable>
-        <variable name="Operator">equals</variable>
-        <variable name="Value">VALIDATION</variable>
-      </expression>
-    </condition>
     <step type="BDD_Validate" name="Validate" successCodeList="0 3010" description="" startIn="" disable="false" continueOnError="false">
       <defaultVarList>
         <variable name="ImageSize" property="ImageSize">20000</variable>
@@ -27,285 +11,103 @@
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTIValidate.wsf"</action>
     </step>
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Run cmd /c start &quot;PowerShell&quot; /wait PowerShell" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-      <defaultVarList>
-        <variable name="PackageID" property="PackageID" />
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-      <action>cmd /c start "PowerShell" /wait PowerShell</action>
-    </step>
-    <step name="Next Phase" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>powershell.exe -file "%SCRIPTROOT%\PSDNextPhase.ps1"</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
   </group>
-  <group expand="false" name="State Capture" description="" disable="false" continueOnError="false">
+  <group expand="true" name="Install Operating System" description="" disable="false" continueOnError="false">
+    <step type="SMS_TaskSequence_PartitionDiskAction" name="Format and Partition Disk (BIOS)" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
+      <condition>
+        <expression type="SMS_TaskSequence_VariableConditionExpression">
+          <variable name="Operator">notEquals</variable>
+          <variable name="Value">True</variable>
+          <variable name="Variable">IsUEFI</variable>
+        </expression>
+      </condition>
+      <defaultVarList>
+        <variable name="OSDDiskIndex" property="DiskIndex">0</variable>
+        <variable name="OSDDiskPartitions1Type" property="OSDDiskPartitions1Type">Recovery</variable>
+        <variable name="DONotCreateExtraPartition" property="DONotCreateExtraPartition"></variable>
+        <variable name="OSDPartitions0Type" property="Partitions0Type">Primary</variable>
+        <variable name="OSDPartitions0FileSystem" property="Partitions0FileSystem">NTFS</variable>
+        <variable name="OSDPartitions0Bootable" property="Partitions0Bootable">True</variable>
+        <variable name="OSDPartitions0QuickFormat" property="Partitions0QuickFormat">True</variable>
+        <variable name="OSDPartitions0VolumeName" property="Partitions0VolumeName">System Reserved</variable>
+        <variable name="OSDPartitions0Size" property="Partitions0Size">499</variable>
+        <variable name="OSDPartitions0SizeUnits" property="Partitions0SizeUnits">MB</variable>
+        <variable name="OSDPartitions0VolumeLetterVariable" property="Partitions0VolumeLetterVariable"></variable>
+        <variable name="OSDPartitions1Type" property="Partitions1Type">Primary</variable>
+        <variable name="OSDPartitions1FileSystem" property="Partitions1FileSystem">NTFS</variable>
+        <variable name="OSDPartitions1Bootable" property="Partitions1Bootable">False</variable>
+        <variable name="OSDPartitions1QuickFormat" property="Partitions1QuickFormat">True</variable>
+        <variable name="OSDPartitions1VolumeName" property="Partitions1VolumeName">Windows</variable>
+        <variable name="OSDPartitions1Size" property="Partitions1Size">99</variable>
+        <variable name="OSDPartitions1SizeUnits" property="Partitions1SizeUnits">%</variable>
+        <variable name="OSDPartitions1VolumeLetterVariable" property="Partitions1VolumeLetterVariable">OSDisk</variable>
+        <variable name="OSDPartitions2Type" property="Partitions2Type">Recovery</variable>
+        <variable name="OSDPartitions2FileSystem" property="Partitions2FileSystem">NTFS</variable>
+        <variable name="OSDPartitions2Bootable" property="Partitions2Bootable">False</variable>
+        <variable name="OSDPartitions2QuickFormat" property="Partitions2QuickFormat">True</variable>
+        <variable name="OSDPartitions2VolumeName" property="Partitions2VolumeName">Recovery</variable>
+        <variable name="OSDPartitions2Size" property="Partitions2Size">100</variable>
+        <variable name="OSDPartitions2SizeUnits" property="Partitions2SizeUnits">%</variable>
+        <variable name="OSDPartitions2VolumeLetterVariable" property="Partitions2VolumeLetterVariable"></variable>
+        <variable name="OSDPartitions" property="Partitions">3</variable>
+        <variable name="OSDPartitionStyle" property="PartitionStyle">MBR</variable>
+      </defaultVarList>
+      <action>cscript.exe "%SCRIPTROOT%\ZTIDiskpart.wsf"</action>
+    </step>
+    <step type="SMS_TaskSequence_PartitionDiskAction" name="Format and Partition Disk (UEFI)" description="" runIn="WinPE" successCodeList="0" disable="false" continueOnError="false">
+      <condition>
+        <expression type="SMS_TaskSequence_VariableConditionExpression">
+          <variable name="Operator">equals</variable>
+          <variable name="Value">True</variable>
+          <variable name="Variable">IsUEFI</variable>
+        </expression>
+      </condition>
+      <defaultVarList>
+        <variable name="OSDDiskIndex" property="DiskIndex">0</variable>
+        <variable name="OSDDiskPartitions1Type" property="OSDDiskPartitions1Type">Recovery</variable>
+        <variable name="DONotCreateExtraPartition" property="DONotCreateExtraPartition"></variable>
+        <variable name="OSDPartitions0Type" property="Partitions0Type">EFI</variable>
+        <variable name="OSDPartitions0FileSystem" property="Partitions0FileSystem">FAT32</variable>
+        <variable name="OSDPartitions0Bootable" property="Partitions0Bootable">True</variable>
+        <variable name="OSDPartitions0QuickFormat" property="Partitions0QuickFormat">True</variable>
+        <variable name="OSDPartitions0VolumeName" property="Partitions0VolumeName">Boot</variable>
+        <variable name="OSDPartitions0Size" property="Partitions0Size">499</variable>
+        <variable name="OSDPartitions0SizeUnits" property="Partitions0SizeUnits">MB</variable>
+        <variable name="OSDPartitions0VolumeLetterVariable" property="Partitions0VolumeLetterVariable"></variable>
+        <variable name="OSDPartitions1Type" property="Partitions1Type">MSR</variable>
+        <variable name="OSDPartitions1FileSystem" property="Partitions1FileSystem">NTFS</variable>
+        <variable name="OSDPartitions1Bootable" property="Partitions1Bootable">False</variable>
+        <variable name="OSDPartitions1QuickFormat" property="Partitions1QuickFormat">True</variable>
+        <variable name="OSDPartitions1VolumeName" property="Partitions1VolumeName"></variable>
+        <variable name="OSDPartitions1Size" property="Partitions1Size">128</variable>
+        <variable name="OSDPartitions1SizeUnits" property="Partitions1SizeUnits">MB</variable>
+        <variable name="OSDPartitions1VolumeLetterVariable" property="Partitions1VolumeLetterVariable"></variable>
+        <variable name="OSDPartitions2Type" property="Partitions2Type">Primary</variable>
+        <variable name="OSDPartitions2FileSystem" property="Partitions2FileSystem">NTFS</variable>
+        <variable name="OSDPartitions2Bootable" property="Partitions2Bootable">False</variable>
+        <variable name="OSDPartitions2QuickFormat" property="Partitions2QuickFormat">True</variable>
+        <variable name="OSDPartitions2VolumeName" property="Partitions2VolumeName">Windows</variable>
+        <variable name="OSDPartitions2Size" property="Partitions2Size">99</variable>
+        <variable name="OSDPartitions2SizeUnits" property="Partitions2SizeUnits">%</variable>
+        <variable name="OSDPartitions2VolumeLetterVariable" property="Partitions2VolumeLetterVariable">OSDisk</variable>
+        <variable name="OSDPartitions3Type" property="Partitions3Type">Recovery</variable>
+        <variable name="OSDPartitions3FileSystem" property="Partitions3FileSystem">NTFS</variable>
+        <variable name="OSDPartitions3Bootable" property="Partitions3Bootable">False</variable>
+        <variable name="OSDPartitions3QuickFormat" property="Partitions3QuickFormat">True</variable>
+        <variable name="OSDPartitions3VolumeName" property="Partitions3VolumeName">Recovery</variable>
+        <variable name="OSDPartitions3Size" property="Partitions3Size">100</variable>
+        <variable name="OSDPartitions3SizeUnits" property="Partitions3SizeUnits">%</variable>
+        <variable name="OSDPartitions3VolumeLetterVariable" property="Partitions3VolumeLetterVariable"></variable>
+        <variable name="OSDPartitions" property="Partitions">4</variable>
+        <variable name="OSDPartitionStyle" property="PartitionStyle">GPT</variable>
+      </defaultVarList>
+      <action>cscript.exe "%SCRIPTROOT%\ZTIDiskpart.wsf"</action>
+    </step>
     <action />
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Capture User State" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-      <defaultVarList>
-        <variable name="PackageID" property="PackageID" />
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-      <action>powershell.exe -file %SCRIPTROOT%\PSDUserState.ps1 Capture</action>
-    </step>
-    <step name="Capture Groups" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>PowerShell.exe "%SCRIPTROOT%\PSDGroups.ps1" /capture</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
-    <step name="Capture Network Settings" description="" runIn="WinPEandFullOS" successCodeList="0 3010" disable="false" continueOnError="false">
-      <action>PowerShell.exe "%ScriptRoot%\PSDNicConfig.ps1"</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
-    <group name="Refresh only" disable="false" continueOnError="false" description="" expand="false">
-      <condition>
-        <expression type="SMS_TaskSequence_VariableConditionExpression">
-          <variable name="Variable">DeploymentType</variable>
-          <variable name="Operator">equals</variable>
-          <variable name="Value">REFRESH</variable>
-        </expression>
-      </condition>
-      <step type="SMS_TaskSequence_RunCommandLineAction" name="Disable BDE Protectors" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-        <defaultVarList>
-          <variable name="PackageID" property="PackageID" />
-          <variable name="RunAsUser" property="RunAsUser">false</variable>
-          <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-          <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-          <variable name="LoadProfile" property="LoadProfile">false</variable>
-        </defaultVarList>
-        <action>PowerShell.exe "%SCRIPTROOT%\PSDDisableBDEProtectors.PS1"</action>
-      </step>
-      <step name="Apply Windows PE" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-        <action>PowerShell.exe "%SCRIPTROOT%\PSDApplyWinPE.ps1"</action>
-        <defaultVarList>
-          <variable name="RunAsUser" property="RunAsUser">false</variable>
-          <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-          <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-          <variable name="LoadProfile" property="LoadProfile">false</variable>
-        </defaultVarList>
-      </step>
-    </group>
-    <step name="Next Phase" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>powershell.exe -file "%SCRIPTROOT%\PSDNextPhase.ps1"</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
-    <group name="Refresh only" disable="false" continueOnError="false" expand="false" description="">
-      <condition>
-        <expression type="SMS_TaskSequence_VariableConditionExpression">
-          <variable name="Variable">DeploymentType</variable>
-          <variable name="Operator">equals</variable>
-          <variable name="Value">REFRESH</variable>
-        </expression>
-      </condition>
-      <step type="SMS_TaskSequence_RebootAction" name="Restart computer" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
-        <defaultVarList>
-          <variable name="Message" property="Message" />
-          <variable name="MessageTimeout" property="MessageTimeout">60</variable>
-          <variable name="Target" property="Target" />
-        </defaultVarList>
-        <action>smsboot.exe /target:WinPE</action>
-      </step>
-    </group>
-    <condition>
-      <expression type="SMS_TaskSequence_VariableConditionExpression">
-        <variable name="Variable">PHASE</variable>
-        <variable name="Operator">equals</variable>
-        <variable name="Value">STATERESTORE</variable>
-      </expression>
-    </condition>
-  </group>
-  <group expand="false" name="Preinstall" description="" disable="false" continueOnError="false">
-    <action />
-    <step type="BDD_Gather" name="Gather" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
-      <defaultVarList>
-        <variable name="GatherLocalOnly" property="GatherLocalOnly">true</variable>
-        <variable name="RulesFile" property="RulesFile"></variable>
-      </defaultVarList>
-      <action>cscript.exe "%SCRIPTROOT%\ZTIGather.wsf"</action>
-    </step>
-    <group expand="false" name="New Computer only" description="" disable="false" continueOnError="false">
-      <action />
-      <step type="BDD_Validate" name="Validate" successCodeList="0 3010" description="" startIn="" disable="false" continueOnError="false">
-        <defaultVarList>
-          <variable name="ImageSize" property="ImageSize">20000</variable>
-          <variable name="ImageProcessorSpeed" property="ImageProcessorSpeed">800</variable>
-          <variable name="ImageMemory" property="ImageMemory">2048</variable>
-          <variable name="VerifyOS" property="VerifyOS">CLIENT</variable>
-        </defaultVarList>
-        <action>cscript.exe "%SCRIPTROOT%\ZTIValidate.wsf"</action>
-      </step>
-      <step type="SMS_TaskSequence_PartitionDiskAction" name="Format and Partition Disk (BIOS)" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
-        <condition>
-          <expression type="SMS_TaskSequence_VariableConditionExpression">
-            <variable name="Operator">notEquals</variable>
-            <variable name="Value">True</variable>
-            <variable name="Variable">IsUEFI</variable>
-          </expression>
-        </condition>
-        <defaultVarList>
-          <variable name="OSDDiskIndex" property="DiskIndex">0</variable>
-          <variable name="OSDDiskPartitions1Type" property="OSDDiskPartitions1Type">Recovery</variable>
-          <variable name="DONotCreateExtraPartition" property="DONotCreateExtraPartition"></variable>
-          <variable name="OSDPartitions0Type" property="Partitions0Type">Primary</variable>
-          <variable name="OSDPartitions0FileSystem" property="Partitions0FileSystem">NTFS</variable>
-          <variable name="OSDPartitions0Bootable" property="Partitions0Bootable">True</variable>
-          <variable name="OSDPartitions0QuickFormat" property="Partitions0QuickFormat">True</variable>
-          <variable name="OSDPartitions0VolumeName" property="Partitions0VolumeName">System Reserved</variable>
-          <variable name="OSDPartitions0Size" property="Partitions0Size">499</variable>
-          <variable name="OSDPartitions0SizeUnits" property="Partitions0SizeUnits">MB</variable>
-          <variable name="OSDPartitions0VolumeLetterVariable" property="Partitions0VolumeLetterVariable"></variable>
-          <variable name="OSDPartitions1Type" property="Partitions1Type">Primary</variable>
-          <variable name="OSDPartitions1FileSystem" property="Partitions1FileSystem">NTFS</variable>
-          <variable name="OSDPartitions1Bootable" property="Partitions1Bootable">False</variable>
-          <variable name="OSDPartitions1QuickFormat" property="Partitions1QuickFormat">True</variable>
-          <variable name="OSDPartitions1VolumeName" property="Partitions1VolumeName">Windows</variable>
-          <variable name="OSDPartitions1Size" property="Partitions1Size">99</variable>
-          <variable name="OSDPartitions1SizeUnits" property="Partitions1SizeUnits">%</variable>
-          <variable name="OSDPartitions1VolumeLetterVariable" property="Partitions1VolumeLetterVariable">OSDisk</variable>
-          <variable name="OSDPartitions2Type" property="Partitions2Type">Recovery</variable>
-          <variable name="OSDPartitions2FileSystem" property="Partitions2FileSystem">NTFS</variable>
-          <variable name="OSDPartitions2Bootable" property="Partitions2Bootable">False</variable>
-          <variable name="OSDPartitions2QuickFormat" property="Partitions2QuickFormat">True</variable>
-          <variable name="OSDPartitions2VolumeName" property="Partitions2VolumeName">Recovery</variable>
-          <variable name="OSDPartitions2Size" property="Partitions2Size">100</variable>
-          <variable name="OSDPartitions2SizeUnits" property="Partitions2SizeUnits">%</variable>
-          <variable name="OSDPartitions2VolumeLetterVariable" property="Partitions2VolumeLetterVariable"></variable>
-          <variable name="OSDPartitions" property="Partitions">3</variable>
-          <variable name="OSDPartitionStyle" property="PartitionStyle">MBR</variable>
-        </defaultVarList>
-        <action>cscript.exe "%SCRIPTROOT%\ZTIDiskpart.wsf"</action>
-      </step>
-      <step type="SMS_TaskSequence_PartitionDiskAction" name="Format and Partition Disk (UEFI)" description="" runIn="WinPE" successCodeList="0" disable="false" continueOnError="false">
-        <condition>
-          <expression type="SMS_TaskSequence_VariableConditionExpression">
-            <variable name="Operator">equals</variable>
-            <variable name="Value">True</variable>
-            <variable name="Variable">IsUEFI</variable>
-          </expression>
-        </condition>
-        <defaultVarList>
-          <variable name="OSDDiskIndex" property="DiskIndex">0</variable>
-          <variable name="OSDDiskPartitions1Type" property="OSDDiskPartitions1Type">Recovery</variable>
-          <variable name="DONotCreateExtraPartition" property="DONotCreateExtraPartition"></variable>
-          <variable name="OSDPartitions0Type" property="Partitions0Type">EFI</variable>
-          <variable name="OSDPartitions0FileSystem" property="Partitions0FileSystem">FAT32</variable>
-          <variable name="OSDPartitions0Bootable" property="Partitions0Bootable">True</variable>
-          <variable name="OSDPartitions0QuickFormat" property="Partitions0QuickFormat">True</variable>
-          <variable name="OSDPartitions0VolumeName" property="Partitions0VolumeName">Boot</variable>
-          <variable name="OSDPartitions0Size" property="Partitions0Size">499</variable>
-          <variable name="OSDPartitions0SizeUnits" property="Partitions0SizeUnits">MB</variable>
-          <variable name="OSDPartitions0VolumeLetterVariable" property="Partitions0VolumeLetterVariable"></variable>
-          <variable name="OSDPartitions1Type" property="Partitions1Type">MSR</variable>
-          <variable name="OSDPartitions1FileSystem" property="Partitions1FileSystem">NTFS</variable>
-          <variable name="OSDPartitions1Bootable" property="Partitions1Bootable">False</variable>
-          <variable name="OSDPartitions1QuickFormat" property="Partitions1QuickFormat">True</variable>
-          <variable name="OSDPartitions1VolumeName" property="Partitions1VolumeName"></variable>
-          <variable name="OSDPartitions1Size" property="Partitions1Size">128</variable>
-          <variable name="OSDPartitions1SizeUnits" property="Partitions1SizeUnits">MB</variable>
-          <variable name="OSDPartitions1VolumeLetterVariable" property="Partitions1VolumeLetterVariable"></variable>
-          <variable name="OSDPartitions2Type" property="Partitions2Type">Primary</variable>
-          <variable name="OSDPartitions2FileSystem" property="Partitions2FileSystem">NTFS</variable>
-          <variable name="OSDPartitions2Bootable" property="Partitions2Bootable">False</variable>
-          <variable name="OSDPartitions2QuickFormat" property="Partitions2QuickFormat">True</variable>
-          <variable name="OSDPartitions2VolumeName" property="Partitions2VolumeName">Windows</variable>
-          <variable name="OSDPartitions2Size" property="Partitions2Size">99</variable>
-          <variable name="OSDPartitions2SizeUnits" property="Partitions2SizeUnits">%</variable>
-          <variable name="OSDPartitions2VolumeLetterVariable" property="Partitions2VolumeLetterVariable">OSDisk</variable>
-          <variable name="OSDPartitions3Type" property="Partitions3Type">Recovery</variable>
-          <variable name="OSDPartitions3FileSystem" property="Partitions3FileSystem">NTFS</variable>
-          <variable name="OSDPartitions3Bootable" property="Partitions3Bootable">False</variable>
-          <variable name="OSDPartitions3QuickFormat" property="Partitions3QuickFormat">True</variable>
-          <variable name="OSDPartitions3VolumeName" property="Partitions3VolumeName">Recovery</variable>
-          <variable name="OSDPartitions3Size" property="Partitions3Size">100</variable>
-          <variable name="OSDPartitions3SizeUnits" property="Partitions3SizeUnits">%</variable>
-          <variable name="OSDPartitions3VolumeLetterVariable" property="Partitions3VolumeLetterVariable"></variable>
-          <variable name="OSDPartitions" property="Partitions">4</variable>
-          <variable name="OSDPartitionStyle" property="PartitionStyle">GPT</variable>
-        </defaultVarList>
-        <action>cscript.exe "%SCRIPTROOT%\ZTIDiskpart.wsf"</action>
-      </step>
-      <condition>
-        <expression type="SMS_TaskSequence_VariableConditionExpression">
-          <variable name="Variable">DeploymentType</variable>
-          <variable name="Operator">equals</variable>
-          <variable name="Value">NEWCOMPUTER</variable>
-        </expression>
-      </condition>
-    </group>
-    <group name="Offline User State Capture" disable="false" continueOnError="false" description="" expand="false">
-      <condition>
-        <expression type="SMS_TaskSequence_VariableConditionExpression">
-          <variable name="Variable">USMTOfflineMigration</variable>
-          <variable name="Operator">Equals</variable>
-          <variable name="Value">TRUE</variable>
-        </expression>
-      </condition>
-      <step type="SMS_TaskSequence_RunCommandLineAction" name="Offline User State Capture" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-        <action>cscript.exe "%SCRIPTROOT%\ZTIUserState.wsf" /capture</action>
-        <defaultVarList>
-          <variable name="RunAsUser" property="RunAsUser">false</variable>
-          <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-          <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-          <variable name="LoadProfile" property="LoadProfile">false</variable>
-        </defaultVarList>
-      </step>
-    </group>
-    <group name="Refresh only" disable="false" continueOnError="false" description="" expand="false">
-      <condition>
-        <expression type="SMS_TaskSequence_VariableConditionExpression">
-          <variable name="Variable">DeploymentType</variable>
-          <variable name="Operator">equals</variable>
-          <variable name="Value">REFRESH</variable>
-        </expression>
-      </condition>
-      <step name="Backup" disable="true" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-        <action>cscript.exe "%SCRIPTROOT%\ZTIBackup.wsf"</action>
-        <defaultVarList>
-          <variable name="RunAsUser" property="RunAsUser">false</variable>
-          <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-          <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-          <variable name="LoadProfile" property="LoadProfile">false</variable>
-        </defaultVarList>
-      </step>
-    </group>
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Enable BitLocker (Offline)" description="" disable="true" continueOnError="true" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-      <action>cscript.exe "%SCRIPTROOT%\ZTIBDE.wsf"</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
     <step type="SMS_TaskSequence_SetVariableAction" name="Set DriverGroup001" description="" disable="false" continueOnError="false" successCodeList="0 3010">
       <defaultVarList>
         <variable name="VariableName" property="VariableName">DriverGroup001</variable>
-        <variable name="VariableValue" property="VariableValue">Client\Windows 10 1709\%model%</variable>
+        <variable name="VariableValue" property="VariableValue">Windows 10\%model%</variable>
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
     </step>
@@ -316,30 +118,7 @@
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTIDrivers.wsf"</action>
     </step>
-    <step type="BDD_InstallUpdatesOffline" name="Apply Patches" disable="true" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>cscript.exe "%SCRIPTROOT%\ZTIPatches.wsf"</action>
-      <defaultVarList>
-        <variable name="PackageSelectionProfile" property="PackageSelectionProfile">All Packages</variable>
-      </defaultVarList>
-    </step>
-    <step name="Next Phase" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>powershell.exe -file "%SCRIPTROOT%\PSDNextPhase.ps1"</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
-    <condition>
-      <expression type="SMS_TaskSequence_VariableConditionExpression">
-        <variable name="Variable">PHASE</variable>
-        <variable name="Operator">equals</variable>
-        <variable name="Value">PREINSTALL</variable>
-      </expression>
-    </condition>
-  </group>
-  <group expand="false" name="Install" description="" disable="false" continueOnError="false">
+    <condition></condition>
     <step type="BDD_InstallOS" name="Install Operating System" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
         <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
@@ -352,18 +131,6 @@
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\LTIApply.wsf"</action>
     </step>
-    <step name="Next Phase" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>powershell.exe -file "%SCRIPTROOT%\PSDNextPhase.ps1"</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
-    <action />
-  </group>
-  <group name="Postinstall" disable="false" continueOnError="false" description="" expand="false">
     <step type="SMS_TaskSequence_RunCommandLineAction" name="Configure" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
       <defaultVarList>
         <variable name="PackageID" property="PackageID" />
@@ -374,37 +141,6 @@
       </defaultVarList>
       <action>powershell.exe -file %SCRIPTROOT%\PSDConfigure.ps1</action>
     </step>
-    <condition>
-      <expression type="SMS_TaskSequence_VariableConditionExpression">
-        <variable name="Variable">PHASE</variable>
-        <variable name="Operator">equals</variable>
-        <variable name="Value">POSTINSTALL</variable>
-      </expression>
-    </condition>
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Add Windows Recovery (WinRE)" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-      <action>cscript.exe "%SCRIPTROOT%\ZTIWinRE.wsf"</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
-    <step type="BDD_InstallUpdatesOffline" name="Apply LanguangePacks" disable="true" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>cscript.exe "%SCRIPTROOT%\ZTIPatches.wsf"</action>
-      <defaultVarList>
-        <variable name="PackageSelectionProfile" property="PackageSelectionProfile">All Packages</variable>
-      </defaultVarList>
-    </step>
-    <step name="Next Phase" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>powershell.exe -file "%SCRIPTROOT%\PSDNextPhase.ps1"</action>
-      <defaultVarList>
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-    </step>
     <step type="SMS_TaskSequence_RebootAction" name="Restart computer" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
         <variable name="Message" property="Message" />
@@ -414,7 +150,7 @@
       <action>smsboot.exe /target:WinPE</action>
     </step>
   </group>
-  <group expand="true" name="State Restore" description="" disable="false" continueOnError="false">
+  <group expand="true" name="Setup Operating System" description="" disable="false" continueOnError="false">
     <action />
     <step type="BDD_Gather" name="Gather" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
@@ -423,44 +159,7 @@
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTIGather.wsf"</action>
     </step>
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Pause with PowerShell" description="" disable="true" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-      <defaultVarList>
-        <variable name="PackageID" property="PackageID" />
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-      <action>cmd /c start "PowerShell" /wait PowerShell</action>
-    </step>
-    <group name="Custom Tasks Pre Windows Update" disable="false" continueOnError="false" expand="false" description="">
-      <step type="SMS_TaskSequence_RunCommandLineAction" name="Custom task script before Windows Update" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-        <defaultVarList>
-          <variable name="PackageID" property="PackageID" />
-          <variable name="RunAsUser" property="RunAsUser">false</variable>
-          <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-          <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-          <variable name="LoadProfile" property="LoadProfile">false</variable>
-        </defaultVarList>
-        <action>powershell.exe -file %SCRIPTROOT%\PSDCustomPreWU.ps1</action>
-      </step>
-      <step type="SMS_TaskSequence_RebootAction" name="Restart computer" description="" disable="true" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
-        <defaultVarList>
-          <variable name="SMSRebootMessage" property="Message"></variable>
-          <variable name="SMSRebootTimeout" property="MessageTimeout">60</variable>
-          <variable name="SMSRebootTarget" property="Target"></variable>
-        </defaultVarList>
-        <action>smsboot.exe /target:WinPE</action>
-      </step>
-    </group>
-    <step type="BDD_InstallApplication" name="Install Applications" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>cscript.exe "%SCRIPTROOT%\ZTIApplications.wsf"</action>
-      <defaultVarList>
-        <variable name="ApplicationGUID" property="ApplicationGUID"></variable>
-        <variable name="ApplicationSuccessCodes" property="ApplicationSuccessCodes">0 3010</variable>
-      </defaultVarList>
-    </step>
-    <step name="Windows Update" disable="false" continueOnError="true" successCodeList="0 3010" description="" startIn="">
+    <step name="Windows Update Pass 1" disable="false" continueOnError="true" successCodeList="0 3010" description="" startIn="">
       <action>powershell.exe -file %SCRIPTROOT%\PSDWindowsUpdate.ps1</action>
       <defaultVarList>
         <variable name="RunAsUser" property="RunAsUser">false</variable>
@@ -469,55 +168,15 @@
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
     </step>
-    <group name="Custom Tasks Post Windows Update" disable="false" continueOnError="false" expand="false" description="">
-      <step type="SMS_TaskSequence_RunCommandLineAction" name="Custom task script post Windows Update" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-        <defaultVarList>
-          <variable name="PackageID" property="PackageID" />
-          <variable name="RunAsUser" property="RunAsUser">false</variable>
-          <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-          <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-          <variable name="LoadProfile" property="LoadProfile">false</variable>
-        </defaultVarList>
-        <action>powershell.exe -file %SCRIPTROOT%\PSDCustomPostWU.ps1</action>
-      </step>
-      <step type="SMS_TaskSequence_RebootAction" name="Restart computer" description="" disable="true" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
-        <defaultVarList>
-          <variable name="SMSRebootMessage" property="Message"></variable>
-          <variable name="SMSRebootTimeout" property="MessageTimeout">60</variable>
-          <variable name="SMSRebootTarget" property="Target"></variable>
-        </defaultVarList>
-        <action>smsboot.exe /target:WinPE</action>
-      </step>
-    </group>
-    <step type="SMS_TaskSequence_EnableBitLockerAction" name="Enable BitLocker" continueOnError="true" successCodeList="0 3010" description="" startIn="" disable="true">
-      <action>cscript.exe "%SCRIPTROOT%\ZTIBde.wsf"</action>
-      <condition>
-        <expression type="SMS_TaskSequence_VariableConditionExpression">
-          <variable name="Variable">BdeInstallSuppress</variable>
-          <variable name="Operator">notEquals</variable>
-          <variable name="Value">YES</variable>
-        </expression>
-      </condition>
+    <step type="BDD_InstallApplication" name="Install Applications" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
+      <action>cscript.exe "%SCRIPTROOT%\ZTIApplications.wsf"</action>
       <defaultVarList>
-        <variable name="OSDBitLockerTargetDrive" property="BdeTargetDriveLetter"></variable>
-        <variable name="OSDBitLockerMode" property="BdeInstall">TPM</variable>
-        <variable name="OSDBitLockerStartupKeyDrive" property="BdeKeyLocation"></variable>
-        <variable name="OSDBitLockerCreateRecoveryPassword" property="BdeRecoveryPassword">AD</variable>
-        <variable name="OSDBitLockerWaitForEncryption" property="WaitForEncryption">false</variable>
+        <variable name="ApplicationGUID" property="ApplicationGUID"></variable>
+        <variable name="ApplicationSuccessCodes" property="ApplicationSuccessCodes">0 3010</variable>
       </defaultVarList>
     </step>
-    <step type="SMS_TaskSequence_RunCommandLineAction" name="Restore User State" description="" disable="false" continueOnError="false" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
-      <defaultVarList>
-        <variable name="PackageID" property="PackageID" />
-        <variable name="RunAsUser" property="RunAsUser">false</variable>
-        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-        <variable name="LoadProfile" property="LoadProfile">false</variable>
-      </defaultVarList>
-      <action>powershell.exe -file %SCRIPTROOT%\PSDUserState.ps1 Restore</action>
-    </step>
-    <step name="Restore Groups" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-      <action>cscript.exe "%SCRIPTROOT%\ZTIGroups.wsf" /restore</action>
+    <step name="Windows Update Pass 2" disable="false" continueOnError="true" successCodeList="0 3010" description="" startIn="">
+      <action>powershell.exe -file %SCRIPTROOT%\PSDWindowsUpdate.ps1</action>
       <defaultVarList>
         <variable name="RunAsUser" property="RunAsUser">false</variable>
         <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
@@ -525,130 +184,7 @@
         <variable name="LoadProfile" property="LoadProfile">false</variable>
       </defaultVarList>
     </step>
-    <group expand="false" name="Imaging (Not yet functional)" description="" disable="true" continueOnError="false">
-      <action />
-      <group name="Prepare Only" disable="false" continueOnError="false" expand="false" description="">
-        <condition>
-          <expression type="SMS_TaskSequence_VariableConditionExpression">
-            <variable name="Variable">DoCapture</variable>
-            <variable name="Operator">equals</variable>
-            <variable name="Value">PREPARE</variable>
-          </expression>
-        </condition>
-        <step name="Copy Sysprep files" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <action>cscript.exe "%SCRIPTROOT%\LTISysprep.wsf"</action>
-          <defaultVarList>
-            <variable name="RunAsUser" property="RunAsUser">false</variable>
-            <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-            <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-            <variable name="LoadProfile" property="LoadProfile">false</variable>
-          </defaultVarList>
-        </step>
-      </group>
-      <group name="Sysprep Only" disable="false" continueOnError="false" expand="false" description="">
-        <condition>
-          <expression type="SMS_TaskSequence_VariableConditionExpression">
-            <variable name="Variable">DoCapture</variable>
-            <variable name="Operator">equals</variable>
-            <variable name="Value">SYSPREP</variable>
-          </expression>
-        </condition>
-        <step name="Add mass storage drivers to sysprep.inf for XP and 2003" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <action>cscript.exe "%SCRIPTROOT%\ZTIDrivers.wsf"</action>
-          <defaultVarList>
-            <variable name="RunAsUser" property="RunAsUser">false</variable>
-            <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-            <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-            <variable name="LoadProfile" property="LoadProfile">false</variable>
-          </defaultVarList>
-        </step>
-        <step name="Execute Sysprep" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <action>cscript.exe "%SCRIPTROOT%\LTISysprep.wsf"</action>
-          <defaultVarList>
-            <variable name="RunAsUser" property="RunAsUser">false</variable>
-            <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-            <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-            <variable name="LoadProfile" property="LoadProfile">false</variable>
-          </defaultVarList>
-        </step>
-      </group>
-      <group name="Capture Image" disable="false" continueOnError="false" expand="false" description="">
-        <condition>
-          <expression type="SMS_TaskSequence_VariableConditionExpression">
-            <variable name="Variable">DoCapture</variable>
-            <variable name="Operator">equals</variable>
-            <variable name="Value">YES</variable>
-          </expression>
-        </condition>
-        <step name="Apply Windows PE" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <action>cscript.exe "%SCRIPTROOT%\LTIApply.wsf" /PE /STAGE</action>
-          <defaultVarList>
-            <variable name="RunAsUser" property="RunAsUser">false</variable>
-            <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-            <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-            <variable name="LoadProfile" property="LoadProfile">false</variable>
-          </defaultVarList>
-        </step>
-        <step name="Add mass storage drivers to sysprep.inf for XP and 2003" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <action>cscript.exe "%SCRIPTROOT%\ZTIDrivers.wsf"</action>
-          <defaultVarList>
-            <variable name="RunAsUser" property="RunAsUser">false</variable>
-            <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-            <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-            <variable name="LoadProfile" property="LoadProfile">false</variable>
-          </defaultVarList>
-        </step>
-        <step name="Execute Sysprep" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <action>cscript.exe "%SCRIPTROOT%\LTISysprep.wsf"</action>
-          <defaultVarList>
-            <variable name="RunAsUser" property="RunAsUser">false</variable>
-            <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-            <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-            <variable name="LoadProfile" property="LoadProfile">false</variable>
-          </defaultVarList>
-        </step>
-        <step name="Apply Windows PE (BCD)" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <action>cscript.exe "%_SMSTSMDataPath%\Scripts\LTIApply.wsf" /PE /BCD</action>
-          <defaultVarList>
-            <variable name="RunAsUser" property="RunAsUser">false</variable>
-            <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-            <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-            <variable name="LoadProfile" property="LoadProfile">false</variable>
-          </defaultVarList>
-        </step>
-        <step type="SMS_TaskSequence_RebootAction" name="Restart computer" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
-          <defaultVarList>
-            <variable name="Message" property="Message" />
-            <variable name="MessageTimeout" property="MessageTimeout">60</variable>
-            <variable name="Target" property="Target" />
-          </defaultVarList>
-          <action>smsboot.exe /target:WinPE</action>
-        </step>
-        <step type="BDD_Gather" name="Gather local only" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <defaultVarList>
-            <variable name="GatherLocalOnly" property="GatherLocalOnly">true</variable>
-            <variable name="RulesFile" property="RulesFile"></variable>
-          </defaultVarList>
-          <action>cscript.exe "%SCRIPTROOT%\ZTIGather.wsf"</action>
-        </step>
-        <step name="Create WIM" disable="false" continueOnError="false" successCodeList="0 3010" description="" startIn="">
-          <action>cscript.exe "%SCRIPTROOT%\ZTIBackup.wsf"</action>
-          <defaultVarList>
-            <variable name="RunAsUser" property="RunAsUser">false</variable>
-            <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
-            <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
-            <variable name="LoadProfile" property="LoadProfile">false</variable>
-          </defaultVarList>
-        </step>
-      </group>
-    </group>
-    <condition>
-      <expression type="SMS_TaskSequence_VariableConditionExpression">
-        <variable name="Variable">PHASE</variable>
-        <variable name="Operator">equals</variable>
-        <variable name="Value">STATERESTORE</variable>
-      </expression>
-    </condition>
+    <condition></condition>
   </group>
   <globalVarList>
     <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
@@ -660,9 +196,9 @@
     <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
     <variable name="OSGUID" property="OSGUID">{d56089d4-293b-45d4-858f-c60992c4f1e1}</variable>
   </globalVarList>
-  <group expand="false" name="Post Config (Placeholder)" description="" disable="false" continueOnError="false">
+  <group expand="true" name="Custom Tasks" description="" disable="false" continueOnError="false">
     <action />
-    <step type="SMS_TaskSequence_RebootAction" name="Restart computer" description="" disable="true" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
+    <step type="SMS_TaskSequence_RebootAction" name="Restart computer" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
         <variable name="SMSRebootMessage" property="Message"></variable>
         <variable name="SMSRebootTimeout" property="MessageTimeout">60</variable>

@@ -1,20 +1,39 @@
-# // ***************************************************************************
-# // 
-# // PowerShell Deployment for MDT
-# //
-# // File:      PSDGather.psm1
-# // 
-# // Purpose:   Module for gathering information about the OS and environment
-# //            (mostly from WMI), and for processing rules (Bootstrap.ini, 
-# //            CustomSettings.ini).  All the resulting information is saved
-# //            into task sequence variables.
-# // 
-# // ***************************************************************************
+<#
+.SYNOPSIS
 
-#$verbosePreference = "Continue"
+.DESCRIPTION
 
-Function Get-PSDLocalInfo
-{
+.LINK
+
+.NOTES
+          FileName: PSDUtility.psd1
+          Solution: PowerShell Deployment for MDT
+          Purpose: Module for gathering information about the OS and environment
+                    (mostly from WMI), and for processing rules (Bootstrap.ini, 
+                    CustomSettings.ini).  All the resulting information is saved
+          into task sequence variables.
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2019-05-09
+
+          Version - 0.0.0 - () - Finalized functional version 1.
+
+          TODO:
+
+.Example
+#>
+
+# Check for debug in PowerShell and TSEnv
+if($TSEnv:PSDDebug -eq "YES"){
+    $Global:PSDDebug = $true
+}
+if($PSDDebug -eq $true){
+    $verbosePreference = "Continue"
+}
+
+Function Get-PSDLocalInfo{
   Process
   {
     # Look up OS details
@@ -199,9 +218,7 @@ Function Get-PSDLocalInfo
 
   }
 }
-
-Function Invoke-PSDRules
-{
+Function Invoke-PSDRules{
     [CmdletBinding()] 
     Param( 
         [ValidateNotNullOrEmpty()] 
@@ -244,9 +261,7 @@ Function Invoke-PSDRules
         $global:iniFile["Settings"]["Priority"].Split(",").Trim() | Invoke-PSDRule
     }
 }
-
-Function Invoke-PSDRule
-{
+Function Invoke-PSDRule{
     [CmdletBinding()] 
     Param( 
         [ValidateNotNullOrEmpty()] 
@@ -290,9 +305,7 @@ Function Invoke-PSDRule
         }
     }
 }
-
-Function Get-PSDSettings
-{
+Function Get-PSDSettings{
     [CmdletBinding()] 
     Param( 
         $section
@@ -376,9 +389,7 @@ Function Get-PSDSettings
 
     }
 }
-
-Function Get-IniContent
-{ 
+Function Get-IniContent{ 
     <# 
     .Synopsis 
         Gets the content of an INI file 
@@ -440,12 +451,12 @@ Function Get-IniContent
      
     Begin 
     {
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Function started"
+        # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Function started"
     } 
          
     Process 
     { 
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing file: $Filepath"
+        # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing file: $Filepath"
              
         $ini = @{} 
         switch -regex -file $FilePath 
@@ -479,12 +490,12 @@ Function Get-IniContent
                 $ini[$section][$name] = $value 
             } 
         } 
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Finished Processing file: $FilePath" 
+        # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Finished Processing file: $FilePath" 
         Return $ini 
     } 
          
     End 
     {
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Function ended" 
+        # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Function ended" 
     } 
 }

@@ -1,13 +1,26 @@
-# // ***************************************************************************
-# // 
-# // PowerShell Deployment for MDT
-# //
-# // File:      PSDConfigure.ps1
-# // 
-# // Purpose:   Configure the unattend.xml to be used with the new OS.
-# // 
-# // 
-# // ***************************************************************************
+<#
+.SYNOPSIS
+    Configure the unattend.xml to be used with the new OS.
+.DESCRIPTION
+    Configure the unattend.xml to be used with the new OS.
+.LINK
+    https://github.com/FriendsOfMDT/PSD
+.NOTES
+          FileName: PSDConfigure.ps1
+          Solution: PowerShell Deployment for MDT
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2019-05-17
+
+          Version - 0.0.0 - () - Finalized functional version 1.
+          Version - 0.1.1 - () - Removed $tsenv:SMSTSRebootRequested = "true" in the end, if not the script will force TS to reboot
+
+          TODO:
+
+.Example
+#>
 
 param (
 
@@ -19,15 +32,17 @@ Import-Module DISM
 Import-Module PSDUtility
 Import-Module PSDDeploymentShare
 
-$verbosePreference = "Continue"
-
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Load core modules"
+# Check for debug in PowerShell and TSEnv
+if($TSEnv:PSDDebug -eq "YES"){
+    $Global:PSDDebug = $true
+}
+if($PSDDebug -eq $true)
+{
+    $verbosePreference = "Continue"
+}
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Deployroot is now $($tsenv:DeployRoot)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now $env:PSModulePath"
 
 # Load the unattend.xml
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Load the unattend.xml"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load the unattend.xml"
 $tsInfo = Get-PSDContent "Control\$($tsenv:TaskSequenceID)"
 [xml] $unattend = Get-Content "$tsInfo\unattend.xml"
@@ -37,7 +52,6 @@ $unattendXml = "$($tsenv:OSVolume):\Windows\Panther\Unattend.xml"
 Initialize-PSDFolder "$($tsenv:OSVolume):\Windows\Panther"
 
 # Substitute the values in the unattend.xml
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Substitute the values in the unattend.xml"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Substitute the values in the unattend.xml"
 $scripts = Get-PSDContent "Scripts"
 [xml] $config = Get-Content "$scripts\ZTIConfigure.xml"
@@ -60,7 +74,6 @@ $config | Select-Xml "//mapping[@type='xml']" | % {
             {
                 # Remove the node
                 $_.Node.parentNode.removeChild($_.Node) | Out-Null
-                #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Removed $xpath from unattend.xml because the value was blank."
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Removed $xpath from unattend.xml because the value was blank."
                 $changed = $true
             }
@@ -68,7 +81,6 @@ $config | Select-Xml "//mapping[@type='xml']" | % {
             {
                 # Remove the node
                 $_.Node.parentNode.parentNode.removeChild($_.Node.parentNode) | Out-Null
-                #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Removed parent of $xpath from unattend.xml because the value was blank."
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Removed parent of $xpath from unattend.xml because the value was blank."
                 $changed = $true
             }
@@ -76,32 +88,27 @@ $config | Select-Xml "//mapping[@type='xml']" | % {
             {
                 # Set the new value
                 $_.Node.InnerText = $value
-                #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Updated unattend.xml with $variable = $value (value was $prev)."
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Updated unattend.xml with $variable = $value (value was $prev)."
                 $changed = $true
 
                 # See if this has a parallel "PlainText" entry, and if it does, set it to true
                 $_.Node.parentNode | Select-Xml -XPath "unattend:PlainText" -Namespace $namespaces | % {
                     $_.Node.InnerText = "true"
-                    #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Updated PlainText entry to true."
                     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Updated PlainText entry to true."
                 }
 
                 # Remove any contradictory entries
                 $removes | % {
                     $removeXpath = $_.Node.'#cdata-section'
-                    #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): *** $removeXpath"
                     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): *** $removeXpath"
                     $unattend | Select-Xml -XPath $removeXpath -Namespace $namespaces | % {
                         $_.Node.parentNode.removeChild($_.Node) | Out-Null
-                        #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Removed $removeXpath entry from unattend.xml."
                         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Removed $removeXpath entry from unattend.xml."
                     }
                 }
             }
             else
             {
-                #Write-Verbose -Message "$($MyInvocation.MyCommand.Name): No value found for $variable."
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No value found for $variable."
             }
         }
@@ -109,37 +116,31 @@ $config | Select-Xml "//mapping[@type='xml']" | % {
 }
 
 # Save the file
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Save the file"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Save the file"
 $unattend.Save($unattendXml)
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Saved $unattendXml."
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Saved $unattendXml."
 
 # TODO: Copy patches
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): TODO: Copy patches"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: Copy patches"
 
 # Apply the unattend.xml
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Apply the unattend.xml"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Apply the unattend.xml"
 $scratchPath = "$(Get-PSDLocalDataPath)\Scratch"
 Initialize-PSDFolder $scratchPath
 Use-WindowsUnattend -UnattendPath $unattendXml -Path "$($tsenv:OSVolume):\" -ScratchDirectory $scratchPath -NoRestart
 
 # Copy needed script and module files
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Copy needed script and module files"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy needed script and module files"
-Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Scripts"
-$modules = Get-PSDContent "Tools\Modules"
-Copy-Item "$scripts\PSDStart.ps1" "$($tsenv:OSVolume):\MININT\Scripts"
-Copy-PSDFolder "$modules" "$($tsenv:OSVolume):\MININT\Tools\Modules" 
+
+# Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Scripts"
+# Copy-Item "$scripts\PSDStart.ps1" "$($tsenv:OSVolume):\MININT\Scripts"
+
+# $modules = Get-PSDContent "Tools\Modules"
+# Copy-PSDFolder "$modules" "$($tsenv:OSVolume):\MININT\Tools\Modules"
 
 # Save all the current variables for later use
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Save all the current variables for later use"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Save all the current variables for later use"
 Save-PSDVariables
 
 # Request a reboot
-#Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Request a reboot"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Request a reboot"
-$tsenv:SMSTSRebootRequested = "true"
+#$tsenv:SMSTSRebootRequested = "true"

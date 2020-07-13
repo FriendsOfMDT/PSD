@@ -13,9 +13,11 @@
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
           Primary: @Mikael_Nystrom 
           Created: 
-          Modified: 2019-05-09
+          Modified: 2019-06-02
 
           Version - 0.0.0 - () - Finalized functional version 1.
+          Version - 0.0.1 - () - Changed BaseDriverPath = "PSDResources\DriverPackages", to "fit" the new folder structure
+
 
           TODO:
           Add support for PNP
@@ -33,14 +35,18 @@ Import-Module DISM
 Import-Module PSDUtility
 Import-Module PSDDeploymentShare
 
-$verbosePreference = "Continue"
-
+# Check for debug in PowerShell and TSEnv
+if($TSEnv:PSDDebug -eq "YES"){
+    $Global:PSDDebug = $true
+}
+if($PSDDebug -eq $true)
+{
+    $verbosePreference = "Continue"
+}
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Deployroot is now $($tsenv:DeployRoot)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now $env:PSModulePath"
 
 # Building source and destionation paths based on model DriverGroup001
-$BaseDriverPath = "DriverPackages"
+$BaseDriverPath = "PSDResources\DriverPackages"
 $SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverGroup001).Replace("\"," - ")).replace(" ","_")
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:DriverGroup001 is $($tsenv:DriverGroup001)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): SourceDriverPackagePath is now $SourceDriverPackagePath"
