@@ -11,11 +11,10 @@ The purpose of PowerShell Deployment for MDT is to create a new deployment solut
 
 Supported deployment scenarios include deployment from the following content repositories:
 
-  -  IIS over HTTP with BITS & BranchCache using 2Pint Software's Task Sequence ACP
-  -  IIS over HTTP with BITS & BranchCache using PowerShell (No BITS available in WinPE)
   -  IIS over HTTP using WebClient (Native PS)
+  -  IIS over HTTP with BITS & BranchCache using 2Pint Software's OSD Toolkit
   -  UNC (\\server\share)
-
+ 
 PSD is very much a work-in-progress solution, so stay tuned as we rapidly move forward on this.
 
 ## Related References
