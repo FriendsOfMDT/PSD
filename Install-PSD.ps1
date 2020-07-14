@@ -31,6 +31,9 @@ Param(
     [Switch]$Upgrade
 )
 
+# Remove trailing \ if exists
+$psDeploymentFolder = $psDeploymentFolder.TrimEnd("\")
+
 # Set VerboseForegroundColor
 $host.PrivateData.VerboseForegroundColor = 'Cyan'
 
@@ -168,13 +171,13 @@ $mdtVer = ((Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uni
 Write-PSDInstallLog -Message "MDT installed version: $mdtVer"
 
 # Create the folder and share
-if (Test-Path -path $psDeploymentFolder){
-    if(Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder})
-    {
-        if(!($Upgrade))
-        {
+Write-PSDInstallLog -Message "Check if $psDeploymentFolder exists"
+if(Test-Path -path $psDeploymentFolder){
+    Write-PSDInstallLog -Message "Check if $psDeploymentFolder is shared"
+    if((Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder}) -ne $null){
+        if(!($Upgrade)){
             Write-PSDInstallLog -Message "The deployment share already exists" -LogLevel 3
-            BREAK
+            Break
         }
     }
     elseIf(!(Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder}))
