@@ -177,7 +177,7 @@ $RootDrivers = Get-ChildItem -Path $RootDriverPath -Recurse
 $AllDrivers = $RootDrivers | Where-Object NodeType -EQ Driver
 foreach($Driver in $AllDrivers){
     $SourceFolderPath = ($psDeploymentFolder + "\" + ($Driver.Source | Split-Path -Parent)).Replace(".\","")
-    $RemoveMe = "Microsoft.BDD.PSSnapIn\MDTProvider::$($PSDriveName):\Out-Of-Box Drivers\"
+    $RemoveMe = "MicrosoftDeploymentToolkit\MDTProvider::$($PSDriveName):\Out-Of-Box Drivers\"
     $DestinationFolderName = ($Driver.PsParentPath).Replace("$RemoveMe","").Replace("\"," - ")
     $DestinationFolderPath = $psDeploymentFolder + "\PSDResources\DriverSources\" + $DestinationFolderName
     
