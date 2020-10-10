@@ -1,4 +1,10 @@
 # README - PowerShell Deployment Extension Kit
+October 2020 (ver 0.2.1.6)
+Lots of changes.
+- Upgrade works, we use it all the times
+- Integration with 2Pint works better, a few issues still to solve
+- Improvments on everything
+
 June 2020 (ver 0.2.0.1)
 
 Welcome to PowerShell Deployment (PSD)
