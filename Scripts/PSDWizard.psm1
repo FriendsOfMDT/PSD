@@ -25,8 +25,7 @@
 if($TSEnv:PSDDebug -eq "YES"){
     $Global:PSDDebug = $true
 }
-if($PSDDebug -eq $true)
-{
+if($PSDDebug -eq $true){
     $verbosePreference = "Continue"
 }
 
@@ -34,8 +33,7 @@ if($PSDDebug -eq $true)
 $script:Wizard = $null
 $script:Xaml = $null
 
-function Get-PSDWizard
-{
+function Get-PSDWizard{
     Param( 
         $xamlPath
     ) 
@@ -72,14 +70,18 @@ function Get-PSDWizard
     # Return the form to the caller
     return $script:Wizard
 }
-
-function Save-PSDWizardResult
-{
+function Save-PSDWizardResult{
     $script:Xaml.SelectNodes("//*[@Name]") | ? { $_.Name -like "TS_*" } | % {
         $name = $_.Name.Substring(3)
         $control = $script:Wizard.FindName($_.Name)
-        $value = $control.Text
-        Set-Item -Path tsenv:$name -Value $value 
+        if($_.Name -eq "TS_DomainAdminPassword" -or $_.Name -eq "TS_AdminPassword"){
+            $value = $control.Password
+            Set-Item -Path tsenv:$name -Value $value 
+        }
+        else{
+            $value = $control.Text
+            Set-Item -Path tsenv:$name -Value $value 
+        }
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Set variable $name using form value $value"
         if($name -eq "TaskSequenceID"){
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking TaskSequenceID value"
@@ -92,19 +94,21 @@ function Save-PSDWizardResult
         }
     }
 }
-
-function Set-PSDWizardDefault
-{
+function Set-PSDWizardDefault{
     $script:Xaml.SelectNodes("//*[@Name]") | ? { $_.Name -like "TS_*" } | % {
         $name = $_.Name.Substring(3)
         $control = $script:Wizard.FindName($_.Name)
-        $value = $control.Text
-        $control.Text = (Get-Item tsenv:$name).Value
+        if($_.Name -eq "TS_DomainAdminPassword" -or $_.Name -eq "TS_AdminPassword"){
+            $value = $control.Password
+            $control.Password = (Get-Item tsenv:$name).Value
+        }
+        else{
+            $value = $control.Text
+            $control.Text = (Get-Item tsenv:$name).Value
+        }
     }
 }
-
-function Show-PSDWizard
-{
+function Show-PSDWizard{
     Param( 
         $xamlPath
     ) 

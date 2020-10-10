@@ -46,9 +46,6 @@ function Start-PSDLog{
 	    			## Create the log file destination if it doesn't exist.
                     New-Item $FilePath -Type File | Out-Null
 			}
-            else{
-                Remove-Item -Path $FilePath -Force
-            }
 				## Set the global variable to be used as the FilePath for all subsequent write-PSDInstallLog
 				## calls in this session
 				$global:ScriptLogFilePath = $FilePath
@@ -122,9 +119,7 @@ function set-PSDDefaultLogPath{
 }
 
 # Start logging
-set-PSDDefaultLogPath
-
-# TODO, figure out log overwrite logic due to deployment workbench running this script four times for every deployment share update
+set-PSDDefaultLogPath -defaultLogLocation $false -LogLocation "$Env:DEPLOYROOT"
 
 # List some variables
 Write-PSDInstallLog -Message "Write out each of the passed-in environment variable values"
@@ -133,33 +128,40 @@ Write-PSDInstallLog -Message "DEPLOYROOT = $Env:DEPLOYROOT"
 Write-PSDInstallLog -Message "PLATFORM = $Env:PLATFORM"
 Write-PSDInstallLog -Message "ARCHITECTURE = $Env:ARCHITECTURE"
 Write-PSDInstallLog -Message "TEMPLATE = $Env:TEMPLATE"
-Write-PSDInstallLog -Message "STAGE = $Env:STAGE"
-Write-PSDInstallLog -Message "CONTENT = $Env:CONTENT"
 
 # Do any desired WIM customizations (right before the WIM changes are committed)
 If ($Env:STAGE -eq "WIM") {
     # CONTENT environment variable contains the path to the mounted WIM
-    Write-PSDInstallLog -Message "Entering the WIM phase"
+    Write-PSDInstallLog -Message "Entering the $Env:STAGE phase"
     Write-PSDInstallLog -Message "CONTENT = $Env:CONTENT"
 }
 
 # Do any desired customizations (right after the WIM changes are committed)
 If ($Env:STAGE -eq "POSTWIM") {
-    Write-PSDInstallLog -Message "Entering the POSTWIM phase"
+    Write-PSDInstallLog -Message "Entering the $Env:STAGE phase"
     Write-PSDInstallLog -Message "CONTENT = $Env:CONTENT"
+
+    # Added for the OSD Toolkit Plugin
+    # Write-PSDInstallLog -Message "Adding the OSD Toolkit by running Set-PSDBootImage2PintEnabled.ps1 from the PSDResources\Plugins\OSDToolKit folder"
+    # $PSDArgument = "$Env:DEPLOYROOT\PSDResources\Plugins\OSDToolKit\Set-PSDBootImage2PintEnabled.ps1"
+    # $PSDProcess = Start-Process PowerShell -ArgumentList $PSDArgument  -NoNewWindow -PassThru -Wait
+
+    Write-PSDInstallLog -Message "Wait a while for MDT to catch up"
+    Start-sleep -Seconds 10
 }
 
 # Do any desired ISO customizations (right before a new ISO is captured, assuming deployment share is configured to create an ISO)
 If ($Env:STAGE -eq "ISO") {
 	# CONTENT environment variable contains the path to the directory that will be used to create the ISO.
-    Write-PSDInstallLog -Message "Entering the ISO phase"
+    Write-PSDInstallLog -Message "Entering the $Env:STAGE phase"
     Write-PSDInstallLog -Message "CONTENT = $Env:CONTENT"
+    Write-PSDInstallLog -Message "Wait a while for MDT to catch up"
+    Start-sleep -Seconds 10
 } 
 
 # Do any steps needed after the ISO has been generated
 If ($Env:STAGE -eq "POSTISO") {
-	# CONTENT environment variable contains the path to the locally-captured ISO file (after it has been copied to the network).
-    Write-PSDInstallLog -Message "Entering the POSTISO phase"
-    Write-PSDInstallLog -Message "CONTENT = $Env:CONTENT"
+	# CONTENT environment variable is empty at this stage
+    Write-PSDInstallLog -Message "Entering the $Env:STAGE phase"
 } 
 

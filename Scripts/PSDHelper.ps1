@@ -15,9 +15,9 @@ $env:PSModulePath = $env:PSModulePath + ";$deployRoot\Tools\Modules"
 
 #Import Env
 Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global -Force -Verbose
-Import-Module PSDUtility -Force -Verbose
-Import-Module PSDDeploymentShare -Force -Verbose
-Import-Module PSDGather -Force -Verbose
+Import-Module PSDUtility -Force -Verbose -Scope Global
+Import-Module PSDDeploymentShare -Force -Verbose -Scope Global
+Import-Module PSDGather -Force -Verbose -Scope Global
 
 dir tsenv: | Out-File "$($env:SystemDrive)\PSDDumpVars.log"
 Get-Content -Path "$($env:SystemDrive)\PSDDumpVars.log"

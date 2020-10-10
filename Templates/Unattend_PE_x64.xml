@@ -20,8 +20,13 @@
                     <Path>reg.exe add HKLM\SOFTWARE\Policies\Microsoft\Windows\PowerShell /v EnableScripts /t REG_DWORD /d 1 /f</Path>
                 </RunSynchronousCommand>
                 <RunSynchronousCommand wcm:action="add">
-                    <Description>Run PSDStart.ps1</Description>
+                    <Description>Run PSDPrestart.ps1</Description>
                     <Order>3</Order>
+                    <Path>powershell.exe -noprofile -windowstyle hidden -file X:\Deploy\Scripts\PSDPrestart.ps1</Path>
+                </RunSynchronousCommand>
+                <RunSynchronousCommand wcm:action="add">
+                    <Description>Run PSDStart.ps1</Description>
+                    <Order>4</Order>
                     <Path>powershell.exe -noprofile -windowstyle hidden -file X:\Deploy\Scripts\PSDStart.ps1</Path>
                 </RunSynchronousCommand>
             </RunSynchronous>

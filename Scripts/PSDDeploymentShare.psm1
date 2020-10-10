@@ -17,6 +17,7 @@
 
           Version - 0.0.0 - () - Finalized functional version 1.
           Version - 0.1.1 - () - Removed blocker if we item could not be found, instead we continue and log, error handling must happen when object is needed, not when downloading.
+          Version - 0.1.2 - () - Added Test-PSDContent,Test-PSDContentWeb,Test-PSDContentUNC - The ability to test if content exists before downloading
 
           TODO:
 
@@ -34,7 +35,7 @@ if($PSDDebug -eq $true)
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Importing module Bitstransfer"
 
-Import-Module BitsTransfer -Global -Force
+Import-Module BitsTransfer -Global -Force -Verbose:$False
 
 # Local variables
 $global:psddsDeployRoot = ""
@@ -43,8 +44,7 @@ $global:psddsDeployPassword = ""
 $global:psddsCredential = ""
 
 # Main function for establishing a connection 
-function Get-PSDConnection 
-{
+function Get-PSDConnection{
     param (
         [string] $deployRoot,
         [string] $username,
@@ -62,7 +62,7 @@ function Get-PSDConnection
         $Password = Get-PSDInputFromScreen -Header UserPassword -Message "Enter Password"  -ButtonText Ok -PasswordText
         $tsenv:UserPassword = $Password
     }
-    Save-PSDVariables
+    Save-PSDVariables | Out-Null
     # Save values in local variables
     $global:psddsDeployRoot = $deployRoot
     $global:psddsDeployUser = $username
@@ -118,12 +118,10 @@ function Get-PSDConnection
 
 # Internal function for initializing the MDT PowerShell provider, to be used to get 
 # objects from the MDT deployment share.
-function Get-PSDProvider
-{
+function Get-PSDProvider{
     param (
         [string] $deployRoot
     )
-
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): deployRoot is now $deployRoot"
 
     # Set an install directory if necessary (needed so the provider can find templates)
@@ -136,7 +134,7 @@ function Get-PSDProvider
 
     # Load the PSSnapIn PowerShell provider module
     $modules = Get-PSDContent -Content "Tools\Modules"
-    Import-Module "$modules\Microsoft.BDD.PSSnapIn"
+    Import-Module "$modules\Microsoft.BDD.PSSnapIn" -Verbose:$False
 
     # Create the PSDrive
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating MDT provider drive DeploymentShare: at $deployRoot"
@@ -145,8 +143,7 @@ function Get-PSDProvider
 }
 
 # Internal function for getting the next available drive letter.
-function Get-PSDAvailableDriveLetter 
-{
+function Get-PSDAvailableDriveLetter{
     $drives = (Get-PSDrive -PSProvider filesystem).Name
     foreach ($letter in "ZYXWVUTSRQPONMLKJIHGFED".ToCharArray()) {
         if ($drives -notcontains $letter) {
@@ -154,14 +151,13 @@ function Get-PSDAvailableDriveLetter
             break
         }
     }
-} 
+}
 
 # Function for finding and retrieving the specified content.  The source location specifies
 # a relative path within the deployment share.  The destination specifies the local path where
 # the content should be placed.  If no destination is specified, it will be placed in a
 # cache folder.
-function Get-PSDContent
-{
+function Get-PSDContent{
     param (
         [string] $content,
         [string] $destination = ""
@@ -239,41 +235,57 @@ function Get-PSDContentUNC
 }
 
 # Internal function for retrieving content from URL (web server/HTTP)
-function Get-PSDContentWeb
-{
+function Get-PSDContentWeb{
     param (
         [string] $content,
         [string] $destination
     )
     
-    $fullSource = "$($global:psddsDeployRoot)/$content"
-    $fullSource = $fullSource.Replace("\", "/")
-    $request = [System.Net.WebRequest]::Create($fullSource)
-    $topUri = new-object system.uri $fullSource
-    $prefixLen = $topUri.LocalPath.Length
+    $maxAttempts = 3
+    $attempts = 0
+    $RetryInterval = 5
+    $Retry = $True
+
+    while($Retry){
+    $attempts++
+        try{
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Retrieving directory listing of $fullSource via WebDAV."
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Attempt $attempts of $maxAttempts"
+
+            $fullSource = "$($global:psddsDeployRoot)/$content"
+            $fullSource = $fullSource.Replace("\", "/")
+            $request = [System.Net.WebRequest]::Create($fullSource)
+            $topUri = new-object system.uri $fullSource
+            $prefixLen = $topUri.LocalPath.Length
         
-    $request.UserAgent = "PSD"
-    $request.Method = "PROPFIND"
-    $request.ContentType = "text/xml"
-    $request.Headers.Set("Depth", "infinity")
-    $request.Credentials = $global:psddsCredential
-          
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Retrieving directory listing of $fullSource via WebDAV."
-    try
-    {  
-        $response = $request.GetResponse()
+            $request.UserAgent = "PSD"
+            $request.Method = "PROPFIND"
+            $request.ContentType = "text/xml"
+            $request.Headers.Set("Depth", "infinity")
+            $request.Credentials = $global:psddsCredential
+
+            $response = $request.GetResponse()
+            $Retry = $False
+        }
+        catch{
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to retrieve directory listing!"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($_.Exception.InnerException)"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $response"
+            
+            #$Message = "Unable to Retrieve directory listing of $($fullSource) via WebDAV. Error message: $($_.Exception.Message)"
+            #Show-PSDInfo -Message "$($Message)" -Severity Error
+            #Start-Process PowerShell -Wait
+            #Break 
+            
+            if($attempts -ge $maxAttempts){
+                Throw
+            }
+            else{
+                Start-Sleep -Seconds $RetryInterval
+            }
+        }
     }
-    catch
-    {
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to retrieve directory listing!"
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($_.Exception.InnerException)"
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $response"
-        #$Message = "Unable to Retrieve directory listing of $($fullSource) via WebDAV. Error message: $($_.Exception.Message)"
-        #Show-PSDInfo -Message "$($Message)" -Severity Error
-        #Start-Process PowerShell -Wait
-        #Break 
-    }
-	
+
 	if ($response -ne $null)
     {
         $sr = new-object System.IO.StreamReader -ArgumentList $response.GetResponseStream(),[System.Encoding]::Default
@@ -308,8 +320,7 @@ function Get-PSDContentWeb
         }
 
         # If possible, do the transfer using ACP or BITS.  Otherwise, download the files one at a time
-        if($tsenv:SMSTSDownloadProgram)
-        {
+        if($tsenv:SMSTSDownloadProgram){
             #We are using an ACP/ assume it works in WinPE as well. We use ACP as BITS does not function as regular BITS in WinPE, so cannot use PS cmdlet.
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using ACP."
 
@@ -355,8 +366,7 @@ function Get-PSDContentWeb
         }
 
         # If possible, do the transfer using BITS.  Otherwise, download the files one at a time
-        elseif ($env:SYSTEMDRIVE -eq "X:")
-        {
+        elseif ($env:SYSTEMDRIVE -eq "X:"){
             # In Windows PE, download the files one at a time using WebClient
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using WebClient."
             $wc = New-Object System.Net.WebClient
@@ -392,9 +402,6 @@ function Get-PSDContentWeb
     }
 }
 
-Export-ModuleMember -function Get-PSDConnection
-Export-ModuleMember -function Get-PSDContent
-
 # Reconnection logic
 if (Test-Path "tsenv:")
 {
@@ -411,3 +418,95 @@ if (Test-Path "tsenv:")
         }
     }
 }
+
+function Test-PSDContent{
+    param (
+        [string] $content
+    )
+    if ($global:psddsDeployRoot -ilike "http*"){
+        Return Test-PSDContentWeb -content $content
+    }
+    if ($global:psddsDeployRoot -like "\\*"){
+        Return Test-PSDContentUNC -content $content
+    }
+}
+function Test-PSDContentWeb{
+    param (
+        [string] $content
+    )
+    
+    $maxAttempts = 3
+    $attempts = 0
+    $RetryInterval = 5
+    $Retry = $True
+
+    while($Retry){
+    $attempts++
+        try{
+            #Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Retrieving directory listing of $fullSource via WebDAV."
+            #Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Attempt $attempts of $maxAttempts"
+
+            $fullSource = "$($global:psddsDeployRoot)/$content"
+            $fullSource = $fullSource.Replace("\", "/")
+            $request = [System.Net.WebRequest]::Create($fullSource)
+            $topUri = new-object system.uri $fullSource
+            $prefixLen = $topUri.LocalPath.Length
+        
+            $request.UserAgent = "PSD"
+            $request.Method = "PROPFIND"
+            $request.ContentType = "text/xml"
+            $request.Headers.Set("Depth", "infinity")
+            $request.Credentials = $global:psddsCredential
+
+            $response = $request.GetResponse()
+            $Retry = $False
+        }
+        catch{
+            #Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to retrieve directory listing!"
+            #Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($_.Exception.InnerException)"
+            #Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $response"
+            
+            #$Message = "Unable to Retrieve directory listing of $($fullSource) via WebDAV. Error message: $($_.Exception.Message)"
+            #Show-PSDInfo -Message "$($Message)" -Severity Error
+            #Start-Process PowerShell -Wait
+            #Break 
+            
+            if($attempts -ge $maxAttempts){
+                Throw
+            }
+            else{
+                Start-Sleep -Seconds $RetryInterval
+            }
+        }
+    }
+
+	if ($response -ne $null){
+        $sr = new-object System.IO.StreamReader -ArgumentList $response.GetResponseStream(),[System.Encoding]::Default
+        [xml]$xml = $sr.ReadToEnd()		
+
+        # Get the list of files and folders, to make this easier to work with
+    	$results = @()
+        $xml.multistatus.response | ? { $_.href -ine $url } | % {
+            $uri = new-object system.uri $_.href
+            $dest = $uri.LocalPath.Replace("/","\").Substring($prefixLen).Trim("\")
+            $obj = [PSCustomObject]@{
+                href = $_.href
+                name = $_.propstat.prop.displayname
+                iscollection = $_.propstat.prop.iscollection
+                destination = $dest
+            }
+            $results += $obj
+        }
+    }
+    Return $results
+}
+function Test-PSDContentUNC{
+    param (
+        [string] $content
+    )
+    Get-ChildItem "$($global:psddsDeployRoot)\$content"
+}
+
+Export-ModuleMember -function Get-PSDConnection
+Export-ModuleMember -function Get-PSDContent
+Export-ModuleMember -function Test-PSDContent

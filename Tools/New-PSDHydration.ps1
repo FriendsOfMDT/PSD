@@ -559,7 +559,6 @@ process{
             break
         }
         Write-PSDInstallLog -Message "Succesfully installed MDT now extending MDT with PSD"
-
         # Call the right arguments depending on starting the script with -Verbose or not
         If ($VerbosePreference -eq "SilentlyCOntinue"){
             $PSDArgument = "$($PSDInstaller.FileName) -psDeploymentFolder $($psDeploymentFolder) -psDeploymentShare $($psDeploymentShare)"
@@ -567,7 +566,6 @@ process{
         Else{
             $PSDArgument = "$($PSDInstaller.FileName) -psDeploymentFolder $($psDeploymentFolder) -psDeploymentShare $($psDeploymentShare) -Verbose"
         }
-
         $PSDProcess = Start-Process PowerShell -ArgumentList $PSDArgument  -NoNewWindow -PassThru -Wait
         Write-PSDInstallLog -Message "The PSD Exit Code Was: $($PSDProcess.ExitCode)"
         if(-not($MDTProcess.ExitCode -eq 0)){

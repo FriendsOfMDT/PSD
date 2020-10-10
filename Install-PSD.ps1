@@ -31,9 +31,6 @@ Param(
     [Switch]$Upgrade
 )
 
-# Remove trailing \ if exists
-$psDeploymentFolder = $psDeploymentFolder.TrimEnd("\")
-
 # Set VerboseForegroundColor
 $host.PrivateData.VerboseForegroundColor = 'Cyan'
 
@@ -171,13 +168,13 @@ $mdtVer = ((Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uni
 Write-PSDInstallLog -Message "MDT installed version: $mdtVer"
 
 # Create the folder and share
-Write-PSDInstallLog -Message "Check if $psDeploymentFolder exists"
-if(Test-Path -path $psDeploymentFolder){
-    Write-PSDInstallLog -Message "Check if $psDeploymentFolder is shared"
-    if((Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder}) -ne $null){
-        if(!($Upgrade)){
+if (Test-Path -path $psDeploymentFolder){
+    if(Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder})
+    {
+        if(!($Upgrade))
+        {
             Write-PSDInstallLog -Message "The deployment share already exists" -LogLevel 3
-            Break
+            BREAK
         }
     }
     elseIf(!(Get-SmbShare | Where-Object {$_.Path -EQ $psDeploymentFolder}))
@@ -267,20 +264,19 @@ Get-ChildItem -Path "$psDeploymentFolder\Templates\*" | Unblock-File
 
 # Copy the script modules to the right places
 Write-PSDInstallLog -Message "Copying PSD Modules to $psdeploymentfolder......."
-"PSDGather", "PSDDeploymentShare", "PSDUtility", "PSDWizard" | % {
-    if ((Test-Path "$psDeploymentFolder\Tools\Modules\$_") -eq $false)
-    {
-        $Result = New-Item "$psDeploymentFolder\Tools\Modules\$_" -ItemType directory
+$ModuleFiles = "PSDGather", "PSDDeploymentShare", "PSDUtility", "PSDWizard" 
+Foreach($ModuleFile in $ModuleFiles){
+    if ((Test-Path "$psDeploymentFolder\Tools\Modules\$ModuleFile") -eq $false){
+        $Result = New-Item "$psDeploymentFolder\Tools\Modules\$ModuleFile" -ItemType directory
     }
-    Write-PSDInstallLog -Message "Copying module $_ to $psDeploymentFolder\Tools\Modules"
-    Copy-Item "$PSScriptRoot\Scripts\$_.psm1" "$psDeploymentFolder\Tools\Modules\$_"
-    Get-ChildItem -Path "$psDeploymentFolder\Tools\Modules\$_\*" | Unblock-File
+    Write-PSDInstallLog -Message "Copying module $ModuleFile to $psDeploymentFolder\Tools\Modules"
+    Copy-Item "$PSScriptRoot\Scripts\$ModuleFile.psm1" "$psDeploymentFolder\Tools\Modules\$ModuleFile"
+    Get-ChildItem -Path "$psDeploymentFolder\Tools\Modules\$ModuleFile\*" | Unblock-File
 }
 
 # Copy the provider module files
 Write-PSDInstallLog -Message "Copying MDT provider files to $psDeploymentFolder\Tools\Modules"
-if ((Test-Path "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn") -eq $false)
-{
+if ((Test-Path "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn") -eq $false){
     $Result = New-Item "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn" -ItemType directory
 }
 Copy-Item "$($mdtDir)Bin\Microsoft.BDD.PSSnapIn.dll" "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn"
@@ -294,8 +290,7 @@ Copy-Item "$($mdtDir)Bin\Microsoft.BDD.ConfigManager.dll" "$psDeploymentFolder\T
 
 # Copy the provider template files
 Write-PSDInstallLog -Message "Copying PSD templates to $psDeploymentFolder\Templates"
-if ((Test-Path "$psDeploymentFolder\Templates") -eq $false)
-{
+if ((Test-Path "$psDeploymentFolder\Templates") -eq $false){
     $Result = New-Item "$psDeploymentFolder\Templates"
 }
 Copy-Item "$($mdtDir)Templates\Groups.xsd" "$psDeploymentFolder\Templates"
@@ -326,6 +321,8 @@ $FoldersToCreate = @(
     "DriverPackages"
     "DriverSources"
     "UserExitScripts"
+    "BGInfo"
+    "Prestart"
 )
 Foreach ($FolderToCreate in $FoldersToCreate){
     Write-PSDInstallLog -Message "Creating $FolderToCreate folder in $psdeploymentshare\PSDResources"
@@ -334,6 +331,15 @@ Foreach ($FolderToCreate in $FoldersToCreate){
 
 # Copy PSDBackground to Branding folder
 Copy-Item -Path $PSScriptRoot\Branding\PSDBackground.bmp -Destination $psDeploymentFolder\PSDResources\Branding\PSDBackground.bmp -Force
+
+# Copy PSDBGI to BGInfo folder
+Copy-Item -Path $PSScriptRoot\Branding\PSD.bgi -Destination $psDeploymentFolder\PSDResources\BGInfo\PSD.bgi -Force
+
+# Copy BGInfo64.exe to BGInfo.exe
+Copy-Item -Path $psDeploymentFolder\Tools\x64\BGInfo64.exe $psDeploymentFolder\Tools\x64\BGInfo.exe
+
+# PSDRestart
+Copy-PSDFolder -source $PSScriptRoot\PSDResources\Prestart -destination $psDeploymentFolder\PSDResources\Prestart
 
 # Update the DeploymentShare properties
 if(!($Upgrade))

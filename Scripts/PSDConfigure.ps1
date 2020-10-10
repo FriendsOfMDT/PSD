@@ -52,6 +52,7 @@ $unattendXml = "$($tsenv:OSVolume):\Windows\Panther\Unattend.xml"
 Initialize-PSDFolder "$($tsenv:OSVolume):\Windows\Panther"
 
 # Substitute the values in the unattend.xml
+Show-PSDActionProgress -Message "Updating the local unattend.xml" -Step "1" -MaxStep "2"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Substitute the values in the unattend.xml"
 $scripts = Get-PSDContent "Scripts"
 [xml] $config = Get-Content "$scripts\ZTIConfigure.xml"
@@ -127,6 +128,7 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: Copy patches"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Apply the unattend.xml"
 $scratchPath = "$(Get-PSDLocalDataPath)\Scratch"
 Initialize-PSDFolder $scratchPath
+Show-PSDActionProgress -Message "Applying local unattend.xml to the OS volume" -Step "2" -MaxStep "2"
 Use-WindowsUnattend -UnattendPath $unattendXml -Path "$($tsenv:OSVolume):\" -ScratchDirectory $scratchPath -NoRestart
 
 # Copy needed script and module files

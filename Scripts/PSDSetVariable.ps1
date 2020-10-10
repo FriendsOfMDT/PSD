@@ -34,4 +34,4 @@ New-Item -Path TSEnv: -Name "$VariableName" -Value "$VariableValue" -Force
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $VariableName is now $((Get-ChildItem -Path TSEnv: | Where-Object Name -Like $VariableName).value)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Save all the current variables for later use"
-Save-PSDVariables
+Save-PSDVariables | Out-Null

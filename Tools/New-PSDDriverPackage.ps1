@@ -20,6 +20,12 @@
 
           Version - 0.0.0 - () - Finalized functional version 1.
 
+
+          # TODO
+          Speed up, remove stuff not needed
+          Condense script, make one flow
+          Use $Env:temp
+
 .EXAMPLE
 	.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction
 #>
@@ -173,34 +179,49 @@ $result = New-PSDrive -Name "$PSDriveName" -PSProvider MDTProvider -Root $psDepl
 $RootDriverPath = "$PSDriveName" + ":\Out-Of-Box Drivers"
 Write-PSDInstallLog -Message "Setting location of drivers to $RootDriverPath"
 
+
+$DriverSources = Get-ChildItem -Path "$psDeploymentFolder\PSDResources\DriverSources" -Recurse
+foreach($DriverSource in $DriverSources){
+    Write-PSDInstallLog -Message "Trying to remove $($DriverSource.fullname)"
+    Remove-Item -Path $DriverSource.fullname -ErrorAction SilentlyContinue -Recurse
+}
+
 $RootDrivers = Get-ChildItem -Path $RootDriverPath -Recurse
 $AllDrivers = $RootDrivers | Where-Object NodeType -EQ Driver
 foreach($Driver in $AllDrivers){
-    $SourceFolderPath = ($psDeploymentFolder + "\" + ($Driver.Source | Split-Path -Parent)).Replace(".\","")
+
+    # Determine source folder
+    $SourceFolderPath = $Driver.GetPhysicalSourcePath() | Split-Path
+
+    # Determine destination folder
     $RemoveMe = "MicrosoftDeploymentToolkit\MDTProvider::$($PSDriveName):\Out-Of-Box Drivers\"
-    $DestinationFolderName = ($Driver.PsParentPath).Replace("$RemoveMe","").Replace("\"," - ")
-    $DestinationFolderPath = $psDeploymentFolder + "\PSDResources\DriverSources\" + $DestinationFolderName
+    $DestinationFolderName = ($Driver.PsParentPath).Replace("$RemoveMe","").Replace("\","-")
     
-    Write-PSDInstallLog -Message "Creating driver package folder: $DestinationFolderPath"
-    $result = New-Item -Path $DestinationFolderPath -ItemType Directory -Force
+    # Create package folder
+    $DestinationFolderPath = $psDeploymentFolder + "\PSDResources\DriverSources\" + $DestinationFolderName
+    if(!(Test-Path -Path $DestinationFolderPath)){
+        Write-PSDInstallLog -Message "Creating driver package folder: $DestinationFolderPath"
+        $result = New-Item -Path $DestinationFolderPath -ItemType Directory -Force
+    }
 
-    #Write-PSDInstallLog -Message "Copy from $SourceFolderPath to $DestinationFolderPath"
-    $result = Copy-Item -Path $SourceFolderPath -Destination $DestinationFolderPath -Recurse -Force
+    # Copy source to destionation
+    $DestinationDriverFolderName = ($SourceFolderPath | Split-Path -Leaf).Replace("_$($Driver.Hash)","")
+    New-Item -Path $($DestinationFolderPath + "\" + $($driver.Class) + "\" + $DestinationDriverFolderName) -ItemType Directory -Force | Out-Null
+    Copy-Item -Path $SourceFolderPath\* -Destination $($DestinationFolderPath + "\" + $($driver.Class) + "\" + $DestinationDriverFolderName) -Recurse -Force
 }
-
 Write-PSDInstallLog -Message "Removing old ZIP Archives"
 
-$DriverZIPs = Get-ChildItem -Path $psDeploymentFolder\PSDResources\DriverPackages -Recurse
+$DriverZIPs = Get-ChildItem -Path "$psDeploymentFolder\PSDResources\DriverPackages" -Recurse
 foreach($DriverZIP in $DriverZIPs){
     Write-PSDInstallLog -Message "Trying to remove $($DriverZIP.fullname)"
     Remove-Item -Path $DriverZIP.fullname -ErrorAction SilentlyContinue -Recurse
 }
 
 Write-PSDInstallLog -Message "Creating ZIP archives"
-$DriverFolders = Get-ChildItem -Path $psDeploymentFolder\PSDResources\DriverSources
+$DriverFolders = Get-ChildItem -Path "$psDeploymentFolder\PSDResources\DriverSources"
 foreach($DriverFolder in $DriverFolders){
     $FileName = ($DriverFolder.BaseName).replace(" ","_") + ".zip"
-    $DestinationFolderPath = $psDeploymentFolder + "\PSDResources\DriverPackages\" + ($DriverFolder.name).replace(" ","_")
+    $DestinationFolderPath = $psDeploymentFolder + "\PSDResources\DriverPackages"
     Write-PSDInstallLog -Message "Creating $DestinationFolderPath"
     $Result = New-Item -Path $DestinationFolderPath -ItemType Directory -Force
     Add-Type -Assembly ‘System.IO.Compression.FileSystem’ -PassThru | Select -First 1 | foreach {
@@ -208,4 +229,10 @@ foreach($DriverFolder in $DriverFolders){
         Write-PSDInstallLog -Message "Creating $DestFile"
         [IO.Compression.ZIPFile]::CreateFromDirectory("$($DriverFolder.fullname)", $DestFile)
     }
+}
+
+$DriverSources = Get-ChildItem -Path "$psDeploymentFolder\PSDResources\DriverSources"
+foreach($DriverSource in $DriverSources){
+    Write-PSDInstallLog -Message "Trying to remove $($DriverSource.fullname)"
+    Remove-Item -Path $DriverSource.fullname -ErrorAction SilentlyContinue -Recurse -Force
 }

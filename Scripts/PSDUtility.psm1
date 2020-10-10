@@ -24,7 +24,7 @@
 #>
 
 # Import main module Microsoft.BDD.TaskSequenceModule
-Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global -Force -ErrorAction Stop
+Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global -Force -ErrorAction Stop -Verbose:$False
 
 # Check for debug in PowerShell and TSEnv
 if($TSEnv:PSDDebug -eq "YES"){
@@ -42,7 +42,6 @@ function Get-PSDLocalDataPath{
         [switch] $move
     )
     # Return the cached local data path if possible
-    # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Return the cached local data path if possible"
     if ($global:psuDataPath -ne "" -and (-not $move)){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psuDataPath is $psuDataPath, testing access"
         if (Test-Path $global:psuDataPath){
@@ -55,7 +54,6 @@ function Get-PSDLocalDataPath{
     # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Always prefer the OS volume"
 
     $localPath = ""
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localpath is $localPath"
     if ($tsenv:OSVolumeGuid -ne ""){
         if ($tsenv:OSVolumeGuid -eq "MBR"){
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:OSVolumeGuid is now $($tsenv:OSVolumeGuid)"
@@ -66,7 +64,6 @@ function Get-PSDLocalDataPath{
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Get the OS image details (MBR)"
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Using OS volume from tsenv:OSVolume: $($tsenv:OSVolume)."
                 $localPath = "$($tsenv:OSVolume):\MININT"
-                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localPath is now $localPath"
             }
             else{
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:OSVersion is now $($tsenv:OSVersion)"
@@ -74,7 +71,6 @@ function Get-PSDLocalDataPath{
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Get the OS image details (MBR)"
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Using OS volume from env:SystemDrive $($env:SystemDrive)."
                 $localPath = "$($env:SystemDrive)\MININT"
-                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localPath is now $localPath"
             }
         }
         else{
@@ -85,31 +81,26 @@ function Get-PSDLocalDataPath{
                 $localPath = "$($_.DriveLetter):\MININT"
             }
         }
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localpath is now $localPath"
     }
     
     if ($localPath -eq ""){
         # Look on all other volumes 
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Look on all other volumes"
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking other volumes for a MININT folder."
         Get-Volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\MININT"} | Select-Object -First 1 | % {
             $localPath = "$($_.DriveLetter):\MININT"
         }
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localpath is now $localPath"
     }
     
     # Not found on any drive, create one on the current system drive
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Not found on any drive, create one on the current system drive"
     if ($localPath -eq ""){
         $localPath = "$($env:SYSTEMDRIVE)\MININT"
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localpath is now $localPath"
     }
     
     # Create the MININT folder if it doesn't exist
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Create the MININT folder if it doesn't exist"
     if ((Test-Path $localPath) -eq $false){
         New-Item -ItemType Directory -Force -Path $localPath | Out-Null
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localpath is now $localPath"
     }
     
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localpath set to $localPath"
@@ -165,7 +156,11 @@ function Stop-PSDLogging{
     if($PSDDebug -ne $true){
         Return
     }
-    Stop-Transcript
+    try{
+        Stop-Transcript | Out-Null
+    }
+    catch{
+    }
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Stop Transcript Logging"
 }
 
@@ -215,18 +210,23 @@ Function Write-PSDLog{
 Start-PSDLogging
 
 function Save-PSDVariables{
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Save-PSDVariables"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running Save-PSDVariables"
+    $PSDLocaldataPath = Get-PSDLocaldataPath
     $v = [xml]"<?xml version=`"1.0`" ?><MediaVarList Version=`"4.00.5345.0000`"></MediaVarList>"
-    Get-ChildItem TSEnv: | % {
+    $Items = Get-ChildItem TSEnv:
+    foreach ($Item in $Items){
         $element = $v.CreateElement("var")
-        $element.SetAttribute("name", $_.Name) | Out-Null
-        $element.AppendChild($v.createCDATASection($_.Value)) | Out-Null
+        $element.SetAttribute("name", $Item.Name) | Out-Null
+        $element.AppendChild($v.createCDATASection($Item.Value)) | Out-Null
         $v.DocumentElement.AppendChild($element) | Out-Null
     }
-    $path = "$(Get-PSDLocaldataPath)\Variables.dat"
+    
+    $path = "$PSDLocaldataPath\Variables.dat"
     $v.Save($path)
-    return $path
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDVariables are saved in: $path"
+    $path
 }
+
 
 function Restore-PSDVariables{
     $path = "$(Get-PSDLocaldataPath)\Variables.dat"
@@ -252,53 +252,76 @@ function Clear-PSDInformation{
         # Copy PSD logs
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy PSD logs"
         if (Test-Path "$localPath\SMSOSD\OSDLOGS"){
+            Write-Verbose "Copy-Item $localPath\SMSOSD\OSDLOGS\* $logDest"
             Copy-Item "$localPath\SMSOSD\OSDLOGS\*" $logDest -Force
         }
 
-        # Copy Panther logs
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy Panther logs"
-        if (Test-Path "$localPath\Logs"){
-            & xcopy $env:SystemRoot\Panther $logDest /s /e /v /d /y /i | Out-Null
+        # Copy Panther,Debug and other logs
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy Panther,Debug and other logs"
+        if (Test-Path "$env:SystemRoot\Panther"){
+            New-Item -Path "$logDest\Panther" -ItemType Directory -Force | Out-Null
+            New-Item -Path "$logDest\Debug" -ItemType Directory -Force | Out-Null
+            New-Item -Path "$logDest\Panther\UnattendGC" -ItemType Directory -Force | Out-Null
+
+            # Check for log files in different locations
+            $Logfiles = @(
+                "wpeinit.log"
+                "Debug\DCPROMO.LOG"
+                "Debug\DCPROMOUI.LOG"
+                "Debug\Netsetup.log"
+                "Panther\cbs_unattend.log"
+                "Panther\setupact.log"
+                "Panther\setuperr.log"
+                "Panther\UnattendGC\setupact.log"
+                "Panther\UnattendGC\setuperr.log"
+            )
+
+            foreach($Logfile in $Logfiles){
+                
+                $Sources = "$env:TEMP\$Logfile","$env:SystemRoot\$Logfile","$env:SystemRoot\System32\$Logfile","$env:Systemdrive\`$WINDOWS.~BT\Sources"
+                foreach($Source in $Sources){
+                    If(Test-Path -Path "$Source"){
+                        Write-Verbose "$($MyInvocation.MyCommand.Name): Copying $Source to $logDest\$Logfile"
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copying $Source to $logDest\$Logfile"
+                        Copy-Item -Path "$Source" -Destination $logDest\$Logfile
+                    }
+                }
+            }
         }
 
         # Copy SMSTS log
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy SMSTS log"
-        if (Test-Path "$localPath\Logs"){
-            Copy-Item -Path $env:LOCALAPPDATA\temp\smstslog\smsts.log -Destination $logDest
+        if (Test-Path "$env:LOCALAPPDATA\temp\smstslog\smsts.log"){
+            Copy-Item -Path "$env:LOCALAPPDATA\temp\smstslog\smsts.log" -Destination $logDest
+        }
+
+        # Copy variables.dat (TODO: Password needs to be cleaned out)
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy variables.dat (TODO)"
+        if (Test-Path "$localPath\Variables.dat"){
+            Copy-Item "$localPath\Variables.dat" $logDest -Force
         }
 
         # Check if DEVRunCleanup is set to NO
         if ($($tsenv:DEVRunCleanup) -eq "NO"){
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:DEVRunCleanup is now $tsenv:DEVRunCleanup"
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cleanup will not remove MININT or Drivers folder"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:DEVRunCleanup is now $tsenv:DEVRunCleanup."
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cleanup will not remove MININT or Drivers folder."
         }
         else{
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:DEVRunCleanup is now $tsenv:DEVRunCleanup"
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cleanup will remove MININT and Drivers folder"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:DEVRunCleanup is now $tsenv:DEVRunCleanup."
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cleanup will remove MININT and Drivers folder."
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): This will be the last log entry."
 
             # Remove the MININT folder
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Remove the MININT folder"
-            try{
-                Remove-Item "$localPath" -Recurse -Force
+            if(Test-Path -Path "$localPath"){
+                Remove-Item "$localPath" -Recurse -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
             }
-            catch{
-                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to completely remove $localPath."
-            }
-
+            
             # Remove the Drivers folder
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Remove the Drivers folder"
-            try{
-                Remove-Item "$($env:Systemdrive + "\Drivers")" -Recurse -Force
-            }
-            catch{
-                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to completely remove $($env:Systemdrive + "\Drivers")."
+            if(Test-Path -Path "$($env:Systemdrive + "\Drivers")"){
+                Remove-Item "$($env:Systemdrive + "\Drivers")" -Recurse -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
             }
         }
     }
-
-    # Cleanup start folder
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cleanup start folder"
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Removing link to re-run $PSCommandPath from the all users Startup folder"
 
     # Remove shortcut to PSDStart.ps1 if it exists
     $allUsersStartup = [Environment]::GetFolderPath('CommonStartup')
@@ -308,11 +331,9 @@ function Clear-PSDInformation{
     }
 
     # Cleanup AutoLogon
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cleanup AutoLogon"
     $Null = New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name AutoAdminLogon -Value 0 -Force
     $Null = New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name DefaultUserName -Value "" -Force
     $Null = New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name DefaultPassword -Value "" -Force
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): AutoLogon has been removed"
 }
 
 function Copy-PSDFolder{
@@ -330,75 +351,72 @@ function Copy-PSDFolder{
 }
 
 function Test-PSDNetCon{
-    Param
-    (
+    [CmdletBinding(SupportsShouldProcess)]
+    Param(
         $Hostname, 
         $Protocol
     )
 
+    switch ($Protocol){
+        SMB{
+            $Port = 445
+        }
+        HTTP{
+            $Port = 80
+        }
+        HTTPS{
+            $Port = 443
+        }
+        WINRM{
+            $Port = 5985
+        }
+        Default{
+            exit
+        }
+    }
 
-switch ($Protocol)
-{
-    SMB
-    {
-        $Port = 445
-    }
-    HTTP
-    {
-        $Port = 80
-    }
-    HTTPS
-    {
-        $Port = 443
-    }
-    WINRM
-    {
-        $Port = 5985
-    }
-    Default
-    {
-        exit
-    }
-}
-    try
-    {
+    try{
         $ips = [System.Net.Dns]::GetHostAddresses($hostname) | Where-Object AddressFamily -EQ InterNetwork | Select-Object IPAddressToString -ExpandProperty  IPAddressToString
-        if($ips.GetType().Name -eq "Object[]")
-        {
+        if($ips.GetType().Name -eq "Object[]"){
             $ips
         }
     }
-    catch
-    {
+    catch{
         Write-Verbose "Possibly $hostname is wrong hostname or IP"
         $ips = "NA"
     }
 
-    foreach($ip in $ips)
-    {
-        $TcpClient = New-Object Net.Sockets.TcpClient
-        try
-        {
-            Write-Verbose "Testing $ip,$port"
-            $TcpClient.Connect($ip,$port)
-        }
-        catch
-        {
-        }
+    $maxAttempts = 5
+    $attempts=0
 
-        if($TcpClient.Connected)
-        {
-            $TcpClient.Close()
-            $Result = $true
-            Return $Result
-            Break
+    foreach($ip in $ips){
+        While($true){
+            $attempts++
+            $TcpClient = New-Object Net.Sockets.TcpClient
+            try{
+                Write-Verbose "Testing $ip,$port, attempt $attempts"
+                $TcpClient.Connect($ip,$port)
+            }
+            catch{
+                Write-Verbose "Attempt $attempts of $maxAttempts failed"
+                if($attempts -ge $maxAttempts){
+                    Throw
+                }else{
+                    sleep -s 2
+                }
+            }
+            if($TcpClient.Connected){
+                $TcpClient.Close()
+                $Result = $true
+                Return $Result
+                Break
+            }
+            else{
+                $Result = $false
+            }
         }
-        else
-        {
-            $Result = $false
-        }
+        Return $Result
     }
-    Return $Result
 }
 
 Function Get-PSDDriverInfo{
@@ -798,10 +816,10 @@ Function Invoke-PSDHelper{
     & net use $MDTDeploySharePath $Password /USER:$UserName
 
     #Import Env
-    Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global -Force -Verbose
-    Import-Module PSDUtility -Force -Verbose
-    Import-Module PSDDeploymentShare -Force -Verbose
-    Import-Module PSDGather -Force -Verbose
+    Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global -Force -Verbose:$False
+    Import-Module PSDUtility -Force -Verbose:$False
+    Import-Module PSDDeploymentShare -Force -Verbose:$False
+    Import-Module PSDGather -Force -Verbose:$False
 
     dir tsenv: | Out-File "$($env:SystemDrive)\DumpVars.log"
     Get-Content -Path "$($env:SystemDrive)\DumpVars.log"
@@ -824,10 +842,10 @@ Function Invoke-PSDEXE{
     if($Arguments -eq "")
     {
         Write-Verbose "Running Start-Process -FilePath $Executable -ArgumentList $Arguments -NoNewWindow -Wait -Passthru"
-        $ReturnFromEXE = Start-Process -FilePath $Executable -NoNewWindow -Wait -Passthru
+        $ReturnFromEXE = Start-Process -FilePath $Executable -NoNewWindow -Wait -Passthru -RedirectStandardError "RedirectStandardError" -RedirectStandardOutput "RedirectStandardOutput"
     }else{
         Write-Verbose "Running Start-Process -FilePath $Executable -ArgumentList $Arguments -NoNewWindow -Wait -Passthru"
-        $ReturnFromEXE = Start-Process -FilePath $Executable -ArgumentList $Arguments -NoNewWindow -Wait -Passthru
+        $ReturnFromEXE = Start-Process -FilePath $Executable -ArgumentList $Arguments -NoNewWindow -Wait -Passthru -RedirectStandardError "RedirectStandardError" -RedirectStandardOutput "RedirectStandardOutput"
     }
     Write-Verbose "Returncode is $($ReturnFromEXE.ExitCode)"
     Return $ReturnFromEXE.ExitCode
@@ -891,7 +909,6 @@ Function Set-PSDCommandWindowsSize{
 }
 
 Function Get-PSDNtpTime {
-
     [CmdletBinding()]
     [OutputType()]
     Param (
@@ -920,7 +937,6 @@ Function Get-PSDNtpTime {
     [Byte[]]$NtpData = ,0 * 48
     $NtpData[0] = 0x1B    # NTP Request header in first byte
 
-
     $Socket = New-Object Net.Sockets.Socket([Net.Sockets.AddressFamily]::InterNetwork,
                                             [Net.Sockets.SocketType]::Dgram,
                                             [Net.Sockets.ProtocolType]::Udp)
@@ -931,8 +947,8 @@ Function Get-PSDNtpTime {
         $Socket.Connect($Server,123)
     }
     Catch {
-        Write-Error "Failed to connect to server $Server"
-        Throw 
+        Write-Warning "Failed to connect to server $Server"
+        Return 
     }
 
 
@@ -945,8 +961,8 @@ Function Get-PSDNtpTime {
             [Void]$Socket.Receive($NtpData)  
         }
         Catch {
-            Write-Error "Failed to communicate with server $Server"
-            Throw
+            Write-Warning "Failed to communicate with server $Server"
+            Return
         }
 
         $t4 = Get-Date    # End of NTP transaction time
@@ -958,14 +974,6 @@ Function Get-PSDNtpTime {
 
 # We now have an NTP response packet in $NtpData to decode.  Start with the LI flag
 # as this is used to indicate errors as well as leap-second information
-
-    # Check the Leap Indicator (LI) flag for an alarm condition - extract the flag
-    # from the first byte in the packet by masking and shifting 
-
-    $LI = ($NtpData[0] -band 0xC0) -shr 6    # Leap Second indicator
-    If ($LI -eq 3) {
-        Throw 'Alarm condition from server (clock not synchronized)'
-    } 
 
     # Decode the 64-bit NTP times
 
@@ -1155,8 +1163,7 @@ Function Write-PSDEvent{
     # an error occurred (EventID 3)
     # a warning occurred (EventID 2)
 
-    if($tsenv:LTIGUID -eq "")
-    {
+    if($tsenv:LTIGUID -eq ""){
         $LTIGUID = ([guid]::NewGuid()).guid
         New-Item -Path TSEnv: -Name "LTIGUID" -Value "$LTIGUID" -Force
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:LTIGUID is now: $tsenv:LTIGUID"
@@ -1217,4 +1224,14 @@ function Import-PSDCertificate{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Certificate Thumbprint : $($Result.Thumbprint)"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Certificate NotAfter   : $($Result.NotAfter)"
     Return "0"
+}
+
+Function Set-PSDDebugPause{
+    Param(
+        $Prompt
+    )
+    if($Global:PSDDebug -eq $True){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name)"
+        Read-Host -Prompt "$Prompt"
+    }
 }

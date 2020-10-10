@@ -6,39 +6,52 @@
     <Grid>
 
         <StackPanel Orientation="Vertical">
-            <StackPanel Height="500" Orientation="Horizontal">
-                <TreeView Name="tsTree" HorizontalAlignment="Left" Height="500" Margin="10,10,10,10" VerticalAlignment="Top" Width="250" />
-                <TextBox Visibility="Hidden" Name="TS_TaskSequenceID" Width="80">ABCDEF</TextBox>
-                <Grid Height="500" Margin="10,10,10,10" VerticalAlignment="Top" Width="440">
+            <StackPanel Height="510" Orientation="Horizontal">
+                <TreeView Name="tsTree" HorizontalAlignment="Left" Height="200" Margin="10,5,0,0" VerticalAlignment="Top" Width="250"/>
+                <Grid Height="500" Margin="10,5,0,0" VerticalAlignment="Top" Width="460">
 
-                    <Label Content="Deployroot" HorizontalAlignment="Left" Height="26" Margin="0,0,0,0" VerticalAlignment="Center"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Deployroot" Text="1234567890" HorizontalAlignment="Left" Height="26" Margin="100,0,0,0" VerticalAlignment="Center" Width="320"/>
+                    <Label Content="TaskSequenceID" HorizontalAlignment="Left" Height="25" Margin="0,0,0,0" VerticalAlignment="Top"/>
+                    <TextBox FontWeight="Bold" Name="TS_TaskSequenceID" HorizontalAlignment="Center" Height="25" Margin="125,0,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="Model" HorizontalAlignment="Left" Height="26" Margin="0,50,0,0" VerticalAlignment="Center"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Model" Text="1234567890" HorizontalAlignment="Left" Height="26" Margin="100,50,0,0" VerticalAlignment="Center" Width="320"/>
+                    <Label Content="Deployroot" HorizontalAlignment="Left" Height="25" Margin="0,40,0,0" VerticalAlignment="Top"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Deployroot" Text="1234567890" HorizontalAlignment="Center" Height="25" Margin="125,40,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="SerialNumber" HorizontalAlignment="Left" Height="26" Margin="0,100,0,0" VerticalAlignment="Center"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_SerialNumber" Text="1234567890" HorizontalAlignment="Left" Height="26" Margin="100,100,0,0" VerticalAlignment="Center" Width="320"/>
+                    <Label Content="Model" HorizontalAlignment="Left" Height="25" Margin="0,80,0,0" VerticalAlignment="Top"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Model" Text="1234567890" HorizontalAlignment="Center" Height="25" Margin="125,80,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="ComputerName" HorizontalAlignment="Left" Height="26" Margin="0,200,0,0" VerticalAlignment="Center"/>
-                    <TextBox Name="TS_OSDComputerName" HorizontalAlignment="Left" Height="26" Margin="100,200,0,0" VerticalAlignment="Center" Width="320"/>
+                    <Label Content="SerialNumber" HorizontalAlignment="Left" Height="25" Margin="0,120,0,0" VerticalAlignment="Top"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_SerialNumber" Text="1234567890" HorizontalAlignment="Center" Height="25" Margin="125,120,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="OSDRnD" HorizontalAlignment="Left" Height="26" Margin="0,250,0,0" VerticalAlignment="Center"/>
-                    <TextBox Name="TS_OSDRnD" HorizontalAlignment="Left" Height="26" Margin="100,250,0,0" VerticalAlignment="Center" Width="320"/>
+                    <Label Content="ComputerName" HorizontalAlignment="Left" Height="25" Margin="0,170,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_OSDComputerName" HorizontalAlignment="Center" Height="25" Margin="125,170,0,0" VerticalAlignment="Top" Width="310"/>
+
+                    <Label Content="Admin Password" HorizontalAlignment="Left" Height="25" Margin="0,210,0,0" VerticalAlignment="Top"/>
+                    <PasswordBox Name="TS_AdminPassword" HorizontalAlignment="Center" Height="25" Margin="125,210,0,0" VerticalAlignment="Top" Width="310"/>
+
+                    <Label Content="Domain" HorizontalAlignment="Left" Height="25" Margin="0,260,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_JoinDomain" HorizontalAlignment="Center" Height="25" Margin="125,260,0,0" VerticalAlignment="Top" Width="310"/>
+
+                    <Label Content="JoinAccount Name" HorizontalAlignment="Left" Height="25" Margin="0,300,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_DomainAdmin" HorizontalAlignment="Center" Height="25" Margin="125,300,0,0" VerticalAlignment="Top" Width="310"/>
+
+                    <Label Content="JoinAccount Password" HorizontalAlignment="Left" Height="25" Margin="0,340,0,0" VerticalAlignment="Top"/>
+                    <PasswordBox Name="TS_DomainAdminPassword" HorizontalAlignment="Center" Height="25" Margin="125,340,0,0" VerticalAlignment="Top" Width="310"/>
+
+                    <Label Content="JoinAccount Domain" HorizontalAlignment="Left" Height="25" Margin="0,380,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_DomainAdminDomain" HorizontalAlignment="Center" Height="25" Margin="125,380,0,0" VerticalAlignment="Top" Width="310"/>
+
+                    <Label Content="OSDRnD" HorizontalAlignment="Left" Height="25" Margin="0,450,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_OSDRnD" HorizontalAlignment="Center" Height="25" Margin="125,450,0,0" VerticalAlignment="Top" Width="310"/>
 
                 </Grid>
-
             </StackPanel>
-
-            <Border BorderBrush="#A0A0A0" BorderThickness="0,1,0,0" Padding="7">
+            <Border BorderBrush="#A0A0A0" BorderThickness="0,1,0,0" Padding="5">
                 <StackPanel>
-
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Name="wizCancelButton" Margin="0,0,7,0" MinWidth="75" Content="Cancel" />
                             <Button Name="wizFinishButton" Margin="7,0,0,0" MinWidth="75" Content="Start" />
@@ -47,7 +60,5 @@
                 </StackPanel>
             </Border>
         </StackPanel>
-
     </Grid>
-
 </Window>

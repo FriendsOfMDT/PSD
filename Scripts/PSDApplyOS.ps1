@@ -44,10 +44,6 @@ if($PSDDebug -eq $true)
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 
-# Make sure we run at full power
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Make sure we run at full power"
-& powercfg.exe /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-
 # Get the OS image details
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Get the OS image details"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Operating system: $($tsenv:OSGUID)"
@@ -77,6 +73,7 @@ Initialize-PSDFolder $scratchPath
 # Apply the image
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Apply the image"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Applying image $image index $index to $($tsenv:OSVolume)"
+Show-PSDActionProgress -Message "Applying $($image | Split-Path -Leaf) " -Step "1" -MaxStep "2"
 $startTime = Get-Date
 Expand-WindowsImage -ImagePath $image -Index $index -ApplyPath "$($tsenv:OSVolume):\" -ScratchDirectory $scratchPath
 $duration = $(Get-Date) - $startTime
@@ -104,7 +101,8 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Time to apply image: $($
 #}
 
 # Make the OS bootable
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Make the OS bootable"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Make the OS volume bootable"
+Show-PSDActionProgress -Message "Make the OS volume bootable" -Step "2" -MaxStep "2"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Configuring volume $($tsenv:BootVolume) to boot $($tsenv:OSVolume):\Windows."
 if ($tsenv:IsUEFI -eq "True")
 {
