@@ -74,4 +74,7 @@ PSD installation requires the following:
         - .\Install-PSD.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name> **-upgrade**
 1) Review the PSD Installation log for errors
 
+# Next steps
+The default setup configures the PSD deployment share for deployment via SMB. To enable HTTP or HTTPS (recommended) deployments, follow the steps in the "PowerShell Deployment - IIS Configuration Guide"
 
+To enable BranchCache (P2P) support, first complete the steps in the "PowerShell Deployment - IIS Configuration Guide", and then the steps in the "PowerShell Deployment - BranchCache Installation Guide".
