@@ -1,0 +1,57 @@
+<Window x:Class="ShowScroller.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow"
+        Height="600" Width="800"
+        ResizeMode="NoResize"
+        WindowStyle="SingleBorderWindow"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False">
+    <Window.Resources>
+
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <!-- MahApps.Metro resource dictionaries. Make sure that all file names are Case Sensitive! -->
+                <ResourceDictionary Source="Resources/Icons.xaml" />
+                <ResourceDictionary Source="Resources/TabControl_LeftSideStyle.xaml" />
+                <ResourceDictionary Source="Resources/TreeViewItem_StandardStyle.xaml" />
+                <ResourceDictionary Source="Resources/TabItem_WhiteStyle.xaml" />
+                <ResourceDictionary Source="Resources/Button_DarkBlueSquareStyle.xaml" />
+                <ResourceDictionary Source="Resources/Button_LightBlueRoundStyle.xaml" />
+                <!-- Load this specific theme because the Aero theme for CheckBox has issues.
+                <ResourceDictionary Source="/PresentationFramework.Royale;V3.0.0.0;31bf3856ad364e35;component\themes\royale.normalcolor.xaml" /> -->
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Setter Property="FontWeight" Value="Light" />
+            </Style>
+
+            <HierarchicalDataTemplate x:Key="CheckBoxItemTemplate" ItemsSource="{Binding Children, Mode=OneTime}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Focusable="False" IsChecked="{Binding IsChecked}" VerticalAlignment="Center" />
+                    <ContentPresenter Content="{Binding Name, Mode=OneTime}" Margin="2,0" />
+                </StackPanel>
+            </HierarchicalDataTemplate>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        @StartPage
+
+        <Rectangle Fill="#004275" HorizontalAlignment="Left" Height="572" VerticalAlignment="Top" Width="150"/>
+        <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Right" Height="572" VerticalAlignment="Top" Width="156"/>
+        <Image x:Name="_wizImgLogo" Height="48" Width="48" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="50,0,0,0" />
+
+        <!-- START TAB MENU -->
+        <TabControl x:Name="_wizTabControl" Style="{DynamicResource TabControlLeftSide}" Width="800" Height="530" HorizontalAlignment="Left" VerticalAlignment="Top">
+            @TabItems
+        </TabControl>
+
+        <Button x:Name="_wizBack" Content="Back" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,260,6.5" />
+        <Button x:Name="_wizNext" Content="Next" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,155,6.5" />
+        <Button x:Name="_wizCancel" Content="Cancel" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,10,6.5" />
+    </Grid>
+</Window>

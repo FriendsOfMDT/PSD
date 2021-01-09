@@ -1,0 +1,34 @@
+<Grid x:Name="_appTabLayout" Margin="0" Grid.ColumnSpan="2">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_appTabMainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle"/>
+    <Rectangle Grid.Column="0" Fill="DarkGray" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_apps}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Label Content="Search the name of an application..." FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top"/>
+    <TextBox x:Name="_appTabSearch" HorizontalAlignment="Left" Height="23" Margin="10,103,0,0" TextWrapping="Wrap" Text="Search..." VerticalAlignment="Top" Width="331" Foreground='Gray'/>
+    <Button x:Name="_appTabSearchClear" Content="Clear" Height="23" Width="63" HorizontalAlignment="left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="414,0,0,404" />
+    <Button x:Name="_appTabSearchEnter" Content="Search" Height="23" Width="63" HorizontalAlignment="left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="346,0,0,404" />
+
+    <Label Content="Application Bundles:" FontSize="14" HorizontalAlignment="Left" Margin="10,126,0,0" VerticalAlignment="Top"/>
+    <ComboBox x:Name="_appTabBundles" HorizontalAlignment="Left" Margin="151,132,0,0" VerticalAlignment="Top" Width="326"/>
+    
+    <Button x:Name="_appTabSelectAll" Content="Select All" Height="20" Width="113" HorizontalAlignment="left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="10,0,0,335" />
+    <Button x:Name="_appTabSelectNone" Content="Select None" Height="20" Width="113" HorizontalAlignment="left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="128,0,0,335" />
+    
+    <TextBox x:Name="TS_Applications" Margin="341,129,13.5,379" IsEnabled="False" Visibility="Hidden"/>
+    
+    <TreeView Name="_appTabTree" HorizontalAlignment="Left" Height="304" Margin="10,200,0,0" VerticalAlignment="Top" Width="467" FontSize="14" 
+                        ItemContainerStyle="{StaticResource TreeViewItemStandard}" 
+                        ItemTemplate="{StaticResource CheckBoxItemTemplate}" />
+    
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_appTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+</Grid>

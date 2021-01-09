@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+
+<Wizard>
+	<Global>
+		<CustomStatement><![CDATA[ "Windows Deployment Wizard" ]]></CustomStatement>
+		<TemplateReference>PSDWizard_Template_Tabular.xaml</TemplateReference>
+		<Condition><![CDATA[UCASE(Property("SkipWizard")) <> "YES" ]]></Condition>
+		<!--<Assessibility><![CDATA[ TabNavigation == "False" ]]>False</Assessibility>-->
+		<TSVariableFieldPrefix>TS_</TSVariableFieldPrefix>
+		<PanesTemplate><![CDATA[
+<TabItem x:Name="_wizTab01" Header="@TabTitle" Style="{DynamicResource TabItemsWhite}" Width="150" Margin="0,0,0,0" IsEnabled="False">
+@TabItemContent
+</TabItem>
+]]></PanesTemplate>
+	</Global>
+
+    <WelcomeWizard id="Welcome" title="Start" reference="Tabular\PSDWizard_Start_en-US.xaml">
+		<Condition><![CDATA[UCASE(Property("SkipBDDWelcome")) <> "YES" ]]></Condition>
+		<MainTitle><![CDATA[ "Welcome to the Deployment Wizard" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Let's set this device up for @ORG" ]]></SubTitle>
+	</WelcomeWizard>
+
+	<Pane id="Readiness" title="Deployment Readiness" reference="Tabular\PSDWizard_DeployReadiness_en-US.xaml" tabmargin="0,50,0,0">
+		<Condition><![CDATA[UCASE(Property("SkipDeployReadiness")) <> "YES" ]]></Condition>
+		<Validation><![CDATA[ Property("Model") in Properties("SupportedModels(*)")]]></Validation>
+		<Validation><![CDATA[ Property(IsEUFI) == "True"]]></Validation>
+		<MainTitle><![CDATA[ "Deployment Readiness" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Let's check the readiness of this device" ]]></SubTitle>
+		<Help><![CDATA[ "Next, a simple series of checks will validate the deployment readiness of this deivce.&#xa;&#xa;If the validation succeeds, you can continue wth the deployment" ]]></Help>
+	</Pane>
+
+	<Pane id="TS" title="Task Sequence" reference="Tabular\PSDWizard_TaskSequence_en-US.xaml">
+		<Condition><![CDATA[UCASE(Property("SkipTaskSequence")) <> "YES" ]]></Condition>
+		<MainTitle><![CDATA[ "Select a Task Sequence" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Search the name of a Task Sequence..." ]]></SubTitle>
+		<Help><![CDATA[ "Select a Task sequence to execute on this device.&#xa;&#xa;Use the filter buttons to drill to a specific task sequence.
+		&#xa;&#xa;WARNING: The Task Sequence may format the disk drive and all data will be lost" ]]></Help>
+	</Pane>
+
+	<Pane id="ComputerName" title="Device Details" reference="Tabular\PSDWizard_DeviceDetails_en-US.xaml">
+		<Condition><![CDATA[UCase(Property("SkipDomainMembership"))<>"YES" or UCase(Property("SkipComputerName"))<>"YES"]]></Condition>
+		<Condition><![CDATA[Property("DeploymentType")<>"REPLACE" and Property("DeploymentType")<>"CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType")<> "UPGRADE" ]]></Condition>
+		<MainTitle><![CDATA[ "Fill in Device Details" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Let's get the basic things out of the way" ]]></SubTitle>
+		<Help><![CDATA[ "Fill in all available fields.&#xa;&#xa;The device name must meet certain criteria's&#xa;&#xa;Select whether you want the device to join a domain or a workgroup" ]]></Help>
+	</Pane>
+
+	<Pane id="Local Admin Account" title="Administrator Credentials" reference="Tabular\PSDWizard_AdminCreds_en-US.xaml">
+		<Condition><![CDATA[ UCase(Property("SkipAdminPassword")) <> "YES" ]]> </Condition>
+		<MainTitle><![CDATA[ "Specify the Local Admin password" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Is this information correct?" ]]></SubTitle>
+		<Help><![CDATA[ "Specify the the local administrator password.&#xA;&#xA;This will used for logging into the computer to complete the deployment.
+		&#xA;&#xA;Type the names of accounts to be added to the local administrators. Use semicolons to separate account names.
+		&#xA;&#xA;If Account does not exist, they will be created as Administrators" ]]></Help>
+	</Pane>
+	
+    <Pane id="SelectLanguageUI" title="Locale and Time" reference="Tabular\PSDWizard_Locale_en-US.xaml">
+		<Condition><![CDATA[ UCase(Property("SkipLocaleSelection")) <> "YES" or UCase(Property("SkipTimeZone"))<>"YES" ]]> </Condition>
+		<Condition><![CDATA[ Property("DeploymentType")<>"REPLACE" and Property("DeploymentType")<>"CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType")<> "UPGRADE" ]]> </Condition>
+	    <MainTitle><![CDATA[ "Select Locales and Time Zone" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Is this the time zone your in?" ]]></SubTitle>
+		<Help><![CDATA[ "Select a locale time zone and language." ]]></Help>
+	</Pane>
+
+	<Pane id="ApplicationSelection" title="Applications" reference="Tabular\PSDWizard_Applications_en-US.xaml">
+		<Condition><![CDATA[ UCase(Property("DeploymentType"))<>"REPLACE" ]]></Condition>
+		<Condition><![CDATA[ UCase(Property("SkipApplications"))<>"YES" ]]></Condition>
+		<Condition><![CDATA[ IsThereAtLeastOneApplicationPresent ]]></Condition>
+		<MainTitle><![CDATA[ "Select Applications" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Select additional applications to install" ]]></SubTitle>
+		<Help><![CDATA[ "Select one or more applications to install during the deployment process.
+		&#xa;&#xa;Use the filter buttons to drill to a specific applciations group.
+		&#xa;&#xa;Application Bundles are a set of pre-selected applications" ]]></Help>
+	</Pane>
+
+	<Pane id="Ready" title="Summary" reference="Tabular\PSDWizard_Ready_en-US.xaml">
+		<Condition><![CDATA[ UCase(Property("SkipSummary")) <> "YES"]]></Condition>
+		<MainTitle><![CDATA[ "Summary details" ]]></MainTitle>
+		<Help><![CDATA[ "This is a summary of all selections within the deployment wizard.&#xa;&#xa;These setting will be used during the deployment process.
+		&#xa;&#xa;Click Begin when ready" ]]></Help>
+	</Pane>
+</Wizard>

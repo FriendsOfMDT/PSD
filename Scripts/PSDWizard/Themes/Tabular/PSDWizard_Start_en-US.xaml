@@ -1,0 +1,38 @@
+<Canvas x:Name="_startPage" HorizontalAlignment="Left" Height="600" Width="800" VerticalAlignment="Top" Background="#004275" Panel.ZIndex="300" Visibility="Visible">
+    <Grid x:Name="_startPageLayout" Margin="0" Height="572">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="96*"></RowDefinition>
+            <RowDefinition Height="55*"></RowDefinition>
+            <RowDefinition Height="36*"></RowDefinition>
+            <RowDefinition Height="194*"></RowDefinition>
+            <RowDefinition Height="96*"></RowDefinition>
+            <RowDefinition Height="95*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="@MainTitle" VerticalAlignment="Top" FontSize="36" Width="800" TextAlignment="Center" FontFamily="Segoe UI Light" Height="64" Foreground="White"/>
+        <TextBlock Grid.Row="2" HorizontalAlignment="Center" Text="@SubTitle" VerticalAlignment="Top" FontSize="16" FontFamily="Segoe UI Light" Width="800" TextAlignment="Center" Height="26" Foreground="White"/>
+
+        <Button Grid.Row="3" x:Name="_start" Style="{DynamicResource ButtonLightBlueRound}" Width="380" Height="68" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Lets get started" FontSize="24" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
+        </Button>
+        <Button Grid.Row="5" x:Name="_startPageAddStaticIP" Style="{DynamicResource ButtonDarkBlueSquare}"  Width="100" HorizontalAlignment="Left" Margin="20,0,0,20">
+            <StackPanel Width="91" Height="44">
+                <Label Content="Configure Static IP" Foreground="White" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                <Rectangle Width="20" Height="20" Fill="White" HorizontalAlignment="Center">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_cog}"/>
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </StackPanel>
+        </Button>
+        <Button Grid.Row="5" x:Name="_startPageOpenCMD" Style="{DynamicResource ButtonDarkBlueSquare}" Width="100" HorizontalAlignment="right" Margin="0,0,20,20">
+            <StackPanel Width="91" Height="44">
+                <Label Content="Exit to CMD" Foreground="White" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                <Rectangle Width="20" Height="20" Fill="White" HorizontalAlignment="Center">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_console}"/>
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </StackPanel>
+        </Button>
+    </Grid>
+</Canvas>

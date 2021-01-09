@@ -6,19 +6,21 @@
 .LINK
 
 .NOTES
-          FileName: PSDUtility.psd1
-          Solution: PowerShell Deployment for MDT
-          Purpose: General utility routines useful for all PSD scripts.
-          Author: PSD Development Team
-          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
-          Primary: @Mikael_Nystrom 
-          Created: 
-          Modified: 2019-06-02
+        FileName: PSDUtility.psd1
+        Solution: PowerShell Deployment for MDT
+        Purpose: General utility routines useful for all PSD scripts.
+        Author: PSD Development Team
+        Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy, @PowershellCrack
+        Primary: @Mikael_Nystrom
+        Created:
+        Modified: 2020-12-28
 
-          Version - 0.0.0 - () - Finalized functional version 1.
-          Version - 0.0.1 - () - Added Import-PSDCertificate.
-          Version - 0.0.2 - () - Replaced Get-PSDNtpTime
-          TODO:
+        Version - 0.0.0 - () - Finalized functional version 1.
+        Version - 0.0.1 - () - Added Import-PSDCertificate.
+        Version - 0.0.2 - () - Replaced Get-PSDNtpTime
+        Version - 0.0.3 - (PC) - Updated Write-PSDLog to be more detailed and less error prone to I/O issue
+
+        TODO:
 
 .Example
 #>
@@ -43,7 +45,7 @@ function Get-PSDLocalDataPath{
     )
     # Return the cached local data path if possible
     if ($global:psuDataPath -ne "" -and (-not $move)){
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psuDataPath is $psuDataPath, testing access"
+        #Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psuDataPath is $psuDataPath, testing access"
         if (Test-Path $global:psuDataPath){
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Returning data $global:psuDataPath"
             Return $global:psuDataPath
@@ -82,36 +84,45 @@ function Get-PSDLocalDataPath{
             }
         }
     }
-    
+
     if ($localPath -eq ""){
-        # Look on all other volumes 
+        # Look on all other volumes
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking other volumes for a MININT folder."
         Get-Volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\MININT"} | Select-Object -First 1 | % {
             $localPath = "$($_.DriveLetter):\MININT"
         }
     }
-    
+
     # Not found on any drive, create one on the current system drive
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Not found on any drive, create one on the current system drive"
     if ($localPath -eq ""){
         $localPath = "$($env:SYSTEMDRIVE)\MININT"
     }
-    
+
     # Create the MININT folder if it doesn't exist
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Create the MININT folder if it doesn't exist"
     if ((Test-Path $localPath) -eq $false){
         New-Item -ItemType Directory -Force -Path $localPath | Out-Null
     }
-    
+
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): localpath set to $localPath"
     $global:psuDataPath = $localPath
     return $localPath
 }
 
+function Find-PSDFile {
+    Param(
+        $FileName
+    )
+    $LocalPath = Get-PSDLocalDataPath
+    $File = Get-ChildItem -Path $LocalPath -Recurse -Filter $FileName -File
+    Return $File.FullName
+}
+
 function Initialize-PSDFolder{
-    Param( 
+    Param(
         $folderPath
-    ) 
+    )
 
     if ((Test-Path $folderPath) -eq $false){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating $folderPath"
@@ -123,11 +134,28 @@ function Start-PSDLogging{
     Param(
         $Logpath = ""
     )
-    
+
     if($Logpath -eq ""){
         $logPath = "$(Get-PSDLocalDataPath)\SMSOSD\OSDLOGS"
+        try{
+            $tsenv:LogPath = $logPath | Out-Null
+        }
+        catch{
+        }
     }
     Initialize-PSDfolder $logPath
+
+    #Writing to CMtrace file
+    #Set PSDLogPath
+    $PSDLogFile = "$($($caller).Substring(0,$($caller).Length-4)).log"
+    $Global:PSDLogPath = "$logPath\$PSDLogFile"
+
+    #Create logfile
+    if (!(Test-Path $Global:PSDLogPath))
+    {
+        ## Create the log file
+        New-Item $Global:PSDLogPath -Type File | Out-Null
+    }
 
     if($PSDDeBug -eq $true){
         Start-Transcript "$logPath\$caller.transcript.log" -Append
@@ -135,18 +163,6 @@ function Start-PSDLogging{
         Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Logging Transcript to $Global:PSDTranscriptLog"
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Logging Transcript to $Global:PSDTranscriptLog"
     }
-
-    #Writing to CMtrace file
-    #Set PSDLogPath
-    $PSDLogFile = "$($($caller).Substring(0,$($caller).Length-4)).log"
-    $Global:PSDLogPath = "$logPath\$PSDLogFile"
-    
-    #Create logfile
-    if (!(Test-Path $Global:PSDLogPath))
-    {
-        ## Create the log file
-        New-Item $Global:PSDLogPath -Type File | Out-Null
-    } 
 
     Write-Verbose -Message "$($MyInvocation.MyCommand.Name): Logging CMtrace logs to $Global:PSDLogPath"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Logging CMtrace logs to $Global:PSDLogPath"
@@ -164,11 +180,15 @@ function Stop-PSDLogging{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Stop Transcript Logging"
 }
 
+
 Function Write-PSDLog{
     param (
         [Parameter(Mandatory = $true)]
         [string]$Message,
-                                             
+
+        [Parameter(Mandatory=$false)]
+		[string]$Source,
+
         [Parameter()]
         [ValidateSet(1, 2, 3)]
         [string]$LogLevel = 1
@@ -178,9 +198,88 @@ Function Write-PSDLog{
     if($Message -like '*password*'){
         $Message = "<Message containing password has been suppressed>"
     }
-    
+
+    #get BIAS time
+    [string]$LogTime = (Get-Date -Format 'HH:mm:ss.fff').ToString()
+	[string]$LogDate = (Get-Date -Format 'MM-dd-yyyy').ToString()
+	[int32]$script:LogTimeZoneBias = [timezone]::CurrentTimeZone.GetUtcOffset([datetime]::Now).TotalMinutes
+	[string]$LogTimePlusBias = $LogTime + $script:LogTimeZoneBias
+
+	#  Get the file name of the source script
+    If($PSBoundParameters.ContainsKey('Source')){
+        $ScriptSource = $Source
+    }
+    Else{
+        Try {
+    	    If ($script:MyInvocation.Value.ScriptName) {
+    		    [string]$ScriptSource = Split-Path -Path $script:MyInvocation.Value.ScriptName -Leaf -ErrorAction 'Stop'
+    	    }
+    	    Else {
+    		    [string]$ScriptSource = Split-Path -Path $script:MyInvocation.MyCommand.Definition -Leaf -ErrorAction 'Stop'
+    	    }
+        }
+        Catch {
+    	    $ScriptSource = ''
+        }
+    }
+    $LineNum = $MyInvocation.ScriptLineNumber
+    $Line = '<![LOG[{0}]LOG]!><time="{1}" date="{2}" component="{3}:{4}" context="{5}" type="{6}" thread="{7}" file="{8}">'
+    $LineFormat = $Message, $LogTimePlusBias, $LogDate, $ScriptSource, $LineNum, $LogLevel,[Security.Principal.WindowsIdentity]::GetCurrent().Name, $Severity, $PID, $ScriptSource
+    $Line = $Line -f $LineFormat
+
+    if($null -ne $Global:PSDLogPath){
+        #if (!(Test-Path -Path $Global:PSDLogPath)){
+            ## Create the log file
+        #    New-Item $Global:PSDLogPath -Type File | Out-Null
+        #}
+
+        #Log to scriptfile
+        $ScriptLogFile = $Global:PSDLogPath
+        try {
+            Out-File -InputObject $Line -Append -NoClobber -Encoding Default -FilePath $ScriptLogFile -ErrorAction Stop
+        }
+        catch {
+            Write-Host ("[{0}] [{1}] :: Unable to append log entry to [{1}], error: {2}" -f $LogTimePlusBias,$ScriptSource,$ScriptLogFile,$_.Exception.ErrorMessage) -ForegroundColor Red
+        }
+
+        #Log to mainfile
+        $MainLogFile = (($Global:PSDLogPath | Split-Path) + "\PSD.log")
+        try {
+            Out-File -InputObject $Line -Append -NoClobber -Encoding Default -FilePath $MainLogFile -ErrorAction Stop
+        }
+        catch {
+            Write-Host ("[{0}] [{1}] :: Unable to append log entry to [{1}], error: {2}" -f $LogTimePlusBias,$ScriptSource,$MainLogFile,$_.Exception.ErrorMessage) -ForegroundColor Red
+        }
+    }
+
+    #Debug logging
+    if($PSDDebug -eq $true){
+        switch ($LogLevel){
+            '1'{Write-Verbose -Message $Message}
+            '2'{Write-Warning -Message $Message}
+            '3'{Write-Error -Message $Message}
+            Default {}
+        }
+    }
+}
+<#
+Function Write-PSDLog{
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Message,
+
+        [Parameter()]
+        [ValidateSet(1, 2, 3)]
+        [string]$LogLevel = 1
+    )
+
+    # Don't log any lines containing the word password
+    if($Message -like '*password*'){
+        $Message = "<Message containing password has been suppressed>"
+    }
+
     #check if we have a logpath set
-    if($Global:PSDLogPath -ne $null){
+    if($null -ne $Global:PSDLogPath){
         if (!(Test-Path -Path $Global:PSDLogPath)){
             ## Create the log file
             New-Item $Global:PSDLogPath -Type File | Out-Null
@@ -193,7 +292,7 @@ Function Write-PSDLog{
 
         #Log to scriptfile
         Add-Content -Value $Line -Path $Global:PSDLogPath
-
+    
         #Log to masterfile
         Add-Content -Value $Line -Path (($Global:PSDLogPath | Split-Path) + "\PSD.log")
     }
@@ -207,7 +306,8 @@ Function Write-PSDLog{
         }
     }
 }
-Start-PSDLogging
+#>
+Start-PSDLogging
 
 function Save-PSDVariables{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running Save-PSDVariables"
@@ -220,28 +320,88 @@ function Save-PSDVariables{
         $element.AppendChild($v.createCDATASection($Item.Value)) | Out-Null
         $v.DocumentElement.AppendChild($element) | Out-Null
     }
-    
+
     $path = "$PSDLocaldataPath\Variables.dat"
     $v.Save($path)
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDVariables are saved in: $path"
     $path
 }
 
-
 function Restore-PSDVariables{
     $path = "$(Get-PSDLocaldataPath)\Variables.dat"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Restore-PSDVariables from $path"
     if (Test-Path -Path $path) {
         [xml] $v = Get-Content -Path $path
-        $v | Select-Xml -Xpath "//var" | % { Set-Item tsenv:$($_.Node.name) -Value $_.Node.'#cdata-section' } 
+        $v | Select-Xml -Xpath "//var" | % { Set-Item tsenv:$($_.Node.name) -Value $_.Node.'#cdata-section' }
     }
     return $path
 }
 
+Function Copy-PSDLogs{
+    param(
+        $FolderPath,
+        $Name
+    )
+    if($tsenv:SLShare -eq $null -or $tsenv:SLShare -eq ""){
+        Return
+    }
+    if ($tsenv:SLShare -ilike "http*"){
+        If((Test-Path -Path $FolderPath) -eq $true){
+            $SecurePassword = $tsenv:LogUserPassword | ConvertTo-SecureString -AsPlainText -Force
+            $Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList "$tsenv:LogUserDomain\$tsenv:LogUserID", $SecurePassword
+            $guid = (New-Guid).Guid
+            $TempArchiveFolder = "$env:TEMP\$guid"
+
+            Try{
+                $Null = New-Item -Path $TempArchiveFolder -ItemType Directory -Force
+            }
+            catch{
+            }
+
+            Try{
+                $Null = Copy-Item -Path "$FolderPath" -Destination "$TempArchiveFolder" -Recurse
+            }
+            catch{
+            }
+
+            $LogArchive = "$env:TEMP\$($Name).zip"
+            if(!(Test-Path -Path $TempArchiveFolder)){
+            }
+
+            $DarnFolder = "$TempArchiveFolder\*"
+            if($PSDDebug -eq $true){
+                Start PowerShell -ArgumentList "Compress-Archive -Path $DarnFolder -DestinationPath $LogArchive -Force -ErrorAction Stop -WarningAction Stop -Verbose" -Wait
+            }
+            else{
+                Start PowerShell -ArgumentList "Compress-Archive -Path $DarnFolder -DestinationPath $LogArchive -Force -ErrorAction Stop -WarningAction Stop" -Wait
+            }
+
+            if(!(Test-Path -Path $LogArchive)){
+            }
+
+            $RemoteFileName = $($env:COMPUTERNAME) + "-" + $Name + ".zip"
+            try{
+                Start-BitsTransfer -Authentication Ntlm -Source $LogArchive -Destination $("$tsenv:SLshare/$RemoteFileName") -TransferType Upload -Credential $Credentials -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+            }
+            catch{
+            }
+            Start-Sleep -Seconds 5
+            Remove-Item -Path $TempArchiveFolder -Recurse -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+            Remove-Item -Path $LogArchive -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+        }
+        else{
+        }
+    }
+    if ($tsenv:SLShare -like "\\*"){
+        Return
+    }
+}
+
+
 function Clear-PSDInformation{
     # Create a folder for the logs
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Create a folder for the logs"
     $logDest = "$($env:SystemRoot)\Temp\DeploymentLogs"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating folder $logDest"
     Initialize-PSDFolder $logDest
 
     # Process each volume looking for MININT folders
@@ -249,12 +409,7 @@ function Clear-PSDInformation{
     Get-Volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\MININT"} | % {
         $localPath = "$($_.DriveLetter):\MININT"
 
-        # Copy PSD logs
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy PSD logs"
-        if (Test-Path "$localPath\SMSOSD\OSDLOGS"){
-            Write-Verbose "Copy-Item $localPath\SMSOSD\OSDLOGS\* $logDest"
-            Copy-Item "$localPath\SMSOSD\OSDLOGS\*" $logDest -Force
-        }
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Working on $localPath"
 
         # Copy Panther,Debug and other logs
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy Panther,Debug and other logs"
@@ -277,7 +432,7 @@ function Clear-PSDInformation{
             )
 
             foreach($Logfile in $Logfiles){
-                
+
                 $Sources = "$env:TEMP\$Logfile","$env:SystemRoot\$Logfile","$env:SystemRoot\System32\$Logfile","$env:Systemdrive\`$WINDOWS.~BT\Sources"
                 foreach($Source in $Sources){
                     If(Test-Path -Path "$Source"){
@@ -287,6 +442,12 @@ function Clear-PSDInformation{
                     }
                 }
             }
+        }
+
+        # Copy SMSTS log from
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy _SMSTaskSequence\Logs"
+        if (Test-Path "$env:SystemDrive\_SMSTaskSequence\Logs"){
+            Copy-Item -Path "$env:SystemDrive\_SMSTaskSequence\Logs*" -Destination $logDest
         }
 
         # Copy SMSTS log
@@ -301,6 +462,16 @@ function Clear-PSDInformation{
             Copy-Item "$localPath\Variables.dat" $logDest -Force
         }
 
+        # Copy PSD logs
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy PSD logs"
+        if (Test-Path "$localPath\SMSOSD\OSDLOGS"){
+            Write-Verbose "Copy-Item $localPath\SMSOSD\OSDLOGS\* $logDest"
+            Copy-Item "$localPath\SMSOSD\OSDLOGS\*" $logDest -Force
+        }
+
+        # Copy logs to SLShare
+        Copy-PSDLogs -FolderPath $logDest -Name "OSDLogs"
+
         # Check if DEVRunCleanup is set to NO
         if ($($tsenv:DEVRunCleanup) -eq "NO"){
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:DEVRunCleanup is now $tsenv:DEVRunCleanup."
@@ -309,13 +480,12 @@ function Clear-PSDInformation{
         else{
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:DEVRunCleanup is now $tsenv:DEVRunCleanup."
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cleanup will remove MININT and Drivers folder."
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): This will be the last log entry."
 
             # Remove the MININT folder
-            if(Test-Path -Path "$localPath"){
-                Remove-Item "$localPath" -Recurse -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
-            }
-            
+            #if(Test-Path -Path "$localPath"){
+            #    Remove-Item "$localPath" -Recurse -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+            #}
+
             # Remove the Drivers folder
             if(Test-Path -Path "$($env:Systemdrive + "\Drivers")"){
                 Remove-Item "$($env:Systemdrive + "\Drivers")" -Recurse -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
@@ -334,6 +504,11 @@ function Clear-PSDInformation{
     $Null = New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name AutoAdminLogon -Value 0 -Force
     $Null = New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name DefaultUserName -Value "" -Force
     $Null = New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name DefaultPassword -Value "" -Force
+
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): This will be the last log entry."
+
+    # Copy logs to SLShare
+    Copy-PSDLogs -FolderPath $logDest -Name "OSDLogs"
 }
 
 function Copy-PSDFolder{
@@ -347,13 +522,16 @@ function Copy-PSDFolder{
     $s = $source.TrimEnd("\")
     $d = $destination.TrimEnd("\")
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copying folder $source to $destination using XCopy"
-    & xcopy $s $d /s /e /v /d /y /i | Out-Null
+    #xcopy $s $d /s /e /v /d /y /i
+
+    #Start-Process -FilePath xcopy -ArgumentList "$s $d /s /e /v /d /y /i" -Wait -Passthru
+    Invoke-PSDEXE -Executable xcopy -Arguments "$s $d /s /e /v /d /y /i"
 }
 
 function Test-PSDNetCon{
     [CmdletBinding(SupportsShouldProcess)]
     Param(
-        $Hostname, 
+        $Hostname,
         $Protocol
     )
 
@@ -459,7 +637,7 @@ Function Get-PSDDriverInfo{
     }
     else {
         $Manufacter = ""
-    }    
+    }
 
     if ($Manufacter.Length -eq 0) {
         $Manufacter = $Provider
@@ -473,7 +651,7 @@ Function Get-PSDDriverInfo{
     }
     $Manufacter = $Manufacter.Trim(' ').Trim('"')
 
-    
+
 
     $HashTable = [Ordered]@{
         Name = $InfName
@@ -482,9 +660,11 @@ Function Get-PSDDriverInfo{
         Date = $DriverVer[0]
         Version = $DriverVersion
     }
-    
+
     New-Object -TypeName psobject -Property $HashTable
-}Function Show-PSDInfo{
+}
+
+Function Show-PSDInfo{
     Param
     (
         $Message,
@@ -502,25 +682,25 @@ Param
     $OSDComputername,
     $Deployroot
 )
-    
+
 switch ($Severity)
 {
-    'Error' 
+    'Error'
     {
         $BackColor = "salmon"
         $Label1Text = "Error"
     }
-    'Warning' 
+    'Warning'
     {
         $BackColor = "yellow"
         $Label1Text = "Warning"
     }
-    'Information' 
+    'Information'
     {
         $BackColor = "#F0F0F0"
         $Label1Text = "Information"
     }
-    Default 
+    Default
     {
         $BackColor = "#F0F0F0"
         $Label1Text = "Information"
@@ -536,7 +716,7 @@ Get-WmiObject Win32_ComputerSystem | % {
 Get-WmiObject Win32_ComputerSystemProduct | % {
     $UUID = $_.UUID
 }
-    
+
 Get-WmiObject Win32_BaseBoard | % {
     $Product = $_.Product
     $SerialNumber = $_.SerialNumber
@@ -550,7 +730,7 @@ Get-WmiObject Win32_SystemEnclosure | % {
     if ($_.ChassisTypes[0] -in "3", "4", "5", "6", "7", "15", "16") { $ChassisType = "Desktop"}
     if ($_.ChassisTypes[0] -in "23") { $ChassisType = "Server"}
     if ($_.ChassisTypes[0] -in "34", "35", "36") { $ChassisType = "Small Form Factor"}
-    if ($_.ChassisTypes[0] -in "13", "31", "32", "30") { $ChassisType = "Tablet"} 
+    if ($_.ChassisTypes[0] -in "13", "31", "32", "30") { $ChassisType = "Tablet"}
 }
 
 $ipList = @()
@@ -696,7 +876,7 @@ $Button1.Font                    = 'Segoe UI,12'
 $Form.controls.AddRange(@($Label1,$Label2,$Label3,$Label4,$Label5,$Label6,$Label7,$Label8,$Label9,$Label10,$TextBox1,$Button1))
 
 $Button1.Add_Click({ Ok })
-    
+
 function Ok (){$Form.close()}
 
 [void]$Form.ShowDialog()
@@ -705,7 +885,8 @@ function Ok (){$Form.close()}
     $File | Out-File -Width 255 -FilePath $ScriptFile
 
     if(($OSDComputername -eq "") -or ($OSDComputername -eq $null)){$OSDComputername = $env:COMPUTERNAME}
-    if(($Deployroot -eq "") -or ($Deployroot -eq $null)){$Deployroot = "NA"}
+    #if(($Deployroot -eq "") -or ($Deployroot -eq $null)){$Deployroot = "NA"}
+    if([string]::IsNullOrEmpty($deployRoot)){$Deployroot = "NA"}
 
     Start-Process -FilePath PowerShell.exe -ArgumentList $ScriptFile, "'$Message'", $Severity, $OSDComputername, $Deployroot
 
@@ -857,16 +1038,16 @@ Function Set-PSDCommandWindowsSize{
     Resets the size of the current console window
     .Description
     Set-myConSize resets the size of the current console window. By default, it
-    sets the windows to a height of 40 lines, with a 3000 line buffer, and sets the 
-    the width and width buffer to 120 characters. 
+    sets the windows to a height of 40 lines, with a 3000 line buffer, and sets the
+    the width and width buffer to 120 characters.
     .Example
     Set-myConSize
     Restores the console window to 120x40
     .Example
     Set-myConSize -Height 30 -Width 180
-    Changes the current console to a height of 30 lines and a width of 180 characters. 
+    Changes the current console to a height of 30 lines and a width of 180 characters.
     .Parameter Height
-    The number of lines to which to set the current console. The default is 40 lines. 
+    The number of lines to which to set the current console. The default is 40 lines.
     .Parameter Width
     The number of characters to which to set the current console. Default is 120. Also sets the buffer to the same value
     .Inputs
@@ -922,7 +1103,7 @@ Function Get-PSDNtpTime {
     # --------------------------------------------------------------------
 
     # NTP Times are all UTC and are relative to midnight on 1/1/1900
-    $StartOfEpoch=New-Object DateTime(1900,1,1,0,0,0,[DateTimeKind]::Utc)   
+    $StartOfEpoch=New-Object DateTime(1900,1,1,0,0,0,[DateTimeKind]::Utc)
 
 
     Function OffsetToLocal($Offset) {
@@ -948,17 +1129,17 @@ Function Get-PSDNtpTime {
     }
     Catch {
         Write-Warning "Failed to connect to server $Server"
-        Return 
+        Return
     }
 
 
 # NTP Transaction -------------------------------------------------------
 
-        $t1 = Get-Date    # t1, Start time of transaction... 
-    
+        $t1 = Get-Date    # t1, Start time of transaction...
+
         Try {
             [Void]$Socket.Send($NtpData)
-            [Void]$Socket.Receive($NtpData)  
+            [Void]$Socket.Receive($NtpData)
         }
         Catch {
             Write-Warning "Failed to communicate with server $Server"
@@ -969,7 +1150,7 @@ Function Get-PSDNtpTime {
 
 # End of NTP Transaction ------------------------------------------------
 
-    $Socket.Shutdown("Both") 
+    $Socket.Shutdown("Both")
     $Socket.Close()
 
 # We now have an NTP response packet in $NtpData to decode.  Start with the LI flag
@@ -977,8 +1158,8 @@ Function Get-PSDNtpTime {
 
     # Decode the 64-bit NTP times
 
-    # The NTP time is the number of seconds since 1/1/1900 and is split into an 
-    # integer part (top 32 bits) and a fractional part, multipled by 2^32, in the 
+    # The NTP time is the number of seconds since 1/1/1900 and is split into an
+    # integer part (top 32 bits) and a fractional part, multipled by 2^32, in the
     # bottom 32 bits.
 
     # Convert Integer and Fractional parts of the (64-bit) t3 NTP time from the byte array
@@ -988,7 +1169,7 @@ Function Get-PSDNtpTime {
     # Convert to Millseconds (convert fractional part by dividing value by 2^32)
     $t3ms = $IntPart * 1000 + ($FracPart * 1000 / 0x100000000)
 
-    # Perform the same calculations for t2 (in bytes [32..39]) 
+    # Perform the same calculations for t2 (in bytes [32..39])
     $IntPart = [BitConverter]::ToUInt32($NtpData[35..32],0)
     $FracPart = [BitConverter]::ToUInt32($NtpData[39..36],0)
     $t2ms = $IntPart * 1000 + ($FracPart * 1000 / 0x100000000)
@@ -996,7 +1177,7 @@ Function Get-PSDNtpTime {
     # Calculate values for t1 and t4 as milliseconds since 1/1/1900 (NTP format)
     $t1ms = ([TimeZoneInfo]::ConvertTimeToUtc($t1) - $StartOfEpoch).TotalMilliseconds
     $t4ms = ([TimeZoneInfo]::ConvertTimeToUtc($t4) - $StartOfEpoch).TotalMilliseconds
- 
+
     # Calculate the NTP Offset and Delay values
     $Offset = (($t2ms - $t1ms) + ($t3ms-$t4ms))/2
     $Delay = ($t4ms - $t1ms) - ($t3ms - $t2ms)
@@ -1055,10 +1236,10 @@ Function Get-PSDNtpTime {
         [Int]$Precision = $PrecisionBits   # top bit clear - just use positive value
     }
     $PrecisionSeconds = [Math]::Pow(2, $Precision)
-    
+
 
     # Determine the format of the ReferenceIdentifier field and decode
-    
+
     If ($Stratum -le 1) {
         # Response from Primary Server.  RefId is ASCII string describing source
         $ReferenceIdentifier = [String]([Char[]]$NtpData[12..15] -join '')
@@ -1081,7 +1262,7 @@ Function Get-PSDNtpTime {
                     }
 
             4       {
-                        # Version 4 Secondary Server, RefId = low-order 32-bits of  
+                        # Version 4 Secondary Server, RefId = low-order 32-bits of
                         # latest transmit time of reference source
                         $ReferenceIdentifier = [BitConverter]::ToUInt32($NtpData[15..12],0) * 1000 / 0x100000000
                         Break
@@ -1096,7 +1277,7 @@ Function Get-PSDNtpTime {
 
 
     # Calculate Root Delay and Root Dispersion values
-    
+
     $RootDelay = [BitConverter]::ToInt32($NtpData[7..4],0) / 0x10000
     $RootDispersion = [BitConverter]::ToUInt32($NtpData[11..8],0) / 0x10000
 
@@ -1135,14 +1316,14 @@ Function Get-PSDNtpTime {
     }
 
     # Set the default display properties for the returned object
-    [String[]]$DefaultProperties =  'NtpServer', 'NtpTime', 'OffsetSeconds', 'NtpVersionNumber', 
+    [String[]]$DefaultProperties =  'NtpServer', 'NtpTime', 'OffsetSeconds', 'NtpVersionNumber',
                                     'Mode_text', 'Stratum', 'ReferenceIdentifier'
 
     # Create the PSStandardMembers.DefaultDisplayPropertySet member
     $ddps = New-Object Management.Automation.PSPropertySet('DefaultDisplayPropertySet', $DefaultProperties)
 
     # Attach default display property set and output object
-    $PSStandardMembers = [Management.Automation.PSMemberInfo[]]$ddps 
+    $PSStandardMembers = [Management.Automation.PSMemberInfo[]]$ddps
     $NtpTimeObj | Add-Member -MemberType MemberSet -Name PSStandardMembers -Value $PSStandardMembers -PassThru
 }
 
@@ -1156,7 +1337,7 @@ Function Write-PSDEvent{
     if($tsenv:EventService -eq ""){
         return
     }
-    
+
     # a Deployment has started (EventID 41016)
     # a Deployment completed successfully (EventID 41015)
     # a Deployment failed (EventID 41014)
@@ -1187,7 +1368,8 @@ Function Write-PSDEvent{
 	if($TotalSteps -eq ""){
         $TotalSteps= '0'
     }
-    $Return = Invoke-WebRequest "$tsenv:EventService/MDTMonitorEvent/PostEvent?uniqueID=$Lguid&computerName=$ComputerName&messageID=$messageID&severity=$severity&stepName=$CurrentStep&totalSteps=$TotalSteps&id=$id,$macaddress&message=$Message&dartIP=&dartPort=&dartTicket=&vmHost=$vmhost&vmName=$ComputerName" -UseBasicParsing
+    $stepName = $tsenv:_SMSTSCurrentActionName
+    $Return = Invoke-WebRequest "$tsenv:EventService/MDTMonitorEvent/PostEvent?uniqueID=$Lguid&computerName=$ComputerName&messageID=$messageID&severity=$severity&stepName=$stepName&currentStep=$CurrentStep&totalSteps=$TotalSteps&id=$id,$macaddress&message=$Message&dartIP=&dartPort=&dartTicket=&vmHost=$vmhost&vmName=$ComputerName" -UseBasicParsing
 }
 
 Function Show-PSDActionProgress {
@@ -1198,7 +1380,15 @@ Function Show-PSDActionProgress {
     )
     $ts = New-Object -ComObject Microsoft.SMS.TSEnvironment
     $tsui = New-Object -ComObject Microsoft.SMS.TSProgressUI
+    $MaxStep = 100
     $tsui.ShowActionProgress($ts.Value("_SMSTSOrgName"),$ts.Value("_SMSTSPackageName"),$ts.Value("_SMSTSCustomProgressDialogMessage"),$ts.Value("_SMSTSCurrentActionName"),[Convert]::ToUInt32($ts.Value("_SMSTSNextInstructionPointer")),[Convert]::ToUInt32($ts.Value("_SMSTSInstructionTableSize")),$Message,$Step,$MaxStep)
+
+    $Message = "test"
+    $Step = 4
+
+    New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Deployment 4' -Name ProgressPercent -Value $Step -PropertyType DWORD -Force -ErrorAction SilentlyContinue
+    New-ItemProperty -Path 'HKLM:\Software\Microsoft\Deployment 4' -Name ProgressText -Value $Message -PropertyType STRING -Force -ErrorAction SilentlyContinue
+
 }
 
 function Import-PSDCertificate{
@@ -1211,7 +1401,7 @@ function Import-PSDCertificate{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Adding $Path to Certificate Store: $CertStoreName in Certificate Scope: $CertStoreScope"
     # Create Object
     $CertStore = New-Object System.Security.Cryptography.X509Certificates.X509Store  -ArgumentList  $CertStoreName,$CertStoreScope
-    $Cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 
+    $Cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
 
     # Import Certificate
     $CertStore.Open('ReadWrite')

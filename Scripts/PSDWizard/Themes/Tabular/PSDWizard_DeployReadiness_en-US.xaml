@@ -1,0 +1,60 @@
+<Grid x:Name="_depTabLayout" Margin="0" Grid.ColumnSpan="2">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_depTabMainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle"/>
+    <Rectangle Grid.Column="0" Fill="DarkGray" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_clipboard}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Canvas x:Name="_depTabValidation01" Grid.Column="0" Margin="10,89,10.5,393" Background="LightGreen" Visibility="Hidden">
+        <TextBox x:Name="_depTabValidation01_Name" Grid.Column="0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" Canvas.Top="10" />
+        <Rectangle x:Name="_depTabValidation01_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" HorizontalAlignment="Right" Canvas.Left="385" Canvas.Top="6" Visibility="Hidden">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+        <Rectangle x:Name="_depTabValidation01_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" HorizontalAlignment="Right" Canvas.Left="430" Canvas.Top="10" Visibility="Hidden">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+    </Canvas>
+
+    <Label Content="Hardware Information" Grid.Column="0" FontSize="22" HorizontalAlignment="Left" Margin="10,275,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.49,0.532"/>
+    <Grid Margin="0" Name="_depTabIdentitySection" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="216">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" MinWidth="121"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Content="Manufacturer:" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" FontSize="16"  VerticalAlignment="Center" Foreground="Black" Height="31" Width="109" HorizontalContentAlignment="Right"/>
+        <TextBox Name="TS_Make" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,4" Width="189" BorderBrush="Gray"/>
+        <Label Content="Model:"  Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="59" HorizontalContentAlignment="Right"/>
+        <TextBox Name="TS_Model" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,4,0,5" Width="189" BorderBrush="Gray"/>
+        <Label Content="Asset Tag:" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="80" HorizontalContentAlignment="Right"/>
+        <TextBox x:Name="TS_AssetTag" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,4,0,5" Width="189" BorderBrush="Gray"/>
+        <Label Content="Serial Number:" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="80" HorizontalContentAlignment="Right"/>
+        <TextBox Name="TS_SerialNumber" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,4,0,5" Width="189" BorderBrush="Gray"/>
+        <Label Content="Mac Address:" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="104" HorizontalContentAlignment="Right"/>
+        <TextBox Name="TS_MacAddress001" Grid.Column="1" Grid.Row="4" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,4" Width="189" BorderBrush="Gray"/>
+        <Label Content="IP Address:" Grid.Column="0" Grid.Row="5" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="88" HorizontalContentAlignment="Right"/>
+        <TextBox Name="TS_IPAddress001" Grid.Column="1" Grid.Row="5" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,4,0,5" Width="189" BorderBrush="Gray"/>
+    </Grid>
+
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_depTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+</Grid>
