@@ -30,63 +30,70 @@ PSD is very much a work-in-progress solution, so stay tuned as we rapidly move f
 
 ## [CHANGELOG](./Scripts/PSDWizard/CHANGELOG.MD)
 ## TODO:
-- Themes <mark> Modern OOBE theme coming soon
+- Themes > Modern OOBE theme coming soon
 - Logos/Branding
 - Add deployment readiness checks
 - Add refresh event handler
 - build network configuration screen
-- Generate XAML based on customsettings <mark> SEE CHANGELOG 11/22/2020
-- Search Task Sequence <mark>  SEE CHANGELOG 11/28/2020
-- Tab events <mark>  SEE CHANGELOG 11/28/2020
-- Populate multilevel treeview for task sequence <mark>  SEE CHANGELOG 11/27/2020
-- Search Applications <mark>  SEE CHANGELOG 11/28/2020
-- SkipWizard Control <mark> SEE CHANGELOG 11/28/2020
+- ~~Generate XAML based on customsettings~~ > SEE CHANGELOG 11/22/2020
+- ~~Search Task Sequence~~ > SEE CHANGELOG 11/28/2020
+- ~~Tab events~~ >  SEE CHANGELOG 11/28/2020
+- ~~Populate multilevel treeview for task sequence~~ > SEE CHANGELOG 11/27/2020
+- ~~Search Applications~~ > SEE CHANGELOG 11/28/2020
+- ~~SkipWizard Control~~ > SEE CHANGELOG 11/28/2020
 
 ## v2 Screenshots
 
 - Welcome Page
 
-  <mark>Static IP and CMD buttons do not work yet</mark>
-![Welcome](.images/psdwizard_v2_welcome.JPG)
+    > Static IP and CMD buttons do not work yet
+
+    ![Welcome](.images/psdwizard_v2_welcome.JPG)
 
 - Readiness Page
 
-    <mark>Planning to add prereq checks controlled by either customsettings.ini or definition.xml.
-![Welcome](.images/psdwizard_v2_readiness.JPG)
+    > Planning to add prereq checks controlled by either customsettings.ini or definition.xml.
+
+    ![Welcome](.images/psdwizard_v2_readiness.JPG)
 
 
 - Task Sequence Page
 
-![Welcome](.images/psdwizard_v2_tasksequence.JPG)
+    ![Welcome](.images/psdwizard_v2_tasksequence.JPG)
 
 - Device Details Page
 
-  <mark>Domain join will show once PSDDomainJoin.ps1 is written for it.
-![Welcome](.images/psdwizard_v2_deviceinfo.JPG)
+    > Domain join will show once PSDDomainJoin.ps1 is written for it.
+
+    ![Welcome](.images/psdwizard_v2_deviceinfo.JPG)
 
 - Administrator Credential Page
 
-  <mark>Additional Admin creds does not work....yet
-![Welcome](.images/psdwizard_v2_admincreds.JPG)
+    > Additional Admin creds does not work....yet
+
+    ![Welcome](.images/psdwizard_v2_admincreds.JPG)
 
 - Locale Page
 
-![Welcome](.images/psdwizard_v2_locale.JPG)
+    ![Welcome](.images/psdwizard_v2_locale.JPG)
 
 - Application Page
 
-  <mark>Bundles are not working. working on supporting profiles as well
-![Welcome](.images/psdwizard_v2_applications.JPG)
+    > Bundles are not working. working on supporting profiles as well
+
+    ![Welcome](.images/psdwizard_v2_applications.JPG)
 
 - Summary Page
-<mark>Coming Soon
+
+    > Coming Soon
 
 
 - OOBE Theme
 
-<mark>First look
-![Welcome](.images/psdwizard_v2_welcome_modern.JPG)
-![Welcome](.images/psdwizard_v2_tasksequence_modern.JPG)
+    > First look
+
+    ![Welcome](.images/psdwizard_v2_welcome_modern.JPG)
+    ![Welcome](.images/psdwizard_v2_tasksequence_modern.JPG)
 
 ## Related References
 (intentionally blank)
