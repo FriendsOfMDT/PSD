@@ -12,11 +12,11 @@
         Contact: @PowershellCrack
         Primary: @PowershellCrack
         Created:
-        Modified: 2021-01-12
+        Modified: 2021-01-26
 
         Version - 2.0.0b - () - Finalized functional version 2.
         Version - 2.1.1b - (PC) - Cleaned up logging and added script source; moved all variables in messages to format tag
-        Version - 2.1.2b - (PC) - Fixed UI issues with invalid TS seledction unable to continue if navigate back
+        Version - 2.1.2b - (PC) - Fixed UI issues with invalid TS selection unable to continue if navigate back
 
 
         TODO:
