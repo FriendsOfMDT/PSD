@@ -9,12 +9,14 @@
         FileName: PSDWizard.psm1
         Solution: PowerShell Deployment for MDT
         Author: PSD Development Team
-        Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy, @PowershellCrack
+        Contact: @PowershellCrack
         Primary: @PowershellCrack
         Created:
-        Modified: 09 Dec 2020
+        Modified: 2021-01-12
 
         Version - 2.0.0b - () - Finalized functional version 2.
+        Version - 2.1.1b - (PC) - Cleaned up logging and added script source; moved all variables in messages to format tag
+        Version - 2.1.2b - (PC) - Fixed UI issues with invalid TS seledction unable to continue if navigate back
 
 
         TODO:
@@ -23,7 +25,7 @@
             - Add deployment readiness checks
             - Add refresh event handler
             - build network configuration screen
-            - Generate XAML based on settings - SEE CHANGELOG 11/22/2020
+            - Generate XAML based on customsettings - SEE CHANGELOG 11/22/2020
             - Search Task Sequence - SEE CHANGELOG 11/28/2020
             - Tab events - SEE CHANGELOG 11/28/2020
             - Populate multilevel treeview for task sequence - SEE CHANGELOG 11/27/2020
@@ -44,7 +46,7 @@ Function ConvertFrom-XML {
         } ElseIf ($_.Definition -Match "^\System.Xml.XmlElement\b.*$") {
             $Return | Add-Member -MemberType NoteProperty -Name $($_.Name) -Value $(ConvertFrom-XML -XML $($XML.($_.Name)))
         } Else {
-            Write-Host " Unrecognized Type: $($_.Name)='$($_.Definition)'"
+            Write-Verbose ("Unrecognized Type: {0}='{1}'" -f $_.Name,$_.Definition)
         }
     }
     $Return
@@ -61,12 +63,14 @@ Function Get-PSDWizardDefinitions {
         [ValidateSet('Global','WelcomeWizard','Pane')]
         $Section = 'Global'
     )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
 
     Try{
         [Xml.XmlElement]$WizardElement = $xml.Wizard
     }
     Catch{
-        Write-PSDLog ('Unable to parse xml content definition file: {0} ' -f $_.Exception.Message) -LogLevel 3
+        Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Unable to parse xml content definition file: {0} " -f $_.Exception.Message) -LogLevel 3
         Return
     }
 
@@ -204,6 +208,10 @@ Function Format-PSDWizard{
 
         [switch]$Passthru
     )
+
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
     #determine if path is has a file in path or is just a container
     #Make the path the working path
     If(Test-Path -Path $Path -PathType Container){
@@ -234,7 +242,7 @@ Function Format-PSDWizard{
     [string]$XamlWizardTemplatePath = Join-Path -Path $TemplatePath -ChildPath $GlobalElement.TemplateReference
     [string]$StartPagePath = Join-Path -Path $TemplatePath -ChildPath $WelcomeElement.reference
 
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Generating PSD Wizard from template file [$XamlWizardTemplatePath]"
+    if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Generating PSD Wizard from template file: {0}" -f (Split-Path $XamlWizardTemplatePath -leaf))}
 
     #grab the primary template
     $PSDWizardXAML = (Get-Content $XamlWizardTemplatePath -ReadCount 0) -replace 'mc:Ignorable="d"','' -replace "x:N",'N' -replace '^<Win.*', '<Window'
@@ -299,17 +307,18 @@ Function Format-PSDWizard{
     $i=0
     #loop through each page
     #ForEach ($Tab in $PaneElements){break}
+    $TSEnvSettings = (Get-TSItem * -wildcard)
     ForEach ($Tab in $PaneElements)
     {
-        #loop through each condition to find if
+        #loop through each condition to find if ts value matches
         Foreach($condition in ($Tab.condition.'#cdata-section').Trim()){
-            $Result = Get-PSDWizardCondition -Condition $condition -TSEnvSettings (Get-TSItem * -wildcard)
+            $Result = Get-PSDWizardCondition -Condition $condition -TSEnvSettings $TSEnvSettings
             If($Result -eq $false){Break} #stop this condition loop if false
         }
 
         #Go to next iteration in loop if ANY condition is false
         If($Result -eq $false){
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Condition [$condition] for Tab [$($Tab.title)] is false, Skipping generation of this tab"
+            if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Condition [{0}] for [{1}] tab is false, Skipping generation of this tab" -f $condition,$Tab.title)}
             Continue
         }
 
@@ -318,11 +327,11 @@ Function Format-PSDWizard{
           #If there is an reference file, grab the contents to inject into the @Content section
         $PageContentPath = Join-Path -Path $TemplatePath -ChildPath $tab.reference
         If(Test-Path $PageContentPath -ErrorAction SilentlyContinue){
+            if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Generating [{0}] tab from reference file [{1}]" -f $Tab.title,(Split-Path $PageContentPath -leaf))}
             $PageContent = (Get-Content $PageContentPath -ReadCount 0)
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Generating Tab [$($Tab.title)] from reference file [$($PageContentPath)]"
         }
         Else{
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to Generate Tab [$($Tab.title)] from reference file [$($PageContentPath)]. File not found, Skipping..."
+            if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Unable to Generate [{0}] tab from reference file [{1}]. File not found, Skipping..." -f $Tab.title,(Split-Path $PageContentPath -leaf))}
             Continue #Go to next iteration in loop
         }
         # PROCESS TAB
@@ -331,7 +340,7 @@ Function Format-PSDWizard{
         $i++
 
         #Collect Tab details from Definition
-        $TabId = ('{0:D2}' -f $i)   # make all tabs are double digits
+        $TabId = ("{0:D2}" -f $i)   # make all tabs are double digits
         $TabTitle = $Tab.title
         #Replace @ORG with ORGName
         $MainTitle = ($Tab.MainTitle.'#cdata-section' -replace '@ORG',$OrgName -replace '"','').Trim()
@@ -411,6 +420,9 @@ function Export-PSDWizardResult{
         $VariablePrefix,
         $Form
     )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
     #search through XML for matching VariablePrefix
     $XMLContent.SelectNodes("//*[@Name]") | ? { $_.Name -match "^$VariablePrefix" } | % {
         $control = $Form.FindName($_.Name)
@@ -436,7 +448,7 @@ function Export-PSDWizardResult{
             $value = $control.Text
             If($value){Set-TSItem $name -Value $value}
         }
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Set OSD variable [$name] to value [$value]"
+        Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): {0} is now: {1}" -f $name,$value)
 
         if($name -eq "TaskSequenceID"){
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking TaskSequenceID for a value..."
@@ -446,7 +458,7 @@ function Export-PSDWizardResult{
                 Show-PSDSimpleNotify -Message "No Task Sequence selected, restarting wizard..."
                 Show-PSDWizard
             }Else{
-                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TaskSequenceID is set to [$value]"
+                Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): TaskSequenceID is now: {0}" -f $value)
             }
         }
     }
@@ -461,6 +473,9 @@ function Set-PSDWizardDefault{
         $Form,
         [switch]$Passthru
     )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
     #search through XML for matching VariablePrefix
     #TEST: $XMLContent=$script:Xaml;$VariablePrefix='TS_';$Form=$script:Wizard
     $XMLContent.SelectNodes("//*[@Name]") | ? { $_.Name -match "^$VariablePrefix" } | % {
@@ -487,7 +502,7 @@ function Set-PSDWizardDefault{
         else{
             $control.Text = $value
         }
-        Write-PSDLog -Message ("{0}: Field name [{1}] is now: {2}" -f $MyInvocation.MyCommand.Name,$control.Name,$value) -LogLevel 1
+        if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): {0} is set to: {1}" -f $control.Name,$value) -LogLevel 1}
         If($Passthru){(Get-TSItem $name)}
     }
 }
@@ -501,6 +516,8 @@ Function Invoke-PSDWizard{
         [string]$Title,
         [switch]$Passthru
     )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
 
      #[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')       | out-null #creating Windows-based applications
     [System.Reflection.Assembly]::LoadWithPartialName('System.Windows')             | out-null #Encapsulates a Windows Presentation Foundation application.
@@ -517,13 +534,13 @@ Function Invoke-PSDWizard{
     }
     catch{
         $ErrorMessage = $_.Exception.Message
-        Write-PSDLog -Message "$ErrorMessage" -LogLevel 3
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $ErrorMessage" -LogLevel 3
         Throw $ErrorMessage
     }
 
     # Store objects in PowerShell variables
     $XamlContent.SelectNodes("//*[@Name]") | % {
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating variable: $($_.Name)"
+        if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Creating wizard variable: {0}" -f $_.Name)}
         Set-Variable -Name ($_.Name) -Value $script:Wizard.FindName($_.Name) -Scope Global
     }
     #add title to window
@@ -533,6 +550,20 @@ Function Invoke-PSDWizard{
     $_wizBack.Visibility = 'hidden'
     #endregion
 
+    #prepoulate locale (reduce UI lock up)
+    #$LocaleList = Get-LocaleInfo
+    #region For Task Sequence Tab objects
+    # ---------------------------------------------
+    #update ID to what in customsettings.ini
+    $TS_TaskSequenceID.Text = Get-TSItem TaskSequenceID -ValueOnly
+    # start by disabling search
+    $_tsTabSearchEnter.IsEnabled = $False
+    $_tsTabSearchClear.IsEnabled = $False
+    Add-PSDWizardTree -SourcePath "DeploymentShare:\Task Sequences" -TreeObject $_tsTabTree -Identifier 'ID'
+    #get all available task seqeunces
+    $Global:TaskSequencesList = Get-PSDChildItem -path "DeploymentShare:\Task Sequences" -Recurse -Passthru
+    
+    #endregion
     #region For Task Sequence Tab objects
     # ---------------------------------------------
 
@@ -550,9 +581,70 @@ Function Invoke-PSDWizard{
     }
     #endregion
 
+    #region For Device tab objects
+    # ---------------------------------------------
+    #hide device details is specified
+
+    #OSDComputerName overwrites ComputerName
+    If($null -ne $TS_ComputerName.Text){
+        $TS_OSDComputerName.Text = (Set-ComputerName $TS_ComputerName.Text)
+    }
+
+    #if skipcomputername is YES, hide input unless value is invalid
+    If( ((Get-TSItem SkipComputerName -ValueOnly).ToUpper() -eq 'YES') -and ($results -ne $False)){
+        Get-FormVariable -Name "_grdDeviceDetails" -Wildcard | Set-UIFieldElement -Visible:$False
+    }
+
+    $NetworkSelectionAvailable = $True
+    #if the check comes back false; show name
+    If((Get-TSItem SkipDomainMembership -ValueOnly).ToUpper() -eq 'YES'){
+        $NetworkSelectionAvailable = $false
+        Get-FormVariable -Name "_grdNetworkDetails" -Wildcard | Set-UIFieldElement -Visible:$False
+    }
+
+    #TODO: Need PSDDomainJoin.ps1 to enable feature
+    If('PSDDomainJoin.ps1' -notin (Get-PSDContent -Content "Scripts" -Passthru)){
+        $NetworkSelectionAvailable = $false
+        Get-FormVariable -Name "JoinDomain" -Wildcard | Set-UIFieldElement -Visible:$False
+    }
+    #endregion
+
+    #region For Locale Tab objects
+    # ---------------------------------------------
+    #The display name is different than the actual variable value. (eg. English (United States) --> en-US)
+    # first get the current value and convert it to a format the list will compare
+    # second populate full list, and preselect the current value
+    #$LocaleProperties = @('UILanguage','SystemLocale','UserLocale','TimeZoneName')
+
+    If($TS_UILanguage)
+    {
+        $CSUILanguage = ConvertFrom-TSVar -HashTable $UILanguageTable -TSVariable 'UILanguage' -Passthru
+        Add-PSDWizardComboList -List $UILanguageTable.Keys -ListObject $_locTabLanguage -PreSelect $CSUILanguage
+    }
+
+    If($TS_SystemLocale)
+    {
+        $CSSystemLocale = ConvertFrom-TSVar -HashTable $SystemLocaleTable -TSVariable 'SystemLocale' -Passthru
+        Add-PSDWizardComboList -List $SystemLocaleTable.Keys -ListObject $_locTabSystemLocale -PreSelect $CSSystemLocale
+    }
+
+    If($TS_KeyboardLocale)
+    {
+        $KeyboardList = Get-KeyboardLayouts
+        $KeyboardLocale = ConvertFrom-TSVar -InputObject $KeyboardList -TSVariable 'KeyboardLocale' -Property 'KeyboardLayout' -Passthru
+        Add-PSDWizardComboList -InputObject $KeyboardList -ListObject $_locTabKeyboardLocale -Identifier 'Name' -PreSelect $KeyboardLocale.Name
+    }
+
+    If($TS_TimeZoneName)
+    {
+        $CSTimeZoneName = ConvertFrom-TSVar -HashTable $TimeZoneNameTable -TSVariable 'TimeZoneName' -Passthru
+        Add-PSDWizardComboList -List $TimeZoneNameTable.Keys -ListObject $_locTabTimeZoneName -PreSelect $CSTimeZoneName
+    }
+    #>
+    #endregion
+
     #region For Application Tab objects
     # ---------------------------------------------
-    #Add Applications named profiles
     If($_appTabBundles)
     {
         Add-PSDWizardProfiles -SourcePath "DeploymentShare:\Selection Profiles" -ListObject $_appTabBundles
@@ -573,104 +665,40 @@ Function Invoke-PSDWizard{
         Add-PSDWizardTree -SourcePath "DeploymentShare:\Applications" -TreeObject $_appTabTree -Identifier "Name" -Exclude "Bundles"
     }
     #endregion
-
-    #region For Device tab objects
-    # ---------------------------------------------
-    #hide device details is specified
-    If( (Get-TSItem SkipComputerName -ValueOnly) -eq 'YES')
-    {
-        $_grdDeviceDetails.Visibility = 'Hidden'
-    }
-    Else{
-        #OSDComputerName overwrites ComputerName
-        If($null -ne $TS_ComputerName.Text){
-            $TS_OSDComputerName.Text = (Set-ComputerName $TS_ComputerName.Text)
-        }
-    }
-
-    #hide network details is specified
-    If( (Get-TSItem SkipDomainMembership -ValueOnly) -eq 'YES')
-    {
-        $_grdNetworkDetails.Visibility = 'Hidden'
-    }
-    #endregion
-
-    #region For Locale Tab objects
-    # ---------------------------------------------
-    #The display name is different than the actual variable value. (eg. English (United States) --> en-US)
-    # first get the current value and convert it to a format the list will compare
-    # second populate full list, and preselect the current value
-    $LocaleList = Get-LocaleInfo
-    If($TS_UILanguage)
-    {
-        #$TS_UILanguage.Text = Get-TSItem UILanguage -ValueOnly
-        #$UILanguage = $LocaleList | Where {$_.Name -eq (Get-TSItem UILanguage -ValueOnly)}
-        #TODO: $UILanguage = ConvertFrom-TSLocale -LocaleType UILanguage -TSVariable 'SystemLocale' -Passthru
-        $UILanguage = ConvertFrom-TSVar -InputObject $LocaleList -TSVariable 'UILanguage' -Property 'Name' -Passthru
-        #populate list with object property of Displayname
-        Add-PSDWizardComboList -InputObject $LocaleList -ListObject $_locTabLanguage -Identifier 'DisplayName' -PreSelect $UILanguage.DisplayName
-    }
-
-    If($TS_SystemLocale)
-    {
-        #$TS_SystemLocale.Text = Get-TSItem SystemLocale -ValueOnly
-        $TS_UserLocale.Text = Get-TSItem UserLocale -ValueOnly
-        $SystemLocale = ConvertFrom-TSVar -InputObject $LocaleList -TSVariable 'SystemLocale' -Property 'Name' -Passthru
-        #$SystemLocale = ConvertFrom-TSLocale -LocaleType SystemLocale -TSVariable 'SystemLocale' -Passthru
-        Add-PSDWizardComboList -InputObject $LocaleList -ListObject $_locTabSystemLocale -Identifier 'DisplayName' -PreSelect $SystemLocale.DisplayName
-    }
-
-    If($TS_KeyboardLocale)
-    {
-        $KeyboardList = Get-KeyboardLayouts
-        #$TS_KeyboardLocale.Text = Get-TSItem KeyboardLocale -ValueOnly
-        $KeyboardLocale = ConvertFrom-TSVar -InputObject $KeyboardList -TSVariable 'KeyboardLocale' -Property 'KeyboardLayout' -Passthru
-        #$KeyboardLocale = ConvertFrom-TSLocale -LocaleType KeyboardLocale -TSVariable 'KeyboardLocale' -Passthru
-        Add-PSDWizardComboList -InputObject $KeyboardList -ListObject $_locTabKeyboardLocale -Identifier 'Name' -PreSelect $KeyboardLocale.Name
-    }
-
-    If($TS_TimeZoneName)
-    {
-        #$TS_TimeZoneName.Text = Get-TSItem TimeZoneName -ValueOnly
-        #$TS_TimeZone.Text = Get-TSItem TimeZone -ValueOnly
-        $TimeZoneName = ConvertFrom-TSLocale -LocaleType TimeZoneName -TSVariable 'TimeZoneName' -Passthru
-        Add-PSDWizardComboList -ScriptBlock {Get-TimeZone -ListAvailable} -ListObject $_locTabTimeZoneName -Identifier 'DisplayName' -PreSelect $TimeZoneName.DisplayName
-    }
-    #endregion
-
-
     #====================================
     # EVENTS HANDLERS
     #====================================
     #Update list when changed
     $_wizTabControl.Add_SelectionChanged({
-        Switch($_wizTabControl.SelectedItem.Header){
+        Switch($_wizTabControl.SelectedItem.Header)
+        {
             'Deployment Readiness'   {
 
-            }
+                                    }
 
-            'Task Sequence'  {  #check if preselect tasksequence is within list
+            'Task Sequence'  {
+                                #check if preselect tasksequence is within list
                                 If($TS_TaskSequenceID.Text -in $Global:TaskSequencesList.ID){
-                                    $_wizNext.IsEnabled = $True
+                                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$True
                                 }Else{
-                                    $_wizNext.IsEnabled = $False
+                                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$False
                                 }
             }
 
             'Device Details' {
-                               $TS_OSDComputerName.Text = (Set-ComputerName $TS_OSDComputerName.Text)
-                               $results = Confirm-ComputerName -ComputerNameObject $TS_OSDComputerName `
+                                $TS_OSDComputerName.Text = (Set-ComputerName $TS_OSDComputerName.Text)
+                                $results = Confirm-ComputerName -ComputerNameObject $TS_OSDComputerName `
                                                                         -OutputObject $_detTabValidation -Passthru
-                               $_wizNext.IsEnabled = $results
-                               #if the check comes back false; show name
-                               If($results -eq $False){
-                                    $_grdDeviceDetails.Visibility = 'Visible'
-                                    #hide network details is specified
-                                    If( $null -ne (Get-TSItem JoinDomain -ValueOnly)){$_JoinDomainRadio.IsChecked = $true}
-                               }
+                                $_wizNext.IsEnabled = $results
+
+                                #disable Next if neither radio is select....however if options are not available, don't disable
+                                If( ($_JoinWorkgroupRadio.IsChecked -eq $False) -and ($_JoinDomainRadio.IsChecked -eq $False) -and $NetworkSelectionAvailable){
+                                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$False
+                                }
             }
 
-            'Administrator Credentials' {   If( -Not[string]::IsNullOrEmpty($TS_AdminPassword.Password)){
+            'Administrator Credentials' {
+                                            If( -Not[string]::IsNullOrEmpty($TS_AdminPassword.Password)){
                                                 $_ConfirmAdminPassword.Password = $TS_AdminPassword.Password
                                             }
                                             $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_AdminPassword `
@@ -679,6 +707,7 @@ Function Invoke-PSDWizard{
             }
 
             'Locale and Time' {}
+
             'Applications' {}
         }
     })
@@ -794,12 +823,13 @@ Function Invoke-PSDWizard{
     )
 
 
-    #Domain / workgroup details
+    #Disables other option when either Domain or workgroup selected
     [System.Windows.RoutedEventHandler]$Script:CheckedEventHandler = {
         If($_.source.name -eq '_JoinDomainRadio')
         {
-            $_grdJoinDomain.IsEnabled = $True
-            $_grdJoinWorkgroup.IsEnabled = $False
+            Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$True
+            Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$False
+            Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$True
 
             if([string]::IsNullOrEmpty($TS_DomainAdminPassword.Password)){
                 #$_DomainAdminConfirmPassword.IsEnabled = $True
@@ -811,46 +841,32 @@ Function Invoke-PSDWizard{
 
         If($_.source.name -eq '_JoinWorkgroupRadio')
         {
-            $_grdJoinDomain.IsEnabled = $False
-            $_grdJoinWorkgroup.IsEnabled = $True
+            Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$False
+            Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$True
+            Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$True
         }
     }
     $_detTabLayout.AddHandler([System.Windows.Controls.RadioButton]::CheckedEvent, $CheckedEventHandler)
-
-    <#
-    $_JoinDomainRadio.AddHandler([Windows.Controls.RadioButton]::CheckedEvent, [Windows.RoutedEventHandler]{
-        $_JoinDomainRadio.IsEnabled = $True
-        $TS_JoinWorkgroup.IsEnabled = $False
-        })
-
-    $_JoinDomainRadio.AddHandler([Windows.Controls.RadioButton]::UncheckedEvent, [Windows.RoutedEventHandler]{
-        $_JoinDomainRadio.IsEnabled = $False
-        $TS_JoinWorkgroup.IsEnabled = $True
-        })
-    #>
     #endregion
 
     #region For Locale Tab event handlers
     # -----------------------------------------
     #Change OSD variables based on selection (format to OSD format)
     $_locTabLanguage.Add_SelectionChanged({
-        #$TS_UILanguage.Text = ConvertTo-TSLocale -LocaleType UILanguage -DisplayProperty 'DisplayName' -Value $_locTabLanguage.SelectedItem
-        $TS_UILanguage.Text = ($LocaleList | Where {$_.DisplayName -eq $_locTabLanguage.SelectedItem}).Name
+        $TS_UILanguage.Text = ConvertTo-TSVar -HashTable $UILanguageTable -InputValue $_locTabLanguage.SelectedItem
     })
 
     $_locTabSystemLocale.Add_SelectionChanged({
-        #$TS_SystemLocale.Text = ConvertTo-TSLocale -LocaleType SystemLocale -DisplayProperty 'DisplayName' -Value $_locTabSystemLocale.SelectedItem
-        $TS_SystemLocale.Text = ($LocaleList | Where {$_.DisplayName -eq $_locTabLanguage.SelectedItem}).Name
+        $TS_SystemLocale.Text = ConvertTo-TSVar -HashTable $SystemLocaleTable -InputValue $_locTabSystemLocale.SelectedItem
         $TS_UserLocale.Text = $TS_SystemLocale.Text
     })
 
     $_locTabKeyboardLocale.Add_SelectionChanged({
-        #$TS_KeyboardLocale.Text = ConvertTo-TSLocale -LocaleType KeyboardLocale -DisplayProperty 'ID' -Value $_locTabKeyboardLocale.SelectedItem
-        $TS_KeyboardLocale.Text = ($KeyboardList | Where {$_.Name -eq $_locTabKeyboardLocale.SelectedItem}).KeyboardLayout
+        $TS_KeyboardLocale.Text = (Get-KeyboardLayouts | Where {$_.Name -eq $_locTabKeyboardLocale.SelectedItem}).KeyboardLayout
     })
 
     $_locTabTimeZoneName.Add_SelectionChanged({
-        $TS_TimeZoneName.Text = ConvertTo-TSLocale -LocaleType TimeZoneName -DisplayProperty 'DisplayName' -Value $_locTabTimeZoneName.SelectedItem
+        $TS_TimeZoneName.Text = ConvertTo-TSVar -HashTable $TimeZoneNameTable -InputValue $_locTabTimeZoneName.SelectedItem
         $TS_TimeZone.Text = Get-TimeZoneIndex -TimeZone ($_locTabTimeZoneName.SelectedItem)
     })
     #endregion
@@ -934,12 +950,16 @@ Function Invoke-PSDWizard{
             $_wizBack.Visibility = 'Visible'
         }
 
-        #change the button text to display begin on the last page
+        #change the button text to display begin on the last tab
         If($_wizTabControl.SelectedIndex -eq ($Tabcount -1)){
             $_wizNext.Content = 'Begin'
         }Else{
             $_wizNext.Content = 'Next'
         }
+
+        #Enable tab click functionality as wizard progresses
+        Get-UIFieldElement -Name ("_wizTab{0:d2}" -f $_wizTabControl.SelectedIndex) | Set-UIFieldElement -Enable:$true
+
     })
     #endregion
     #====================================
@@ -1024,6 +1044,7 @@ Function Invoke-PSDWizard{
     # ------------------------------
     $_wizNext.Add_Click({
         $Tabcount = $_wizTabControl.items.count
+        #if wizard is at the last tab
         If($_wizTabControl.SelectedIndex -eq ($Tabcount -1))
         {
             #need to set a result back
@@ -1038,6 +1059,8 @@ Function Invoke-PSDWizard{
 
     $_wizBack.Add_Click({
         Switch-TabItem -TabControlObject $_wizTabControl -increment -1
+        #if next is diabled; re-enable it
+        $_wizNext.IsEnabled = $true
     })
 
     #close wizard with cancel button
@@ -1070,6 +1093,9 @@ Function Show-PSDWizard{
         [switch]$Passthru
     )
 
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
     If(Test-Path -Path $ResourcePath -PathType Container)
     {
         $WorkingPath = $ResourcePath -replace '\\$',''
@@ -1097,11 +1123,11 @@ Function Show-PSDWizard{
     }
 
     #Build the XAML file based on definitions
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running [Format-PSDWizard -Path $WorkingPath -DefinitionFile $XmlDefinitionFile]"
+    Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Format-PSDWizard -Path {0} -DefinitionFile {1}]" -f $WorkingPath,$XmlDefinitionFile)
     $script:Xaml = Format-PSDWizard -Path $WorkingPath -DefinitionFile $XmlDefinitionFile
 
     #load wizard
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running [Invoke-PSDWizard -XamlContent `$script:Xaml -Title `"$Title`" -Passthru]"
+    Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Invoke-PSDWizard -XamlContent `$script:Xaml -Title `"{0}`" -Passthru]" -f $Title)
     $script:Wizard = Invoke-PSDWizard -XamlContent $script:Xaml -Title "$Title" -Passthru
 
     #Get Defintions prefix
@@ -1109,15 +1135,17 @@ Function Show-PSDWizard{
     [Xml.XmlDocument]$DefinitionXmlDoc = Get-Content $DefinitionsXml
     [PSCustomObject]$GlobalElement = Get-PSDWizardDefinitions -Xml $DefinitionXmlDoc -Section Global
 
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running [Set-PSDWizardDefault -XMLContent `$script:Xaml -VariablePrefix $($GlobalElement.TSVariableFieldPrefix) -Form `$script:Wizard]"
+    Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Set-PSDWizardDefault -XMLContent `$script:Xaml -VariablePrefix {0} -Form `$script:Wizard]" -f $GlobalElement.TSVariableFieldPrefix)
     Set-PSDWizardDefault -XMLContent $script:Xaml -VariablePrefix $GlobalElement.TSVariableFieldPrefix -Form $script:Wizard
 
-    Write-PSDLog ('Launching PSD Wizard using definition file: {0}' -f $XmlDefinitionFile)
+    Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Launching PSD Wizard using definition file: {0}" -f $XmlDefinitionFile)
 
-    # Make PowerShell Disappear
-    $windowcode = '[DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);'
-    $asyncwindow = Add-Type -MemberDefinition $windowcode -name Win32ShowWindowAsync -namespace Win32Functions -PassThru
-    $null = $asyncwindow::ShowWindowAsync((Get-Process -PID $pid).MainWindowHandle, 0)
+    if($PSDDeBug -eq $false){
+        # Make PowerShell Disappear
+        $windowcode = '[DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);'
+        $asyncwindow = Add-Type -MemberDefinition $windowcode -name Win32ShowWindowAsync -namespace Win32Functions -PassThru
+        $null = $asyncwindow::ShowWindowAsync((Get-Process -PID $pid).MainWindowHandle, 0)
+    }
 
     If($AsAsyncJob){
         $script:Wizard.Add_Closing({
@@ -1156,7 +1184,8 @@ Function Show-PSDWizard{
         # This helps with responsiveness, especially when exiting.
         $appContext = New-Object System.Windows.Forms.ApplicationContext
         [void][System.Windows.Forms.Application]::Run($appContext)
-    }Else{
+    }
+    Else{
         #make sure window is on top
         $script:Wizard.Topmost = $true
         #disable x button
@@ -1165,9 +1194,10 @@ Function Show-PSDWizard{
         $script:Wizard.ShowDialog() | Out-Null
     }
 
+    #NOTE: Function will not continue until wizard is closed
 
     #Save all entered results back
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running [Export-PSDWizardResult -XMLContent `$script:Xaml -VariablePrefix $($GlobalElement.TSVariableFieldPrefix) -Form `$script:Wizard]"
+    Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Export-PSDWizardDefault -XMLContent `$script:Xaml -VariablePrefix {0} -Form `$script:Wizard]" -f $GlobalElement.TSVariableFieldPrefix)
     Export-PSDWizardResult -XMLContent $script:Xaml -VariablePrefix $GlobalElement.TSVariableFieldPrefix -Form $script:Wizard
 
     If($Passthru){

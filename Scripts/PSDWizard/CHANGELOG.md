@@ -1,5 +1,16 @@
 # Change log for PSDWizard
 
+## 2.1.2b - Jan 12, 2021
+
+- Added hashtables for locale info; provided quicker UI load.
+- Added Get/Set-UIElements functions to debug issues with UI.
+- Fixed UI issues with invalid TS seledction unable to continue if navigate back
+- Added PSDNextPhase.ps1 and New PSD Deployment Templates. 
+## 2.1.1b - Jan 11, 2021
+
+- Cleaned up logging and added script source; moved all variables in messages to format tag
+- Fixed computername detection; added Autopilot like variables (eg. %RAND:4%, %4:SERIAL% and %SERIAL:4%)
+
 ## 2.1.0b - Dec 27, 2020
 
 - Fixed Locale check and update; using function convert TS to Object and back

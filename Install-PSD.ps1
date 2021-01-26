@@ -267,6 +267,13 @@ foreach($item in $Result){
     Move-Item -Path $item.FullName -Destination "$psDeploymentFolder\Backup\Scripts\$($item.Name)" -Force:$force
 }
 
+# Cleanup old images from DeploymentShare
+$Result = Get-ChildItem -Path "$psDeploymentFolder\Scripts" | Where {$_.Extension -match 'png|gif|jpg|jpeg|bmp'}
+foreach($item in $Result){
+    Write-PSDInstallLog -Message "Moving $($item.FullName)"
+    Move-Item -Path $item.FullName -Destination "$psDeploymentFolder\Backup\Scripts\$($item.Name)" -Force:$force
+}
+
 # Copy the scripts
 Copy-PSDFolder "$PSScriptRoot\Scripts\*.ps1" "$psDeploymentFolder\Scripts"
 Get-ChildItem -Path "$psDeploymentFolder\Scripts\*.ps1" | Unblock-File 
@@ -281,9 +288,9 @@ Get-ChildItem -Path "$psDeploymentFolder\Templates\*" | Unblock-File
 Try{
     New-Item "$psDeploymentFolder\Scripts\PSDWizard" -ItemType directory -Force:$force -ErrorAction Stop | Out-Null
     Copy-PSDFolder "$PSScriptRoot\Scripts\PSDWizard" "$psDeploymentFolder\Scripts\PSDWizard"
-    Move-Item "$psDeploymentFolder\Scripts\PSDWizard.Initialize.ps1" "$psDeploymentFolder\Scripts\PSDWizard" -Force:$force
+    Move-Item "$PSScriptRoot\Scripts\PSDWizard.Initialize.ps1" "$psDeploymentFolder\Scripts\PSDWizard" -Force:$force
     Copy-Item "$PSScriptRoot\Scripts\ListOfTimeZoneIndex.xml" "$psDeploymentFolder\scripts" -Force:$force
-    Move-Item "$psDeploymentFolder\Scripts\PSDWizard_Definitions_en-US.xml" "$psDeploymentFolder\Scripts\PSDWizard" -ErrorAction SilentlyContinue -Force:$force
+    Move-Item "$PSScriptRoot\Scripts\PSDWizard_Definitions_en-US.xml" "$psDeploymentFolder\Scripts\PSDWizard" -ErrorAction SilentlyContinue -Force:$force
 }Catch{
     Write-PSDInstallLog -Message ("{0}. Use -Force to force directory" -f $_.Exception.Message) -LogLevel 3
     Break
@@ -358,6 +365,9 @@ Foreach ($FolderToCreate in $FoldersToCreate){
     Write-PSDInstallLog -Message "Creating $FolderToCreate folder in $psDeploymentFolder\PSDResources"
     $Result = New-Item -ItemType directory -Path $psDeploymentFolder\PSDResources\$FolderToCreate -Force:$force
 }
+
+#copy noprompt ISO to CustomScripts; Ran during boot build process in Deployment Workbench (called by PSDUpdateExit.ps1)
+Copy-Item -Path $PSScriptRoot\Tools\Create-NoPromptISO.ps1 -Destination $psDeploymentFolder\PSDResources\CustomScripts\Create-NoPromptISO.ps1 -Force:$force
 
 # Copy PSDBackground to Branding folder
 Copy-Item -Path $PSScriptRoot\Branding\PSDBackground.bmp -Destination $psDeploymentFolder\PSDResources\Branding\PSDBackground.bmp -Force:$force

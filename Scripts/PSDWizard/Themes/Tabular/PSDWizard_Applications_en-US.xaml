@@ -15,8 +15,9 @@
     <Button x:Name="_appTabSearchClear" Content="Clear" Height="23" Width="63" HorizontalAlignment="left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="414,0,0,404" />
     <Button x:Name="_appTabSearchEnter" Content="Search" Height="23" Width="63" HorizontalAlignment="left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="346,0,0,404" />
 
+    <!--
     <Label Content="Application Bundles:" FontSize="14" HorizontalAlignment="Left" Margin="10,126,0,0" VerticalAlignment="Top"/>
-    <ComboBox x:Name="_appTabBundles" HorizontalAlignment="Left" Margin="151,132,0,0" VerticalAlignment="Top" Width="326"/>
+    <ComboBox x:Name="_appTabBundles" HorizontalAlignment="Left" Margin="151,132,0,0" VerticalAlignment="Top" Width="326"/>-->
 
     <Button x:Name="_appTabSelectAll" Content="Select All" Height="20" Width="113" HorizontalAlignment="left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="10,0,0,335" />
     <Button x:Name="_appTabSelectNone" Content="Select None" Height="20" Width="113" HorizontalAlignment="left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="128,0,0,335" />

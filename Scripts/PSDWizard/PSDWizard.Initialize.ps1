@@ -65,12 +65,12 @@ Function Get-TSItem{
 
     If($PSBoundParameters.ContainsKey('WildCard'))
     {
-        if($PSDDeBug -eq $true){Write-PSDLog -Message ("Searching OSD value for [{0}]" -f $Name) -LogLevel 1 -Source ${CmdletName}}
+        if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Searching OSD value for [{0}]" -f $Name) -LogLevel 1}
         #$Value = (Get-ChildItem -Path TSEnv: | Where {$_.Name -like "*$Name*"}) | Select @param
         $Results = Get-Item TSEnv:*$Name* | Select @param
     }
     Else{
-        if($PSDDeBug -eq $true){Write-PSDLog -Message ("Grabbing OSD value for for [{0}]" -f $Name) -LogLevel 1 -Source ${CmdletName}}
+        if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Grabbing OSD value for for [{0}]" -f $Name) -LogLevel 1}
         #$Value = (Get-ChildItem -Path TSEnv: | Where {$_.Name -eq $Name}) | Select @param
         $Results = Get-Item TSEnv:$Name | Select @param
     }
@@ -103,11 +103,11 @@ Function Set-TSItem{
 
     If($PSBoundParameters.ContainsKey('WildCard')){
         #$Value = (Get-ChildItem -Path TSEnv: | Where {$_.Name -like "*$Name*"}) | Select @param
-        if($PSDDeBug -eq $true){Write-PSDLog -Message ("Setting OSD value for names that match [{0}] to [{1}]" -f $Name,$Value) -LogLevel 1 -Source ${CmdletName}}
+        if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Setting OSD value for names that match [{0}] to [{1}]" -f $Name,$Value) -LogLevel 1}
         $Results = Get-TSItem $Name -WildCard | %{Set-Item -Path TSEnv:$_.Name @param}
     }Else{
         #$Value = (Get-ChildItem -Path TSEnv: | Where {$_.Name -eq $Name}) | Select @param
-        if($PSDDeBug -eq $true){Write-PSDLog -Message ("Setting OSD value for name [{0}] to [{1}]" -f $Name,$Value) -LogLevel 1 -Source ${CmdletName}}
+        if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Setting OSD value for name [{0}] to [{1}]" -f $Name,$Value) -LogLevel 1}
         $Results = Set-Item -Path TSEnv:$Name @param
     }
     return $Results
@@ -147,7 +147,7 @@ function Switch-TabItem {
 
         $message = ("Selected tab name: {0}" -f $newtab.Header)
     }
-    if($PSDDeBug -eq $true){Write-PSDLog -Message $message -LogLevel 1 -Source ${CmdletName}}
+    if($PSDDeBug -eq $true){Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $message" -LogLevel 1}
 }
 #endregion
 
@@ -168,10 +168,10 @@ Function Get-UIFieldElement {
             If($null -ne (Get-FormVariable -Name $item)){
                 $FieldObject = (Get-FormVariable -Name $item)
                 $Objects += $FieldObject
-                If($PSDDeBug -eq $true){Write-PSDLog ("Found field object [{0}]" -f $FieldObject.Name) -Source ${CmdletName}}
+                If($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Found field object [{0}]" -f $FieldObject.Name)}
             }
             Else{
-                If($PSDDeBug -eq $true){Write-PSDLog ("Field object [{0}] does not exist" -f $FieldObject.Name) -Source ${CmdletName}}
+                If($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Field object [{0}] does not exist" -f $FieldObject.Name)}
             }
         }
 
@@ -242,11 +242,11 @@ Function Set-UIFieldElement {
                         If( $item.$Property -ne $value )
                         {
                             $item.$Property = $value
-                            If($PSDDeBug -eq $true){Write-PSDLog ("Object [{0}] {1} property is changed to [{2}]" -f $item.Name,$Property,$Value) -Source ${CmdletName}}
+                            If($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Object [{0}] {1} property is changed to [{2}]" -f $item.Name,$Property,$Value)}
                         }
                         Else
                         {
-                            If($PSDDeBug -eq $true){Write-PSDLog ("Object [{0}] {1} property already set to [{2}]" -f $item.Name,$Property,$Value) -Source ${CmdletName}}
+                            If($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Object [{0}] {1} property already set to [{2}]" -f $item.Name,$Property,$Value)}
                         }
                     }
                 }#endloop each parameter
@@ -275,67 +275,10 @@ Function Get-LocaleInfo{
     $ErrorActionPreference=$olderr
 
     $Results = ($Cultures | Select -Unique | Sort DisplayName)
-    if($PSDDeBug -eq $true){Write-PSDLog -Message ("Populating Language list; [{0}] items found" -f $Results.count) -LogLevel 1 -Source ${CmdletName}}
+    if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Populating Language list; [{0}] items found" -f $Results.count) -LogLevel 1}
     return $Results
 }
 #endregion
-
-#region FUNCTION: Retrieve cultures by property
-Function Find-LocaleDetails{
-    param(
-        [Parameter(Mandatory = $false, Position=0,ParameterSetName="lcid")]
-        [int]$lcid,
-        [Parameter(Mandatory = $false, Position=0,ParameterSetName="Name")]
-        [string]$Name,
-        [Parameter(Mandatory = $false, Position=0,ParameterSetName="Display")]
-        [string]$DisplayName
-    )
-
-    Begin{
-        ## Get the name of this function
-        [string]${CmdletName} = $MyInvocation.MyCommand
-
-        $Cultures = @()
-    }
-    Process{
-        #loop through 20500 numbers to find all cultures
-        If($PSCmdlet.ParameterSetName -eq "lcid"){
-            Try{$Cultures = [System.Globalization.Cultureinfo]::GetCultureInfo($lcid)}Catch{$Cultures = $null}Finally{$Results = $Cultures}
-        }
-        Else{
-            If ($PSCmdlet.ParameterSetName -eq "Name") {
-                $filterby = "Name"
-                $Value = $Name
-            }
-
-            If ($PSCmdlet.ParameterSetName -eq "Display") {
-                $filterby = "DisplayName"
-                $Value = $DisplayName
-            }
-
-            #loop through 20500 numbers to find all cultures
-            #stop when it reaches the filter
-            $lcid=0
-            Do {
-                $lcid++
-                $olderr=$ErrorActionPreference
-                $ErrorActionPreference='SilentlyContinue'
-                $Culture = [System.Globalization.Cultureinfo]::GetCultureInfo($lcid)
-                If($Culture.$filterby -notin $Cultures.$filterby){$Cultures += $Culture}
-                $ErrorActionPreference=$olderr
-            } # End of 'Do'
-            Until ( ($lcid -eq 20500) -or ($Value -in $Cultures.$filterby) )
-
-            $Results = $Cultures | Where {$_.$filterby -eq $Value}
-        }
-    }
-    End{
-        if($PSDDeBug -eq $true){Write-PSDLog -Message ("Populating Language list by {0}; [{1}] items found" -f $PSCmdlet.ParameterSetName,$Results.count) -LogLevel 1 -Source ${CmdletName}}
-        return $Results
-    }
-}
-#endregion
-
 
 #region FUNCTION: Get index value of Timezone
 Function Get-TimeZoneIndex{
@@ -379,7 +322,7 @@ Function Get-TimeZoneIndex{
         $IndexValue = ('{0:d3}' -f [int]$TZI).ToString()
     }
 
-    if($PSDDeBug -eq $true){Write-PSDLog -Message ("Selected TimeZone index value: {0}" -f $IndexValue) -LogLevel 1 -Source ${CmdletName}}
+    if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Selected TimeZone index value: {0}" -f $IndexValue) -LogLevel 1}
     return $IndexValue
 }
 #endregion
@@ -393,80 +336,8 @@ Function Get-KeyboardLayouts{
                         @{Name = 'KeyboardLayout';expression={($_.PSChildName).Substring($_.PSChildName.Length - 4) + ':' + $_.PSChildName}} |
                         Sort Name
 
-    if($PSDDeBug -eq $true){Write-PSDLog -Message ("Populating Keyboard layouts; [{0}] items found" -f $Results.count) -LogLevel 1 -Source ${CmdletName}}
+    if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Populating Keyboard layouts; [{0}] items found" -f $Results.count) -LogLevel 1}
     return $Results
-}
-
-Function Get-KeyboardID{
-    <#
-    #Get-winUserLangaugeList does not work in PE
-    #Commands need to use in PE
-    #https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/wpeutil-command-line-options
-    #https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-language-pack-default-values
-    # Pulls from HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Keyboard Layouts
-    $Keyboard = wpeutil ListKeyboardLayouts $lcid
-    $Language = wpeutil SetMuiLanguage
-    $UserLocale = wpeutil SetUserLocale
-    #>
-    Param(
-        [int]$lcid = 1033
-    )
-
-    ## Get the name of this function
-    [string]${CmdletName} = $MyInvocation.MyCommand
-
-    $report = @()
-    $LocaleDetails = Get-LocaleInfo
-    #Names are not equal to locale values
-    #Parsing them is required. The current solution will see what matches
-    #TODO: better solution would be to split up names and compare names and get max matches.
-    #$NamesArray = (($Names[$i] -replace '\bUS\b','United States').split(' ').split('-') -replace '[()]','').trim()
-
-    #test if PE key exists
-    If(Test-Path -Path Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlset\Control\MiniNT){
-        $Keyboards = wpeutil ListKeyboardLayouts $lcid
-
-        $Names = @()
-        $IDs = @()
-        $data = ($keyboards -split "`r`n") | %{
-            If(-not[string]::IsNullOrEmpty($_) -and ($_ -ne 'The command completed successfully.')){
-                if($_ -like "Name:*"){
-                    $Names += $_ -replace '^Name:\s+',''
-                }
-                if($_ -like "ID:*"){
-                    $IDs += $_ -replace '^ID:\s+',''
-                }
-            }
-        }
-        #$Names
-        #$IDs
-        for ($i = 0; $i -lt $Names.Count; $i++)
-        {
-            $Name = $Names[$i]
-            $LocaleInfo = $LocaleDetails | Where {$_.DisplayName -like "*$Name*"}
-
-            $info = "" | Select Name,ID,LanguageTag,LCID
-            $info.Name = ($Name -replace '\bUS\b','United States')
-            $info.ID = $IDs[$i]
-            $info.LanguageTag = $LocaleInfo.Name
-            $info.LCID = $LocaleInfo.LCID
-            $report += $info
-        }
-    }
-    Else{
-        $LangInfo = Get-WinUserLanguageList
-        $LocaleInfo = $LocaleDetails | Where {$_.DisplayName -eq $LangInfo.LocalizedName}
-
-        $report += $Keyboards | Select-Object -Property @{Name = 'Name'; Expression = {$_.LocalizedName}},
-                                                    @{Name = 'ID'; Expression = {$_.InputMethodTips -replace '{','' -replace '}',''}},
-                                                    @{Name = 'LanguageTag'; Expression = {$_.LanguageTag}},
-                                                    @{Name = 'LCID'; Expression = {$LocaleInfo.LCID}}
-    }
-    #filter out any non unique ones
-    $Results = ($report | Select -Unique | Sort Name)
-
-    if($PSDDeBug -eq $true){Write-PSDLog -Message ("Populating Keyboard layout; [{0}] items found" -f $Results.count) -LogLevel 1 -Source ${CmdletName}}
-    Return $Results
 }
 
 #region FUNCTION: Converts a variable to an PS object
@@ -566,79 +437,6 @@ Function ConvertTo-TSVar{
 }
 #endregion
 
-#region FUNCTION: Convert Locale info from OSD value
-Function ConvertFrom-TSLocale{
-    Param(
-        [parameter(Mandatory=$true)]
-        [ValidateSet('UILanguage','KeyboardLocale','UserLocale','SystemLocale','TimeZoneName')]
-        [string]$LocaleType,
-        [parameter(Mandatory=$false)]
-        [string]$TSVariable,
-        [string]$DisplayProperty,
-        [switch]$Passthru
-    )
-
-    switch($LocaleType){
-        #'UILanguage' {$LocaleSet = Get-WinUserLanguageList;$OSDLocaleProperty='LanguageTag'}
-        #'UserLocale' {$LocaleSet = Get-WinUserLanguageList;$OSDLocaleProperty='LanguageTag'}
-        #'KeyboardLocale' {$LocaleSet = Get-WinUserLanguageList;$OSDLocaleProperty='InputMethodTips'}
-
-        'UILanguage' {$LocaleSet = Get-LocaleInfo;$OSDLocaleProperty='Name'}
-        'UserLocale' {$LocaleSet = Get-LocaleInfo;$OSDLocaleProperty='Name'}
-        'KeyboardLocale' {$LocaleSet = Get-KeyboardLayouts;$OSDLocaleProperty='KeyboardLayout'}
-        'SystemLocale' {$LocaleSet = Get-LocaleInfo;$OSDLocaleProperty='Name'}
-        'TimeZoneName' {$LocaleSet = Get-TimeZone -ListAvailable;$OSDLocaleProperty='StandardName'}
-    }
-    $Value = $null
-    #If property specified use that as the $SelectProperty, otherwise use $OSDLocaleProperty
-    If($DisplayProperty){$SelectProperty = $DisplayProperty}Else{$SelectProperty = $OSDLocaleProperty}
-
-    If($null -ne $TSVariable)
-    {
-        $TSValue = (Get-TSItem $TSVariable -ValueOnly)
-        If($Passthru){
-            $Value = $LocaleSet | Where {$_.$OSDLocaleProperty -eq $TSValue}
-        }Else{
-            $Value = ($LocaleSet | Where {$_.$OSDLocaleProperty -eq $TSValue}).$SelectProperty
-        }
-    }
-    return $Value
-}
-#endregion
-
-#region FUNCTION: Convert Locale value to a OSD format
-Function ConvertTo-TSLocale{
-    Param(
-        [parameter(Mandatory=$true)]
-        [ValidateSet('UILanguage','KeyboardLocale','UserLocale','SystemLocale','TimeZoneName')]
-        [string]$LocaleType,
-        [string]$DisplayProperty,
-        [string]$Value
-    )
-
-    switch($LocaleType){
-        #'UILanguage' {$LocaleSet = Get-WinUserLanguageList;$OSDLocaleProperty='LanguageTag'}
-        #'UserLocale' {$LocaleSet = Get-WinUserLanguageList;$OSDLocaleProperty='LanguageTag'}
-        #'KeyboardLocale' {$LocaleSet = Get-WinUserLanguageList;$OSDLocaleProperty='InputMethodTips'}
-
-        'UILanguage' {$LocaleSet = Get-LocaleInfo;$OSDLocaleProperty='Name'}
-        'UserLocale' {$LocaleSet = Get-LocaleInfo;$OSDLocaleProperty='Name'}
-        'KeyboardLocale' {$LocaleSet = Get-KeyboardLayouts;$OSDLocaleProperty='Name'}
-        'SystemLocale' {$LocaleSet = Get-LocaleInfo;$OSDLocaleProperty='Name'}
-        'TimeZoneName' {$LocaleSet = Get-TimeZone -ListAvailable;$OSDLocaleProperty='StandardName'}
-    }
-
-    If($null -ne $Value)
-    {
-        If($DisplayProperty){
-            $Value = ($LocaleSet | Where {$_.$DisplayProperty -eq $Value}).$OSDLocaleProperty
-        }Else{
-            $Value = ($LocaleSet | Where {$_.$OSDLocaleProperty -eq $Value}).$OSDLocaleProperty
-        }
-    }
-    return $Value
-}
-#endregion
 
 #region FUNCTION: Throw errors to Form's Output field
 Function Invoke-UIMessage {
@@ -945,7 +743,7 @@ Function Get-PSDChildItem{
 
     }
 
-    if($PSDDeBug -eq $true){Write-PSDLog -Message ("Populating content for PSD Drive: {0}" -f $Path) -Source ${CmdletName}}
+    if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Populating content for PSD Drive: {0}" -f $Path)}
     return $Content
 }
 #endregion
@@ -1221,7 +1019,7 @@ Function Add-PSDWizardTree{
             [System.Windows.Controls.TreeViewItem]$sender = $args[0]
             [System.Windows.RoutedEventArgs]$e = $args[1]
             $message = ("Selected: [" + $sender.Tag[2].ToString() + ": " + $sender.Tag[0].ToString() + "\" + $sender.Tag[1].ToString() +"]")
-            if($PSDDeBug -eq $true){Write-PSDLog -Message $message -Source ${CmdletName}}
+            if($PSDDeBug -eq $true){Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $message"}
         })
 
         <#
@@ -1310,7 +1108,7 @@ Function Expand-PSDWizardTree{
 		            [System.Windows.Controls.TreeViewItem]$sender = $args[0]
 		            [System.Windows.RoutedEventArgs]$e = $args[1]
 		                $message = ("Selected: [" + $sender.Tag[2].ToString() + ": " + $sender.Tag[0].ToString() + "\" + $sender.Tag[1].ToString() +"]")
-                        if($PSDDeBug -eq $true){Write-PSDLog -Message $message -Source ${CmdletName}}
+                        if($PSDDeBug -eq $true){Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $message"}
 	            })
 
                 <#
@@ -1380,7 +1178,7 @@ Function Search-PSDWizardTree{
             [System.Windows.Controls.TreeViewItem]$sender = $args[0]
             [System.Windows.RoutedEventArgs]$e = $args[1]
             $message = ("Selected: [" + $sender.Tag[2].ToString() + ": " + $sender.Tag[0].ToString() + "\" + $sender.Tag[1].ToString() +"]")
-            if($PSDDeBug -eq $true){Write-PSDLog -Message $message -Source ${CmdletName}}
+            if($PSDDeBug -eq $true){Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $message"}
         })
 
         <#
@@ -1437,7 +1235,7 @@ Function Get-SelectedApplications{
         }
     }
 
-    if($PSDDeBug -eq $true){Write-PSDLog -Message ("Preselected [(0)] applications" -f $SelectedGuids.count) -Source ${CmdletName}}
+    if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Preselected [(0)] applications" -f $SelectedGuids.count)}
     If($Passthru){
         return ($SelectedGuids -join ',')
     }
@@ -1486,7 +1284,7 @@ Function Set-SelectedApplications{
     }
 
     #Write-PSDLog -Message "Selected [$($InputObject.count)] Applications" -LogLevel 1
-    if($PSDDeBug -eq $true){Write-PSDLog -Message ("Set [(0)] applications to install" -f $SelectedGuids.count) -Source ${CmdletName}}
+    if($PSDDeBug -eq $true){Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Set [(0)] applications to install" -f $SelectedGuids.count)}
     If($Passthru){
         return ($SelectedGuids -join ',')
     }

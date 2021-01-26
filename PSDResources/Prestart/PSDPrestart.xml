@@ -1,6 +1,6 @@
 ﻿<Commands>
  <Command>
   <Executable>powershell.exe</Executable>
-  <Argument>-noprofile -windowstyle hidden -file X:\Deploy\Prestart\PSDSamplePrestart.ps1</Argument>
+  <Argument>-noprofile -file X:\Deploy\Prestart\PSDSamplePrestart.ps1</Argument>
  </Command>
 </Commands>

@@ -45,7 +45,7 @@
         <TextBox Name="TS_Model" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,4,0,5" Width="189" BorderBrush="Gray"/>
         <Label Content="Asset Tag:" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="80" HorizontalContentAlignment="Right"/>
         <TextBox x:Name="TS_AssetTag" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,4,0,5" Width="189" BorderBrush="Gray"/>
-        <Label Content="Serial Number:" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="80" HorizontalContentAlignment="Right"/>
+        <Label Content="Serial Number:" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="32" Width="121" HorizontalContentAlignment="Right"/>
         <TextBox Name="TS_SerialNumber" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,4,0,5" Width="189" BorderBrush="Gray"/>
         <Label Content="Mac Address:" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="104" HorizontalContentAlignment="Right"/>
         <TextBox Name="TS_MacAddress001" Grid.Column="1" Grid.Row="4" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,4" Width="189" BorderBrush="Gray"/>
