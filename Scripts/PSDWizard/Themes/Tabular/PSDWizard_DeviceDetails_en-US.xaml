@@ -21,16 +21,16 @@
         </Grid.RowDefinitions>
         <Label Content="Device Name:" Grid.Column="0" FontSize="14" HorizontalAlignment="Right" VerticalAlignment="Center" Width="114" Height="30" Margin="0,4"/>
         <TextBox x:Name="TS_OSDComputerName" Grid.Column="1" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,4,49,4" Height="30"/>
-        <Canvas x:Name="_detTabValidation" Grid.ColumnSpan="2" Grid.Row="1" Margin="10,0" Visibility="Hidden">
+        <Canvas x:Name="_detTabValidation" Grid.ColumnSpan="2" Grid.Row="1" Margin="10,0">
             <TextBox x:Name="_detTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" Canvas.Top="10" />
-            <Rectangle x:Name="_detTabValidation_Alert" Width="30" Height="30" Fill="Red" HorizontalAlignment="Right" Canvas.Left="415" Canvas.Top="4" Visibility="Hidden" >
+            <Rectangle x:Name="_detTabValidation_Alert" Width="30" Height="30" Fill="Red" HorizontalAlignment="Right" Canvas.Left="415" Canvas.Top="4" Visibility="Hidden">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
                 </Rectangle.OpacityMask>
             </Rectangle>
             <Rectangle x:Name="_detTabValidation_Check" Width="30" Height="30" Fill="Green" HorizontalAlignment="Right" Canvas.Left="415" Canvas.Top="4" Visibility="Hidden">
                 <Rectangle.OpacityMask>
-                    <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
+                    <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}" />
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Canvas>
@@ -46,13 +46,13 @@
             <RowDefinition Height="27*"></RowDefinition>
             <RowDefinition Height="196*"></RowDefinition>
             <RowDefinition Height="28*"></RowDefinition>
-            <RowDefinition Height="50*"></RowDefinition>
-            <RowDefinition Height="33*"></RowDefinition>
+            <RowDefinition Height="36*"></RowDefinition>
+            <RowDefinition Height="47*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Label Content="Network Details" FontSize="22" HorizontalAlignment="Left" Grid.Row="0" VerticalAlignment="Top" Height="37" Width="164"/>
-        <RadioButton x:Name="_JoinDomainRadio" GroupName="joinoption" Content="Join a domain" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Margin="0,0,40,0"/>
-        <Grid x:Name="_grdJoinDomain" Grid.ColumnSpan="2" Grid.Row="2">
+        <Label Content="Network Details" FontSize="22" HorizontalAlignment="Left" Grid.Row="0" VerticalAlignment="Top" Height="37" Width="164" Grid.RowSpan="2"/>
+        <RadioButton x:Name="_JoinDomainRadio" GroupName="joinoption" Content="Join a domain" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Margin="20,6,60,6" Width="93"/>
+        <Grid x:Name="_grdJoinDomain" Grid.ColumnSpan="2" Grid.Row="2" Margin="0,0,-0.5,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto" MinWidth="175"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
@@ -74,14 +74,13 @@
             <Label Content="Password:" FontSize="14" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>
             <PasswordBox x:Name="TS_DomainAdminPassword" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center" Width="275" Margin="0,0,0,5"/>
             <Label Content="Confirm Password:" FontSize="14" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right"/>
-            <PasswordBox x:Name="_DomainAdminConfirmPassword" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" FontSize="14" 
-FontWeight="Bold" VerticalContentAlignment="Center" Width="275" Margin="0,0,0,5"/>
+            <PasswordBox x:Name="_DomainAdminConfirmPassword" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center" Width="275" Margin="0,0,0,5"/>
             <Label Content="Domain:" FontSize="14" Grid.Column="0" Grid.Row="5"  HorizontalAlignment="Right"/>
             <TextBox x:Name="TS_DomainAdminDomain" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="5" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Width="210" Margin="0,0,0,4"/>
         </Grid>
 
-        <RadioButton x:Name="_JoinWorkgroupRadio" GroupName="joinoption" Content="Join a workgroup" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Margin="0,0,40,0"/>
-        <Grid x:Name="_grdJoinWorkgroup" Grid.ColumnSpan="2" Grid.Row="4">
+        <RadioButton x:Name="_JoinWorkgroupRadio" GroupName="joinoption" Content="Join a workgroup" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="14" Margin="11,7,51,7" Width="111"/>
+        <Grid x:Name="_grdJoinWorkgroup" Grid.ColumnSpan="2" Grid.Row="4" Margin="0,0,-0.5,5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto" MinWidth="175"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
@@ -90,11 +89,11 @@ FontWeight="Bold" VerticalContentAlignment="Center" Width="275" Margin="0,0,0,5"
                 <RowDefinition Height="34*"></RowDefinition>
             </Grid.RowDefinitions>
             <Label Content="Workgroup:" FontSize="14" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-            <TextBox x:Name="TS_JoinWorkgroup" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,0,92,27"/>
+            <TextBox x:Name="TS_JoinWorkgroup" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,0,92,4"/>
         </Grid>
-        <Canvas x:Name="_detTabValidation2" Grid.ColumnSpan="2" Grid.Row="5" Margin="10,0">
-            <TextBox x:Name="_detTabValidation2_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" Canvas.Top="10" />
-            <Rectangle x:Name="_detTabValidation2_Alert" Width="30" Height="30" Fill="Red" HorizontalAlignment="Right" Canvas.Left="415" Canvas.Top="4" Visibility="Hidden" >
+        <Canvas x:Name="_detTabValidation2" Grid.ColumnSpan="2" Grid.Row="5" Margin="10,0,9.5,10" Visibility="Hidden">
+            <TextBox x:Name="_detTabValidation2_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" Canvas.Top="3" />
+            <Rectangle x:Name="_detTabValidation2_Alert" Width="30" Height="30" Fill="Red" HorizontalAlignment="Right" Canvas.Left="415" Canvas.Top="4" Visibility="Hidden">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
                 </Rectangle.OpacityMask>

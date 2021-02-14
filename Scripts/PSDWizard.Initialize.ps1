@@ -194,6 +194,7 @@ Function Set-UIFieldElement {
         [boolean]$Visible,
         [string]$Content,
         [string]$text,
+        [string]$BorderColor,
         $Source
     )
     Begin{
@@ -230,6 +231,7 @@ Function Set-UIFieldElement {
                     #if parameter is FieldObject of FieldName ignore setting it value
                     #Write-Host ('working with parameter: {0}' -f $Parameter)
                     Switch($Parameter){
+                        'BorderColor'    {$SetValue=$true;$Property='BorderBrush';$value=$BorderColor}
                         'Checked'    {$SetValue=$true;$Property='IsChecked';$value=$Checked}
                         'Enable'    {$SetValue=$true;$Property='IsEnabled';$value=$Enable}
                         'Visible'    {$SetValue=$true;$Property='Visibility';$value=$SetVisible}
@@ -255,7 +257,7 @@ Function Set-UIFieldElement {
             }#endloop each field object
         }
         Catch{
-            Write-Host $_.Exception.Message
+            #Write-Host $_.Exception.Message
         }
     }
 }
@@ -652,54 +654,110 @@ Function Invoke-UIMessage {
         $OutputObject,
         [switch]$Passthru
     )
+
     switch($Type){
         'Error' {
                     $CanvasColor = 'LightPink';
                     $Highlight='Red';
                     $ReturnValue = $False
-                    $OutputObject.Visibility="Visible"
-                    (Get-Variable ($OutputObject.Name + '_Alert') -Value).Visibility="Visible"
-                    (Get-Variable ($OutputObject.Name + '_Check') -Value).Visibility="Hidden"
+                    If($OutputObject){
+                        $OutputObject.Visibility="Visible"
+                        (Get-Variable ($OutputObject.Name + '_Alert') -Value).Visibility="Visible"
+                        (Get-Variable ($OutputObject.Name + '_Check') -Value).Visibility="Hidden"
+                    }
                 }
         'Info'  {
                     $CanvasColor = 'LightGreen';
                     $Highlight='Green';
                     $ReturnValue = $true
-                    $OutputObject.Visibility="Visible"
-                    (Get-Variable ($OutputObject.Name + '_Check') -Value).Visibility="Visible"
-                    (Get-Variable ($OutputObject.Name + '_Alert') -Value).Visibility="Hidden"
+                    If($OutputObject){
+                        $OutputObject.Visibility="Visible"
+                        (Get-Variable ($OutputObject.Name + '_Check') -Value).Visibility="Visible"
+                        (Get-Variable ($OutputObject.Name + '_Alert') -Value).Visibility="Hidden"
+                    }
                 }
         'Hide'  {
                     $CanvasColor = 'White';
                     $Highlight='White';
                     $ReturnValue = $true
-                    (Get-Variable ($OutputObject.Name + '_Check') -Value).Visibility="Hidden"
-                    (Get-Variable ($OutputObject.Name + '_Alert') -Value).Visibility="Hidden"
-                    $OutputObject.Visibility="Hidden"
+                    If($OutputObject){
+                        (Get-Variable ($OutputObject.Name + '_Check') -Value).Visibility="Hidden"
+                        (Get-Variable ($OutputObject.Name + '_Alert') -Value).Visibility="Hidden"
+                        $OutputObject.Visibility="Hidden"
+                    }
+        }
+        default  {
+                    $CanvasColor = 'White';
+                    $Highlight='#FFABADB3';
+                    $ReturnValue = $true
+                    If($OutputObject){
+                        (Get-Variable ($OutputObject.Name + '_Check') -Value).Visibility="Hidden"
+                        (Get-Variable ($OutputObject.Name + '_Alert') -Value).Visibility="Hidden"
+                        $OutputObject.Visibility="Hidden"
+                    }
         }
     }
-    #put a border around input
-    $HighlightObject.BorderThickness = "2"
-    $HighlightObject.BorderBrush = $Highlight
+    #put a border around object(s)
+    Foreach($Object in $HighlightObject){
+        $Object.BorderThickness = "2"
+        $Object.BorderBrush = $Highlight
+    }
 
-    $OutputObject.Background = $CanvasColor
-    (Get-Variable ($OutputObject.Name + '_Name') -Value).Text = $Message
-
+    If($OutputObject){
+        $OutputObject.Background = $CanvasColor
+        (Get-Variable ($OutputObject.Name + '_Name') -Value).Text = $Message
+    }
     If($Passthru){return $ReturnValue}
 }
 #endregion
 
 #region FUNCTION: Validate domain name with regex
-Function Confirm-DomainFQDN ($value){
+Function Confirm-DomainFQDN{
+    [CmdletBinding()]
+    param(
+        [System.Windows.Controls.TextBox]$DomainNameObject,
+        $OutputObject,
+        [switch]$Passthru
+    )
     $Regex = '(?=^.{3,253}$)(^(((?!-)[a-zA-Z0-9-]{1,63}(?<!-))|((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63})$)'
-    If($value -match $Regex){return $true}Else{$false}
+
+    $ErrorMessage = $null
+    If ($DomainNameObject.Text.length -eq 0){$ErrorMessage = ("Enter a valid domain name");$Validation = $false}
+    ElseIf($DomainNameObject.Text -notmatch $Regex){$ErrorMessage = ("Invalid domain name (eg. contoso.com)");$Validation = $false}
+    Else{$Validation = $true}
+
+
+    If($Validation -eq $true){
+        Invoke-UIMessage -Message 'Valid domain name' -HighlightObject $DomainNameObject -OutputObject $OutputObject -Type Info
+    }Else{
+        Invoke-UIMessage -Message $ErrorMessage -HighlightObject $DomainNameObject -OutputObject $OutputObject -Type Error
+    }
+
+    If($Passthru){return $Validation}
 }
 #endregion
 
 #region FUNCTION: Validate workgroup name with regex
-Function Confirm-WorkgroupName ($value){
-    $Regex = "^[a-z0-9]{3,20}$"
-    If($value -match $Regex){return $true}Else{$false}
+Function Confirm-WorkgroupName{
+    [CmdletBinding()]
+    param(
+        [System.Windows.Controls.TextBox]$WorkgroupNameObject,
+        $OutputObject,
+        [switch]$Passthru
+    )
+    $ErrorMessage = $null
+    If ($WorkgroupNameObject.Text.length -eq 0){$ErrorMessage = ("Enter a valid workgroup name");$Validation = $false}
+    Elseif ($WorkgroupNameObject.text.length -gt 20) {$ErrorMessage = ("More than 20 characters!");$Validation = $false}
+    ElseIf($WorkgroupNameObject.Text -match "^[-_]|[^a-zA-Z0-9-_]"){$ErrorMessage = ("Invalid character(s) [{0}]." -f $Matches[0]);$Validation = $false}
+    Else{$Validation = $true}
+
+    If($Validation -eq $true){
+        Invoke-UIMessage -Message 'Valid workgroup name' -HighlightObject $WorkgroupNameObject -OutputObject $OutputObject -Type Info
+    }Else{
+        Invoke-UIMessage -Message $ErrorMessage -HighlightObject $WorkgroupNameObject -OutputObject $OutputObject -Type Error
+    }
+
+    If($Passthru){return $Validation}
 }
 #endregion
 
@@ -719,6 +777,32 @@ Function Get-RandomAlphanumericString {
 	}
 }
 #endregion
+
+#region FUNCTION: Validate domain name with regex
+Function Confirm-UserName{
+    [CmdletBinding()]
+    param(
+        [System.Windows.Controls.TextBox]$UserNameObject,
+        $OutputObject,
+        [switch]$Passthru
+    )
+
+    $ErrorMessage = $null
+    If ($UserNameObject.Text.length -eq 0){$ErrorMessage = ("Enter a valid domain account");$Validation = $false}
+    ElseIf($UserNameObject.Text -match '[^\.\w]'){$ErrorMessage = ("Invalid character(s) [{0}]." -f $Matches[0]);$Validation = $false}
+    Else{$Validation = $true}
+
+
+    If($Validation -eq $true){
+        Invoke-UIMessage -Message 'Valid domain name' -HighlightObject $UserNameObject -OutputObject $OutputObject -Type Info
+    }Else{
+        Invoke-UIMessage -Message $ErrorMessage -HighlightObject $UserNameObject -OutputObject $OutputObject -Type Error
+    }
+
+    If($Passthru){return $Validation}
+}
+#endregion
+
 
 #region FUNCTION: Changes character length
 function Set-StringLength {
@@ -791,7 +875,7 @@ Function Set-ComputerName{
             #check if serial is truncated with colon (eg. %SERIAL:6%)
             If($_ -match '(?<=\:).*?(?=\d{1,2})'){$Length = $_.split(':')[1]}
             If($_ -match '(?<=^\d{1,2}:)'){$Length = $_.split(':')[0];$TrimOffSide='Left'}
-            Write-Host $Length
+
             #check if serial has digit within brackets [] (eg. %SERIAL[6]%)
             # $Length = [Regex]::Matches($_,'(?<=\[).*?(?=\])') | Select -ExpandProperty Value
             #If($_ -match '(?<=\[).*?(?=\])'){$Length = $Matches[0]}
@@ -847,7 +931,7 @@ Function Confirm-ComputerName {
     Else{$Validation = $true}
 
     If($Validation -eq $true){
-        Invoke-UIMessage -Message 'Valid Device Name' -HighlightObject $ComputerNameObject -OutputObject $OutputObject -Type Info
+        Invoke-UIMessage -Message 'Valid device name' -HighlightObject $ComputerNameObject -OutputObject $OutputObject -Type Info
     }Else{
         Invoke-UIMessage -Message $ErrorMessage -HighlightObject $ComputerNameObject -OutputObject $OutputObject -Type Error
     }
@@ -867,17 +951,17 @@ Function Confirm-Passwords {
 
     #check to see if password match
     If([string]::IsNullOrEmpty($PasswordObject.Password)){
-        $Validation = Invoke-UIMessage -Message ("Password must be supplied") -HighlightObject $PasswordObject -OutputObject $OutputObject -Type Error -Passthru
+        $Validation = Invoke-UIMessage -Message ("Password must be supplied") -HighlightObject @($PasswordObject,$ConfirmedPasswordObject) -OutputObject $OutputObject -Type Error -Passthru
     }
     ElseIf([string]::IsNullOrEmpty($ConfirmedPasswordObject.Password) -and $ConfirmedPasswordObject.IsEnabled -eq $true){
-        $Validation = Invoke-UIMessage -Message "Confirm password before continuing" -HighlightObject $ConfirmedPasswordObject -OutputObject $OutputObject -Type Error -Passthru
+        $Validation = Invoke-UIMessage -Message "Confirm password before continuing" -HighlightObject @($PasswordObject,$ConfirmedPasswordObject) -OutputObject $OutputObject -Type Error -Passthru
     }
     #check to see if password match
     ElseIf($PasswordObject.Password -ne $ConfirmedPasswordObject.Password){
-        $Validation = Invoke-UIMessage -Message "Passwords do not match" -HighlightObject $ConfirmedPasswordObject -OutputObject $OutputObject -Type Error -Passthru
+        $Validation = Invoke-UIMessage -Message "Passwords do not match" -HighlightObject @($PasswordObject,$ConfirmedPasswordObject) -OutputObject $OutputObject -Type Error -Passthru
     }
     Else{
-        $Validation = Invoke-UIMessage -Message "Passwords Match!" -HighlightObject $ConfirmedPasswordObject -OutputObject $OutputObject -Type Info -Passthru
+        $Validation = Invoke-UIMessage -Message "Passwords match!" -HighlightObject @($PasswordObject,$ConfirmedPasswordObject) -OutputObject $OutputObject -Type Info -Passthru
     }
 
     If($Passthru){return $Validation}
