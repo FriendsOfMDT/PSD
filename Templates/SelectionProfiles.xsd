@@ -1,0 +1,22 @@
+<xsd:schema id="selectionProfiles" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+ <xsd:element name="selectionProfile" type="selectionProfileType" />
+
+ <xsd:complexType name="selectionProfileType">
+  <xsd:sequence>
+   <xsd:element name="Name" type="xsd:string" nillable="false" />
+   <xsd:element name="Comments" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedBy" type="xsd:string" minOccurs="0" nillable="true" />
+
+   <xsd:element name="ReadOnly" type="xsd:string" nillable="false" />
+   <xsd:element name="Definition" type="xsd:string" minOccurs="0" nillable="true" />
+  </xsd:sequence>
+  <xsd:attribute name="guid" type="xsd:string" />
+  <xsd:attribute name="hide" type="xsd:string" />
+  <xsd:attribute name="enable" type="xsd:string" />
+ </xsd:complexType>
+
+</xsd:schema>

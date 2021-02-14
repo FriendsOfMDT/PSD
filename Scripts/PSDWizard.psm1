@@ -12,11 +12,11 @@
         Contact: @PowershellCrack
         Primary: @PowershellCrack
         Created:
-        Modified: 2021-01-26
+        Modified: 2021-01-12
 
         Version - 2.0.0b - () - Finalized functional version 2.
         Version - 2.1.1b - (PC) - Cleaned up logging and added script source; moved all variables in messages to format tag
-        Version - 2.1.2b - (PC) - Fixed UI issues with invalid TS selection unable to continue if navigate back
+        Version - 2.1.2b - (PC) - Fixed UI issues with invalid TS seledction unable to continue if navigate back
 
 
         TODO:
@@ -552,6 +552,18 @@ Function Invoke-PSDWizard{
 
     #prepoulate locale (reduce UI lock up)
     #$LocaleList = Get-LocaleInfo
+    
+    #region For Device Readiness Tab objects
+    # ---------------------------------------------
+    If($_depTabProfiles)
+    {
+        $Profiles = Add-PSDWizardProfiles -ListObject $_depTabProfiles -Passthru
+        If($null -eq $Profiles){
+            Get-FormVariable -Name "_depTabProfiles" | Set-UIFieldElement -Enable:$False
+        }
+    }
+    #endregion
+    
     #region For Task Sequence Tab objects
     # ---------------------------------------------
     #update ID to what in customsettings.ini
@@ -592,23 +604,33 @@ Function Invoke-PSDWizard{
 
     #if skipcomputername is YES, hide input unless value is invalid
     If( ((Get-TSItem SkipComputerName -ValueOnly).ToUpper() -eq 'YES') -and ($results -ne $False)){
-        Get-FormVariable -Name "_grdDeviceDetails" -Wildcard | Set-UIFieldElement -Visible:$False
+        Get-FormVariable -Name "_grdDeviceDetails" | Set-UIFieldElement -Visible:$False
     }
 
     $NetworkSelectionAvailable = $True
     #if the check comes back false; show name
     If((Get-TSItem SkipDomainMembership -ValueOnly).ToUpper() -eq 'YES'){
         $NetworkSelectionAvailable = $false
-        Get-FormVariable -Name "_grdNetworkDetails" -Wildcard | Set-UIFieldElement -Visible:$False
+        Get-FormVariable -Name "_grdNetworkDetails" | Set-UIFieldElement -Visible:$False
     }
 
-    #TODO: Need PSDDomainJoin.ps1 to enable feature
+    <#TODO: Need PSDDomainJoin.ps1 to enable feature
     If('PSDDomainJoin.ps1' -notin (Get-PSDContent -Content "Scripts" -Passthru)){
         $NetworkSelectionAvailable = $false
         Get-FormVariable -Name "JoinDomain" -Wildcard | Set-UIFieldElement -Visible:$False
     }
+    #>
     #endregion
-
+    
+    If( -not[string]::IsNullOrEmpty((Get-TSItem JoinWorkgroup -ValueOnly)) ){
+        Get-FormVariable -Name "_JoinWorkgroupRadio" | Set-UIFieldElement -Checked:$True
+        Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$False
+    }
+    
+    If( -not[string]::IsNullOrEmpty((Get-TSItem JoinDomain -ValueOnly)) ){
+        Get-FormVariable -Name "_JoinDomainRadio" | Set-UIFieldElement -Checked:$True
+        Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$False
+    }
     #region For Locale Tab objects
     # ---------------------------------------------
     #The display name is different than the actual variable value. (eg. English (United States) --> en-US)
@@ -647,8 +669,11 @@ Function Invoke-PSDWizard{
     # ---------------------------------------------
     If($_appTabBundles)
     {
-        Add-PSDWizardProfiles -SourcePath "DeploymentShare:\Selection Profiles" -ListObject $_appTabBundles
-        Add-PSDWizardBundles -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabBundles
+        #Add-PSDWizardProfiles -SourcePath "DeploymentShare:\Selection Profiles" -ListObject $_appTabBundles
+        $Bundles = Add-PSDWizardBundles -ListObject $_appTabBundles -Passthru
+        If($null -eq $Bundles){
+            Get-FormVariable -Name "_appTabBundles" | Set-UIFieldElement -Enable:$False
+        }
     }
 
     If($_appTabList)
@@ -664,6 +689,8 @@ Function Invoke-PSDWizard{
     {
         Add-PSDWizardTree -SourcePath "DeploymentShare:\Applications" -TreeObject $_appTabTree -Identifier "Name" -Exclude "Bundles"
     }
+    
+    
     #endregion
     #====================================
     # EVENTS HANDLERS
@@ -673,7 +700,7 @@ Function Invoke-PSDWizard{
         Switch($_wizTabControl.SelectedItem.Header)
         {
             'Deployment Readiness'   {
-
+                
                                     }
 
             'Task Sequence'  {
@@ -1018,14 +1045,14 @@ Function Invoke-PSDWizard{
 
     $_appTabSearchEnter.Add_Click({
         If(-not([string]::IsNullOrEmpty($_appTabSearch.Text))){
-            Search-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList -Filter $_appTabSearch.Text
+            Search-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList -Identifier "Name" -Filter $_appTabSearch.Text
         }
     })
 
     $_appTabSearchClear.Add_Click({
         $_appTabSearch.Text = $null
         $_appTabSearchEnter.IsEnabled = $False
-        Add-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList
+        Add-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList -Identifier "Name" -Exclude "Bundles"
         $_appTabSearchClear.IsEnabled = $False
     })
 

@@ -1,0 +1,20 @@
+<xsd:schema id="groups" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+ <xsd:element name="group" type="GroupType"/>
+
+ <xsd:complexType name="GroupType">
+  <xsd:sequence>
+   <xsd:element name="Name" type="xsd:string"/>
+   <xsd:element name="Comments" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedBy" type="xsd:string" minOccurs="0" nillable="true" />
+
+   <xsd:element name="Member" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+  </xsd:sequence>
+  <xsd:attribute name="guid" type="xsd:string" />
+  <xsd:attribute name="enable" type="xsd:string" />
+ </xsd:complexType>
+
+</xsd:schema>

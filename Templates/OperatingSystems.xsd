@@ -1,0 +1,36 @@
+<xsd:schema id="operatingSystems" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+ <xsd:element name="os"  type="osType"/>
+
+ <xsd:complexType name="osType">
+  <xsd:sequence>
+   <xsd:element name="Name" type="xsd:string"/>
+   <xsd:element name="Comments" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedBy" type="xsd:string" minOccurs="0" nillable="true" />
+
+   <xsd:element name="Description" type="xsd:string"/>
+   <xsd:element name="Platform"  type="xsd:string"/>
+   <xsd:element name="Build" type="xsd:string"/>
+   <xsd:element name="OSType" type="xsd:string"/>
+   <xsd:element name="Source" type="xsd:string"/>
+   <xsd:element name="IncludesSetup" type="xsd:string"/>
+   <xsd:element name="SMSImage" type="xsd:string"/>
+   <xsd:element name="ImageFile" type="xsd:string" minOccurs="0" nillable="true"/>
+   <xsd:element name="ImageIndex" type="xsd:string" minOccurs="0" nillable="true"/>
+   <xsd:element name="ImageName" type="xsd:string" minOccurs="0" nillable="true"/>
+   <xsd:element name="Flags" type="xsd:string" minOccurs="0" nillable="true"/>
+   <xsd:element name="HAL" type="xsd:string" minOccurs="0" nillable="true"/>
+   <xsd:element name="Size" type="xsd:string" minOccurs="0" nillable="true"/>
+   <xsd:element name="Language" type="xsd:string" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+   <xsd:element name="WDSServer" type="xsd:string" minOccurs="0" nillable="true"/>
+   <xsd:element name="ImageGroup" type="xsd:string" minOccurs="0" nillable="true"/>
+  </xsd:sequence>
+  <xsd:attribute name="guid" type="xsd:string" />
+  <xsd:attribute name="enable" type="xsd:string" />
+  <xsd:attribute name="hide" type="xsd:string" />
+ </xsd:complexType>
+
+</xsd:schema>

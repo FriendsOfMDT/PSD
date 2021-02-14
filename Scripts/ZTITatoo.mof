@@ -1,0 +1,168 @@
+
+//==================================================================
+// Register Registry property provider (shipped with WMI)
+// Refer to WMI SDK documentation for use
+//==================================================================
+
+#pragma namespace("\\\\.\\root\\cimv2")
+
+// Registry instance provider
+instance of __Win32Provider as $InstProv
+{
+	Name    ="RegProv" ;
+	ClsID   = "{fe9af5c0-d3b6-11ce-a5b6-00aa00680c3f}" ;
+	ImpersonationLevel = 1;
+	PerUserInitialization = "False";
+};
+
+instance of __InstanceProviderRegistration
+{
+	Provider    = $InstProv;
+	SupportsPut = True;
+	SupportsGet = True;
+	SupportsDelete = False;
+	SupportsEnumeration = True;
+};
+
+
+// Registry property provider
+instance of __Win32Provider as $PropProv
+{
+	Name    ="RegPropProv" ;
+	ClsID   = "{72967901-68EC-11d0-B729-00AA0062CBB7}";
+	ImpersonationLevel = 1;
+	PerUserInitialization = "False";
+};
+
+instance of __PropertyProviderRegistration
+{
+	Provider     = $PropProv;
+	SupportsPut  = True;
+	SupportsGet  = True;
+};
+
+
+//==================================================================
+// BDD Information class and instance definition
+//==================================================================
+
+#pragma namespace ("\\\\.\\root\\cimv2")
+
+// Class definition
+
+#pragma deleteclass("Microsoft_BDD_Info",nofail)
+[DYNPROPS]
+class Microsoft_BDD_Info 
+{
+	[key]
+	string InstanceKey;
+
+	string DeploymentMethod;
+	string DeploymentSource;
+	string DeploymentType;
+	datetime DeploymentTimestamp;
+	string DeploymentToolkitVersion;
+
+	string BuildID;
+	string BuildName;
+	string BuildVersion;
+
+	string OSDPackageID;
+	string OSDProgramName;
+	string OSDAdvertisementID;
+
+	string TaskSequenceID;
+	string TaskSequenceName;
+	string TaskSequenceVersion;
+
+	string CaptureMethod;
+	datetime CaptureTimestamp;
+	string CaptureToolkitVersion;
+
+	string CaptureTaskSequenceID;
+	string CaptureTaskSequenceName;
+	string CaptureTaskSequenceVersion;
+
+	string CaptureOSDPackageID;
+	string CaptureOSDProgramName;
+	string CaptureOSDAdvertisementID;
+};
+
+
+// Instance definition
+
+[DYNPROPS]
+instance of Microsoft_BDD_Info
+{
+	InstanceKey = "@";
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Deployment Method"), Dynamic, Provider("RegPropProv")]
+	DeploymentMethod;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Deployment Source"), Dynamic, Provider("RegPropProv")]
+	DeploymentSource;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Deployment Type"), Dynamic, Provider("RegPropProv")]
+	DeploymentType;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Deployment Timestamp"), Dynamic, Provider("RegPropProv")]
+	DeploymentTimestamp;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Deployment Toolkit Version"), Dynamic, Provider("RegPropProv")]
+	DeploymentToolkitVersion;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Build ID"), Dynamic, Provider("RegPropProv")]
+	BuildID;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Build Name"), Dynamic, Provider("RegPropProv")]
+	BuildName;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Build Version"), Dynamic, Provider("RegPropProv")]
+	BuildVersion;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|OSD Package ID"), Dynamic, Provider("RegPropProv")]
+	OSDPackageID;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|OSD Program Name"), Dynamic, Provider("RegPropProv")]
+	OSDProgramName;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|OSD Advertisement ID"), Dynamic, Provider("RegPropProv")]
+	OSDAdvertisementID;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Task Sequence ID"), Dynamic, Provider("RegPropProv")]
+	TaskSequenceID;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Task Sequence Name"), Dynamic, Provider("RegPropProv")]
+	TaskSequenceName;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Task Sequence Version"), Dynamic, Provider("RegPropProv")]
+	TaskSequenceVersion;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture Method"), Dynamic, Provider("RegPropProv")]
+	CaptureMethod;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture Timestamp"), Dynamic, Provider("RegPropProv")]
+	CaptureTimestamp;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture Toolkit Version"), Dynamic, Provider("RegPropProv")]
+	CaptureToolkitVersion;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture OSD Package ID"), Dynamic, Provider("RegPropProv")]
+	CaptureOSDPackageID;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture OSD Program Name"), Dynamic, Provider("RegPropProv")]
+	CaptureOSDProgramName;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture OSD Advertisement ID"), Dynamic, Provider("RegPropProv")]
+	CaptureOSDAdvertisementID;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture Task Sequence ID"), Dynamic, Provider("RegPropProv")]
+	CaptureTaskSequenceID;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture Task Sequence Name"), Dynamic, Provider("RegPropProv")]
+	CaptureTaskSequenceName;
+
+	[PropertyContext("local|HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Deployment 4|Capture Task Sequence Version"), Dynamic, Provider("RegPropProv")]
+	CaptureTaskSequenceVersion;
+
+};

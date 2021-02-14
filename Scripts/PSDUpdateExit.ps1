@@ -163,5 +163,9 @@ If ($Env:STAGE -eq "ISO") {
 If ($Env:STAGE -eq "POSTISO") {
 	# CONTENT environment variable is empty at this stage
     Write-PSDInstallLog -Message "Entering the $Env:STAGE phase"
+    Write-PSDInstallLog -Message "Creating additional Boot ISO with no key prompts (64-bit only) by running Create-NoPromptISO.ps1 from the PSDResources\CustomScripts folder"
+    $PSDArgument = "$Env:DEPLOYROOT\PSDResources\CustomScripts\Create-NoPromptISO.ps1 -ISOPath $Env:DEPLOYROOT\Boot\PSDLiteTouch_x64.iso"
+    $PSDProcess = Start-Process PowerShell -ArgumentList $PSDArgument -NoNewWindow -PassThru -Wait
+    Write-PSDInstallLog -Message "Wait a while for MDT to catch up"
+    Start-sleep -Seconds 10
 } 
-

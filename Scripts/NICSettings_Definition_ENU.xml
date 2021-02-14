@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+
+' // ***************************************************************************
+' // 
+' // Copyright (c) Microsoft Corporation.  All rights reserved.
+' // 
+' // Microsoft Deployment Toolkit Solution Accelerator
+' //
+' // File:      NICSettings_Definition_ENU.xml
+' // 
+' // Version:   6.3.8456.1000
+' // 
+' // Purpose:   Wizard for specifying NIC settings
+' // 
+' // ***************************************************************************
+
+-->
+<Wizard>
+	<Global>
+
+		<Initialization>ZTINicUtility.vbs</Initialization>
+		<HideNavigation>true</HideNavigation>
+
+		<CustomStatement>
+			<![CDATA[
+
+		document.title =  "Network Adapter Configuration"
+
+		CleanNetworkSettings 0
+		oProperties.RemoveAll
+		
+		Function InitializeNetworkDialog
+		
+			Dim oItem
+			Dim i
+
+			i = 0
+			For Each oItem in ObjNetworkAdapters
+				If not oProperties.Exists("OSDAdapter" & i & "Description") then
+					oProperties.Add "OSDAdapter" & i & "Description", oItem.Description
+					oProperties.Add "OSDAdapter" & i & "MacAddress", join(ostrings.ForceAsArray( oItem.MACAddress, empty ),",")
+					If oItem.DHCPEnabled then
+						oProperties.Add "OSDAdapter" & i & "DHCP","True"
+					Else
+						oProperties.Add "OSDAdapter" & i & "DHCP","False"
+						
+						on error resume next
+						oProperties.Add "OSDAdapter" & i & "IPAddressList", join(ostrings.ForceAsArray( oItem.IPAddress, empty ),",")
+						oProperties.Add "OSDAdapter" & i & "SubnetMask", join(ostrings.ForceAsArray( oItem.IPSubnet, empty ),",")
+						oProperties.Add "OSDAdapter" & i & "Gateways", join(ostrings.ForceAsArray( oItem.DefaultIPGateway, empty ),",")
+						oProperties.Add "OSDAdapter" & i & "DNSServerList", join(ostrings.ForceAsArray( oItem.DNSServerSearchOrder, empty ),",")
+						oProperties.Add "OSDAdapter" & i & "DNSSuffix", oItem.DNSDomain
+						oProperties.Add "OSDAdapter" & i & "WINSServerList", oItem.WINSPrimaryServer & "," & oItem.WINSSecondaryServer
+						on error goto 0
+
+					End if
+
+					i = i + 1
+					OSDAdapterCount.value = i
+				End if
+			Next
+			
+			EnumChkAll
+			PopulateElements
+			EnumChkAll
+
+		End Function
+		
+		Function EnumChkAll
+			Dim i,j
+			Dim DisableMain
+			
+			for i = 0 to 5
+				If i > OSDAdapterCount.value -1 then
+
+					' Disable and Hide
+					document.GetElementByID("OSDAdapter" & i & "DHCP").disabled = true
+					document.GetElementByID("OSDAdapter" & i & "Display").style.display = "none"
+					DisableMain = True
+
+				Else
+
+					document.GetElementByID("OSDAdapter" & i & "Display").style.display = "inline"
+					document.GetElementByID("OSDAdapter" & i & "DHCP").disabled = False
+					DisableMain = cbool(document.GetElementByID("OSDAdapter" & i & "DHCP").Checked)
+
+				End if
+
+				for each j in array("IPAddressList","SubnetMask","Gateways","DNSServerList","DNSSuffix","WINSServerList")
+					document.GetElementByID("OSDAdapter" & i & j ).Disabled   = DisableMain
+				next
+
+			next
+			
+			ParseAllWarningLabels
+		
+		End function
+
+		Function ValidateNetworkDialog
+		
+			Dim sErrorMsg
+			Dim oItem
+			Dim i,j
+			Dim bDirty
+			
+			' Possible that the user didn't mean to select this dialog.
+			bDirty = false
+			for i = 0 to (OSDAdapterCount.value -1)
+				If not cbool(document.GetElementByID("OSDAdapter" & i & "DHCP").Checked) then
+					bDirty = true
+					exit for
+				End if
+			next
+			If not bDirty then
+				oLogging.CreateEntry "Welcome NIC Settings, Early Exit." , LogTypeInfo
+				window.close
+			End if 
+
+
+			for i = 0 to (OSDAdapterCount.value -1)
+				
+				If cbool(document.GetElementByID("OSDAdapter" & i & "DHCP").Checked) then
+
+					oLogging.CreateEntry "Clear out settings. OSDAdapter" & i & "MacAddress = " & document.GetElementByID("OSDAdapter" & i & "MacAddress" ).Value, LogTypeInfo
+					for each j in array("IPAddressList","SubnetMask","Gateways","DNSServerList","DNSSuffix","WINSServerList")
+						oEnvironment.Item("OSDAdapter" & i & j )  = ""
+					next
+					oEnvironment.Item("OSDAdapter" & i & "MacAddress" )  = "<DHCP>"
+
+				Else
+				
+					for each j in array("MacAddress","IPAddressList","SubnetMask","Gateways","DNSServerList","DNSSuffix","WINSServerList")
+						oEnvironment.Item("OSDAdapter" & i & j )  = document.GetElementByID("OSDAdapter" & i & j ).Value
+					next
+					
+				End if
+				
+			next
+
+			oEnvironment.Item("OSDAdapterCount") = OSDAdapterCount.Value
+			
+			' Load the settings into the device via WMI
+			i = 0
+			For each oItem in ObjNetworkAdapters
+
+				If cbool(document.GetElementByID("OSDAdapter" & i & "DHCP").Checked) = False then
+					sErrorMsg = LoadNetworkAdapterSettings ( oItem, i )
+				End if
+				i = i + 1
+
+			Next
+
+			if sErrorMsg <> "" then
+				Dim sNicMessage
+				sNicMessage = "Network settings have been applied except for the following:" & vbNewLine & vbNewLine
+				sNicMessage = sNicMessage & sErrorMsg & vbNewLine & vbNewLine & "OK to Continue?"
+				if MsgBox (sNicMessage, vbYesNo, "Networking Settings Error" ) <> vbYes then
+					ValidateNetworkDialog = FALSE
+					exit function
+				end if
+			end if
+
+
+			' Re-process Bootstrap.ini in case the network settings have changed something
+
+			oShell.run "WScript.exe " & oUtility.ScriptDir & "\ZTIGather.wsf /inifile:Bootstrap.ini",1, true 
+
+
+			' We are done. Settings have been saved. Hard Exit!
+
+			window.close
+
+		end function
+
+		]]>
+		</CustomStatement>
+
+	</Global>
+
+	<!-- ************************************************************** -->
+
+	<Pane id="Ready" title="Configure Network">
+
+		<Initialization><![CDATA[ InitializeNetworkDialog ]]> </Initialization>
+		<Validation><![CDATA[ ValidateNetworkDialog ]]> </Validation>
+		<Body>
+			<![CDATA[
+
+			<H1>Specify the static IP network settings to be used.<H1>
+
+			<span id=OSDAdapter0Display >
+				<table width=95% id=OSDAdapter0>
+
+					<tr>
+						<td>
+						<input type=checkbox id=OSDAdapter0DHCP name=OSDAdapter0DHCP checked value="True" onclick=EnumChkAll language="vbscript"/> 
+						</td>
+						<td colspan=2>
+						<label for=OSDAdapter0DHCP />Enable DHCP</label>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input disabled type=text id=OSDAdapter0Description name="OSDAdapter0Description" size=50 value="0" />
+						
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td width=25%>Physical (MAC) Address:</td>
+						<td  width=70%>
+						<input disabled type=text id=OSDAdapter0MacAddress name="OSDAdapter0MacAddress" size=30 title="Read Only" />
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>IP Address(es): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter0IPAddressList name="OSDAdapter0IPAddressList" size=30 
+							title="IP Address (Comma Delimited). Example: [192.168.1.50,192.168.100.52] " /> *
+						<label class=ErrMsg for=OSDAdapter0IPAddressList>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Subnet Mask(s): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter0SubnetMask name="OSDAdapter0SubnetMask" size=30  
+							title="IP Address (Comma Delimited). Example: [255.255.255.0,255.255.255.0] "/> * 
+						<label class=ErrMsg for=OSDAdapter0SubnetMask>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Default Gateway(s):</td>
+						<td>
+						<input type=text id=OSDAdapter0Gateways name="OSDAdapter0Gateways" size=30   
+							title="Default Gateway (Comma Delimited). Example: [192.168.1.1,192.168.100.1] " /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter0DNSServerList name="OSDAdapter0DNSServerList" size=30   
+							title="DNS Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11]" /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Suffixes:</td>
+						<td>
+						<input type=text id=OSDAdapter0DNSSuffix name="OSDAdapter0DNSSuffix" size=30 value="" 
+							title="DNS Suffix (Comma Delimited). Example: [fabrikam.com]"/>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>WINS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter0WINSServerList name="OSDAdapter0WINSServerList" size=30  
+							title="Wins Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11] " /> * 
+						</td>
+					</tr>
+					
+					<tr>
+					<td colspan=3>&nbsp;</td>
+					</tr>
+					
+				</table>
+			</span>
+
+			<span id=OSDAdapter1Display >
+				<table width=95% id=OSDAdapter1>
+
+					<tr>
+						<td>
+						<input type=checkbox id=OSDAdapter1DHCP name=OSDAdapter1DHCP checked value="True" onclick=EnumChkAll language="vbscript"/> 
+						</td>
+						<td colspan=2>
+						<label for=OSDAdapter1DHCP />Enable DHCP</label>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input disabled type=text id=OSDAdapter1Description name="OSDAdapter1Description" size=50 value="0" />
+						
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td width=25%>Physical (MAC) Address:</td>
+						<td  width=70%>
+						<input disabled type=text id=OSDAdapter1MacAddress name="OSDAdapter1MacAddress" size=30 title="Read Only" />
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>IP Address(es): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter1IPAddressList name="OSDAdapter1IPAddressList" size=30 
+							title="IP Address (Comma Delimited). Example: [192.168.1.50,192.168.100.52] " /> *
+						<label class=ErrMsg for=OSDAdapter1IPAddressList>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Subnet Mask(s): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter1SubnetMask name="OSDAdapter1SubnetMask" size=30  
+							title="IP Address (Comma Delimited). Example: [255.255.255.0,255.255.255.0] "/> * 
+						<label class=ErrMsg for=OSDAdapter1SubnetMask>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Default Gateway(s):</td>
+						<td>
+						<input type=text id=OSDAdapter1Gateways name="OSDAdapter1Gateways" size=30   
+							title="Default Gateway (Comma Delimited). Example: [192.168.1.1,192.168.100.1] " /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter1DNSServerList name="OSDAdapter1DNSServerList" size=30   
+							title="DNS Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11]" /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Suffixes:</td>
+						<td>
+						<input type=text id=OSDAdapter1DNSSuffix name="OSDAdapter1DNSSuffix" size=30 value="" 
+							title="DNS Suffix (Comma Delimited). Example: [fabrikam.com]"/>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>WINS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter1WINSServerList name="OSDAdapter1WINSServerList" size=30  
+							title="Wins Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11] " /> * 
+						</td>
+					</tr>
+					
+					<tr>
+					<td colspan=3>&nbsp;</td>
+					</tr>
+					
+				</table>
+			</span>
+
+			<span id=OSDAdapter2Display >
+				<table width=95% id=OSDAdapter2>
+
+					<tr>
+						<td>
+						<input type=checkbox id=OSDAdapter2DHCP name=OSDAdapter2DHCP checked value="True" onclick=EnumChkAll language="vbscript"/> 
+						</td>
+						<td colspan=2>
+						<label for=OSDAdapter2DHCP />Enable DHCP</label>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input disabled type=text id=OSDAdapter2Description name="OSDAdapter2Description" size=50 value="0" />
+						
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td width=25%>Physical (MAC) Address:</td>
+						<td  width=70%>
+						<input disabled type=text id=OSDAdapter2MacAddress name="OSDAdapter2MacAddress" size=30 title="Read Only" />
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>IP Address(es): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter2IPAddressList name="OSDAdapter2IPAddressList" size=30 
+							title="IP Address (Comma Delimited). Example: [192.168.1.50,192.168.100.52] " /> *
+						<label class=ErrMsg for=OSDAdapter2IPAddressList>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Subnet Mask(s): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter2SubnetMask name="OSDAdapter2SubnetMask" size=30  
+							title="IP Address (Comma Delimited). Example: [255.255.255.0,255.255.255.0] "/> * 
+						<label class=ErrMsg for=OSDAdapter2SubnetMask>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Default Gateway(s):</td>
+						<td>
+						<input type=text id=OSDAdapter2Gateways name="OSDAdapter2Gateways" size=30   
+							title="Default Gateway (Comma Delimited). Example: [192.168.1.1,192.168.100.1] " /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter2DNSServerList name="OSDAdapter2DNSServerList" size=30   
+							title="DNS Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11]" /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Suffixes:</td>
+						<td>
+						<input type=text id=OSDAdapter2DNSSuffix name="OSDAdapter2DNSSuffix" size=30 value="" 
+							title="DNS Suffix (Comma Delimited). Example: [fabrikam.com]"/>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>WINS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter2WINSServerList name="OSDAdapter2WINSServerList" size=30  
+							title="Wins Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11] " /> * 
+						</td>
+					</tr>
+					
+					<tr>
+					<td colspan=3>&nbsp;</td>
+					</tr>
+					
+				</table>
+			</span>
+
+			<span id=OSDAdapter3Display >
+				<table width=95% id=OSDAdapter3>
+
+					<tr>
+						<td>
+						<input type=checkbox id=OSDAdapter3DHCP name=OSDAdapter3DHCP checked value="True" onclick=EnumChkAll language="vbscript"/> 
+						</td>
+						<td colspan=2>
+						<label for=OSDAdapter3DHCP />Enable DHCP</label>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input disabled type=text id=OSDAdapter3Description name="OSDAdapter3Description" size=50 value="0" />
+						
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td width=25%>Physical (MAC) Address:</td>
+						<td  width=70%>
+						<input disabled type=text id=OSDAdapter3MacAddress name="OSDAdapter3MacAddress" size=30 title="Read Only" />
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>IP Address(es): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter3IPAddressList name="OSDAdapter3IPAddressList" size=30 
+							title="IP Address (Comma Delimited). Example: [192.168.1.50,192.168.100.52] " /> *
+						<label class=ErrMsg for=OSDAdapter3IPAddressList>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Subnet Mask(s): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter3SubnetMask name="OSDAdapter3SubnetMask" size=30  
+							title="IP Address (Comma Delimited). Example: [255.255.255.0,255.255.255.0] "/> * 
+						<label class=ErrMsg for=OSDAdapter3SubnetMask>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Default Gateway(s):</td>
+						<td>
+						<input type=text id=OSDAdapter3Gateways name="OSDAdapter3Gateways" size=30   
+							title="Default Gateway (Comma Delimited). Example: [192.168.1.1,192.168.100.1] " /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter3DNSServerList name="OSDAdapter3DNSServerList" size=30   
+							title="DNS Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11]" /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Suffixes:</td>
+						<td>
+						<input type=text id=OSDAdapter3DNSSuffix name="OSDAdapter3DNSSuffix" size=30 value="" 
+							title="DNS Suffix (Comma Delimited). Example: [fabrikam.com]"/>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>WINS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter3WINSServerList name="OSDAdapter3WINSServerList" size=30  
+							title="Wins Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11] " /> * 
+						</td>
+					</tr>
+					
+					<tr>
+					<td colspan=3>&nbsp;</td>
+					</tr>
+					
+				</table>
+			</span>
+
+			<span id=OSDAdapter4Display >
+				<table width=95% id=OSDAdapter4>
+
+					<tr>
+						<td>
+						<input type=checkbox id=OSDAdapter4DHCP name=OSDAdapter4DHCP checked value="True" onclick=EnumChkAll language="vbscript"/> 
+						</td>
+						<td colspan=2>
+						<label for=OSDAdapter4DHCP />Enable DHCP</label>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input disabled type=text id=OSDAdapter4Description name="OSDAdapter4Description" size=50 value="0" />
+						
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td width=25%>Physical (MAC) Address:</td>
+						<td  width=70%>
+						<input disabled type=text id=OSDAdapter4MacAddress name="OSDAdapter4MacAddress" size=30 title="Read Only" />
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>IP Address(es): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter4IPAddressList name="OSDAdapter4IPAddressList" size=30 
+							title="IP Address (Comma Delimited). Example: [192.168.1.50,192.168.100.52] " /> *
+						<label class=ErrMsg for=OSDAdapter4IPAddressList>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Subnet Mask(s): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter4SubnetMask name="OSDAdapter4SubnetMask" size=30  
+							title="IP Address (Comma Delimited). Example: [255.255.255.0,255.255.255.0] "/> * 
+						<label class=ErrMsg for=OSDAdapter4SubnetMask>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Default Gateway(s):</td>
+						<td>
+						<input type=text id=OSDAdapter4Gateways name="OSDAdapter4Gateways" size=30   
+							title="Default Gateway (Comma Delimited). Example: [192.168.1.1,192.168.100.1] " /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter4DNSServerList name="OSDAdapter4DNSServerList" size=30   
+							title="DNS Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11]" /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Suffixes:</td>
+						<td>
+						<input type=text id=OSDAdapter4DNSSuffix name="OSDAdapter4DNSSuffix" size=30 value="" 
+							title="DNS Suffix (Comma Delimited). Example: [fabrikam.com]"/>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>WINS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter4WINSServerList name="OSDAdapter4WINSServerList" size=30  
+							title="Wins Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11] " /> * 
+						</td>
+					</tr>
+					
+					<tr>
+					<td colspan=3>&nbsp;</td>
+					</tr>
+					
+				</table>
+			</span>
+
+			<span id=OSDAdapter5Display >
+				<table width=95% id=OSDAdapter5>
+
+					<tr>
+						<td>
+						<input type=checkbox id=OSDAdapter5DHCP name=OSDAdapter5DHCP checked value="True" onclick=EnumChkAll language="vbscript"/> 
+						</td>
+						<td colspan=2>
+						<label for=OSDAdapter5DHCP />Enable DHCP</label>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input disabled type=text id=OSDAdapter5Description name="OSDAdapter5Description" size=50 value="0" />
+						
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td width=25%>Physical (MAC) Address:</td>
+						<td  width=70%>
+						<input disabled type=text id=OSDAdapter5MacAddress name="OSDAdapter5MacAddress" size=30 title="Read Only" />
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>IP Address(es): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter5IPAddressList name="OSDAdapter5IPAddressList" size=30 
+							title="IP Address (Comma Delimited). Example: [192.168.1.50,192.168.100.52] " /> *
+						<label class=ErrMsg for=OSDAdapter5IPAddressList>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Subnet Mask(s): </td>
+						<td>
+						<input disabled type=text id=OSDAdapter5SubnetMask name="OSDAdapter5SubnetMask" size=30  
+							title="IP Address (Comma Delimited). Example: [255.255.255.0,255.255.255.0] "/> * 
+						<label class=ErrMsg for=OSDAdapter5SubnetMask>* Required (MISSING)</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>Default Gateway(s):</td>
+						<td>
+						<input type=text id=OSDAdapter5Gateways name="OSDAdapter5Gateways" size=30   
+							title="Default Gateway (Comma Delimited). Example: [192.168.1.1,192.168.100.1] " /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter5DNSServerList name="OSDAdapter5DNSServerList" size=30   
+							title="DNS Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11]" /> * 
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>DNS Suffixes:</td>
+						<td>
+						<input type=text id=OSDAdapter5DNSSuffix name="OSDAdapter5DNSSuffix" size=30 value="" 
+							title="DNS Suffix (Comma Delimited). Example: [fabrikam.com]"/>
+						</td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td>WINS Server(s):</td>
+						<td>
+						<input type=text id=OSDAdapter5WINSServerList name="OSDAdapter5WINSServerList" size=30  
+							title="Wins Server List (Comma Delimited). Example: [192.168.1.10,192.168.100.11] " /> * 
+						</td>
+					</tr>
+					
+					<tr>
+					<td colspan=3>&nbsp;</td>
+					</tr>
+					
+				</table>
+			</span>
+
+
+
+			<input type=hidden name="OSDAdapterCount" value="1" />
+
+        ]]>
+
+		</Body>
+
+	</Pane>
+
+</Wizard>

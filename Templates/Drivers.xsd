@@ -1,0 +1,31 @@
+<xsd:schema id="drivers" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+ <xsd:element name="driver" type="driverType"/>
+
+ <xsd:complexType name="driverType">
+  <xsd:sequence>
+   <xsd:element name="Name" type="xsd:string"/>
+   <xsd:element name="Comments" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="DisplayName" type="xsd:string" minOccurs="0" nillable="true" />
+
+   <xsd:element name="Manufacturer" type="xsd:string"/>
+   <xsd:element name="Version" type="xsd:string"/>
+   <xsd:element name="Date" type="xsd:string" minOccurs="0" />
+   <xsd:element name="Source" type="xsd:string"/>
+   <xsd:element name="Class"  type="xsd:string"/>
+   <xsd:element name="Platform" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+   <xsd:element name="OSVersion" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+   <xsd:element name="PNPId" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+   <xsd:element name="Hash" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="WHQLSigned" type="xsd:string" minOccurs="0" nillable="true" />
+  </xsd:sequence>
+  <xsd:attribute name="guid" type="xsd:string" />
+  <xsd:attribute name="enable" type="xsd:string" />
+  <xsd:attribute name="hide" type="xsd:string" />
+ </xsd:complexType>
+
+</xsd:schema>

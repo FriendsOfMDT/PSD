@@ -1,11 +1,15 @@
 # Change log for PSDWizard
 
+
+## 2.1.3b - Feb 14, 2021
+
+- Fixed Search for Task seqeucne and Applictions
+- Added Domain Join Section
 ## 2.1.2b - Jan 12, 2021
 
 - Added hashtables for locale info; provided quicker UI load.
 - Added Get/Set-UIElements functions to debug issues with UI.
-- Fixed UI issues with invalid TS seledction unable to continue if navigate back
-- Added PSDNextPhase.ps1 and New PSD Deployment Templates. 
+- Fixed UI issues with invalid TS selection unable to continue if navigate back
 ## 2.1.1b - Jan 11, 2021
 
 - Cleaned up logging and added script source; moved all variables in messages to format tag

@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<properties>
+
+	<!-- Properties that can be overwritten (last value wins) and are automatically set by the BDD scripts -->
+
+	<property id="DeployRoot" type="string" overwrite="true" description="The UNC path to the deployment share" />
+	<property id="ResourceRoot" type="string" overwrite="true" description="The UNC path to resources (drivers, packages) kept separate from the deployment share" />
+	<property id="DeployDrive" type="string" overwrite="true" description="The drive letter mapped to the deployment share (Lite Touch only)" />
+	<property id="ResourceDrive" type="string" overwrite="true" description="The drive letter mapped to resources (drivers, packages) kept separate from the deployment share (Lite Touch only)" />
+	<property id="DeploymentMethod" type="string" overwrite="true" description="The method being used for the deployment (NETWORK, MEDIA, OSD, etc.)" />
+	<property id="DeploymentType" type="string" overwrite="true" description="The type of deployment (NEWCOMPUTER, REFRESH, REPLACE) being performed" />
+	<property id="Phase" type="string" overwrite="true" description="The current phase of the deployment (NEWCOMPUTER, STATECAPTURE, PREINSTALL, INSTALL, POSTINSTALL, STATERESTORE)" />
+	<property id="DestinationDisk" type="string" overwrite="true" description="Disk Number that the image will be deployed to" />
+	<property id="DestinationPartition" type="string" overwrite="true" description="Disk Partition that the image will be deployed to" />
+	
+
+	<!-- Properties that cannot be overwritten (first value wins) -->
+
+	<property id="UserID" type="string" overwrite="false" description="User ID used for connecting to network paths" />
+	<property id="UserDomain" type="string" overwrite="false" description="Domain for the user ID used to connect to network paths" />
+	<property id="UserPassword" type="string" overwrite="false" description="Password for the user ID used to connect to network paths" />
+	<property id="UDShare" type="string" overwrite="false" description="User data share used for capturing user state to a network path" />
+	<property id="UDDir" type="string" overwrite="false" description="Directory on the user data share where user state should be placed" />
+	<property id="UDProfiles" type="string" overwrite="false" description="List of profiles that should be captured by USMT as part of the user state" />
+	<property id="SLShare" type="string" overwrite="false" description="Script log share where all BDD scripts should be copied at the end of the deployment process" />
+	<property id="SLShareDynamicLogging" type="string" overwrite="false" description="Script log share where all BDD events should be written during execution (advanced debugging only)" />
+	<property id="EventShare" type="string" overwrite="false" description="Event share UNC where all BDD scripts should write events for MOM management pack" />
+	<property id="EventService" type="string" overwrite="false" description="Event web service where scripts should send events" />
+	<property id="OSInstall" type="string" overwrite="false" description="Flag to indicate whether this machine is authorized for an OS deployment (if set, it must be YES or Y to proceed)" />
+	<property id="ComputerName" type="string" overwrite="false" description="The new computer name to assign to the computer" />
+	<property id="OSDComputerName" type="string" overwrite="false" description="The new computer name to assign to the computer (used with ConfigMgr) " />
+	<property id="Home_Page" type="string" overwrite="false" description="The Internet Explorer home page that should be used on the computer" />
+	<property id="JoinDomain" type="string" overwrite="false" description="The name of the domain that should be joined (do not set if using JoinWorkgroup)" />
+	<property id="JoinWorkgroup" type="string" overwrite="false" description="The name of the Workgroup that should be joined (do not set if using JoinDomain)" />
+	<property id="DomainAdmin" type="string" overwrite="false" description="Account used to join to Domain (may be in 'Domain\UserName' or 'UserName@Domain.com' format)" />
+	<property id="DomainAdminDomain" type="string" overwrite="false" description="Domain of Account used to join to Domain (Vista Only, must be blank if 'DomainAdmin' conains domain)" />
+	<property id="DomainAdminPassword" type="string" overwrite="false" description="Password of Account used to join to Domain" />
+	<property id="MachineObjectOU" type="string" overwrite="false" description="The OU that should be used when the computer is joined to the domain (only if the computer account does not already exist)" />
+	<property id="OSDINSTALLSILENT" type="string" overwrite="false" description="OSD flag to indicate that no OSD new computer wizard should be displayed" />
+	<property id="OSDINSTALLPACKAGE" type="string" overwrite="false" description="OSD variable to indicate which SMS OSD package should be installed (only used for new computer)" />
+	<property id="OSDINSTALLPROGRAM" type="string" overwrite="false" description="OSD variable to indicate which program should be used for the specified OSD package (only used for new computer)" />
+	<property id="OSDNEWMACHINENAME" type="string" overwrite="false" description="OSD variable that specifies the computer name that should be assigned (only used for new computer)" />
+	<property id="ScanStateArgs" type="string" overwrite="false" description="Command line arguments that should be added to the USMT Scanstate command line" />
+	<property id="OSDMigrateAdditionalCaptureOptions" type="string" overwrite="false" description="Command line arguments that should be added to the USMT Scanstate command line" />
+	<property id="LoadStateArgs" type="string" overwrite="false" description="Command line arguments that should be added to the USMT Loadstate command line" />
+	<property id="OSDMigrateAdditionalRestoreOptions" type="string" overwrite="false" description="Command line arguments that should be added to the USMT Scanstate command line" />
+	<property id="ComputerBackupLocation" type="string" overwrite="false" description="Specifies where the computer backup should be stored (AUTO, NETWORK, NONE, specific path, default is AUTO)" />
+	<property id="BackupShare" type="string" overwrite="false" description="Network share (UNC) where the computer backup should be stored" />
+	<property id="BackupDir" type="string" overwrite="false" description="Directory on the network share where the computer backup should be stored" />
+	<property id="BackupDrive" type="string" overwrite="false" description="Drive to include in the backup (defaults to the drive with disk 0 partition 1, can be set to ALL)" />
+	<property id="UserDataLocation" type="string" overwrite="false" description="Full path to the USMT user state store that should be restored onto a particular machine" />
+	<property id="DoCapture" type="string" overwrite="false" description="Flag to indicate that the machine should be Sysprepped and captured as a new WIM image" />
+	<property id="ProductKey" type="string" overwrite="false" description="Product key string that should be inserted into unattend.xml, sysprep.inf, or unattend.txt" />
+	<property id="OverrideProductKey" type="string" overwrite="false" description="Multiple activation key (MAK) that should be applied after Windows Vista is deployed" />
+	<property id="WDSServer" type="string" overwrite="false" description="Name of the WDS server that should be used when installing WDS images (default is the server that contains the original image)" />
+	<property id="CaptureGroups" type="string" overwrite="false" description="Specifies whether to capture the local group membership from the machine (default is YES; ALL can also be specified)" />
+	<property id="AdminPassword" type="string" overwrite="false" description="Specifies the local administrator password to assign (default is to use existing value)" />
+	<property id="OrgName" type="string" overwrite="false" description="Specifies the organization name (default is none)" />
+	<property id="FullName" type="string" overwrite="false" description="Specifies the full name (default is none)" />
+	<property id="TimeZone" type="string" overwrite="false" description="TimeZone Identifier for Windows XP Builds (example: PST = 004 )" />
+	<property id="TimeZoneName" type="string" overwrite="false" description="TimeZone Identifier for Windows Vista Builds (example: PST = 'Pacific Standard Time')" />
+	<property id="TaskSequenceID" type="string" overwrite="false" description="TaskSequence ID used to automate LTI/ZTI build selection (default is blank)" />
+	<property id="BuildID" type="string" overwrite="false" description="Build ID used to automate LTI/ZTI build selection (default is blank)" />
+	<property id="KeyboardLocale" type="string" overwrite="false" description="Locale used for Keyboard, can be either 0409:00000409 or en-US format (default is OS Default)" />
+	<property id="KeyboardLocalePE" type="string" overwrite="false" description="Locale used for Keyboard in WinPE Only, 0409:00000409 format (default is WinPE OS Default)" />
+	<property id="InputLocale" type="string" overwrite="false" description="Locale used for Keyboard, (XP only, example: 0409:00000409, default is OS Default)" />
+	<property id="SystemLocale" type="string" overwrite="false" description="Default System Locale used for the OS (XP only, example: 0409:00000409)" />
+	<property id="UserLocale" type="string" overwrite="false" description="Locale used for user when logged in, en-US format (default is OS Default)" />
+	<property id="UILanguage" type="string" overwrite="false" description="Default Locale used for OS before user is logged in, en-US format (default is OS Default)" />
+	<property id="Xresolution" type="string" overwrite="false" description="The Horizontal Resolution of the screen (example: 1024, default is OS Default)" />
+	<property id="Yresolution" type="string" overwrite="false" description="The Vertical Resolution of the screen (example: 768, default is OS Default)" />
+	<property id="BitsPerPel" type="string" overwrite="false" description="The Color Depth of the screen in Bits Per Pixel (example: 32, default is OS Default)" />
+	<property id="Vrefresh" type="string" overwrite="false" description="The vertical Refresh rate of the monitor in Hz (example: 60, default is OS Default)" />
+	<property id="AreaCode" type="string" overwrite="false" description="Area code for the computer's location." />
+	<property id="CountryCode" type="string" overwrite="false" description="Country/region code to use for telephony." />
+	<property id="LongDistanceAccess" type="string" overwrite="false" description="Number to dial to gain access to an outside line, such as 9." />
+	<property id="Dialing" type="string" overwrite="false" description="Type of dialing to use for the telephony device in the computer, such as 'Tone' or 'Pulse' (XP only)." />
+	<property id="OSDBitLockerMode" type="string" overwrite="false" description="Specifies the type of BDE install. (KEY|TPMKey|TPMPin|TPM)" />
+	<property id="BdeInstallSuppress" type="string" overwrite="false" description="Boolean to indicate whether a BDE Install should be attempted." />
+	<property id="BdeInstall" type="string" overwrite="false" description="(Deprecated) Specifies the type of BDE install. (KEY|TPMKey|TPMPin|TPM)" />
+	<property id="OSDBitLockerTargetDrive" type="string" overwrite="false" description="Specifies the drive to be encrypted (default OS Drive) " />
+	<property id="OSDBitLockerStartupKeyDrive" type="string" overwrite="false" description="Specifies the location of Key files (Drive)" />
+	<property id="BdeKeyLocation" type="string" overwrite="false" description="(Deprecated) Specifies the location of Key files (Drive)" />
+	<property id="OSDBitLockerCreateRecoveryPassword" type="string" overwrite="false" description="Indicates whether a recovery password should be generated for AD." />
+	<property id="BdeRecoveryKey" type="string" overwrite="false" description="(Deprecated) Indicates whether a recovery password should be generated for AD." />
+	<property id="OSDBitLockerWaitForEncryption" type="string" overwrite="false" description="Boolean (any value) indicated whether process should be held to wait for drive encryption to complete." />
+	<property id="BdeWaitForEncryption" type="string" overwrite="false" description="(Deprecated) Boolean (any value) indicated whether process should be held to wait for drive encryption to complete." />
+	<property id="BdeDriveLetter" type="string" overwrite="false" description="Drive Letter for BDE partition (default S:) " />
+	<property id="BdeDriveSize" type="string" overwrite="false" description="Drive size for BDE partition (default 2048MB)" />
+	<property id="BdePin" type="string" overwrite="false" description="BdePin for TPMPin" />
+	<property id="BdeDisablePreProvisioning" type="string" overwrite="false" description="Disables offline pre-provisioning of BDE. Valid values are YES or NO" />
+	<property id="BdeAllowAlphaNumericPin" type="string" overwrite="false" description="Allows Pin to be Alpha Numeric valid values are YES or NO ( Allow enhanced PINs for startup Group Policy must be applied )" />
+	<property id="BDEPinMinLength" type="string" overwrite="false" description="Specifies the minimum pin length when using TPM and PIN (must be numeric)" />
+	<property id="TpmOwnerPassword" type="string" overwrite="false" description="Specifies the TPM Password for setting Ownership" />
+	<property id="OSDBitLockerRecoveryPassword" type="string" overwrite="false" description="Specifies the password to use for BDE Password scenarios" />
+	<property id="OSDBitLockerStartupKey" type="string" overwrite="false" description="Specifies the value to use for startup key." />
+	<property id="OSDMP" type="string" overwrite="false" description="OSD variable to indicate which SMS management point should be used (only needed for new computer)" />
+	<property id="OSDSITECODE" type="string" overwrite="false" description="OSD variable to indicate which SMS site code should be used (only needed for new computer)" />
+	<property id="ServerA" type="string" overwrite="false" description="Server name to be used during the deployment process" />
+	<property id="ServerB" type="string" overwrite="false" description="Server name to be used during the deployment process" />
+	<property id="ServerC" type="string" overwrite="false" description="Server name to be used during the deployment process" />
+	<property id="USMTConfigFile" type="string" overwrite="false" description="USMT configuration XML file that should be used when running Scanstate and Loadstate" />
+	<property id="WipeDisk" type="string" overwrite="false" description="Specifies whether the disk should be wiped." />
+	<property id="_SMSTSORGNAME" type="string" overwrite="false" description="Customizes the Task Sequencer engine's display banner." />
+	<property id="WsusServer" type="string" overwrite="false" description="The URL of the WSUS server that should be used (optional, will use Windows Update or policyt settings by default)" />
+	<property id="USMT3" type="string" overwrite="false" description="Designates to always use USMT 3 Valid values are YES or NO" />
+	<property id="USMT4" type="string" overwrite="false" description="Designates to always use USMT 4 Valid values are YES or NO" />
+	<property id="DriverSelectionProfile" type="string" overwrite="false" description="Profile name used during driver installation." />
+	<property id="PackageSelectionProfile" type="string" overwrite="false" description="Profile name used during Package installation." />
+	<property id="WizardSelectionProfile" type="string" overwrite="false" description="Profile name used by the wizard for filtering the display of various items." />
+	<property id="CustomDriverSelectionProfile" type="string" overwrite="false" description="Custom SelectionProfile XML Blob used during driver installation." />
+	<property id="CustomPackageSelectionProfile" type="string" overwrite="false" description="Custom SelectionProfile XML Blob used during Package installation." />
+	<property id="CustomWizardSelectionProfile" type="string" overwrite="false" description="Custom SelectionProfile XML Blob used by the wizard for filtering the display of various items." />
+	<property id="SkipGroupSubFolders" type="string" overwrite="false" description="Do not include sub-folders when matching against Groups (example: DriverGroups, Default: Include Sub-Folders)." />
+	<property id="SysPrepDriverSelectionProfile" type="string" overwrite="false" description="Profile name used to pre-load storage drivers before sysprep on XP/2003 (default is All Drivers)" />
+	<property id="AutoMode" type="string" overwrite="false" description="Sets AutoMode for Server 2003 deployments" />	
+	<property id="AutoUsers" type="string" overwrite="false" description="Sets AutoUsers for Server 2003 deployments" />
+	<property id="ApplicationSuccessCodes" type="string" overwrite="false" description="Space delimited list of error codes allowed by ZTIApplications.wsf (default: 0 3010)" />
+	<property id="BackupFile" type="string" overwrite="false" description="Sets the name of the backup file used with ztibackup" />
+	<property id="DoNotCreateExtraPartition" type="string" overwrite="false" description="Specifies that Windows 7 and Windows Server 2008R2 will not create the 300 MB system partition" />
+	<property id="OSDDiskpartBiosCompatibilityMode" type="string" overwrite="false" description="Implementing Diskpart BIOS compatibility fix (see KB 931760 and KB 931761)" />
+	<property id="ForceApplyFallback" type="string" overwrite="false" description="Allows imagex.exe /apply for Windows 6.x captured images (does not use Setup.exe servicing stack)." />
+	<property id="OSDDiskAlign" type="string" overwrite="false" description="Diskpart partition alignment" />
+	<property id="FinishAction" type="string" overwrite="false" description="Specifies what action should be taken when a Lite Touch task sequence completes (SHUTDOWN, REBOOT, LOGOFF, or default of none)" />
+	<property id="SMSTSRunCommandLineUserName" type="string" overwrite="false" description="Specifies the username (e.g. DOM\USER) that should be used with a Run Command Line action that is configure to run as user" />
+	<property id="SMSTSRunCommandLineUserPassword" type="string" overwrite="false" description="Specifies the password that should be used with a Run Command Line action that is configure to run as user" />
+	<property id="SMSTSPreferredAdvertID" type="string" overwrite="false" description="Specifies the preferred task sequence advertisement ID" />
+	<property id="SMSTSUDAUsers" type="string" overwrite="false" description="Specifies a comma-delimeted list of primary users for the computer" />
+	<property id="SMSTSAssignUsersMode" type="string" overwrite="false" description="Specifies if users can change the primary users for the computer (AUTO, PENDING, DISABLED)" /> 
+	<property id="OSDStateStorePath" type="string" overwrite="false" description="Full path to be used for state capture and state restore" /> 
+	<property id="_SMSTSPackageName" type="string" overwrite="false" description="Task sequence package name displayed in the progress dialog (Lite Touch only)." />
+	<property id="HideShell" type="string" overwrite="false" description="Causes Lite Touch task sequence to run before Explorer loads if set to YES (Lite Touch only)." />
+	<property id="DisableTaskMgr" type="string" overwrite="false" description="Disables Task Manager during deployment if set to YES (Lite Touch only and must be used  with HideShell))." />
+	<property id="PrepareWinRE" type="string" overwrite="false" description="Install Windows Recovery Environment into Active System partition." />
+	<property id="ApplyGPOPack" type="string" overwrite="false" description="Causes the GPO Pack to not be applied if the value is set to NO." />
+	<property id="GPOPackPath" type="string" overwrite="false" description="Overides the default path that is used for GPO Packs (.\Templates\GPOPacks)." />
+	<property id="ValidateDomainCredentialsUNC" type="string" overwrite="false" description="Specifies a path to Validate the JoinDomain Credentials against. This UNC share must *not* be used by any other MDT component." />
+	<property id="VSSMaxSize" type="string" overwrite="false" description="Sets the max storage space available for system restore. Can be specified in bytes or as a percentage(%) of the volume. Acceptable suffixes are KB, MB, GB, TB, PB, EB or %" />
+	<property id="DestinationOSInstallType" type="string" overwrite="true" description="Mechanism Apply OS step should use to determine where to install the OS (valid values are ByDriveLetter, ByVariable, ByDiskPartition, NextPartition)" />
+	<property id="DestinationOSVariable" type="string" overwrite="true" description="Drive letter to deploy OS to (e.g. G:) when DestinationOSInstallType=ByVariable" />
+	<property id="SkipRearm" type="string" overwrite="false" description="Skips the rearming of Office if set to YES" />
+	<property id="WindowsSource" type="string" overwrite="false" description="Windows installation files (sxs) needed to install Windows 8 features that are not in the image" />
+	<property id="DoNotFormatAndPartition" type="string" overwrite="false" description="If set to YES, skips any formatting and partitioning that would have been performed" />
+	<property id="USMTOfflineMigration" type="string" overwrite="false" description="If set to TRUE, user state will be captured offline in Windows PE instead of from the current OS" />
+	<property id="WindowsUpgradeAdditionalOptions" type="string" overwrite="false" description="Windows 10 Upgrade Additional Options" />
+	<property id="DynamicallyUpdateWinSetup" type="string" overwrite="false" description="Option for Windows 10 Setup dynamic Upgrade " />
+
+	<!-- Wizard control variables (first value wins) -->
+
+	<property id="SkipWizard" type="string" overwrite="false" description="Flag to skip the deployment wizard altogether (if set to YES, default is blank)" />
+	<property id="SkipCapture" type="string" overwrite="false" description="Flag to skip the capture of an image (if set to YES, default is YES)" />
+	<property id="SkipAdminPassword" type="string" overwrite="false" description="Flag to skip the Administrator User Account Password wizard page(if set to YES, default is blank)" />
+	<property id="SkipApplications" type="string" overwrite="false" description="Flag to skip the wizard pane that asks for applications to be installed (if set to YES, default is blank)" />
+	<property id="SkipComputerBackup" type="string" overwrite="false" description="Flag to skip the computer backup wizard pane (if set to YES, default is blank)" />
+	<property id="SkipDomainMembership" type="string" overwrite="false" description="Flag to skip the domain membership wizard pane (if set to YES, default is blank)" />
+	<property id="SkipComputerName" type="string" overwrite="false" description="Flag to skip the Computer Name wizard pane (if set to YES, default is blank)" />
+	<property id="SkipDeploymentType" type="string" overwrite="false" description="Flag to skip the initial deployment type wizard pane (if set to YES, default is blank)" />
+	<property id="SkipUserData" type="string" overwrite="false" description="Flag to skip the user data wizard pane (if set to YES, default is blank)" />
+	<property id="SkipPackageDisplay" type="string" overwrite="false" description="Flag to skip the packages (language packs) wizard pane (if set to YES, default is blank)" />
+	<property id="SkipLocaleSelection" type="string" overwrite="false" description="Flag to skip the locale selection wizard pane (if set to YES, default is blank)" />
+	<property id="SkipProductKey" type="string" overwrite="false" description="Flag to skip the product key wizard pane (if set to YES, default is blank)" />
+	<property id="SkipSummary" type="string" overwrite="false" description="Flag to skip the final wizard summary screen (if set to YES, default is blank)" />
+	<property id="SkipFinalSummary" type="string" overwrite="false" description="Flag to skip the Summary_Definition_XXX.xml screen (if set to YES, default is blank)" />
+	<property id="SkipBDDWelcome" type="string" overwrite="false" description="Flag to skip the BDD Welcome screen (if set to YES, default is blank)" />
+	<property id="SkipTimeZone" type="string" overwrite="false" description="Flag to skip the TimeZone screen (if set to YES, default is blank)" />
+	<property id="SkipTaskSequence" type="string" overwrite="false" description="Flag to skip the Task Sequence (OS Selection) screen (if set to YES, default is blank)" />
+	<property id="SkipBuild" type="string" overwrite="false" description="Flag to skip the Build (OS Selection) screen (if set to YES, default is blank)" />
+	<property id="SkipBitLocker" type="string" overwrite="false" description="Flag to skip the BitLocker (if set to YES, default is blank)" />
+	<property id="SkipBitLockerDetails" type="string" overwrite="false" description="Flag to skip BitLocker details screen (if set to YES, default is blank)" />
+	<property id="SkipAdminAccounts" type="string" overwrite="false" description="Flag to skip the Administrator Users screen (if *NOT* set to NO, default is blank, You must set to NO to display the page)" />
+	<property id="SkipRoles" type="string" overwrite="false" description="Flag to skip the Roles and Features wizard pane (if set to YES, default is blank)" />
+
+	<!-- UDI Wizard control variables (first value wins) -->
+	<property id="OSDDomainName" type="string" overwrite="false" description="Specifies which domain to join" />
+	<property id="OSDDomainOUName" type="string" overwrite="false" description="Specifies which OU to use when joining the specified domain" />
+	<property id="OSDWorkgroupName" type="string" overwrite="false" description="Specifies which workgroup to join" />
+	<property id="OSDJoinAccount" type="string" overwrite="false" description="Specifies the account to be used for joining a domain" />
+	<property id="OSDJoinPassword" type="string" overwrite="false" description="Specifies the password to use with the OSDJoinAccount when joining a domain." />
+	<property id="OSDLocalAdminPassword" type="string" overwrite="false" description="Specifies what the password for the local administrator account should be set to once the server has been imaged" />
+	<property id="OSDAddAdmin" type="string" overwrite="false" description="Specifies which domain accounts, separated by semicolons, should be added to the administrators group. " />
+	<property id="OSDTimeZone" type="string" overwrite="false" description="Specifies which time zone the machine should be set to." />
+	<property id="OSDArchitecture" type="string" overwrite="false" description="Specifies the architecture (x86 or amd64) of the OS that will be applied. Additionally this variable can be used to determine which applications and language packs to apply" />
+	<property id="OSDImageIndex" type="string" overwrite="false" description="Specifies the index of the image that should be applied from the WIM file." />
+	<property id="OSDTargetDrive" type="string" overwrite="false" description="Specifies volume that the specified image should be applied to." />
+	<property id="OSDWinPEWinDir" type="string" overwrite="false" description="Specifies the windows directory used for backing up user state" />
+	<property id="OSDDiskPart" type="string" overwrite="false" description="Specifies whether a OSDTargetDrive should be formatted or not." />
+	<property id="OSDApplicationList" type="string" overwrite="false" description="Specifies which applications should be selected by default from the application page of the OSD Setup Wizard. " />
+	<property id="UDILocale" type="string" overwrite="false" description="Specifies the locale that should be used for the UDI wizard (e.g. 0x407, 1031)" />
+
+	<!-- Action Properties (commonly defined within Management Console) -->
+	<property id="OSDAdapterCount" type="string" overwrite="false" description="Number of Adapters defined here( either blank, 0 or 1)" />
+	<property id="OSDAdapter0Name" type="string" overwrite="false" description="If present, match all settings to the adapter with this name." />
+	<property id="OSDAdapter0MacAddress" type="string" overwrite="false" description="If present, match all settings to the adapter with this MAC address." />
+	<property id="OSDAdapter0EnableDHCP" type="string" overwrite="false" description="If false, will disable DHCP, otherwise True (true if blank)." />
+	<property id="OSDAdapter0IPAddressList" type="string" overwrite="false" description="Comma delimited list of IPAddress Lists" />
+	<property id="OSDAdapter0SubnetMask" type="string" overwrite="false" description="Comma delimited list of Subnet masks" />
+	<property id="OSDAdapter0Gateways" type="string" overwrite="false" description="Comma delimited list of Gateway cost metrics" />
+	<property id="OSDAdapter0GatewayCostMetric" type="string" overwrite="false" description="Comma delimited list of Gateway Cost MEtrics as either integers, or the string 'Automatic' (if empty, uses automatic)" />
+	<property id="OSDAdapter0DNSServerList" type="string" overwrite="false" description="Comma delimited list of DNS Servers" />
+	<property id="OSDAdapter0DNSSuffix" type="string" overwrite="false" description="DNS Suffix, example Frabrikam.com" />
+	<property id="OSDAdapter0EnableDNSRegistration" type="string" overwrite="false" description="True/False to enable DNS registration." />
+	<property id="OSDAdapter0EnableFullDNSRegistration" type="string" overwrite="false" description="True/False to enalbe Full DNS Registration" />
+	<property id="OSDAdapter0EnableLMHOSTS" type="string" overwrite="false" description="True/False to enable LMHosts" />
+	<property id="OSDAdapter0EnableWINS" type="string" overwrite="false" description="True/False to enable WINS" />
+	<property id="OSDAdapter0TcpipNetbiosOptions" type="string" overwrite="false" description="NetBIOS Options 0/DHCP/False, 1/True, or 2/Disable" />
+	<property id="OSDAdapter0WINSServerList" type="string" overwrite="false" description="Comma delimited list of WINS Servers" />
+	<property id="OSDAdapter0EnableTCPIPFiltering" type="string" overwrite="false" description="True/False to enable TCP/IP Filtering." />
+	<property id="OSDAdapter0TCPFilterPortList" type="string" overwrite="false" description="Comma delimited list of TCP Filters" />
+	<property id="OSDAdapter0UDPFilterPortList" type="string" overwrite="false" description="Comma delimited list of IDP Filters" />
+	<property id="OSDAdapter0IPProtocolFilterList" type="string" overwrite="false" description="Comma delimited list of IP Protocol FIlters" />
+
+	<property id="OSDDiskIndex" type="string" overwrite="false" description="Disk index used for Partitioning (Default is 0)" />
+	<property id="OSDPartitions" type="string" overwrite="false" description="Number of Partitions listed here (Default is None, max of 2, use Default configuration)" />
+	<property id="OSDPartitions0TYPE" type="string" overwrite="false" description="Type of partition (Default: Primary, can be Logical or extended)" />
+	<property id="OSDPartitions0FILESYSTEM" type="string" overwrite="false" description="Type of File System (Default: NTFS, can be FAT32)" />
+	<property id="OSDPartitions0BOOTABLE" type="string" overwrite="false" description="True/False - Is the partition bootalbe (default: True if 1st partition)" />
+	<property id="OSDPartitions0QUICKFORMAT" type="string" overwrite="false" description="True/False - Shall the format be quick (default: True)" />
+	<property id="OSDPartitions0VOLUMENAME" type="string" overwrite="false" description="Volume name" />
+	<property id="OSDPartitions0SIZE" type="string" overwrite="false" description="Size of partition" />
+	<property id="OSDPartitions0SIZEUNITS" type="string" overwrite="false" description="Size units of partition (default: MB, can be GB or %)" />
+	<property id="OSDPartitions0VOLUMELETTERVARIABLE" type="string" overwrite="false" description="Variable Name to receive DriveLetter" />
+	<property id="OSDPartitions1TYPE" type="string" overwrite="false" description="Type of partition (Default: Primary, can be Logical or extended)" />
+	<property id="OSDPartitions1FILESYSTEM" type="string" overwrite="false" description="Type of File System (Default: NTFS, can be FAT32)" />
+	<property id="OSDPartitions1BOOTABLE" type="string" overwrite="false" description="True/False - Is the partition bootalbe (default: True if 1st partition)" />
+	<property id="OSDPartitions1QUICKFORMAT" type="string" overwrite="false" description="True/False - Shall the format be quick (default: True)" />
+	<property id="OSDPartitions1VOLUMENAME" type="string" overwrite="false" description="Volume name" />
+	<property id="OSDPartitions1SIZE" type="string" overwrite="false" description="Size of partition" />
+	<property id="OSDPartitions1SIZEUNITS" type="string" overwrite="false" description="Size units of partition (default: MB, can be GB or %)" />
+	<property id="OSDPartitions1VOLUMELETTERVARIABLE" type="string" overwrite="false" description="Variable Name to receive DriveLetter" />
+
+
+	<!-- Roles -->
+
+	<property id="OSRoles" type="string" overwrite="false" description="Comma-delimited list of role IDs to be installed" />
+	<property id="OSRoleServices" type="string" overwrite="false" description="Comma-delimited list of role service IDs to be installed" />
+	<property id="OSFeatures" type="string" overwrite="false" description="Comma-delimited list of features to be installed" />
+	<property id="UninstallOSRoles" type="string" overwrite="false" description="Comma-delimited list of role IDs to be removed" />
+	<property id="UninstallOSRoleServices" type="string" overwrite="false" description="Comma-delimited list of role service IDs to be removed" />
+	<property id="UninstallOSFeatures" type="string" overwrite="false" description="Comma-delimited list of features to be removed" />
+	<property id="OptionalOSRoles" type="string" overwrite="false" description="Comma-delimited list of optional role IDs to be installed (typically selected in the wizard)" />
+	<property id="OptionalOSRoleServices" type="string" overwrite="false" description="Comma-delimited list of optional role service IDs to be installed (typically selected in the wizard)" />
+	<property id="OptionalOSFeatures" type="string" overwrite="false" description="Comma-delimited list of optional features to be installed (typically selected in the wizard)" />
+
+
+	<!-- Configure ADDS -->
+	<property id="ReplicaOrNewDomain" type="string" overwrite="false" description="Chooses whether the domain controller will be a replica or part of a new domain" />
+	<property id="NewDomain" type="string" overwrite="false" description="Choice between a new forest or new domain in an existing tree or a new domain in a new tree" />
+	<property id="NewDomainDNSName" type="string" overwrite="false" description="DNS domain name of new domain" />
+	<property id="ParentDomainDNSName" type="string" overwrite="false" description="Parent DNS domain" />
+	<property id="ReplicaDomainDNSName" type="string" overwrite="false" description="Replica DNS domain" />
+	<property id="ChildName" type="string" overwrite="false" description="Name of child domain" />
+	<property id="DomainNetBiosName" type="string" overwrite="false" description="NetBios Name" />
+	<property id="ForestLevel" type="string" overwrite="false" description="Forest Level" />
+	<property id="DomainLevel" type="string" overwrite="false" description="Domain functional level" />
+	<property id="AutoConfigDNS" type="string" overwrite="false" description="Chooses to auto configure DNS" />
+	<property id="ConfirmGC" type="string" overwrite="false" description="Chooses whether to Confirm communication to GC" />
+	<property id="CriticalReplicationOnly" type="string" overwrite="false" description="Chooses to only replicate critical information" />
+	<property id="ADDSUserName" type="string" overwrite="false" description="Username chosen to run dcpromo" />
+	<property id="ADDSUserDomain" type="string" overwrite="false" description="Domain for user chosen to run dcpromo" />
+	<property id="ADDSPassword" type="string" overwrite="false" description="Password for user chosen to run dcpromo" />
+	<property id="ReplicationSourceDC" type="string" overwrite="false" description="DC used to replicate content" />
+	<property id="DatabasePath" type="string" overwrite="false" description="Path to store the AD database" />
+	<property id="ADDSLogPath" type="string" overwrite="false" description="Path to store the AD database logs" />
+	<property id="SysVolPath" type="string" overwrite="false" description="Path to store the SYSVOL" />
+	<property id="SafeModeAdminPassword" type="string" overwrite="false" description="Password used for safemode recovery" />
+	<property id="SiteName" type="string" overwrite="false" description="AD SiteName" />
+
+	<!-- Configure DHCP -->
+	<property id="DHCPServerOptionRouter" type="string" overwrite="false" description="Routers for the DHCP Server Option" />
+	<property id="DHCPServerOptionDNSServer" type="string" overwrite="false" description="DNS Server for the DHCP Server Option" />
+	<property id="DHCPServerOptionWINSServer" type="string" overwrite="false" description="WINS Server for the DHCP Server Option" />
+	<property id="DHCPServerOptionDNSDomainName" type="string" overwrite="false" description="DNS domain for the DHCP Server Option" />
+	<property id="DHCPServerOptionNBTNodeType" type="string" overwrite="false" description="NBT NodeType for the DHCP Server Option" />
+	<property id="DHCPServerOptionPXEClient" type="string" overwrite="false" description="PXE Client option for the DHCP Server Option" />
+	<property id="DHCPScopes" type="string" overwrite="false" description="Number of DHCP Scopes to Configure" />
+	<property id="DHCPScopes0SubnetMask" type="string" overwrite="false" description="Subnet mask for the first DHCP Scope" />
+	<property id="DHCPScopes0IP" type="string" overwrite="false" description="IP Subnet for the first DHCP Scope" />
+	<property id="DHCPScopes0Name" type="string" overwrite="false" description="Name for the first DHCP Scope" />
+	<property id="DHCPScopes0Description" type="string" overwrite="false" description="Description for the first DHCP Scope" />
+	<property id="DHCPScopes0StartIP" type="string" overwrite="false" description="Starting IP address the first DHCP Scope" />
+	<property id="DHCPScopes0EndIP" type="string" overwrite="false" description="Ending IP for the first DHCP Scope" />
+	<property id="DHCPScopes0ExcludeStartIP" type="string" overwrite="false" description="Start of the excluding IP range for the first DHCP Scope" />
+	<property id="DHCPScopes0ExcludeEndIP" type="string" overwrite="false" description="End of the excluding IP range for the first DHCP Scope" />
+	<property id="DHCPScopes0OptionRouter" type="string" overwrite="false" description="Router of the excluding IP range for the first DHCP Scope" />
+	<property id="DHCPScopes0OptionDNSServer" type="string" overwrite="false" description="DNS Server for the first DHCP Scope" />
+	<property id="DHCPScopes0OptionWINSServer" type="string" overwrite="false" description="WINS Server for the first DHCP Scope" />
+	<property id="DHCPScopes0OptionDNSDomainName" type="string" overwrite="false" description="DNS Domain Name for the first DHCP Scope" />
+	<property id="DHCPScopes0OptionNBTNodeType" type="string" overwrite="false" description="NBT Node Type for the first DHCP Scope" />
+	<property id="DHCPScopes0OptionLease" type="string" overwrite="false" description="Lease Duration for the first DHCP Scope" />
+	<property id="DHCPScopes0OptionPXEClient" type="string" overwrite="false" description="PXE Client for the first DHCP Scope" />
+
+	<!-- Configure DNS -->
+	<property id="DNSZones" type="string" overwrite="false" description="Number of DNS Zones to Configure" />
+	<property id="DNSZones0Name" type="string" overwrite="false" description="Name of the first DNS Zone" />
+	<property id="DNSZones0Type" type="string" overwrite="false" description="Type of Zone" />
+	<property id="DNSZones0MasterIP" type="string" overwrite="false" description="Primary IP for the zone" />
+	<property id="DNSZones0DirectoryPartition" type="string" overwrite="false" description="AD Partition to store the zone" />
+	<property id="DNSZones0FileName" type="string" overwrite="false" description="File Name of the first DNS Zone" />
+	<property id="DNSZones0Scavenge" type="string" overwrite="false" description="Enables scavenging" />
+	<property id="DNSZones0Update" type="string" overwrite="false" description="Enables dynamic updates" />
+	<property id="DNSServerOptionDisableRecursion" type="string" overwrite="false" description="Disables recursion on the DNS server" />
+	<property id="DNSServerOptionBINDSecondaries" type="string" overwrite="false" description="Allows BIND secondaries" />
+	<property id="DNSServerOptionFailOnLoad" type="string" overwrite="false" description="Toggles fail on load" />
+	<property id="DNSServerOptionEnableRoundRobin" type="string" overwrite="false" description="Enables Round Robin" />
+	<property id="DNSServerOptionEnableNetmaskOrdering" type="string" overwrite="false" description="Enables netmask ordering" />
+	<property id="DNSServerOptionEnableSecureCache" type="string" overwrite="false" description="Enables cache security" />
+	<property id="DNSServerOptionNameCheckFlag" type="string" overwrite="false" description="Name Check Flag" />
+
+	<!-- Configure WINS -->
+	<property id="WINSPartners" type="string" overwrite="false" description="Number of WINS Partners to Configure" />
+	<property id="WINSPartners0Name" type="string" overwrite="false" description="Name of the first WINS partner" />
+	<property id="WINSPartners0Type" type="string" overwrite="false" description="Type of the WINS partner" />
+	<property id="WINSPartners0IP" type="string" overwrite="false" description="IP address of the first WINS partner" />
+
+	<!-- Values used for SCCM "OEM" Scenarios -->
+	<property id="OSDImageIndex" type="string" overwrite="false" description="Index of installation image within WIM (Used for OEM Scenario)." />
+	<property id="OSDInstallEditionIndex" type="string" overwrite="false" description="Index of installation image within WIM (Used for OEM Scenario)." />
+	<property id="ConfigFileName" type="string" overwrite="false" description="Filename of config file (example: unattend.xml (Used for OEM Scenario)." />
+	<property id="OSDAnswerFilePath" type="string" overwrite="false" description="path for answer file (example: c:\unattend.xml) (Used for OEM Scenario)." />
+	<property id="OSDImageCreator" type="string" overwrite="false" description="User ID of installation account (Used for OEM Scenario)." />
+	<property id="OSDInstallType" type="string" overwrite="false" description="Installation Type (example: SysPrep ) (Used for OEM Scenario)." />
+	<property id="OSDTargetSystemDrive" type="string" overwrite="false" description="Disk Drive used to install OS (Used for OEM Scenario)." />
+	<property id="OSDTargetSystemRoot" type="string" overwrite="false" description="Install path for OS (Used for OEM Scenario)." />
+	<property id="OSDisk" type="string" overwrite="false" description="Disk drive used to install OS, typically written by ZTIDiskPart.wsf (Used for OEM Scenario)." />
+	<property id="OSVersionNumber" type="string" overwrite="false" description="OS Major and Minor version number (example: 6.0) (Used for OEM Scenario)." />
+	<property id="OSArchitecture" type="string" overwrite="false" description="OS CPU Architecture Type (example: x86 or x64) (Used for OEM Scenario)." />
+	<property id="ImagePackageID" type="string" overwrite="false" description="Package ID for the OS image to install (Used for OEM Scenario)." />
+	<property id="InstallPackageID" type="string" overwrite="false" description="Package ID for the OS image to install (Used for OEM Scenario)." />
+	<property id="OSDImagePackageID" type="string" overwrite="false" description="Package ID for the OS image to install (Used for OEM Scenario)." />
+	<property id="ConfigFilePackage" type="string" overwrite="false" description="Package ID for the Configuration Package to use for installation (Used for OEM Scenario)." />
+
+	<!-- Lists -->
+
+	<property id="Packages" type="list" description="List of SMS packages that should be installed" />
+	<property id="Applications" type="list" description="List of applications (GUIDs) that should be installed" />
+	<property id="MandatoryApplications" type="list" description="List of applications (GUIDs) that will be installed" />
+	<property id="Administrators" type="list" description="List of groups and users to add to the Administrators group" />
+	<property id="PowerUsers" type="list" description="List of groups and users to add to the Power Users group" />
+	<property id="DriverPaths" type="list" description="Driver path UNCs that should be used (no default)" />
+	<property id="DriverGroup" type="list" description="Driver groups that should be used (default is All Drivers)" />
+	<property id="StorageDriverGroup" type="list" description="Storage Driver groups that should be used for XP/2003 (default is All Drivers)" />
+	<property id="StorageDriverSysPrepGroup" type="list" description="Storage Driver groups that should be used XP/2003 during SysPrep (default is All Drivers)" />
+	<property id="DomainOUs" type="list" description="Optional list of Domain OU's to be displayed to users." />
+	<property id="USMTMigFiles" type="list" overwrite="false" description="USMT XML files that should be used when running Scanstate and Loadstate" />
+	<property id="Groups" type="list" overwrite="false" description="List of local security groups to capture and restore (default is 'Administrators' and 'Power Users')" />
+	<property id="LanguagePacks" type="list" description="List of language packs (GUIDs) to be installed" />
+	<property id="PackageGroup" type="list" description="Package groups that should be used (default is All Drivers)" />
+	<property id="Role" type="list" overwrite="false" description="Specifies roles that should be assigned to the computer" />
+	<property id="Location" type="list" overwrite="false" description="Locations for the computer (typicaly resolved via a database lookup based on the default gateway)" />
+	<property id="WUMU_ExcludeKB" type="list" description="List of Windows Update/Microsoft Update patches to ignore (by associated KB Articles)" />
+	<property id="WUMU_ExcludeID" type="list" description="List of Windows Update/Microsoft Update patches to ignore (by associated Update ID)" />
+
+</properties>

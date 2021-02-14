@@ -1,0 +1,32 @@
+<xsd:schema id="applications" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+ <xsd:element name="application" type="applicationType" />
+
+ <xsd:complexType name="applicationType">
+  <xsd:sequence>
+   <xsd:element name="Name" type="xsd:string" nillable="false" />
+   <xsd:element name="Comments" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="DisplayName" type="xsd:string" minOccurs="0" nillable="true" />
+
+   <xsd:element name="ShortName" type="xsd:string" nillable="false" />
+   <xsd:element name="Version" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="Publisher" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="Language" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="Source" type="xsd:string" minOccurs="0" />
+   <xsd:element name="CommandLine" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="WorkingDirectory" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="SupportedPlatform" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+   <xsd:element name="UninstallKey" type="xsd:string" minOccurs="0" />
+   <xsd:element name="Dependency" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+   <xsd:element name="Reboot" type="xsd:string" minOccurs="0" />
+  </xsd:sequence>
+  <xsd:attribute name="guid" type="xsd:string" />
+  <xsd:attribute name="hide" type="xsd:string" />
+  <xsd:attribute name="enable" type="xsd:string" />
+ </xsd:complexType>
+
+</xsd:schema>

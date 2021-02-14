@@ -1,0 +1,28 @@
+<xsd:schema id="linkedDeploymentShares" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+ <xsd:element name="linkedDeploymentShare" type="linkedDeploymentShareType" />
+
+ <xsd:complexType name="linkedDeploymentShareType">
+  <xsd:sequence>
+   <xsd:element name="Name" type="xsd:string" nillable="false" />
+   <xsd:element name="Comments" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedBy" type="xsd:string" minOccurs="0" nillable="true" />
+
+   <xsd:element name="Root" type="xsd:string" nillable="false" />
+   <xsd:element name="SelectionProfile" type="xsd:string" nillable="false" />
+   <xsd:element name="Replace" type="xsd:string" nillable="false" />
+   <xsd:element name="CopyStandardFolders" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="ExtraFolders" type="xsd:string" minOccurs="0" maxOccurs="unbounded" nillable="true" />
+   <xsd:element name="UpdateBoot" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="SingleUser" type="xsd:string" minOccurs="0" nillable="true" />
+
+  </xsd:sequence>
+  <xsd:attribute name="guid" type="xsd:string" />
+  <xsd:attribute name="hide" type="xsd:string" />
+  <xsd:attribute name="enable" type="xsd:string" />
+ </xsd:complexType>
+
+</xsd:schema>

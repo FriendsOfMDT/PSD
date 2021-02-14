@@ -1,0 +1,25 @@
+<xsd:schema id="taskSequences" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+ <xsd:element name="ts" type="tsType" />
+
+ <xsd:complexType name="tsType">
+  <xsd:sequence>
+   <xsd:element name="Name" type="xsd:string" />
+   <xsd:element name="Comments" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="CreatedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedTime" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="LastModifiedBy" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="DisplayName" type="xsd:string" minOccurs="0" nillable="true" />
+
+   <xsd:element name="ID" type="xsd:string" />
+   <xsd:element name="Version" type="xsd:string" minOccurs="0" nillable="true" />
+   <xsd:element name="TaskSequenceTemplate" type="xsd:string" />
+   <xsd:element name="SupportedPlatform" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+  </xsd:sequence>
+  <xsd:attribute name="guid" type="xsd:string" />
+  <xsd:attribute name="hide" type="xsd:string" />
+  <xsd:attribute name="enable" type="xsd:string" />
+ </xsd:complexType>
+
+</xsd:schema>
