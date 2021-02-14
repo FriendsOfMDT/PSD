@@ -1,7 +1,10 @@
 # README - PowerShell Deployment Extension Kit v2
 
+
+## [CHANGELOG](./Scripts/PSDWizard/CHANGELOG.MD)
+
 January 2021 (ver 0.2.1.8)
-  - Updates UI
+  - Updated UI
 
 October 2020 (ver 0.2.1.6)
 Lots of changes.
@@ -13,6 +16,18 @@ June 2020 (ver 0.2.0.1)
 
 Welcome to PowerShell Deployment (PSD)
 
+## TODO
+- Themes > Modern OOBE theme coming soon
+- Logos/Branding
+- Add deployment readiness checks
+- Add refresh event handler
+- build network configuration screen
+- ~~Generate XAML based on customsettings~~ > SEE CHANGELOG 11/22/2020
+- ~~Search Task Sequence~~ > SEE CHANGELOG 11/28/2020
+- ~~Tab events~~ >  SEE CHANGELOG 11/28/2020
+- ~~Populate multilevel treeview for task sequence~~ > SEE CHANGELOG 11/27/2020
+- ~~Search Applications~~ > SEE CHANGELOG 11/28/2020
+- ~~SkipWizard Control~~ > SEE CHANGELOG 11/28/2020
 ## Target audience
 - Infrastructure Architects
 - Solution Architects
@@ -26,21 +41,6 @@ Supported deployment scenarios include deployment from the following content rep
   -  UNC (\\server\share)
  
 PSD is very much a work-in-progress solution, so stay tuned as we rapidly move forward on this.
-
-
-## [CHANGELOG](./Scripts/PSDWizard/CHANGELOG.MD)
-## TODO:
-- Themes > Modern OOBE theme coming soon
-- Logos/Branding
-- Add deployment readiness checks
-- Add refresh event handler
-- build network configuration screen
-- ~~Generate XAML based on customsettings~~ > SEE CHANGELOG 11/22/2020
-- ~~Search Task Sequence~~ > SEE CHANGELOG 11/28/2020
-- ~~Tab events~~ >  SEE CHANGELOG 11/28/2020
-- ~~Populate multilevel treeview for task sequence~~ > SEE CHANGELOG 11/27/2020
-- ~~Search Applications~~ > SEE CHANGELOG 11/28/2020
-- ~~SkipWizard Control~~ > SEE CHANGELOG 11/28/2020
 
 ## v2 Screenshots
 
