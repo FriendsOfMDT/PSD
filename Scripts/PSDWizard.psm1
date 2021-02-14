@@ -413,7 +413,7 @@ Function Format-PSDWizard{
 }
 #endregion
 
-#region FUNCTION: Export all results
+#region FUNCTION: Export all results from PSDwizard
 function Export-PSDWizardResult{
     Param(
         $XMLContent,
@@ -465,7 +465,7 @@ function Export-PSDWizardResult{
 }
 #endregion
 
-#region FUNCTION: Sets all variables
+#region FUNCTION: Sets all variables for PSD wizard
 function Set-PSDWizardDefault{
     Param(
         $XMLContent,
@@ -508,7 +508,7 @@ function Set-PSDWizardDefault{
 }
 #endregion
 
-
+#region FUNCTION: initialize PSDwizard and it functionality
 Function Invoke-PSDWizard{
     Param(
         [parameter(Mandatory=$true)]
@@ -563,18 +563,7 @@ Function Invoke-PSDWizard{
         }
     }
     #endregion
-    
-    #region For Task Sequence Tab objects
-    # ---------------------------------------------
-    #update ID to what in customsettings.ini
-    $TS_TaskSequenceID.Text = Get-TSItem TaskSequenceID -ValueOnly
-    # start by disabling search
-    $_tsTabSearchEnter.IsEnabled = $False
-    $_tsTabSearchClear.IsEnabled = $False
-    Add-PSDWizardTree -SourcePath "DeploymentShare:\Task Sequences" -TreeObject $_tsTabTree -Identifier 'ID'
-    #get all available task seqeunces
-    $Global:TaskSequencesList = Get-PSDChildItem -path "DeploymentShare:\Task Sequences" -Recurse -Passthru
-    
+
     #endregion
     #region For Task Sequence Tab objects
     # ---------------------------------------------
@@ -597,11 +586,6 @@ Function Invoke-PSDWizard{
     # ---------------------------------------------
     #hide device details is specified
 
-    #OSDComputerName overwrites ComputerName
-    If($null -ne $TS_ComputerName.Text){
-        $TS_OSDComputerName.Text = (Set-ComputerName $TS_ComputerName.Text)
-    }
-
     #if skipcomputername is YES, hide input unless value is invalid
     If( ((Get-TSItem SkipComputerName -ValueOnly).ToUpper() -eq 'YES') -and ($results -ne $False)){
         Get-FormVariable -Name "_grdDeviceDetails" | Set-UIFieldElement -Visible:$False
@@ -620,17 +604,18 @@ Function Invoke-PSDWizard{
         Get-FormVariable -Name "JoinDomain" -Wildcard | Set-UIFieldElement -Visible:$False
     }
     #>
-    #endregion
-    
+
     If( -not[string]::IsNullOrEmpty((Get-TSItem JoinWorkgroup -ValueOnly)) ){
         Get-FormVariable -Name "_JoinWorkgroupRadio" | Set-UIFieldElement -Checked:$True
         Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$False
     }
-    
+
     If( -not[string]::IsNullOrEmpty((Get-TSItem JoinDomain -ValueOnly)) ){
         Get-FormVariable -Name "_JoinDomainRadio" | Set-UIFieldElement -Checked:$True
         Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$False
     }
+    #endregion
+
     #region For Locale Tab objects
     # ---------------------------------------------
     #The display name is different than the actual variable value. (eg. English (United States) --> en-US)
@@ -693,277 +678,458 @@ Function Invoke-PSDWizard{
     
     #endregion
     #====================================
-    # EVENTS HANDLERS
+    # EVENTS HANDLERS ON PAGE CHANGE
     #====================================
     #Update list when changed
     $_wizTabControl.Add_SelectionChanged({
         Switch($_wizTabControl.SelectedItem.Header)
         {
             'Deployment Readiness'   {
-                
+
                                     }
 
-            'Task Sequence'  {
-                                #check if preselect tasksequence is within list
-                                If($TS_TaskSequenceID.Text -in $Global:TaskSequencesList.ID){
-                                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$True
-                                }Else{
-                                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$False
+            'Task Sequence'
+            {
+                #PROCESS ON PAGE LOAD
+                #region For Task Sequence Tab event handlers
+                # -------------------------------------------
+                #Grab the text value when cursor leaves (AFTER Typed)
+                $_tsTabSearch.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::GotFocusEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        #set a variable if there is text in field BEFORE the new name is typed
+                        If($_tsTabSearch.Text){
+                            $script:SearchText = $_tsTabSearch.Text
+                        }
+                        $_tsTabSearchEnter.IsEnabled = $True
+                        $_tsTabSearchClear.IsEnabled = $True
+                    }
+                )
+
+                $_tsTabSearch.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::LostFocusEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        #because there is a example text field in the box by default, check for that
+                        If($_tsTabSearch.Text -eq 'Search...'){
+                            $script:SearchText = $_tsTabSearch.Text
+                            $_tsTabSearchEnter.IsEnabled = $False
+                            $_tsTabSearchClear.IsEnabled = $False
+                        }
+                        ElseIf([string]::IsNullOrEmpty($_tsTabSearch.Text)){
+                            $_tsTabSearchEnter.IsEnabled = $False
+                            $_tsTabSearchClear.IsEnabled = $False
+                        }
+                        Else{
+                            $_tsTabSearchEnter.IsEnabled = $True
+                            $_tsTabSearchClear.IsEnabled = $True
+                        }
+                    }
+                )
+
+                #Textbox placeholder remove default text when textbox is being used
+                $_tsTabSearch.Add_GotFocus({
+                    #if it has an example
+                    if ($_tsTabSearch.Text -eq 'Search...') {
+                        #clear value and make it black bold ready for input
+                        $_tsTabSearch.Text = ''
+                        $_tsTabSearch.Foreground = 'Black'
+                        #should be black while typing....
+                    }
+                    #if it does not have an example
+                    Else{
+                        #ensure test is black and medium
+                        $_tsTabSearch.Foreground = 'Black'
+                    }
+                })
+
+                #Textbox placeholder grayed out text when textbox empty and not in being used
+                $_tsTabSearch.Add_LostFocus({
+                    #if text is null (after it has been clicked on which cleared by the Gotfocus event)
+                    if ($_tsTabSearch.Text -eq '') {
+                        #add example back in light gray font
+                        $_tsTabSearch.Foreground = 'Gray'
+                        $_tsTabSearch.Text = 'Search...'
+                    }
+                })
+
+                #make sure task sequence is selected
+                $_tsTabTree.add_SelectedItemChanged({
+                    $TS_TaskSequenceID.Text = $this.SelectedItem.Tag[2]
+                    If($TS_TaskSequenceID.Text -in $Global:TaskSequencesList.ID){
+                        $_wizNext.IsEnabled = $True
+                    }Else{
+                        $_wizNext.IsEnabled = $False
+                    }
+                })
+
+                #check if preselect tasksequence is within list
+                If($TS_TaskSequenceID.Text -in $Global:TaskSequencesList.ID){
+                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$True
+                }Else{
+                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$False
+                }
+
+                #LIVE SEARCH
+                $_tsTabSearch.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        If(-not([string]::IsNullOrEmpty($_tsTabSearch.Text))){
+                            Search-PSDWizardTree -SourcePath "DeploymentShare:\Task Sequences" -TreeObject $_tsTabTree -Identifier 'ID' -Filter $_tsTabSearch.Text
+                        }
+                    }
+                )
+
+                # BUTTON EVENTS
+                # ---------------------------
+                $_tsTabSearchEnter.Add_Click({
+                    If(-not([string]::IsNullOrEmpty($_tsTabSearch.Text))){
+                        Search-PSDWizardTree -SourcePath "DeploymentShare:\Task Sequences" -TreeObject $_tsTabTree -Identifier 'ID' -Filter $_tsTabSearch.Text
+                    }
+                })
+
+                $_tsTabSearchClear.Add_Click({
+                    $_tsTabSearch.Text = $null
+                    $_tsTabSearchEnter.IsEnabled = $False
+                    Add-PSDWizardTree -SourcePath "DeploymentShare:\Task Sequences" -TreeObject $_tsTabTree -Identifier 'ID'
+                    $_tsTabSearchClear.IsEnabled = $False
+                })
+
+                $_tsTabExpand.Add_Click({
+                    $i=0
+                    Foreach($item in $_tsTabTree.Items)
+                    {
+                        If($_tsTabTree.Items[$i].IsExpanded -ne $true){
+                            $_tsTabTree.Items[$i].ExpandSubtree()
+                        }
+                        $i++
+                    }
+
+                })
+
+                $_tsTabCollapse.Add_Click({
+                    $i=0
+                    Foreach($item in $_tsTabTree.Items)
+                    {
+                        If($_tsTabTree.Items[$i].IsExpanded -ne $False){
+                            $_tsTabTree.Items[$i].IsExpanded = $false;
+                        }
+                        $i++
+                    }
+                })
+                #endregion
+
+            } #end Tasksequence switch value
+
+
+
+            'Device Details'
+            {
+                #RUN EVENTS ON PAGE LOAD
+                #OSDComputerName overwrites ComputerName
+                If( Get-TSItem ComputerName -ValueOnly ){
+                    $TS_OSDComputerName.Text = (Set-ComputerName (Get-TSItem ComputerName -ValueOnly))
+                }
+                If( Get-TSItem OSDComputerName -ValueOnly ){
+                    $TS_OSDComputerName.Text = (Set-ComputerName (Get-TSItem OSDComputerName -ValueOnly))
+                }
+                $_wizNext.IsEnabled = Confirm-ComputerName -ComputerNameObject $TS_OSDComputerName -OutputObject $_detTabValidation -Passthru
+
+                #disable Next if neither radio is select....however if options are not available, don't disable
+                If( ($_JoinWorkgroupRadio.IsChecked -eq $False) -and ($_JoinDomainRadio.IsChecked -eq $False) -and $NetworkSelectionAvailable){
+                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$False
+                }
+                ElseIf($_JoinDomainRadio.IsChecked -eq $True){
+                    Get-FormVariable -Name "Workgroup" -Wildcard | Set-UIFieldElement -BorderColor '#FFABADB3'
+                    Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$True
+                    Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$False
+
+                    $_wizNext.IsEnabled = Confirm-DomainFQDN -DomainNameObject $TS_JoinDomain -OutputObject $_detTabValidation2 -Passthru
+                    $_wizNext.IsEnabled = Confirm-UserName -UserNameObject $TS_DomainAdmin -OutputObject $_detTabValidation2 -Passthru
+                    $_wizNext.IsEnabled = Confirm-DomainFQDN -DomainNameObject $TS_DomainAdminDomain -OutputObject $_detTabValidation2 -Passthru
+
+                    If( [string]::IsNullOrEmpty($TS_DomainAdminPassword.Password)){
+                        $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_DomainAdminPassword -ConfirmedPasswordObject $_DomainAdminConfirmPassword -OutputObject $_detTabValidation2 -Passthru
+                    }Else{
+                        $_DomainAdminConfirmPassword.Password = $TS_DomainAdminPassword.Password
+                    }
+
+                }
+                ElseIf($_JoinWorkgroupRadio.IsChecked -eq $True){
+                    Get-FormVariable -Name "Domain" -Wildcard | Set-UIFieldElement -BorderColor '#FFABADB3'
+                    Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$False
+                    Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$True
+
+                    If([string]::IsNullOrEmpty($TS_JoinWorkgroup.Text)){
+                        Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$False
+                    }Else{
+                        $_wizNext.IsEnabled = Confirm-WorkgroupName -WorkgroupNameObject $TS_JoinWorkgroup -OutputObject $_detTabValidation2 -Passthru
+                    }
+                }
+
+                #RUN EVENTS ON SELECTION CHANGE
+                #Disables other option when either Domain or workgroup selected
+                $_detTabLayout.AddHandler(
+                    [System.Windows.Controls.RadioButton]::CheckedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        If($_.source.name -eq '_JoinDomainRadio')
+                        {
+                            Get-FormVariable -Name "Workgroup" -Wildcard | Set-UIFieldElement -BorderColor '#FFABADB3'
+                            Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$True
+                            Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$False
+
+                            $_wizNext.IsEnabled = Confirm-DomainFQDN -DomainNameObject $TS_JoinDomain -OutputObject $_detTabValidation2 -Passthru
+                            $_wizNext.IsEnabled = Confirm-UserName -UserNameObject $TS_DomainAdmin -OutputObject $_detTabValidation2 -Passthru
+                            $_wizNext.IsEnabled = Confirm-DomainFQDN -DomainNameObject $TS_DomainAdminDomain -OutputObject $_detTabValidation2 -Passthru
+
+                            if([string]::IsNullOrEmpty($TS_DomainAdminPassword.Password)){
+                                $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_DomainAdminPassword -ConfirmedPasswordObject $_DomainAdminConfirmPassword -OutputObject $_detTabValidation2 -Passthru
+                            }Else{
+                                $_DomainAdminConfirmPassword.Password = (Get-TSItem DomainAdminPassword -ValueOnly)
+                            }
+                        }
+
+                        If($_.source.name -eq '_JoinWorkgroupRadio')
+                        {
+                            Get-FormVariable -Name "Domain" -Wildcard | Set-UIFieldElement -BorderColor '#FFABADB3'
+                            Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$False
+                            Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$True
+
+                            $TS_JoinWorkgroup.AddHandler(
+                                [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                                [System.Windows.RoutedEventHandler]{
+                                    $_wizNext.IsEnabled = Confirm-WorkgroupName -WorkgroupNameObject $TS_JoinWorkgroup -OutputObject $_detTabValidation2 -Passthru
                                 }
-            }
+                            )
 
-            'Device Details' {
-                                $TS_OSDComputerName.Text = (Set-ComputerName $TS_OSDComputerName.Text)
-                                $results = Confirm-ComputerName -ComputerNameObject $TS_OSDComputerName `
-                                                                        -OutputObject $_detTabValidation -Passthru
-                                $_wizNext.IsEnabled = $results
+                            If([string]::IsNullOrEmpty($TS_JoinWorkgroup.Text)){
+                                Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$False
+                            }Else{
+                                $_wizNext.IsEnabled = Confirm-WorkgroupName -WorkgroupNameObject $TS_JoinWorkgroup -OutputObject $_detTabValidation2 -Passthru
+                            }
+                        }
+                    }
+                )
 
-                                #disable Next if neither radio is select....however if options are not available, don't disable
-                                If( ($_JoinWorkgroupRadio.IsChecked -eq $False) -and ($_JoinDomainRadio.IsChecked -eq $False) -and $NetworkSelectionAvailable){
-                                    Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$False
-                                }
-            }
+                #CHECK VALUE AS TYPED
+                $TS_OSDComputerName.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-ComputerName -ComputerNameObject $TS_OSDComputerName -OutputObject $_detTabValidation -Passthru
+                    }
+                )
 
-            'Administrator Credentials' {
-                                            If( -Not[string]::IsNullOrEmpty($TS_AdminPassword.Password)){
-                                                $_ConfirmAdminPassword.Password = $TS_AdminPassword.Password
-                                            }
-                                            $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_AdminPassword `
-                                                                        -ConfirmedPasswordObject $_ConfirmAdminPassword `
-                                                                        -OutputObject $_admTabValidation -Passthru
-            }
+                $TS_DomainAdminPassword.AddHandler(
+                    [System.Windows.Controls.PasswordBox]::PasswordChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_DomainAdminPassword -ConfirmedPasswordObject $_DomainAdminConfirmPassword -OutputObject $_detTabValidation2 -Passthru
+                    }
+                )
 
-            'Locale and Time' {}
+                $_DomainAdminConfirmPassword.AddHandler(
+                    [System.Windows.Controls.PasswordBox]::PasswordChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_DomainAdminPassword -ConfirmedPasswordObject $_DomainAdminConfirmPassword -OutputObject $_detTabValidation2 -Passthru
+                    }
+                )
 
-            'Applications' {}
-        }
-    })
+                $TS_JoinDomain.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-DomainFQDN -DomainNameObject $TS_JoinDomain -OutputObject $_detTabValidation2 -Passthru
+                    }
+                )
 
-    #region For Task Sequence Tab event handlers
-    # -------------------------------------------
-    #Grab the text value when cursor leaves (AFTER Typed)
-    $_tsTabSearch.AddHandler(
-        [System.Windows.Controls.Primitives.TextBoxBase]::GotFocusEvent,
-        [System.Windows.RoutedEventHandler]{
-            #set a variable if there is text in field BEFORE the new name is typed
-            If($_tsTabSearch.Text){
-                $script:SearchText = $_tsTabSearch.Text
-            }
-            $_tsTabSearchEnter.IsEnabled = $True
-            $_tsTabSearchClear.IsEnabled = $True
-        }
-    )
+                $TS_DomainAdminDomain.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-DomainFQDN -DomainNameObject $TS_DomainAdminDomain -OutputObject $_detTabValidation2 -Passthru
+                    }
+                )
 
-    $_tsTabSearch.AddHandler(
-        [System.Windows.Controls.Primitives.TextBoxBase]::LostFocusEvent,
-        [System.Windows.RoutedEventHandler]{
-            #because there is a example text field in the box by default, check for that
-            If($_tsTabSearch.Text -eq 'Search...'){
-                $script:SearchText = $_tsTabSearch.Text
-                $_tsTabSearchEnter.IsEnabled = $False
-                $_tsTabSearchClear.IsEnabled = $False
-            }
-            ElseIf([string]::IsNullOrEmpty($_tsTabSearch.Text)){
-                $_tsTabSearchEnter.IsEnabled = $False
-                $_tsTabSearchClear.IsEnabled = $False
-            }
-            Else{
-                $_tsTabSearchEnter.IsEnabled = $True
-                $_tsTabSearchClear.IsEnabled = $True
-            }
-        }
-    )
+                $TS_DomainAdmin.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-UserName -UserNameObject $TS_DomainAdmin -OutputObject $_detTabValidation2 -Passthru
+                    }
+                )
 
-    #Textbox placeholder remove default text when textbox is being used
-    $_tsTabSearch.Add_GotFocus({
-        #if it has an example
-        if ($_tsTabSearch.Text -eq 'Search...') {
-            #clear value and make it black bold ready for input
-            $_tsTabSearch.Text = ''
-            $_tsTabSearch.Foreground = 'Black'
-            #should be black while typing....
-        }
-        #if it does not have an example
-        Else{
-            #ensure test is black and medium
-            $_tsTabSearch.Foreground = 'Black'
-        }
-    })
+                $TS_JoinWorkgroup.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-WorkgroupName -WorkgroupNameObject $TS_JoinWorkgroup -OutputObject $_detTabValidation2 -Passthru
+                    }
+                )
 
-    #Textbox placeholder grayed out text when textbox empty and not in being used
-    $_tsTabSearch.Add_LostFocus({
-        #if text is null (after it has been clicked on which cleared by the Gotfocus event)
-        if ($_tsTabSearch.Text -eq '') {
-            #add example back in light gray font
-            $_tsTabSearch.Foreground = 'Gray'
-            $_tsTabSearch.Text = 'Search...'
-        }
-    })
-
-    #make sure task sequence is selected
-    $_tsTabTree.add_SelectedItemChanged({
-        $TS_TaskSequenceID.Text = $this.SelectedItem.Tag[2]
-        If($TS_TaskSequenceID.Text -in $Global:TaskSequencesList.ID){
-            $_wizNext.IsEnabled = $True
-        }Else{
-            $_wizNext.IsEnabled = $False
-        }
-    })
-
-    #endregion
-
-    #region For Admin Credentials Tab event handlers
-    # -----------------------------------------
-    #Grab the text value if cursor is in field
-    $TS_AdminPassword.AddHandler(
-        [System.Windows.Controls.Primitives.TextBoxBase]::GotFocusEvent,
-        [System.Windows.RoutedEventHandler]{
-            $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_AdminPassword -ConfirmedPasswordObject $_ConfirmAdminPassword -OutputObject $_admTabValidation -Passthru
-        }
-    )
-
-    #Grab the text value when cursor leaves (AFTER Typed)
-    $TS_AdminPassword.AddHandler(
-        [System.Windows.Controls.Primitives.TextBoxBase]::LostFocusEvent,
-        [System.Windows.RoutedEventHandler]{
-            $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_AdminPassword -ConfirmedPasswordObject $_ConfirmAdminPassword -OutputObject $_admTabValidation -Passthru
-        }
-    )
-    #endregion
-
-    #region For Details Tab event handlers
-    # -----------------------------------------
-    #Grab the text value if cursor is in field
-    $TS_OSDComputerName.AddHandler(
-        [System.Windows.Controls.Primitives.TextBoxBase]::GotFocusEvent,
-        [System.Windows.RoutedEventHandler]{
-            $_wizNext.IsEnabled = Confirm-ComputerName -ComputerNameObject $TS_OSDComputerName -OutputObject $_detTabValidation -Passthru
-        }
-    )
-
-    #Grab the text value when cursor leaves (AFTER Typed)
-    $TS_OSDComputerName.AddHandler(
-        [System.Windows.Controls.Primitives.TextBoxBase]::LostFocusEvent,
-        [System.Windows.RoutedEventHandler]{
-            $_wizNext.IsEnabled = Confirm-ComputerName -ComputerNameObject $TS_OSDComputerName -OutputObject $_detTabValidation -Passthru
-        }
-    )
+            } #end device switch value
 
 
-    #Disables other option when either Domain or workgroup selected
-    [System.Windows.RoutedEventHandler]$Script:CheckedEventHandler = {
-        If($_.source.name -eq '_JoinDomainRadio')
-        {
-            Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$True
-            Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$False
-            Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$True
 
-            if([string]::IsNullOrEmpty($TS_DomainAdminPassword.Password)){
-                #$_DomainAdminConfirmPassword.IsEnabled = $True
-            }Else{
-                $_DomainAdminConfirmPassword.Password = (Get-TSItem DomainAdminPassword -ValueOnly)
-                #$_DomainAdminConfirmPassword.IsEnabled = $False
-            }
-        }
+            'Administrator Credentials'
+            {
+                #PROCESS ON PAGE LOAD
+                If( -Not[string]::IsNullOrEmpty($TS_AdminPassword.Password)){
+                    $_ConfirmAdminPassword.Password = $TS_AdminPassword.Password
+                }
+                $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_AdminPassword -ConfirmedPasswordObject $_ConfirmAdminPassword -OutputObject $_admTabValidation -Passthru
 
-        If($_.source.name -eq '_JoinWorkgroupRadio')
-        {
-            Get-FormVariable -Name "_grdJoinDomain" | Set-UIFieldElement -Enable:$False
-            Get-FormVariable -Name "_grdJoinWorkgroup" | Set-UIFieldElement -Enable:$True
-            Get-FormVariable -Name "_wizNext" | Set-UIFieldElement -Enable:$True
-        }
-    }
-    $_detTabLayout.AddHandler([System.Windows.Controls.RadioButton]::CheckedEvent, $CheckedEventHandler)
-    #endregion
+                #CHECK VALUE AS TYPED
+                $TS_AdminPassword.AddHandler(
+                    [System.Windows.Controls.PasswordBox]::PasswordChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_AdminPassword -ConfirmedPasswordObject $_ConfirmAdminPassword -OutputObject $_admTabValidation -Passthru
+                    }
+                )
 
-    #region For Locale Tab event handlers
-    # -----------------------------------------
-    #Change OSD variables based on selection (format to OSD format)
-    $_locTabLanguage.Add_SelectionChanged({
-        $TS_UILanguage.Text = ConvertTo-TSVar -HashTable $UILanguageTable -InputValue $_locTabLanguage.SelectedItem
-    })
+                $_ConfirmAdminPassword.AddHandler(
+                    [System.Windows.Controls.PasswordBox]::PasswordChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        $_wizNext.IsEnabled = Confirm-Passwords -PasswordObject $TS_AdminPassword -ConfirmedPasswordObject $_ConfirmAdminPassword -OutputObject $_admTabValidation -Passthru
+                    }
+                )
 
-    $_locTabSystemLocale.Add_SelectionChanged({
-        $TS_SystemLocale.Text = ConvertTo-TSVar -HashTable $SystemLocaleTable -InputValue $_locTabSystemLocale.SelectedItem
-        $TS_UserLocale.Text = $TS_SystemLocale.Text
-    })
+            } #end Admin creds switch value
 
-    $_locTabKeyboardLocale.Add_SelectionChanged({
-        $TS_KeyboardLocale.Text = (Get-KeyboardLayouts | Where {$_.Name -eq $_locTabKeyboardLocale.SelectedItem}).KeyboardLayout
-    })
 
-    $_locTabTimeZoneName.Add_SelectionChanged({
-        $TS_TimeZoneName.Text = ConvertTo-TSVar -HashTable $TimeZoneNameTable -InputValue $_locTabTimeZoneName.SelectedItem
-        $TS_TimeZone.Text = Get-TimeZoneIndex -TimeZone ($_locTabTimeZoneName.SelectedItem)
-    })
-    #endregion
 
-    #region For Application Tab event handlers
-    # -----------------------------------------
-    #Grab the text value when cursor leaves (AFTER Typed)
-    $_appTabSearch.AddHandler(
-        [System.Windows.Controls.Primitives.TextBoxBase]::GotFocusEvent,
-        [System.Windows.RoutedEventHandler]{
-            #set a variable if there is text in field BEFORE the new name is typed
-            If($_appTabSearch.Text){
-                $script:SearchText = $_appTabSearch.Text
-            }
-            $_appTabSearchEnter.IsEnabled = $True
-            $_appTabSearchClear.IsEnabled = $True
-        }
-    )
+            'Locale and Time'
+            {
+                #PROCESS ON PAGE LOAD
+                #region For Locale Tab event handlers
+                # -----------------------------------------
+                #Change OSD variables based on selection (format to OSD format)
+                $_locTabLanguage.Add_SelectionChanged({
+                    $TS_UILanguage.Text = ConvertTo-TSVar -HashTable $UILanguageTable -InputValue $_locTabLanguage.SelectedItem
+                })
 
-    $_appTabSearch.AddHandler(
-        [System.Windows.Controls.Primitives.TextBoxBase]::LostFocusEvent,
-        [System.Windows.RoutedEventHandler]{
-            #because there is a example text field in the box by default, check for that
-            If($_appTabSearch.Text -eq 'Search...'){
-                $script:SearchText = $_appTabSearch.Text
-                $_appTabSearchEnter.IsEnabled = $False
-                $_appTabSearchClear.IsEnabled = $False
-            }
-            ElseIf([string]::IsNullOrEmpty($_appTabSearch.Text)){
-                $_appTabSearchEnter.IsEnabled = $False
-                $_appTabSearchClear.IsEnabled = $False
-            }
-            Else{
-                $_appTabSearchEnter.IsEnabled = $True
-                $_appTabSearchClear.IsEnabled = $True
-            }
-        }
-    )
+                $_locTabSystemLocale.Add_SelectionChanged({
+                    $TS_SystemLocale.Text = ConvertTo-TSVar -HashTable $SystemLocaleTable -InputValue $_locTabSystemLocale.SelectedItem
+                    $TS_UserLocale.Text = $TS_SystemLocale.Text
+                })
+                $_locTabKeyboardLocale.Add_SelectionChanged({
+                    $TS_KeyboardLocale.Text = (Get-KeyboardLayouts | Where {$_.Name -eq $_locTabKeyboardLocale.SelectedItem}).KeyboardLayout
+                })
 
-    #Textbox placeholder remove default text when textbox is being used
-    $_appTabSearch.Add_GotFocus({
-        #if it has an example
-        if ($_appTabSearch.Text -eq 'Search...') {
-            #clear value and make it black bold ready for input
-            $_appTabSearch.Text = ''
-            $_appTabSearch.Foreground = 'Black'
-            #should be black while typing....
-        }
-        #if it does not have an example
-        Else{
-            #ensure test is black and medium
-            $_appTabSearch.Foreground = 'Black'
-        }
-    })
+                $_locTabTimeZoneName.Add_SelectionChanged({
+                    $TS_TimeZoneName.Text = ConvertTo-TSVar -HashTable $TimeZoneNameTable -InputValue $_locTabTimeZoneName.SelectedItem
+                    $TS_TimeZone.Text = Get-TimeZoneIndex -TimeZone ($_locTabTimeZoneName.SelectedItem)
+                })
+                #endregion
 
-    #Textbox placeholder grayed out text when textbox empty and not in being used
-    $_appTabSearch.Add_LostFocus({
-        #if text is null (after it has been clicked on which cleared by the Gotfocus event)
-        if ($_appTabSearch.Text -eq '') {
-            #add example back in light gray font
-            $_appTabSearch.Foreground = 'Gray'
-            $_appTabSearch.Text = 'Search...'
-        }
-    })
+            } #end locale switch value
 
-    $_appTabList.Add_SelectionChanged({
-        $_appTabList.items
-    })
 
-    #endregion
+            'Applications'
+            {
+                #PROCESS ON PAGE LOAD
+                #region For Application Tab event handlers
+                # -----------------------------------------
+                #Grab the text value when cursor leaves (AFTER Typed)
+                $_appTabSearch.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::GotFocusEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        #set a variable if there is text in field BEFORE the new name is typed
+                        If($_appTabSearch.Text){
+                            $script:SearchText = $_appTabSearch.Text
+                        }
+                        $_appTabSearchEnter.IsEnabled = $True
+                        $_appTabSearchClear.IsEnabled = $True
+                    }
+                )
+            
+                $_appTabSearch.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::LostFocusEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        #because there is a example text field in the box by default, check for that
+                        If($_appTabSearch.Text -eq 'Search...'){
+                            $script:SearchText = $_appTabSearch.Text
+                            $_appTabSearchEnter.IsEnabled = $False
+                            $_appTabSearchClear.IsEnabled = $False
+                        }
+                        ElseIf([string]::IsNullOrEmpty($_appTabSearch.Text)){
+                            $_appTabSearchEnter.IsEnabled = $False
+                            $_appTabSearchClear.IsEnabled = $False
+                        }
+                        Else{
+                            $_appTabSearchEnter.IsEnabled = $True
+                            $_appTabSearchClear.IsEnabled = $True
+                        }
+                    }
+                )
+            
+                #Textbox placeholder remove default text when textbox is being used
+                $_appTabSearch.Add_GotFocus({
+                    #if it has an example
+                    if ($_appTabSearch.Text -eq 'Search...') {
+                        #clear value and make it black bold ready for input
+                        $_appTabSearch.Text = ''
+                        $_appTabSearch.Foreground = 'Black'
+                        #should be black while typing....
+                    }
+                    #if it does not have an example
+                    Else{
+                        #ensure test is black and medium
+                        $_appTabSearch.Foreground = 'Black'
+                    }
+                })
+            
+                #Textbox placeholder grayed out text when textbox empty and not in being used
+                $_appTabSearch.Add_LostFocus({
+                    #if text is null (after it has been clicked on which cleared by the Gotfocus event)
+                    if ($_appTabSearch.Text -eq '') {
+                        #add example back in light gray font
+                        $_appTabSearch.Foreground = 'Gray'
+                        $_appTabSearch.Text = 'Search...'
+                    }
+                })
+
+                $_appTabList.Add_SelectionChanged({
+                    $_appTabList.items
+                })
+
+
+                #LIVE SEARCH
+                $_appTabSearch.AddHandler(
+                    [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                    [System.Windows.RoutedEventHandler]{
+                        If(-not([string]::IsNullOrEmpty($_appTabSearch.Text))){
+                            Search-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList -Identifier "Name" -Filter $_appTabSearch.Text
+                        }
+                    }
+                )
+                
+                # BUTTON EVENTS
+                # -------------------------
+
+                $_appTabSearchEnter.Add_Click({
+                    If(-not([string]::IsNullOrEmpty($_appTabSearch.Text))){
+                        Search-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList -Identifier "Name" -Filter $_appTabSearch.Text
+                    }
+                })
+            
+                $_appTabSearchClear.Add_Click({
+                    $_appTabSearch.Text = $null
+                    $_appTabSearchEnter.IsEnabled = $False
+                    Add-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList -Identifier "Name" -Exclude "Bundles"
+                    $_appTabSearchClear.IsEnabled = $False
+                })
+            
+                $_appTabSelectAll.Add_Click({
+                    If($_appTabList -and ($_appTabList.items.Count -gt 0)){
+                        $_appTabList.SelectAll();
+                    }
+                })
+            
+                $_appTabSelectNone.Add_Click({
+                    $_appTabList.SelectedItems.Clear()
+                })
+                #endregion
+        
+            } #end Application switch
+
+        } #end switch
+    }) #end change event
+
+
 
     #region For Main Wizard Template event handlers
     # ---------------------------------------------
@@ -998,72 +1164,6 @@ Function Invoke-PSDWizard{
     #if the star button is clicked, hide the start page
     $_Start.Add_Click({
         $_startPage.Visibility = 'hidden'
-    })
-    #endregion
-
-    #region For Task sequence Tab
-    # ---------------------------
-    $_tsTabSearchEnter.Add_Click({
-        If(-not([string]::IsNullOrEmpty($_tsTabSearch.Text))){
-            Search-PSDWizardTree -SourcePath "DeploymentShare:\Task Sequences" -TreeObject $_tsTabTree -Identifier 'ID' -Filter $_tsTabSearch.Text
-        }
-    })
-
-    $_tsTabSearchClear.Add_Click({
-        $_tsTabSearch.Text = $null
-        $_tsTabSearchEnter.IsEnabled = $False
-        Add-PSDWizardTree -SourcePath "DeploymentShare:\Task Sequences" -TreeObject $_tsTabTree -Identifier 'ID'
-        $_tsTabSearchClear.IsEnabled = $False
-    })
-
-    $_tsTabExpand.Add_Click({
-        $i=0
-        Foreach($item in $_tsTabTree.Items)
-        {
-            If($_tsTabTree.Items[$i].IsExpanded -ne $true){
-                $_tsTabTree.Items[$i].ExpandSubtree()
-            }
-            $i++
-        }
-
-    })
-
-    $_tsTabCollapse.Add_Click({
-        $i=0
-        Foreach($item in $_tsTabTree.Items)
-        {
-            If($_tsTabTree.Items[$i].IsExpanded -ne $False){
-                $_tsTabTree.Items[$i].IsExpanded = $false;
-            }
-            $i++
-        }
-    })
-    #endregion
-
-    #region For Application Tab
-    # -------------------------
-
-    $_appTabSearchEnter.Add_Click({
-        If(-not([string]::IsNullOrEmpty($_appTabSearch.Text))){
-            Search-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList -Identifier "Name" -Filter $_appTabSearch.Text
-        }
-    })
-
-    $_appTabSearchClear.Add_Click({
-        $_appTabSearch.Text = $null
-        $_appTabSearchEnter.IsEnabled = $False
-        Add-PSDWizardList -SourcePath "DeploymentShare:\Applications" -ListObject $_appTabList -Identifier "Name" -Exclude "Bundles"
-        $_appTabSearchClear.IsEnabled = $False
-    })
-
-    $_appTabSelectAll.Add_Click({
-        If($_appTabList -and ($_appTabList.items.Count -gt 0)){
-            $_appTabList.SelectAll();
-        }
-    })
-
-    $_appTabSelectNone.Add_Click({
-        $_appTabList.SelectedItems.Clear()
     })
     #endregion
 
