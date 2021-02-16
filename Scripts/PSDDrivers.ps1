@@ -55,7 +55,7 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 
 # Building source and destionation paths based on model DriverGroup001
 $BaseDriverPath = "PSDResources\DriverPackages"
-$SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverGroup001).Replace("\"," - ")).replace(" ","_")
+$SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverGroup001).Replace("\","-")).replace(" ","_")
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:DriverGroup001 is $($tsenv:DriverGroup001)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): SourceDriverPackagePath is now $SourceDriverPackagePath"
 

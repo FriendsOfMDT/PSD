@@ -28,19 +28,23 @@ param (
 
 # Load core modules
 Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global
-Import-Module DISM
 Import-Module PSDUtility
+Import-Module DISM
 Import-Module PSDDeploymentShare
 
 # Check for debug in PowerShell and TSEnv
 if($TSEnv:PSDDebug -eq "YES"){
     $Global:PSDDebug = $true
 }
-if($PSDDebug -eq $true)
-{
+if($PSDDebug -eq $true){
     $verbosePreference = "Continue"
 }
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
+
+# Fix issue if Domainjoin value is blank as well as joinworkgroup
+if($tsenv:JoinDomain -eq "" -or $tsenv:JoinDomain -eq $null){
+    $tsenv:JoinWorkgroup = "WORKGROUP"
+}
 
 # Load the unattend.xml
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load the unattend.xml"
@@ -131,8 +135,9 @@ Initialize-PSDFolder $scratchPath
 Show-PSDActionProgress -Message "Applying local unattend.xml to the OS volume" -Step "2" -MaxStep "2"
 Use-WindowsUnattend -UnattendPath $unattendXml -Path "$($tsenv:OSVolume):\" -ScratchDirectory $scratchPath -NoRestart
 
+# The following section has been moved to PSDStart.ps1
 # Copy needed script and module files
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy needed script and module files"
+# Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy needed script and module files"
 
 # Initialize-PSDFolder "$($tsenv:OSVolume):\MININT\Scripts"
 # Copy-Item "$scripts\PSDStart.ps1" "$($tsenv:OSVolume):\MININT\Scripts"

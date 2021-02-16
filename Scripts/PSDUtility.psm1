@@ -227,7 +227,6 @@ function Save-PSDVariables{
     $path
 }
 
-
 function Restore-PSDVariables{
     $path = "$(Get-PSDLocaldataPath)\Variables.dat"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Restore-PSDVariables from $path"
@@ -347,7 +346,7 @@ function Copy-PSDFolder{
     $s = $source.TrimEnd("\")
     $d = $destination.TrimEnd("\")
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copying folder $source to $destination using XCopy"
-    & xcopy $s $d /s /e /v /d /y /i | Out-Null
+    & xcopy $s $d /s /e /v /d /y /i
 }
 
 function Test-PSDNetCon{

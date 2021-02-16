@@ -678,6 +678,12 @@ else{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Done in PSDStart for now, handing over to Task Sequence by running $tsEngine\TSMBootstrap.exe /env:SAStart"
     Write-PSDBootInfo -SleepSec 0 -Message "Running Task Sequence"
     Stop-PSDLogging
+    
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Looking for $tsEngine\TSMBootstrap.exe"
+    if((Test-Path -Path "$tsEngine\TSMBootstrap.exe") -ne $true){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to access $tsEngine\TSMBootstrap.exe" -Loglevel 3
+        Show-PSDInfo -Message "Unable to access $tsEngine\TSMBootstrap.exe" -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
+    }
     $result = Start-Process -FilePath "$tsEngine\TSMBootstrap.exe" -ArgumentList "/env:SAStart" -Wait -Passthru
 }
 
@@ -697,7 +703,6 @@ if($BootfromWinPE -eq $True){
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): logPath is now $logPath"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Task Sequence is done, PSDStart.ps1 is now in charge.."
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Return code from TSMBootstrap.exe is $($result.ExitCode)"
 
 # Make sure variables.dat is in the current local directory
 if (Test-Path -Path "$(Get-PSDLocalDataPath)\Variables.dat"){
@@ -713,16 +718,8 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): env:PSModulePath is now 
 
 # Process the exit code from the task sequence
 # Start-PSDLogging
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Return code from TSMBootstrap.exe is $($result.ExitCode)"
-
-$variablesPath = Restore-PSDVariables
-try{
-    foreach($i in (Get-ChildItem -Path TSEnv:)){
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property $($i.Name) is $($i.Value)"
-    }
-}
-catch{
-}
+#if($result.ExitCode -eq $null){$result.ExitCode = 0}
+#Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Return code from TSMBootstrap.exe is $($result.ExitCode)"
 
 Switch ($result.ExitCode){
     0 {
@@ -789,6 +786,17 @@ Switch ($result.ExitCode){
     }
     -2147021886 {
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): REBOOT!"
+        $variablesPath = Restore-PSDVariables
+
+        try{
+            foreach($i in (Get-ChildItem -Path TSEnv:)){
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property $($i.Name) is $($i.Value)"
+            }
+        }
+        catch{
+        }
+
+
         if ($env:SYSTEMDRIVE -eq "X:"){
             # We are running in WinPE and need to reboot, if we have a hard disk, then we need files to continute the TS after reboot, copy files...
             # Exit with a zero return code and let Windows PE reboot
@@ -800,14 +808,45 @@ Switch ($result.ExitCode){
                 If (Test-Path -Path "$($Drive.Name):\Windows\System32\mspaint.exe"){
                     #Copy files needed for full OS
 
+                    Write-PSDLog -Message "Copy-Item $scripts\PSDStart.ps1 $($Drive.Name):\MININT\Scripts"
                     Initialize-PSDFolder "$($Drive.Name):\MININT\Scripts"
                     Copy-Item "$scripts\PSDStart.ps1" "$($Drive.Name):\MININT\Scripts"
 
-                    $modules = Get-PSDContent "Tools\Modules"
-                    Copy-PSDFolder "$modules" "$($Drive.Name):\MININT\Tools\Modules"
+                    try{
+                        $drvcache = "$($Drive.Name):\MININT\Cache"
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy-Item X:\Deploy\Tools -Destination $drvcache"
+                        $cres = Copy-Item -Path "X:\Deploy\Tools" -Destination "$drvcache" -Recurse -Force -Verbose -PassThru
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $cres"
+                        
+                        #simulate download to x:\MININT\Cache\Tools
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy-Item X:\Deploy\Tools -Destination X:\MININT\Cache\Tools"
+                        $cres = Copy-Item -Path "X:\Deploy\Tools" -Destination "X:\MININT\Cache" -Recurse -Force -Verbose -PassThru
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $cres"
 
+                        #Copies from x:\MININT\Cache to target drive
+                        $Modules = Get-PSDContent "Tools\Modules"
+                        Write-PSDLog -Message "Copy-PSDFolder $Modules $($Drive.Name):\MININT\Tools\Modules"
+                        Copy-PSDFolder "$Modules" "$($Drive.Name):\MININT\Tools\Modules"
+                        
+                        #Copies from x:\MININT\Cache\Tools\<arc> to target drive
+                        $Tools = Get-PSDContent "Tools\$($tsenv:Architecture)"
+                        Write-PSDLog -Message "Copy-PSDFolder $Tools $($Drive.Name):\MININT\Tools\$($tsenv:Architecture)"
+                        Copy-PSDFolder "$Tools" "$($Drive.Name):\MININT\Tools\$($tsenv:Architecture)"
+
+                    }
+                    catch{
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy failed"
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $_"
+                    }
+
+                    Write-PSDLog -Message "Copy-PSDFolder $Certificates $($Drive.Name):\MININT\Certificates"
                     $Certificates = Get-PSDContent "PSDResources\Certificates"
                     Copy-PSDFolder "$Certificates" "$($Drive.Name):\MININT\Certificates"
+
+                    # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Copy items from X:\Deploy\Tools to $($tsenv:OSVolume):\MININT\Cache\Tools"
+                    # Copy-PSDFolder -Source X:\Deploy\Tools -Destination "$($tsenv:OSVolume):\MININT\Cache\Tools"
+                    # Get-ChildItem -Path "$($tsenv:OSVolume):\MININT\Cache\Tools" -Filter ts.xml -Recurse | Remove-Item -Force
+                    # Get-ChildItem -Path "$($tsenv:OSVolume):\MININT\Cache\Tools" -Filter variables.dat -Recurse | Remove-Item -Force
 
                     if($PSDDeBug -eq $true){
                         New-Item -Path "$($Drive.Name):\MININT\PSDDebug.txt" -ItemType File -Force
@@ -845,6 +884,9 @@ Switch ($result.ExitCode){
                 $return = Invoke-PSDEXE -Executable $Executable -Arguments $Arguments
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Exitcode: $return"
             }
+            if($return -ne 0){
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to unload $tools\tscore.dll" -Loglevel 2
+            }
 
             $Executable = "$Tools\TSProgressUI.exe"
             $Arguments = "/Unregister"
@@ -852,6 +894,9 @@ Switch ($result.ExitCode){
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to run: $Executable $Arguments"
                 $return = Invoke-PSDEXE -Executable $Executable -Arguments $Arguments
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Exitcode: $return"
+            }
+            if($return -ne 0){
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to unload $Tools\TSProgressUI.exe" -Loglevel 2
             }
 
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Restart, see you on the other side... (Shutdown.exe /r /t 30 /f)"

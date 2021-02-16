@@ -119,7 +119,7 @@ Function Get-PSDLocalInfo{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): TODO: Capable architecture" 
 
     Get-WmiObject Win32_ComputerSystem | % {
-      $tsenv:Manufacturer = $_.Manufacturer
+      $tsenv:Make = $_.Manufacturer
       $tsenv:Model = $_.Model
       $tsenv:Memory = [int] ($_.TotalPhysicalMemory / 1024 / 1024)
     }

@@ -142,9 +142,9 @@ If ($Env:STAGE -eq "POSTWIM") {
     Write-PSDInstallLog -Message "CONTENT = $Env:CONTENT"
 
     # Added for the OSD Toolkit Plugin
-    # Write-PSDInstallLog -Message "Adding the OSD Toolkit by running Set-PSDBootImage2PintEnabled.ps1 from the PSDResources\Plugins\OSDToolKit folder"
-    # $PSDArgument = "$Env:DEPLOYROOT\PSDResources\Plugins\OSDToolKit\Set-PSDBootImage2PintEnabled.ps1"
-    # $PSDProcess = Start-Process PowerShell -ArgumentList $PSDArgument  -NoNewWindow -PassThru -Wait
+    Write-PSDInstallLog -Message "Adding the OSD Toolkit by running Set-PSDBootImage2PintEnabled.ps1 from the PSDResources\Plugins\OSDToolKit folder"
+    $PSDArgument = "$Env:DEPLOYROOT\PSDResources\Plugins\OSDToolKit\Set-PSDBootImage2PintEnabled.ps1"
+    $PSDProcess = Start-Process PowerShell -ArgumentList $PSDArgument  -NoNewWindow -PassThru -Wait
 
     Write-PSDInstallLog -Message "Wait a while for MDT to catch up"
     Start-sleep -Seconds 10

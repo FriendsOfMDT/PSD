@@ -157,21 +157,15 @@ Import-Module "$Env:DEPLOYROOT\Tools\Modules\PSDGather\PSDGather.psm1"
 $RulesFile = Get-IniContent -FilePath "$Env:DEPLOYROOT\Control\CustomSettings.ini"
 if(($RulesFile.Default.BranchCacheEnabled) -eq "YES"){
 
-    Write-PSDInstallLog -Message "BranchCacheEnabled is set to YES, continuing adding the OSD Toolkit"
-    
-    # Get OSDToolkitImageName, abort if not found. No point in continuing if OS Media is missing.
+    # Get OSDToolkitName
     $OSDToolkitImageName=$RulesFile.Default.OSDToolkitImageName
-    Write-PSDInstallLog -Message "OSDToolkitImageName from CustomSettings.ini is $OSDToolkitImageName"
-    If (!($OSDToolkitImageName)){
-        Write-PSDInstallLog -Message "OSDToolkitImageName variable not configured in CustomSettings.ini, aborting script..." -LogLevel 2
-        Exit
 
-    }
-    
+    Write-PSDInstallLog -Message "BranchCacheEnabled is set to YES, entering the 2Pint Software OSD Toolkit section"
+
     # Verify access to WinPEGen.exe, no point in continuing if OSD Toolkit is missing
     $OSDToolKitPath = "$Env:DEPLOYROOT\PSDResources\Plugins\OSDToolKit"
-    Write-PSDInstallLog -Message "OSDToolKitPath path set to $OSDToolKitPath, verifying the OSD Toolkit exist"
-        Set-Location "$OSDToolKitPath\WinPE Generator\x64"
+    Write-PSDInstallLog -Message "Setting OSD Toolkit path to $OSDToolKitPath."
+        Set-Location "$OSDToolKitPath"
     If (!(Test-path -Path .\WinPEGen.exe)){
         Write-PSDInstallLog -Message "OSD Toolkit not found in $OSDToolKitPath folder, aborting script..." -LogLevel 2
         Exit
@@ -192,11 +186,11 @@ if(($RulesFile.Default.BranchCacheEnabled) -eq "YES"){
     Write-PSDInstallLog -Message "Boot image build is $BootImageBuild"
 
     # Look for matching operating system on a build number level, for now assuming the first match is OK
-    $MatchingOperatingSystem = Get-ChildItem -Path "PSD:\Operating Systems" -Recurse | Where-Object NodeType -EQ OperatingSystem | Where-Object Name -EQ $OSDToolkitImageName
+    $MatchingOperatingSystem = (Get-ChildItem -Path "PSD:\Operating Systems" -Recurse | Where-Object NodeType -EQ OperatingSystem | Where-Object Name -EQ $OSDToolkitImageName) | Select-Object -First 1
 
     # Abort if no matching operating system was found
     If (!($MatchingOperatingSystem)){
-        Write-PSDInstallLog -Message "No matching operating system found, aborting script" -LogLevel 2
+        Write-PSDInstallLog -Message "No matching operating system found, aborting script"
         Exit
     }
 
@@ -220,43 +214,22 @@ if(($RulesFile.Default.BranchCacheEnabled) -eq "YES"){
     Else {
         Write-PSDInstallLog -Message "BITS and BranchCache could not be added to the $BootMedia boot image. Exit code: $($WinPEGenResult.ExitCode)" -LogLevel 2
     }
-
-    Write-PSDInstallLog -Message "Wait 10 seconds for any open file handles to close"
-    Start-Sleep -Seconds 10
-
-    # Add any updated OSD Toolkit files to the WIM that goes into the ISO file
-    # This section is only needed when adding hotfixes in between full OSD Toolkit release
-    Write-PSDInstallLog -Message "Entering section for adding updated files to boot media"
-
-    $UpdatePath = "$Env:DEPLOYROOT\PSDResources\Plugins\OSDToolkit\Update"
-
-    If (Test-path $UpdatePath){
-
-        Write-PSDInstallLog -Message "Update path: $UpdatePath found, assuming hotfixes to be installed."
-
-        $MountPath = "C:\Mount"
-        Write-PSDInstallLog -Message "Mounting $BootMedia to $MountPath"
-        Mount-WindowsImage -ImagePath $BootMedia -Index $BootIndex -Path $MountPath
-        Write-PSDInstallLog -Message "$BootMedia mounted to $MountPath"
-        Write-PSDInstallLog -Message "About to copy updated files from $Env:DEPLOYROOT\PSDResources\Plugins\OSDToolkit\Update"
-
-        $Files = Get-ChildItem "$Env:DEPLOYROOT\PSDResources\Plugins\OSDToolkit\Update"
-        foreach ($File in $Files){
-            Write-PSDInstallLog -Message "Copying $File, version: $($File.VersionInfo.ProductVersion), date: $($File.CreationTime), to $MountPath\Windows\System32"
-            Copy-Item -Path $File.FullName -Destination "$MountPath\Windows\System32" -Force
-        }
-
-        Write-PSDInstallLog -Message "Dismounting $BootMedia from $MountPath and saving changes"
+    
+    # Look for updated binaries outside of WinPEGen.exe
+    $Update = "$OSDToolKitPath\Updates\BITSACP.exe"
+    If (Test-Path $Update){
+        $File = Get-ChildItem $Update
+        $FileVersion = $File.VersionInfo.FileVersion
+        Write-PSDInstallLog -Message "Found BITSACP.exe version $FileVersion, adding to boot image: $Bootmedia"
+        $TimeStamp = $(get-date -f MMddyyyy_hhmmss)
+        $MountPath = "C:\Windows\Temp\PSDMount_$TimeStamp"
+        New-Item -Path $MountPath -ItemType Directory -Force
+        Mount-WindowsImage -ImagePath $Bootmedia -Index $BootIndex -Path $MountPath
+        Copy-Item -Path $Update -Destination $MountPath\Windows\System32 -Force
         Dismount-WindowsImage -Path $MountPath -Save
-
-        Write-PSDInstallLog -Message "Wait 10 seconds for any open file handles to close"
-        Start-Sleep -Seconds 10
-
+        Write-PSDInstallLog -Message "BITSACP.exe version $FileVersion, added to boot image: $Bootmedia"
+        Remove-Item $MountPath -Recurse -Force
     }
-    Else{
-        Write-PSDInstallLog -Message "Update path: $UpdatePath not found, assuming no hotfixes to be installed."
-    }        
-
 
     # Update the WIM file that is created directly in the deployment share boot folder
     Write-PSDInstallLog -Message "Update the WIM file that is created directly in the deployment share boot folder"
@@ -264,6 +237,7 @@ if(($RulesFile.Default.BranchCacheEnabled) -eq "YES"){
     $Windows10Index = $MatchingOperatingSystem.ImageIndex
     Write-PSDInstallLog -Message "Using Windows 10 WIM File: $Windows10Media, index: $Windows10Index"
     $BootMedia = "$Env:DEPLOYROOT\Boot\LiteTouchPE_x64.wim"
+    $BootIndex = "1"
     Write-PSDInstallLog -Message "Using Boot Image: $BootMedia, index: $BootIndex"
 
     $WinPEGenArgument = "`"$Windows10Media`" $Windows10Index `"$Bootmedia`" $BootIndex"
@@ -276,39 +250,28 @@ if(($RulesFile.Default.BranchCacheEnabled) -eq "YES"){
         Write-PSDInstallLog -Message "BITS and BranchCache could not be added to the $BootMedia boot image. Exit code: $($WinPEGenResult.ExitCode)" -LogLevel 2
     }
 
+    # Look for updated binaries outside of WinPEGen.exe
+    $Update = "$OSDToolKitPath\Updates\BITSACP.exe"
+    If (Test-Path $Update){
+        $File = Get-ChildItem $Update
+        $FileVersion = $File.VersionInfo.FileVersion
+        Write-PSDInstallLog -Message "Found BITSACP.exe version $FileVersion, adding to boot image: $Bootmedia"
+        $TimeStamp = $(get-date -f MMddyyyy_hhmmss)
+        $MountPath = "C:\Windows\Temp\PSDMount_$TimeStamp"
+        New-Item -Path $MountPath -ItemType Directory -Force
+        Mount-WindowsImage -ImagePath $Bootmedia -Index $BootIndex -Path $MountPath
+        Copy-Item -Path $Update -Destination $MountPath\Windows\System32 -Force
+        Dismount-WindowsImage -Path $MountPath -Save
+        Write-PSDInstallLog -Message "BITSACP.exe version $FileVersion, added to boot image: $Bootmedia"
+        Remove-Item $MountPath -Recurse -Force
+    }
+
+
     # Remove the backup file that WinPEGen.exe creates
     Remove-Item "$Env:DEPLOYROOT\Boot\LiteTouchPE_x64.wim_original_backup" -Force
-
+    
     Write-PSDInstallLog -Message "Wait 10 seconds for any open file handles to close"
     Start-Sleep -Seconds 10
-
-    # Add Updated OSD Toolkit files to the WIM in the boot folder
-
-    If (Test-path $UpdatePath){
-
-        Write-PSDInstallLog -Message "Update path: $UpdatePath found, assuming hotfixes to be installed."
-
-        Write-PSDInstallLog -Message "Adding updated files to $BootMedia"
-        Write-PSDInstallLog -Message "Mounting $BootMedia to $MountPath"
-        Mount-WindowsImage -ImagePath $BootMedia -Index $BootIndex -Path $MountPath
-        Write-PSDInstallLog -Message "About to copy updated files from $Env:DEPLOYROOT\PSDResources\Plugins\OSDToolkit\Update"
-    
-        $Files = Get-ChildItem "$Env:DEPLOYROOT\PSDResources\Plugins\OSDToolkit\Update"
-        foreach ($File in $Files){
-            Write-PSDInstallLog -Message "Copying $File, version: $($File.VersionInfo.ProductVersion), date: $($File.CreationTime), to $MountPath\Windows\System32"
-            Copy-Item -Path $File.FullName -Destination "$MountPath\Windows\System32" -Force
-        }
-   
-        Write-PSDInstallLog -Message "Dismounting $BootMedia from $MountPath and saving changes"
-        Dismount-WindowsImage -Path $MountPath -Save
-    
-        Write-PSDInstallLog -Message "Wait 10 seconds for any open file handles to close"
-        Start-Sleep -Seconds 10
-    }
-    Else{
-        Write-PSDInstallLog -Message "Update path: $UpdatePath not found, assuming no hotfixes to be installed."
-    }        
-
 
     Write-PSDInstallLog -Message "Exiting the 2Pint Software OSD Toolkit section"
 }

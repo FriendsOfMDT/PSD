@@ -1,6 +1,6 @@
 ﻿<#
 .Synopsis
-    This script creates a self-signed certificate for PSD
+    This script creates a driver packages
     
 .Description
     This script was written by Johan Arwidmark @jarwidmark and Mikael Nystrom @mikael_nystrom. This script is for the friends of MDT deployment tools 
@@ -235,4 +235,10 @@ $DriverSources = Get-ChildItem -Path "$psDeploymentFolder\PSDResources\DriverSou
 foreach($DriverSource in $DriverSources){
     Write-PSDInstallLog -Message "Trying to remove $($DriverSource.fullname)"
     Remove-Item -Path $DriverSource.fullname -ErrorAction SilentlyContinue -Recurse -Force
+}
+
+$Zips = Get-ChildItem -Path "$psDeploymentFolder\PSDResources\DriverPackages" -Filter *.zip
+foreach($Zip in $Zips){
+    $FolderPath = New-Item -Path "$psDeploymentFolder\PSDResources\DriverPackages\$($Zip.BaseName)" -ItemType Directory -Force
+    Move-Item -Path $($Zip.FullName) -Destination $($FolderPath.FullName) -Force
 }

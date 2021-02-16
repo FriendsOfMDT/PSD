@@ -125,12 +125,18 @@ function Get-PSDProvider{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): deployRoot is now $deployRoot"
 
     # Set an install directory if necessary (needed so the provider can find templates)
-    if ((Test-Path "HKLM:\Software\Microsoft\Deployment 4") -eq $false)
-    {
-        $null = New-Item "HKLM:\Software\Microsoft\Deployment 4"
-        Set-ItemProperty "HKLM:\Software\Microsoft\Deployment 4" -Name "Install_Dir" -Value "$deployRoot\"
+    if ((Test-Path "HKLM:\Software\Microsoft\Deployment 4") -eq $false){
+        $null = New-Item "HKLM:\Software\Microsoft\Deployment 4" -Force
+        Set-ItemProperty "HKLM:\Software\Microsoft\Deployment 4" -Name "Install_Dir" -Value "$deployRoot\" -Force
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Set MDT Install_Dir to $deployRoot\ for MDT Provider."
     }
+
+    # Set an install directory if necessary (needed so the provider can find templates)
+    if ((Test-Path "HKLM:\Software\Microsoft\Deployment 4\Install_Dir") -eq $false){
+        Set-ItemProperty "HKLM:\Software\Microsoft\Deployment 4" -Name "Install_Dir" -Value "$deployRoot\" -Force
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Set MDT Install_Dir to $deployRoot\ for MDT Provider."
+    }
+
 
     # Load the PSSnapIn PowerShell provider module
     $modules = Get-PSDContent -Content "Tools\Modules"
@@ -165,22 +171,22 @@ function Get-PSDContent{
 
     $dest = ""
 
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Content:[$content], destination:[$destination]"
+
     # Track the time
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Track the time"
+    # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Track the time"
     $start = Get-Date
 
     # If the destination is blank, use a default value
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): If the destination is blank, use a default value"
-    if ($destination -eq "")
-    {
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination is blank, setting value Dest"
+    # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): If the destination is blank, use a default value"
+    if ($destination -eq ""){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination is blank, running $PSDLocalDataPath = Get-PSDLocalDataPath"
         $PSDLocalDataPath = Get-PSDLocalDataPath
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDLocalDataPath is $PSDLocalDataPath"
+        # Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDLocalDataPath is $PSDLocalDataPath"
         $dest = "$PSDLocalDataPath\Cache\$content"
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Dest is $dest"
     }
-    else
-    {
+    else{
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination is NOT blank"
         $dest = $destination
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Dest is $dest"
@@ -191,25 +197,21 @@ function Get-PSDContent{
     # Otherwise, download it, copy it, .
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Otherwise, download it, copy it."
 
-    if (Test-Path $dest)
-    {
+    if (Test-Path $dest){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Access to $dest is OK"
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Already copied $content, not copying again."
     }
-    elseif ($global:psddsDeployRoot -ilike "http*")
-    {
+    elseif ($global:psddsDeployRoot -ilike "http*"){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psddsDeployRoot is now $global:psddsDeployRoot"
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running Get-PSDContentWeb -content $content -destination $dest"
         Get-PSDContentWeb -content $content -destination $dest
     }
-    elseif ($global:psddsDeployRoot -like "\\*")
-    {
+    elseif ($global:psddsDeployRoot -like "\\*"){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): global:psddsDeployRoot is now $global:psddsDeployRoot"
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running Get-PSDContentUNC -content $content -destination $dest"
         Get-PSDContentUNC -content $content -destination $dest
     }
-    else
-    {
+    else{
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Path for $content is already local, not copying again"
     }
 
@@ -245,6 +247,82 @@ function Get-PSDContentWeb{
     $attempts = 0
     $RetryInterval = 5
     $Retry = $True
+
+    if($tsenv:BranchCacheEnabled -eq "YES"){
+        if($tsenv:SMSTSDownloadProgram -ne "" -or $tsenv:SMSTSDownloadProgram -ne $null){
+            if((Get-Process | Where-Object Name -EQ tsmanager).count -ge 1){
+                
+                # Create the destination folder
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating $destination"
+                try{
+                    New-Item -Path $destination -ItemType Directory -Force | Out-Null
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating $destination was a success"
+                }catch{
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating $destination was a failure"
+                    Return
+                }
+                
+
+                # Make some calc...
+                $fullSource = "$($global:psddsDeployRoot)/$content"
+                $fullSource = $fullSource.Replace("\", "/")
+                #$request = [System.Net.WebRequest]::Create($fullSource)
+                $topUri = New-Object system.uri $fullSource
+                #$prefixLen = $topUri.LocalPath.Length
+
+                # We are using an ACP/ assume it works in WinPE as well. We use ACP as BITS does not function as regular BITS in WinPE, so cannot use PS cmdlet.
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using ACP."
+
+                # Begin create regular ACP style .ini file
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Create regular ACP style .ini file"
+
+                #Needed, do not remove.
+                $PSDPkgId = "PSD12345" 
+
+                # Create regular ACP style .ini file
+                $iniPath = "$env:tmp\$PSDPkgId"+"_Download.ini"
+                Set-Content -Value '[Download]' -Path $iniPath -Force -Encoding Ascii
+                Add-Content -Value "Source=$topUri" -Path $iniPath
+                Add-Content -Value "Destination=$destination" -Path $iniPath
+                Add-Content -Value "MDT=true" -Path $iniPath
+
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination=$destination"
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Source=$topUri"
+
+                if((Get-Process | Where-Object Name -EQ TSManager).count -ne 0){
+                    Add-Content -Value "Username=$($tsenv:UserDomain)\$($tsenv:UserID)" -Path $iniPath
+                    Add-Content -Value "Password=$($tsenv:UserPassword)" -Path $iniPath
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Username=$($tsenv:UserDomain)\$($tsenv:UserID)"
+                }
+
+                # ToDo, check that the ini file exists before we try...
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading information saved to $iniPath so starting $tsenv:SMSTSDownloadProgram"
+
+                if((Test-Path -Path $iniPath) -eq $true){
+                    #Start-Process -Wait -FilePath "$tsenv:SMSTSDownloadProgram" -ArgumentList "$iniPath $PSDPkgId `"$($destination)`""
+                    $return = Start-Process -Wait -WindowStyle Hidden -FilePath "$tsenv:SMSTSDownloadProgram" -ArgumentList "$iniPath $PSDPkgId `"$($destination)`"" -PassThru
+                    if($return.ExitCode -eq 0){
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $tsenv:SMSTSDownloadProgram Success"
+                        $Retry = $False
+                        Return
+                    }
+                    else{
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $tsenv:SMSTSDownloadProgram Fail with exitcode $($return.ExitCode)" -Loglevel 2
+                    }
+                    # ToDo hash verification?
+                }
+                else{
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to access $iniPath, aborting..." -Loglevel 2
+                    # Show-PSDInfo -Message "Unable to access $iniPath, aborting..." -Severity Information
+                    # Start-Process PowerShell -Wait
+                    # Exit 1
+                }
+            }
+            else{
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to use ACP since TSManager is not running, using fallback"
+            }
+        }
+    }
 
     while($Retry){
     $attempts++
@@ -286,8 +364,7 @@ function Get-PSDContentWeb{
         }
     }
 
-	if ($response -ne $null)
-    {
+	if ($response -ne $null){
         $sr = new-object System.IO.StreamReader -ArgumentList $response.GetResponseStream(),[System.Encoding]::Default
         [xml]$xml = $sr.ReadToEnd()		
 
@@ -309,64 +386,16 @@ function Get-PSDContentWeb{
         # Create the folder structure
         $results | ? { $_.iscollection -eq "1"} | sort destination | % {
             $folder = "$destination\$($_.destination)"
-            if (Test-Path $folder)
-            {
+            if (Test-Path $folder){
                 # Already exists
             }
-            else
-            {
+            else{
                 $null = MkDir $folder
             }
         }
 
-        # If possible, do the transfer using ACP or BITS.  Otherwise, download the files one at a time
-        if($tsenv:SMSTSDownloadProgram){
-            #We are using an ACP/ assume it works in WinPE as well. We use ACP as BITS does not function as regular BITS in WinPE, so cannot use PS cmdlet.
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using ACP."
-
-            # Begin create regular ACP style .ini file
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Create regular ACP style .ini file"
-
-            #Needed, do not remove.
-            $PSDPkgId = "PSD12345" 
-
-            # Create regular ACP style .ini file
-            $iniPath = "$env:tmp\$PSDPkgId"+"_Download.ini"
-            Set-Content -Value '[Download]' -Path $iniPath -Force -Encoding Ascii
-            Add-Content -Value "Source=$topUri" -Path $iniPath
-            Add-Content -Value "Destination=$destination" -Path $iniPath
-            Add-Content -Value "MDT=true" -Path $iniPath
-
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Destination=$destination"
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Source=$topUri"
-
-            if((Get-Process | Where-Object Name -EQ TSManager).count -ne 0)
-            {
-                Add-Content -Value "Username=$($tsenv:UserDomain)\$($tsenv:UserID)" -Path $iniPath
-                Add-Content -Value "Password=$($tsenv:UserPassword)" -Path $iniPath
-                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Username=$($tsenv:UserDomain)\$($tsenv:UserID)"
-            }
-
-            # ToDo, check that the ini file exists before we try...
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading information saved to $iniPath so starting $tsenv:SMSTSDownloadProgram"
-
-            if((Test-Path -Path $iniPath) -eq $true)
-            {
-                #Start-Process -Wait -FilePath "$tsenv:SMSTSDownloadProgram" -ArgumentList "$iniPath $PSDPkgId `"$($destination)`""
-                Start-Process -Wait -WindowStyle Hidden -FilePath "$tsenv:SMSTSDownloadProgram" -ArgumentList "$iniPath $PSDPkgId `"$($destination)`""
-                # ToDo hash verification?
-            }
-            else
-            {
-                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to access $iniPath, aborting..."
-                Show-PSDInfo -Message "Unable to access $iniPath, aborting..." -Severity Information
-                Start-Process PowerShell -Wait
-                Exit 1
-            }
-        }
-
         # If possible, do the transfer using BITS.  Otherwise, download the files one at a time
-        elseif ($env:SYSTEMDRIVE -eq "X:"){
+        if($env:SYSTEMDRIVE -eq "X:"){
             # In Windows PE, download the files one at a time using WebClient
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using WebClient."
             $wc = New-Object System.Net.WebClient
@@ -385,8 +414,7 @@ function Get-PSDContentWeb{
                 }
             }            
         }
-        else
-        {
+        else{
             # Create the list of files to download
             $sourceUrl = @()
             $destFile = @()
