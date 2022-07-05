@@ -1,3 +1,6 @@
+# Update
+We are curtrently working onm 0.2.1.7, will be released soon...
+
 # README - PowerShell Deployment Extension Kit
 October 2020 (ver 0.2.1.6)
 Lots of changes.
