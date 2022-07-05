@@ -25,3 +25,7 @@ PSD is very much a work-in-progress solution, so stay tuned as we rapidly move f
 
 ## Related References
 (intentionally blank)
+
+## Development of PSD
+This repository currently acts as a “download” repository. If you are interested of participating in the development of PSD the active repository is “private” and you need an invitation. Please contact 
+johan@2pintsoftware.com  or Mikael.nystrom@truesec.se
