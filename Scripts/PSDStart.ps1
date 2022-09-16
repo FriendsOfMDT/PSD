@@ -328,7 +328,7 @@ else{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): --------------------"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Check if we are deploying from media"
 
-    Get-Volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):Deploy\Scripts\Media.tag"} | % {
+    Get-Volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\Deploy\Scripts\Media.tag"} | % {
         # Found it, save the location
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found Media Tag $($_.DriveLetter):Deploy\Scripts\Media.tag"
         $tsDrive = $_.DriveLetter
@@ -697,7 +697,7 @@ if($BootfromWinPE -eq $True){
             Start-PSDLogging -Logpath "$($Drive.Name):\MININT\SMSOSD\OSDLOGS"
 
             Break
-        }
+Â  Â      }
     }
 }
 
@@ -854,7 +854,7 @@ Switch ($result.ExitCode){
 
                     #Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): We are now on line 775 and we are doing a break on line 776..."
                     #Break
-                }
+Â  Â              }
             }
 
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Exit with a zero return code and let Windows PE reboot"
