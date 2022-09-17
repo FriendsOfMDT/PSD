@@ -328,18 +328,13 @@ else{
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): --------------------"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Check if we are deploying from media"
 
-    Get-Volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveType -eq 'Fixed'} | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):Deploy\Scripts\Media.tag"} | % {
+    Get-Volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.DriveLetter -ne 'X'} | ? {Test-Path "$($_.DriveLetter):\Deploy\Scripts\Media.tag"} | % {
         # Found it, save the location
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found Media Tag $($_.DriveLetter):Deploy\Scripts\Media.tag"
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found Media Tag $($_.DriveLetter):\Deploy\Scripts\Media.tag"
         $tsDrive = $_.DriveLetter
-	    $tsenv:DeployRoot = $tsDrive + ":\Deploy"
-	    $tsenv:ResourceRoot = $tsDrive + ":\Deploy"
-	    $tsenv:DeploymentMethod = "MEDIA"
-
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): DeploymentMethod is $tsenv:DeploymentMethod, this solution does not currently support deploying from media, sorry, aborting"
-        Show-PSDInfo -Message "No deployroot set, this solution does not currently support deploying from media, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
-        Start-Process PowerShell -Wait
-        Break
+	$tsenv:DeployRoot = $tsDrive + ":\Deploy"
+	$tsenv:ResourceRoot = $tsDrive + ":\Deploy"
+	$tsenv:DeploymentMethod = "MEDIA"
     }
 
     #Set-PSDDebugPause -Prompt 337
@@ -347,8 +342,10 @@ else{
 
     switch ($tsenv:DeploymentMethod){
         'MEDIA'{
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): DeploymentMethod is $tsenv:DeploymentMethod, this solution does not currently support deploying from media, sorry, aborting"
-            Show-PSDInfo -Message "No deployroot set, this solution does not currently support deploying from media, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
+	    $deployRoot = $tsenv:DeployRoot
+	    $global:psddsDeployRoot = $deployRoot
+	    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): DeployRoot is set to $deployroot, however, DeploymentMethod is $tsenv:DeploymentMethod and this solution does not currently support deploying from media, aborting..."
+	    Show-PSDInfo -Message "DeployRoot is set to $deployroot, however, DeploymentMethod is $tsenv:DeploymentMethod and this solution does not currently support deploying from media, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
             Start-Process PowerShell -Wait
             Break
         }
@@ -697,7 +694,7 @@ if($BootfromWinPE -eq $True){
             Start-PSDLogging -Logpath "$($Drive.Name):\MININT\SMSOSD\OSDLOGS"
 
             Break
-        }
+Â  Â      }
     }
 }
 
@@ -854,7 +851,7 @@ Switch ($result.ExitCode){
 
                     #Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): We are now on line 775 and we are doing a break on line 776..."
                     #Break
-                }
+Â  Â              }
             }
 
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Exit with a zero return code and let Windows PE reboot"
