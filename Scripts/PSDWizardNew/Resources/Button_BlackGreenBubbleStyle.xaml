@@ -1,0 +1,114 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  
+	<Style x:Key="ButtonBlackGreenBubble" TargetType="{x:Type Button}">
+		<Setter Property="Background">
+			<Setter.Value>
+				<RadialGradientBrush>
+					<RadialGradientBrush.GradientStops>
+						<GradientStopCollection>
+							<GradientStop Color="black" Offset="0" />
+							<GradientStop Color="black" Offset="1" />
+						</GradientStopCollection>
+					</RadialGradientBrush.GradientStops>
+				</RadialGradientBrush>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="Foreground" Value="white" />
+		<Setter Property="ContentTemplate" Value="{DynamicResource myContentTemplate}" />
+		<Setter Property="Margin" Value="3" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Button}">
+					<Grid>
+						<Rectangle x:Name="GelBackground"
+					Opacity="1"
+					RadiusX="9"
+					RadiusY="9"
+					Fill="{TemplateBinding Background}"
+					StrokeThickness="0.35">
+							<Rectangle.Stroke>
+								<LinearGradientBrush StartPoint="0,0"
+							EndPoint="0,1">
+									<LinearGradientBrush.GradientStops>
+										<GradientStopCollection>
+											<GradientStop Color="white"
+										Offset="0" />
+											<GradientStop Color="#666666"
+										Offset="1" />
+										</GradientStopCollection>
+									</LinearGradientBrush.GradientStops>
+								</LinearGradientBrush>
+							</Rectangle.Stroke>
+						</Rectangle>
+						<Rectangle x:Name="GelShine"
+							Margin="2,2,2,0"
+							VerticalAlignment="top"
+							RadiusX="6"
+							RadiusY="6"
+							Opacity="1"
+							Stroke="transparent"
+							Height="15px">
+							<Rectangle.Fill>
+								<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+									<LinearGradientBrush.GradientStops>
+										<GradientStopCollection>
+											<GradientStop Color="#ccffffff" Offset="0" />
+											<GradientStop Color="transparent" Offset="1" />
+										</GradientStopCollection>
+									</LinearGradientBrush.GradientStops>
+								</LinearGradientBrush>
+							</Rectangle.Fill>
+						</Rectangle>
+						<ContentPresenter x:Name="GelButtonContent"
+					VerticalAlignment="center"
+					HorizontalAlignment="center"
+					Content="{TemplateBinding Content}" />
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver" Value="true">
+							<Setter Property="Fill" TargetName="GelBackground">
+								<Setter.Value>
+									<RadialGradientBrush>
+										<RadialGradientBrush.GradientStops>
+											<GradientStopCollection>
+												<GradientStop Color="lime"
+											Offset="0" />
+												<GradientStop Color="DarkGreen"
+											Offset="1" />
+											</GradientStopCollection>
+										</RadialGradientBrush.GradientStops>
+									</RadialGradientBrush>
+								</Setter.Value>
+							</Setter>
+						</Trigger>
+						<Trigger Property="IsPressed" Value="true">
+							<Setter Property="Fill" TargetName="GelBackground">
+								<Setter.Value>
+									<RadialGradientBrush>
+										<RadialGradientBrush.GradientStops>
+											<GradientStopCollection>
+												<GradientStop Color="#ffcc00"
+											Offset="0" />
+												<GradientStop Color="#cc9900"
+											Offset="1" />
+											</GradientStopCollection>
+										</RadialGradientBrush.GradientStops>
+									</RadialGradientBrush>
+								</Setter.Value>
+							</Setter>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+		<Style.Triggers>
+			<Trigger Property="IsMouseOver" Value="true">
+				<Setter Property="Foreground" Value="black " />
+			</Trigger>
+			<Trigger Property="IsPressed" Value="true">
+				<Setter Property="Foreground" Value="black " />
+			</Trigger>
+		</Style.Triggers>
+	</Style>
+</ResourceDictionary>

@@ -1,0 +1,31 @@
+<Grid x:Name="_tsTabLayout" Margin="0" Grid.ColumnSpan="2" FocusManager.FocusedElement="{Binding ElementName=tsTree}">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_tsTabMainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle"/>
+    <Rectangle Grid.Column="0" Fill="HotPink" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_listoutline}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+
+    <Label x:Name="_tsTabSubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top" Content="@SubTitle"/>
+    <TextBox x:Name="_tsTabSearch" HorizontalAlignment="Left" Height="31" Margin="10,103,0,0" TextWrapping="Wrap" Text="Search..." VerticalAlignment="Top" Width="331" Foreground='Gray' VerticalContentAlignment="Center" FontSize="18"/>
+    <Button x:Name="_tsTabSearchClear" Content="Clear" Height="31" Width="63" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="414,0,0,416" />
+    <Button x:Name="_tsTabSearchEnter" Content="Search" Height="31" Width="63" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="346,0,0,416" />
+
+    <Button x:Name="_tsTabExpand" Content="Expand All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="10,0,0,386" />
+    <Button x:Name="_tsTabCollapse" Content="Collapse All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="128,0,0,386" />
+
+    <TextBox x:Name="TS_TaskSequenceID" Margin="342,139,14,386" IsEnabled="False" />
+    <TreeView x:Name="_tsTabTree" HorizontalAlignment="Left" Height="371" Margin="10,169,0,0" VerticalAlignment="Top" Width="467" FontSize="14"  
+        ItemContainerStyle="{StaticResource TreeViewItemStandard}" 
+        ItemTemplate="{StaticResource CheckBoxItemTemplate}" />
+
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_tsTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+</Grid>

@@ -1,0 +1,63 @@
+<Grid x:Name="_locTabLayout" Margin="0" Grid.ColumnSpan="2">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_locTabMainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle"/>
+    <Rectangle Grid.Column="0" Fill="DarkViolet" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_webclock}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Label Content="Language Settings" FontSize="18" HorizontalAlignment="Center" Margin="0,81,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.49,0.532" Width="470"/>
+
+    <Label Content="Language to Install:" FontSize="12" Margin="44,120,332.5,385"/>
+    <ComboBox x:Name="_locTabLanguage" HorizontalAlignment="Left" Margin="46,145,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18" Style="{DynamicResource SimpleComboBoxStyle}">
+        <ComboBox.Resources>
+            <Style TargetType="{x:Type ComboBoxItem}">
+                <Setter Property="Foreground" Value="#004275" />
+            </Style>
+        </ComboBox.Resources>
+    </ComboBox>
+
+    <Label Content="Time and current format:" FontSize="12" Margin="44,186,302.5,319"/>
+    <ComboBox x:Name="_locTabSystemLocale" HorizontalAlignment="Left" Margin="46,211,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18" Style="{DynamicResource SimpleComboBoxStyle}">
+        <ComboBox.Resources>
+            <Style TargetType="{x:Type ComboBoxItem}">
+                <Setter Property="Foreground" Value="#004275" />
+            </Style>
+        </ComboBox.Resources>
+    </ComboBox>
+
+    <Label Content="Keyboard layout:" FontSize="12" Margin="46,254,330.5,251"/>
+    <ComboBox x:Name="_locTabKeyboardLocale" HorizontalAlignment="Left" Margin="46,279,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18" Style="{DynamicResource SimpleComboBoxStyle}">
+        <ComboBox.Resources>
+            <Style TargetType="{x:Type ComboBoxItem}">
+                <Setter Property="Foreground" Value="#004275" />
+            </Style>
+        </ComboBox.Resources>
+    </ComboBox>
+
+    <Label Content="Time Settings" FontSize="18" HorizontalAlignment="Center" Margin="0,329,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.49,0.532" Width="470"/>
+
+    <Label Content="Time zone:" FontSize="12" Margin="44,365,332.5,140"/>
+    <ComboBox Name="_locTabTimeZoneName" HorizontalAlignment="Left" Margin="46,390,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18" Style="{DynamicResource SimpleComboBoxStyle}">
+        <ComboBox.Resources>
+            <Style TargetType="{x:Type ComboBoxItem}">
+                <Setter Property="Foreground" Value="#004275" />
+            </Style>
+        </ComboBox.Resources>
+    </ComboBox>
+    <TextBox x:Name="TS_UILanguage" Text="" Margin="380,145,10,377" IsEnabled="False" />
+    <TextBox x:Name="TS_SystemLocale" Text="" Margin="380,211,10,311" IsEnabled="False" />
+    <TextBox x:Name="TS_UserLocale" Text="" Margin="380,243,10,279" IsEnabled="False" />
+    <TextBox x:Name="TS_KeyboardLocale" Text="" Margin="380,279,10,243" IsEnabled="False" />
+    <TextBox x:Name="TS_TimeZoneName" Text="" Margin="380,390,10,132" IsEnabled="False" />
+    <TextBox x:Name="TS_TimeZone" Text="" Margin="380,423,10,99" IsEnabled="False" />
+
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_locTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+</Grid>

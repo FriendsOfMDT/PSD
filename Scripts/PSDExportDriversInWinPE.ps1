@@ -9,12 +9,12 @@
           FileName: PSDGather.ps1
           Solution: PowerShell Deployment for MDT
           Author: PSD Development Team
-          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus
           Primary: @Mikael_Nystrom 
           Created: 
           Modified: 2020-06-16
 
-          Version - 0.0.0 - () - Finalized functional version 1.
+          Version - 0.0.1 - () - Finalized functional version 1.
           TODO:
 
 .Example
@@ -24,6 +24,9 @@
 param (
 
 )
+
+# Set scriptversion for logging
+$ScriptVersion = "0.0.1"
 
 # Load core module
 Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global

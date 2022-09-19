@@ -1,0 +1,11 @@
+<Grid Background="#004275">
+    <Label x:Name="_tsTabMainTitle" Content="@MainTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="48" Margin="0,36,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
+    <Label x:Name="_tsTabSubTitle"  Content="@SubTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16" Margin="0,110,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
+
+    <TextBox x:Name="_tsTabSearch" HorizontalAlignment="Left" Height="47" Margin="200,155,0,0" TextWrapping="Wrap" Text="Search..." VerticalAlignment="Top" Width="522" Foreground='Gray' VerticalContentAlignment="Center" FontSize="18" Padding="50,0,0,0"/>
+    <Button x:Name="_tsTabSearchClear" Content="Clear" Height="47" Width="97" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="727,0,0,438" />
+    <Button x:Name="_tsTabSearchEnter" Height="40" Width="40" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="204,0,0,441" Style="{DynamicResource SearchBlueMag}" IsEnabled="False" />
+    
+    <ListBox x:Name="_tsTabTree" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#004275" Foreground="#FFE8EDF9" FontSize="18" Width="624" Height="379" Margin="0,207,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto" SelectionMode="Single"/>
+    <TextBox x:Name="TS_TaskSequenceID" HorizontalAlignment="Right" Width="107" IsEnabled="False" Margin="0,207,88,402" />
+</Grid>

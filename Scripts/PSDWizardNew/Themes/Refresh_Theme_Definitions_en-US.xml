@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Theme>
+	<Global>
+		<TemplateReference>Refresh\PSDWizard_Template_Refresh_en-US.xaml</TemplateReference>
+		<WelcomeWizardReference>Refresh\PSDWizard_Start_en-US.xaml</WelcomeWizardReference>
+	</Global>
+
+	<PaneDefinitions>
+		<!--
+			For every node in pane (key=Value), will replace any @Value in Pane template
+
+			However there are few that are detected and MUST be in Template:
+			@TabTitle
+			tab01
+		-->
+		<PanesTemplate><![CDATA[
+	<TabItem x:Name="_wiz@id" Header="@TabTitle" Style="{DynamicResource TabItemsWhite}" Width="150" Margin="@margin" IsEnabled="False">
+	@TabItemContent
+	</TabItem>
+	]]></PanesTemplate>
+		<!--
+		#EXAMPLE
+		<Pane id="Readiness" reference="PSDWizard_DeployReadiness_en-US.xaml" margin="0,0,0,0" Width='180' Style="pillTabItemLeft" />
+		-->
+		<Pane id="Readiness" reference="Refresh\PSDWizard_DeployReadiness_en-US.xaml" margin="0,70,0,0" />
+		<Pane id="TaskSequence" reference="Refresh\PSDWizard_TaskSequence_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="DeviceDetails" reference="Refresh\PSDWizard_DeviceDetails_en-US.xaml" margin="0,0,0,0"/>	
+		<Pane id="AdminAccount" reference="Refresh\PSDWizard_AdminCreds_en-US.xaml" margin="0,0,0,0"/>	
+		<Pane id="LocaleTime" reference="Refresh\PSDWizard_Locale_en-US.xaml" margin="0,0,0,0"/>
+		<Pane id="Applications" reference="Refresh\PSDWizard_Applications_en-US.xaml" margin="0,0,0,0"/>
+		<Pane id="Ready" reference="Refresh\PSDWizard_Ready_en-US.xaml" margin="0,0,0,0" />
+			
+	</PaneDefinitions>
+</Theme>

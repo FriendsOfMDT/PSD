@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+
+    Pulled data from 
+    http://unattended.sourceforge.net/timezones.php
+
+    and 
+
+    tzutil /l
+-->
+<TimeZoneIndex>
+    <Index id="0" TimeZone="(GMT-12:00) Dateline Standard Time" DisplayName="Dateline Standard Time" Name="International Date Line West" UTC="UTC-12:00" />
+    <Index id="1" TimeZone="(GMT-11:00) Samoa Standard Time" DisplayName="Samoa Standard Time" Name="Midway Island, Samoa" UTC="UTC-11:00" />
+    <Index id="2" TimeZone="(GMT-10:00) Hawaiian Standard Time" DisplayName="Hawaiian Standard Time" Name="Hawaii" UTC="UTC-10:00" />
+    <Index id="3" TimeZone="(GMT-09:00) Alaskan Standard Time" DisplayName="Alaskan Standard Time" Name="Alaska" UTC="UTC-09:00" />
+    <Index id="4" TimeZone="(GMT-08:00) Pacific Standard Time" DisplayName="Pacific Standard Time" Name="Pacific Time (US and Canada)" UTC="UTC-08:00" />
+    <Index id="7" TimeZone="(GMT-08:00) Mexico Standard Time 3" DisplayName="Pacific Standard Time (Mexico)" Name="Baja California" UTC="UTC-08:00" />
+    <Index id="10" TimeZone="(GMT-07:00) Mountain Standard Time" DisplayName="Mountain Standard Time" Name="Mountain Time (US and Canada)" UTC="UTC-07:00" />
+    <Index id="13" TimeZone="(GMT-07:00) Mexico Standard Time 2" DisplayName="Mountain Standard Time (Mexico)" Name="Chihuahua, La Paz, Mazatlan" UTC="UTC-07:00" />
+    <Index id="15" TimeZone="(GMT-07:00) U.S. Mountain Standard Time" DisplayName="US Mountain Standard Time" Name="Arizona" UTC="UTC-07:00" />
+    <Index id="20" TimeZone="(GMT-06:00) Central Standard Time" DisplayName="Central Standard Time" Name="Central Time (US and Canada)" UTC="UTC-06:00" />
+    <Index id="25" TimeZone="(GMT-06:00) Canada Central Standard Time" DisplayName="Canada Central Standard Time" Name="Saskatchewan" UTC="UTC-06:00" />
+    <Index id="30" TimeZone="(GMT-06:00) Mexico Standard Time" DisplayName="Central Standard Time (Mexico)" Name="Guadalajara, Mexico City, Monterrey" UTC="UTC-06:00" />
+    <Index id="33" TimeZone="(GMT-06:00) Central America Standard Time" DisplayName="Central America Standard Time" Name="Central America" UTC="UTC-06:00" />
+    <Index id="35" TimeZone="(GMT-05:00) Eastern Standard Time" DisplayName="Eastern Standard Time" Name="Eastern Time (US and Canada)" UTC="UTC-05:00" />
+    <Index id="40" TimeZone="(GMT-05:00) U.S. Eastern Standard Time" DisplayName="US Eastern Standard Time" Name="Indiana (East)" UTC="UTC-05:00" />
+    <Index id="45" TimeZone="(GMT-05:00) S.A. Pacific Standard Time" DisplayName="SA Pacific Standard Time" Name="Bogota, Lima, Quito" UTC="UTC-05:00" />
+    <Index id="50" TimeZone="(GMT-04:00) Atlantic Standard Time" DisplayName="Atlantic Standard Time" Name="Atlantic Time (Canada)" UTC="UTC-04:00" />
+    <Index id="55" TimeZone="(GMT-04:00) S.A. Western Standard Time" DisplayName="SA Western Standard Time" Name="Caracas, La Paz" UTC="UTC-04:00" />
+    <Index id="56" TimeZone="(GMT-04:00) Pacific S.A. Standard Time" DisplayName="Pacific SA Standard Time" Name="Santiago" UTC="UTC-04:00" />
+    <Index id="60" TimeZone="(GMT-03:30) Newfoundland and Labrador Standard Time" DisplayName="Newfoundland and Labrador Standard Time" Name="Newfoundland and Labrador" UTC="UTC-03:30" />
+    <Index id="65" TimeZone="(GMT-03:00) E. South America Standard Time" DisplayName="E. South America Standard Time" Name="Brasilia" UTC="UTC-03:30" />
+    <Index id="70" TimeZone="(GMT-03:00) S.A. Eastern Standard Time" DisplayName="SA Eastern Standard Time" Name="Buenos Aires, Georgetown" UTC="UTC-03:00" />
+    <Index id="73" TimeZone="(GMT-03:00) Greenland Standard Time" DisplayName="Greenland Standard Time" Name="Greenland" UTC="UTC-03:00" />
+    <Index id="75" TimeZone="(GMT-02:00) Mid-Atlantic Standard Time" DisplayName="Mid-Atlantic Standard Time" Name="Mid-Atlantic" UTC="UTC-02:00" />
+    <Index id="80" TimeZone="(GMT-01:00) Azores Standard Time" DisplayName="Azores Standard Time" Name="Azores" UTC="UTC-01:00" />
+    <Index id="83" TimeZone="(GMT-01:00) Cape Verde Standard Time" DisplayName="Cape Verde Standard Time" Name="Cape Verde Islands" UTC="UTC-01:00" />
+    <Index id="85" TimeZone="(GMT) GMT Standard Time" DisplayName="GMT Standard Time" Name="Greenwich Mean Time: Dublin, Edinburgh, Lisbon, London" UTC="UTC" />
+    <Index id="90" TimeZone="(GMT) Greenwich Standard Time" DisplayName="Greenwich Standard Time" Name="Casablanca, Monrovia" UTC="UTC" />
+    <Index id="95" TimeZone="(GMT+01:00) Central Europe Standard Time" DisplayName="Central Europe Standard Time" Name="Belgrade, Bratislava, Budapest, Ljubljana, Prague" UTC="UTC+01:00" />
+    <Index id="100" TimeZone="(GMT+01:00) Central European Standard Time" DisplayName="Central European Standard Time" Name="Sarajevo, Skopje, Warsaw, Zagreb" UTC="UTC+01:00" />
+    <Index id="105" TimeZone="(GMT+01:00) Romance Standard Time" DisplayName="Romance Standard Time" Name="Brussels, Copenhagen, Madrid, Paris" UTC="UTC+01:00" />
+    <Index id="110" TimeZone="(GMT+01:00) W. Europe Standard Time" DisplayName="W. Europe Standard Time" Name="Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna" UTC="UTC+01:00" />
+    <Index id="113" TimeZone="(GMT+01:00) W. Central Africa Standard Time" DisplayName="W. Central Africa Standard Time" Name="West Central Africa" UTC="UTC+01:00" />
+    <Index id="115" TimeZone="(GMT+02:00) E. Europe Standard Time" DisplayName="E. Europe Standard Time" Name="Bucharest" UTC="UTC+02:00" />
+    <Index id="120" TimeZone="(GMT+02:00) Egypt Standard Time" DisplayName="Egypt Standard Time" Name="Cairo" UTC="UTC+02:00" />
+    <Index id="125" TimeZone="(GMT+02:00) FLE Standard Time" DisplayName="FLE Standard Time" Name="Helsinki, Kiev, Riga, Sofia, Tallinn, Vilnius" UTC="UTC+02:00" />
+    <Index id="130" TimeZone="(GMT+02:00) GTB Standard Time" DisplayName="GTB Standard Time" Name="Athens, Istanbul, Minsk" UTC="UTC+02:00" />
+    <Index id="135" TimeZone="(GMT+02:00) Israel Standard Time" DisplayName="Israel Standard Time" Name="Jerusalem" UTC="UTC+02:00" />
+    <Index id="140" TimeZone="(GMT+02:00) South Africa Standard Time" DisplayName="South Africa Standard Time" Name="Harare, Pretoria" UTC="UTC+02:00" />
+    <Index id="145" TimeZone="(GMT+03:00) Russian Standard Time" DisplayName=" Russian Standard Time" Name="Moscow, St. Petersburg, Volgograd" UTC="UTC+03:00" />
+    <Index id="150" TimeZone="(GMT+03:00) Arab Standard Time" DisplayName="Arab Standard Time" Name="Kuwait, Riyadh" UTC="UTC+03:00" />
+    <Index id="155" TimeZone="(GMT+03:00) E. Africa Standard Time" DisplayName="E. Africa Standard Time" Name="Nairobi" UTC="UTC+03:00" />
+    <Index id="158" TimeZone="(GMT+03:00) Arabic Standard Time" DisplayName="Arabic Standard Time" Name="Baghdad" UTC="UTC+03:00" />
+    <Index id="160" TimeZone="(GMT+03:30) Iran Standard Time" DisplayName="Iran Standard Time" Name="Tehran" UTC="UTC+03:30" />
+    <Index id="165" TimeZone="(GMT+04:00) Arabian Standard Time" DisplayName="Arabian Standard Time" Name="Abu Dhabi, Muscat" UTC="UTC+04:00" />
+    <Index id="170" TimeZone="(GMT+04:00) Caucasus Standard Time" DisplayName="Caucasus Standard Time" Name="Baku, Tbilisi, Yerevan" UTC="UTC+04:00" />
+    <Index id="175" TimeZone="(GMT+04:30) Transitional Islamic State of Afghanistan Standard Time" DisplayName="Afghanistan Standard Time" Name="Kabul" UTC="UTC+04:30" />
+    <Index id="180" TimeZone="(GMT+05:00) Ekaterinburg Standard Time" DisplayName="Ekaterinburg Standard Time" Name="Ekaterinburg" UTC="UTC+05:00" />
+    <Index id="185" TimeZone="(GMT+05:00) West Asia Standard Time" DisplayName="West Asia Standard Time" Name="Islamabad, Karachi, Tashkent" UTC="UTC+05:00" />
+    <Index id="190" TimeZone="(GMT+05:30) India Standard Time" DisplayName="India Standard Time" Name="Chennai, Kolkata, Mumbai, New Delhi" UTC="UTC+05:30" />
+    <Index id="193" TimeZone="(GMT+05:45) Nepal Standard Time" DisplayName="Nepal Standard Time" Name="Kathmandu" UTC="UTC+05:40" />
+    <Index id="195" TimeZone="(GMT+06:00) Central Asia Standard Time" DisplayName="Central Asia Standard Time" Name="Astana, Dhaka" UTC="UTC+06:00" />
+    <Index id="200" TimeZone="(GMT+06:00) Sri Lanka Standard Time" DisplayName="Sri Lanka Standard Time" Name="Sri Jayawardenepura" UTC="UTC+06:00" />
+    <Index id="201" TimeZone="(GMT+06:00) N. Central Asia Standard Time" DisplayName="N. Central Asia Standard Time" Name="Almaty, Novosibirsk" UTC="UTC+06:00" />
+    <Index id="203" TimeZone="(GMT+06:30) Myanmar Standard Time" DisplayName="Myanmar Standard Time" Name="Yangon Rangoon" UTC="UTC+06:30" />
+    <Index id="205" TimeZone="(GMT+07:00) S.E. Asia Standard Time" DisplayName="SE Asia Standard Time" Name="Bangkok, Hanoi, Jakarta" UTC="UTC+07:00" />
+    <Index id="207" TimeZone="(GMT+07:00) North Asia Standard Time" DisplayName="North Asia Standard Time" Name="Krasnoyarsk" UTC="UTC+07:00" />
+    <Index id="210" TimeZone="(GMT+08:00) China Standard Time" DisplayName="China Standard Time" Name="Beijing, Chongqing, Hong Kong SAR, Urumqi" UTC="UTC+08:00" />
+    <Index id="215" TimeZone="(GMT+08:00) Singapore Standard Time" DisplayName="Singapore Standard Time" Name="Kuala Lumpur, Singapore" UTC="UTC+08:00" />
+    <Index id="220" TimeZone="(GMT+08:00) Taipei Standard Time" DisplayName="Taipei Standard Time" Name="Taipei" UTC="UTC+08:00" />
+    <Index id="225" TimeZone="(GMT+08:00) W. Australia Standard Time" DisplayName="W. Australia Standard Time" Name="Perth" UTC="UTC+08:00" />
+    <Index id="227" TimeZone="(GMT+08:00) North Asia East Standard Time" DisplayName="North Asia East Standard Time" Name="Irkutsk, Ulaanbaatar" UTC="UTC+08:00" />
+    <Index id="230" TimeZone="(GMT+09:00) Korea Standard Time" DisplayName="Korea Standard Time" Name="Seoul" UTC="UTC+09:00" />
+    <Index id="235" TimeZone="(GMT+09:00) Tokyo Standard Time" DisplayName="Tokyo Standard Time" Name="Osaka, Sapporo, Tokyo" UTC="UTC+09:00" />
+    <Index id="240" TimeZone="(GMT+09:00) Yakutsk Standard Time" DisplayName="Yakutsk Standard Time" Name="Yakutsk" UTC="UTC+09:00" />
+    <Index id="245" TimeZone="(GMT+09:30) A.U.S. Central Standard Time" DisplayName="AUS Central Standard Time" Name="Darwin" UTC="UTC+09:30" />
+    <Index id="250" TimeZone="(GMT+09:30) Cen. Australia Standard Time" DisplayName="Cen. Australia Standard Time" Name="Adelaide" UTC="UTC+09:30" />
+    <Index id="255" TimeZone="(GMT+10:00) A.U.S. Eastern Standard Time" DisplayName="AUS Eastern Standard Time" Name="Canberra, Melbourne, Sydney" UTC="UTC+10:00" />
+    <Index id="260" TimeZone="(GMT+10:00) E. Australia Standard Time" DisplayName="E. Australia Standard Time" Name="Brisbane" UTC="UTC+10:00" />
+    <Index id="265" TimeZone="(GMT+10:00) Tasmania Standard Time" DisplayName="Tasmania Standard Time" Name="Hobart" UTC="UTC+10:00" />
+    <Index id="270" TimeZone="(GMT+10:00) Vladivostok Standard Time" DisplayName="Vladivostok Standard Time" Name="Vladivostok" UTC="UTC+10:00" />
+    <Index id="275" TimeZone="(GMT+10:00) West Pacific Standard Time" DisplayName="West Pacific Standard Time" Name="Guam, Port Moresby" UTC="UTC+10:00" />
+    <Index id="280" TimeZone="(GMT+11:00) Central Pacific Standard Time" DisplayName="Central Pacific Standard Time" Name="Magadan, Solomon Islands, New Caledonia" UTC="UTC+11:00" />
+    <Index id="285" TimeZone="(GMT+12:00) Fiji Islands Standard Time" DisplayName="Fiji Islands Standard Time" Name="Fiji Islands, Kamchatka, Marshall Islands" UTC="UTC+12:00" />
+    <Index id="290" TimeZone="(GMT+12:00) New Zealand Standard Time" DisplayName="New Zealand Standard Time" Name="Auckland, Wellington" UTC="UTC+12:00" />
+    <Index id="300" TimeZone="(GMT+13:00) Tonga Standard Time" DisplayName="Tonga Standard Time" Name="Nuku alofa" UTC="UTC+13:00" />
+</TimeZoneIndex>

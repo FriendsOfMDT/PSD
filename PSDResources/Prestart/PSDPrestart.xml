@@ -1,6 +1,10 @@
 ﻿<Commands>
  <Command>
   <Executable>powershell.exe</Executable>
-  <Argument>-noprofile -windowstyle hidden -file X:\Deploy\Prestart\PSDSamplePrestart.ps1</Argument>
+  <Argument>-noprofile -windowstyle hidden -file X:\Deploy\Prestart\PSDPrestartScript.ps1</Argument>
+ </Command>
+ <Command>
+  <Executable>powershell.exe</Executable>
+  <Argument>-noprofile -file X:\Deploy\Prestart\PSDPrestartMenu.ps1</Argument>
  </Command>
 </Commands>

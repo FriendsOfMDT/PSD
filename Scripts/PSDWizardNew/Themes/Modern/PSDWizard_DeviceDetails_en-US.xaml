@@ -1,0 +1,21 @@
+<Grid Background="#004275">
+    <Label x:Name="_detTabMainTitle" Content="@MainTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="48" Margin="0,36,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
+    <Label x:Name="_detTabSubTitle" Content="@SubTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16" Margin="0,119,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
+
+    <Label x:Name="_detTabContext" Content="@Context" HorizontalAlignment="Center" FontSize="16" Margin="0,201,0,0" VerticalAlignment="Top" Foreground="White" Width="1024" HorizontalContentAlignment="Center"/>
+    <TextBox x:Name="TS_OSDComputerName" FontWeight="Medium" HorizontalAlignment="Center" Height="44" Margin="0,248,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="502" BorderThickness="0" FontSize="30" IsReadOnly="False" CharacterCasing="Upper"/>
+
+    <Canvas x:Name="_detTabValidation" HorizontalAlignment="Center" Background="LightGreen" Visibility="Visible" Width="502" Margin="0,297,0,298" >
+        <TextBox x:Name="_detTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" Canvas.Top="10" VerticalAlignment="Center" Width="429" />
+        <Rectangle x:Name="_detTabValidation_Alert" Width="30" Height="30" Fill="Red" Canvas.Left="462" Canvas.Top="8" Visibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+        <Rectangle x:Name="_detTabValidation_Check" Width="30" Height="30" Fill="Green" Canvas.Left="462" Canvas.Top="10" Visibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}" />
+            </Rectangle.OpacityMask>
+        </Rectangle>
+    </Canvas>
+</Grid>

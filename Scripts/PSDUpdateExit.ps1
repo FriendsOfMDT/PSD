@@ -9,7 +9,7 @@
     https://github.com/FriendsOfMDT/PSD
 
 .NOTES
-          FileName: New-UpdateExit.ps1
+          FileName: PSDUpdateExit.ps1
           Solution: PowerShell Deployment for MDT
           Author: PSD Development Team
           Contact: @Mikael_Nystrom , @jarwidmark

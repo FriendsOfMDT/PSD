@@ -1,0 +1,35 @@
+<Grid x:Name="_appTabLayout" Margin="0" Grid.ColumnSpan="2">
+
+    <Label x:Name="_appTabMainTitle" HorizontalAlignment="Left" Margin="128,10,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle"/>
+    <Rectangle Grid.Column="0" Fill="DarkBlue" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,10,10,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_apps}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Label Content="Search the name of an application..." FontSize="14" HorizontalAlignment="Left" Margin="12,189,0,0" VerticalAlignment="Top"/>
+    <TextBox x:Name="_appTabSearch" HorizontalAlignment="Left" Height="31" Margin="12,219,0,0" TextWrapping="Wrap" Text="Search..." VerticalAlignment="Top" Width="399" Foreground='Gray' VerticalContentAlignment="Center" FontSize="18"/>
+    <Button x:Name="_appTabSearchClear" Height="31" Width="28" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="449,0,0,98" Style="{DynamicResource SearchBlueClear}" />
+    <Button x:Name="_appTabSearchEnter" Height="31" Width="28" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="416,0,0,98" Style="{DynamicResource SearchBlueMag}" />
+
+    <Label x:Name="_appBundleslabel" Content="Application Bundles:" FontSize="14" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Center"/>
+    <ComboBox x:Name="_appBundlesCmb" HorizontalAlignment="Left" Margin="153,0,0,0" VerticalAlignment="Center" Width="326" FontSize="18" Style="{DynamicResource SimpleComboBoxStyle}" Height="28"/>
+
+    <Button x:Name="_appTabSelectAll" Height="25" Width="25" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="460,0,0,313" Style="{DynamicResource CheckAllBlueBox}" />
+    <Button x:Name="_appTabSelectNone" Height="25" Width="25" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="460,0,0,283" Style="{DynamicResource UnCheckBlueBox}"/>
+
+    <TextBox x:Name="TS_Applications" Margin="341,129,13.5,379" IsEnabled="False" Visibility="Hidden"/>
+
+    <ListBox x:Name="_appTabList" HorizontalAlignment="Left" Height="240" Margin="490,10,0,0" VerticalAlignment="Top" Width="466" SelectionMode="Multiple">
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+                <Setter Property="IsSelected" Value="{Binding Selected}" />
+            </Style>
+        </ListBox.ItemContainerStyle>
+    </ListBox>
+
+    <Label Content="More Info" FontSize="14" HorizontalAlignment="Right" Margin="0,259,916,0" VerticalAlignment="Top" Foreground="LightSlateGray" Width="88" HorizontalContentAlignment="Right" />
+    <TextBlock x:Name="_appTabMoreInfo" HorizontalAlignment="Left" Margin="119,266,0,0" Width="674" TextWrapping="Wrap" VerticalAlignment="Top" Height="72">
+        <Run Text="@Help"/>
+    </TextBlock>
+</Grid>

@@ -9,7 +9,7 @@
           FileName: PSDWizard.psm1
           Solution: PowerShell Deployment for MDT
           Author: PSD Development Team
-          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus
           Primary: @Mikael_Nystrom 
           Created: 
           Modified: 2019-05-09

@@ -9,7 +9,7 @@
           FileName: PSDConfigure.ps1
           Solution: PowerShell Deployment for MDT
           Author: PSD Development Team
-          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus
           Primary: @Mikael_Nystrom 
           Created: 
           Modified: 2019-05-17
@@ -22,9 +22,13 @@
 .Example
 #>
 
+[CmdletBinding()]
 param (
 
 )
+
+# Set scriptversion for logging
+$ScriptVersion = "0.1.1"
 
 # Load core modules
 Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global
@@ -39,6 +43,11 @@ if($TSEnv:PSDDebug -eq "YES"){
 if($PSDDebug -eq $true){
     $verbosePreference = "Continue"
 }
+
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Starting: $($MyInvocation.MyCommand.Name) - Version $ScriptVersion"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): The task sequencer log is located at $("$tsenv:_SMSTSLogPath\SMSTS.LOG"). For task sequence failures, please consult this log."
+Write-PSDEvent -MessageID 41000 -severity 1 -Message "Starting: $($MyInvocation.MyCommand.Name)"
+
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 
 # Fix issue if Domainjoin value is blank as well as joinworkgroup

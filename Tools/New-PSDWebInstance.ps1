@@ -241,6 +241,13 @@ process{
 		{
 			write-PSDInstallLog -Message "Succesfully installed the IIS install with Exit Code $($IISResults.ExitCode) and Value $($IISResults.ExitCode.Value__)"
 		}
+
+		$BITSSResults = Install-WindowsFeature -Name BITS-IIS-Ext -Verbose:$false
+		if($BITSSResults.Success)
+		{
+			write-PSDInstallLog -Message "Succesfully installed the BITS install with Exit Code $($BITSSResults.ExitCode) and Value $($BITSSResults.ExitCode.Value__)"
+		}
+
 		Write-PSDInstallLog -Message "Now attempting to install other required IIS Features"
 		#ToDO make this a proper hash table/list to explain info next to it at the end and evaluate or to allow install ALL sub features
 		$Featurelist = @("Web-Custom-Logging","Web-Log-Libraries","Web-Request-Monitor","Web-Http-Tracing","Web-Security","Web-Filtering","Web-Basic-Auth","Web-Digest-Auth","Web-Url-Auth","Web-Windows-Auth","Web-Mgmt-Console","Web-Metabase","Web-Common-Http","Web-Default-Doc","Web-Dir-Browsing","Web-Http-Errors","Web-Static-Content","Web-Http-Redirect","Web-DAV-Publishing")

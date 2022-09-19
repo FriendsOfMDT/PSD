@@ -1,0 +1,120 @@
+<Window x:Class="PSDWizard.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PSDWizard"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Width="1024" Height="768"
+        Background="#1f1f1f">
+    <Window.Resources>
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources\Icons.xaml" />
+                <ResourceDictionary Source="Resources\TabControl_TopBlackStyle.xaml" />
+                <ResourceDictionary Source="Resources\ListBox_ModernBlueStyle.xaml" />
+                <ResourceDictionary Source="Resources\Button_BlueFlatSquareStyle.xaml" />
+                <ResourceDictionary Source="Resources\ComboBox_BlackFlatSquareStyle.xaml" />
+                <ResourceDictionary Source="Resources\Button_DarkBlueSquareStyle.xaml" />
+                <ResourceDictionary Source="Resources\CheckBox_ModernToggleStyle.xaml" />
+                <ResourceDictionary Source="Resources\Button_BlueRoundNavStyle.xaml" />
+                <ResourceDictionary Source="Resources\ScrollBar_BlueModernStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Setter Property="FontWeight" Value="Light" />
+                <Setter Property="Background" Value="#1f1f1f" />
+                <Setter Property="Foreground" Value="white" />
+            </Style>
+
+            <Style TargetType="{x:Type ListViewItem}">
+                <Setter Property="IsSelected" Value="{Binding Mode=TwoWay, Path=IsSelected}" />
+                <Setter Property="Margin" Value="2,4,2,2" />
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListViewItem}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*" MinWidth="815"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="Bd"
+                                    Grid.ColumnSpan="2"
+                                    SnapsToDevicePixels="true"
+                                    BorderThickness="1,1,1,1" Background="Transparent"/>
+                                <Border x:Name="SelectionBorder"
+                                        Grid.Column="1"
+                                        BorderThickness="0" 
+                                        Background="Transparent"
+                                        HorizontalAlignment="Stretch"/>
+
+                                <GridViewRowPresenter 
+                                        x:Name="txtContent"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"                  
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="true">
+                                    <Setter TargetName="SelectionBorder" Property="BorderBrush" Value="White" />
+                                    <Setter TargetName="SelectionBorder" Property="BorderThickness" Value="1" />
+
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsSelected" Value="true" />
+                                        <Condition Property="Selector.IsSelectionActive" Value="True" />
+                                    </MultiTrigger.Conditions>
+
+                                    <Setter Property="Foreground" Value="White"/>
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <HierarchicalDataTemplate x:Key="CheckBoxItemTemplate" ItemsSource="{Binding Children, Mode=OneTime}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Focusable="False" IsChecked="{Binding IsChecked}" VerticalAlignment="Center" />
+                    <ContentPresenter Content="{Binding Name, Mode=OneTime}" Margin="2,0" />
+                </StackPanel>
+            </HierarchicalDataTemplate>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Name="background" HorizontalAlignment="Center" VerticalAlignment="Center">
+        @StartPage
+
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,100,0,0" Panel.ZIndex="1">
+            <Image Name="_wizMainLogo" Height="48" Width="132" Stretch="Uniform" />
+        </StackPanel>
+
+        <!-- START TAB MENU -->
+        <TabControl Name="_wizTabControl" Style="{DynamicResource TabControlTopBlack}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1024" Height="700" Margin="0,0,0,40" BorderThickness="0">
+            @TabItems
+        </TabControl>
+
+        <DockPanel Background="#004275" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,40" Width="1024" Height="67">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="321*"></ColumnDefinition>
+                    <ColumnDefinition Width="94*"></ColumnDefinition>
+                    <ColumnDefinition Width="97*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button Name="_wizCancel" Grid.Column="0" Content="Cancel" Height="45" Width="180" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="10" Margin="10,0,0,10" />
+                <Button Name="_wizBack" Grid.Column="1" Content="Back" Height="45" Width="180" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="10" Margin="0,0,0,10" />
+                <Button Name="_wizNext" Grid.Column="2" Content="Next" Height="45" Width="180" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="10" Margin="0,0,0,10" />
+                <Button x:Name="_wizDebugConsole" Grid.Column="0" Content="Debug Console" Height="45" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" Padding="10" Margin="198,0,0,0" />
+            </Grid>
+        </DockPanel>
+    </Grid>
+</Window>

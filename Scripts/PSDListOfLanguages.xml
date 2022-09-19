@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	#REFERENCE: https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-international-core-inputlocale
+	[xml]$DataXML = Get-Content .\Scripts\ListOfLanguages.xml
+
+	$DataLocales = $DataXML.LOCALEDATA.LOCALE 
+
+	$XML = "<?xml version=`"1.0`" encoding=`"UTF-8`" standalone=`"yes`"?>`n<Locales>"
+	Foreach($Data in $DataLocales)
+	{
+		If($Data.IFLAGS -gt 0){
+			$XML += "`n    <Locale ID=`"$($Data.ILANGUAGE)`" Name=`"$($Data.SENGDISPLAYNAME)`" Language=`"$($Data.SENGLANGUAGE)`" Culture=`"$($Data.SSPECIFICCULTURE)`" KeyboardID=`"$($Data.DEFAULTKEYBOARD)`" KeyboardLayout=`"$($Data.ILANGUAGE):$($Data.DEFAULTKEYBOARD)`" />"
+		}
+	}
+	$XML += "`n</Locales>"
+-->
+<Locales>
+    <Locale ID="0436" Name="Afrikaans (South Africa)" Language="Afrikaans" Culture="af-ZA" KeyboardID="00000436" KeyboardLayout="0436:00000436" />
+    <Locale ID="041c" Name="Albanian (Albania)" Language="Albanian" Culture="sq-AL" KeyboardID="0000041c" KeyboardLayout="041c:0000041c" />
+    <Locale ID="0484" Name="Alsatian (France)" Language="Alsatian" Culture="gsw-FR" KeyboardID="00000484" KeyboardLayout="0484:00000484" />
+    <Locale ID="045e" Name="Amharic (Ethiopia)" Language="Amharic" Culture="am-ET" KeyboardID="0000045e" 
+KeyboardLayout="045e:0000045e" />
+    <Locale ID="1401" Name="Arabic (Algeria)" Language="Arabic" Culture="ar-DZ" KeyboardID="00000409" KeyboardLayout="1401:00000409" />
+    <Locale ID="3c01" Name="Arabic (Bahrain)" Language="Arabic" Culture="ar-BH" KeyboardID="00000409" KeyboardLayout="3c01:00000409" />
+    <Locale ID="0c01" Name="Arabic (Egypt)" Language="Arabic" Culture="ar-EG" KeyboardID="00000409" KeyboardLayout="0c01:00000409" />
+    <Locale ID="0801" Name="Arabic (Iraq)" Language="Arabic" Culture="ar-IQ" KeyboardID="00000409" KeyboardLayout="0801:00000409" />
+    <Locale ID="2c01" Name="Arabic (Jordan)" Language="Arabic" Culture="ar-JO" KeyboardID="00000409" KeyboardLayout="2c01:00000409" />
+    <Locale ID="3401" Name="Arabic (Kuwait)" Language="Arabic" Culture="ar-KW" KeyboardID="00000409" KeyboardLayout="3401:00000409" />
+    <Locale ID="3001" Name="Arabic (Lebanon)" Language="Arabic" Culture="ar-LB" KeyboardID="00000409" KeyboardLayout="3001:00000409" />
+    <Locale ID="1001" Name="Arabic (Libya)" Language="Arabic" Culture="ar-LY" KeyboardID="00000409" KeyboardLayout="1001:00000409" />
+    <Locale ID="1801" Name="Arabic (Morocco)" Language="Arabic" Culture="ar-MA" KeyboardID="00000409" KeyboardLayout="1801:00000409" />
+    <Locale ID="2001" Name="Arabic (Oman)" Language="Arabic" Culture="ar-OM" KeyboardID="00000409" KeyboardLayout="2001:00000409" />
+    <Locale ID="4001" Name="Arabic (Qatar)" Language="Arabic" Culture="ar-QA" KeyboardID="00000409" KeyboardLayout="4001:00000409" />
+    <Locale ID="0401" Name="Arabic (Saudi Arabia)" Language="Arabic" Culture="ar-SA" KeyboardID="00000409" KeyboardLayout="0401:00000409" />
+    <Locale ID="2801" Name="Arabic (Syria)" Language="Arabic" Culture="ar-SY" KeyboardID="00000409" KeyboardLayout="2801:00000409" />
+    <Locale ID="1c01" Name="Arabic (Tunisia)" Language="Arabic" Culture="ar-TN" KeyboardID="00000409" KeyboardLayout="1c01:00000409" />
+    <Locale ID="3801" Name="Arabic (U.A.E.)" Language="Arabic" Culture="ar-AE" KeyboardID="00000409" KeyboardLayout="3801:00000409" />
+    <Locale ID="2401" Name="Arabic (Yemen)" Language="Arabic" Culture="ar-YE" KeyboardID="00000409" KeyboardLayout="2401:00000409" />
+    <Locale ID="042b" Name="Armenian (Armenia)" Language="Armenian" Culture="hy-AM" KeyboardID="0000042b" KeyboardLayout="042b:0000042b" />
+    <Locale ID="044d" Name="Assamese (India)" Language="Assamese" Culture="as-IN" KeyboardID="0000044d" KeyboardLayout="044d:0000044d" />
+    <Locale ID="082c" Name="Azerbaijani (Cyrillic, Azerbaijan)" Language="Azerbaijani (Cyrillic)" Culture="az-Cyrl-AZ" KeyboardID="0000042c" KeyboardLayout="082c:0000042c" />
+    <Locale ID="042c" Name="Azerbaijani (Latin, Azerbaijan)" Language="Azerbaijani (Latin)" Culture="az-Latn-AZ" KeyboardID="0000042c" KeyboardLayout="042c:0000042c" />
+    <Locale ID="046d" Name="Bashkir (Russia)" Language="Bashkir" Culture="ba-RU" KeyboardID="00000419" KeyboardLayout="046d:00000419" />
+    <Locale ID="042d" Name="Basque (Basque)" Language="Basque" Culture="eu-ES" KeyboardID="0000042d" KeyboardLayout="042d:0000042d" />
+    <Locale ID="0423" Name="Belarusian (Belarus)" Language="Belarusian" Culture="be-BY" KeyboardID="00000423" KeyboardLayout="0423:00000423" />
+    <Locale ID="0845" Name="Bangla (Bangladesh)" Language="Bangla" Culture="bn-BD" KeyboardID="00000445" 
+KeyboardLayout="0845:00000445" />
+    <Locale ID="0445" Name="Bangla (India)" Language="Bangla" Culture="bn-IN" KeyboardID="00000445" KeyboardLayout="0445:00000445" />
+    <Locale ID="201a" Name="Bosnian (Cyrillic)" Language="Bosnian (Cyrillic)" Culture="bs-Cyrl-BA" KeyboardID="0000141a" KeyboardLayout="201a:0000141a" />
+    <Locale ID="141a" Name="Bosnian (Latin)" Language="Bosnian (Latin)" Culture="bs-Latn-BA" KeyboardID="0000141a" KeyboardLayout="141a:0000141a" />
+    <Locale ID="047e" Name="Breton (France)" Language="Breton" Culture="br-FR" KeyboardID="0000047e" KeyboardLayout="047e:0000047e" />
+    <Locale ID="0402" Name="Bulgarian (Bulgaria)" Language="Bulgarian" Culture="bg-BG" KeyboardID="00030402" KeyboardLayout="0402:00030402" />
+    <Locale ID="0403" Name="Catalan (Catalan)" Language="Catalan" Culture="ca-ES" KeyboardID="00000403" KeyboardLayout="0403:00000403" />
+    <Locale ID="0c04" Name="Chinese (Hong Kong S.A.R.)" Language="Chinese" Culture="zh-HK" KeyboardID="00000404" KeyboardLayout="0c04:00000404" />
+    <Locale ID="1404" Name="Chinese (Macao S.A.R.)" Language="Chinese" Culture="zh-MO" KeyboardID="00000404" KeyboardLayout="1404:00000404" />
+    <Locale ID="0804" Name="Chinese (PRC)" Language="Chinese" Culture="zh-CN" KeyboardID="00000804" KeyboardLayout="0804:00000804" />
+    <Locale ID="1004" Name="Chinese (Singapore)" Language="Chinese" Culture="zh-SG" KeyboardID="00000804" KeyboardLayout="1004:00000804" />
+    <Locale ID="0404" Name="Chinese (Taiwan)" Language="Chinese" Culture="zh-TW" KeyboardID="00000404" KeyboardLayout="0404:00000404" />
+    <Locale ID="0483" Name="Corsican (France)" Language="Corsican" Culture="co-FR" KeyboardID="00000483" 
+KeyboardLayout="0483:00000483" />
+    <Locale ID="041a" Name="Croatian (Croatia)" Language="Croatian" Culture="hr-HR" KeyboardID="0000041a" KeyboardLayout="041a:0000041a" />
+    <Locale ID="101a" Name="Croatian (Latin)" Language="Croatian (Latin)" Culture="hr-BA" KeyboardID="0000041a" KeyboardLayout="101a:0000041a" />
+    <Locale ID="0405" Name="Czech (Czech Republic)" Language="Czech" Culture="cs-CZ" KeyboardID="00000405" KeyboardLayout="0405:00000405" />
+    <Locale ID="0406" Name="Danish (Denmark)" Language="Danish" Culture="da-DK" KeyboardID="00000406" KeyboardLayout="0406:00000406" />
+    <Locale ID="048c" Name="Dari (Afghanistan)" Language="Dari" Culture="prs-AF" KeyboardID="0000048c" KeyboardLayout="048c:0000048c" />
+    <Locale ID="0465" Name="Divehi (Maldives)" Language="Divehi" Culture="dv-MV" KeyboardID="00000465" KeyboardLayout="0465:00000465" />
+    <Locale ID="0813" Name="Dutch (Belgium)" Language="Dutch" Culture="nl-BE" KeyboardID="00000413" KeyboardLayout="0813:00000413" />
+    <Locale ID="0413" Name="Dutch (Netherlands)" Language="Dutch" Culture="nl-NL" KeyboardID="00000413" KeyboardLayout="0413:00000413" />
+    <Locale ID="0c09" Name="English (Australia)" Language="English" Culture="en-AU" KeyboardID="00000409" KeyboardLayout="0c09:00000409" />
+    <Locale ID="2809" Name="English (Belize)" Language="English" Culture="en-BZ" KeyboardID="00000409" KeyboardLayout="2809:00000409" />
+    <Locale ID="1009" Name="English (Canada)" Language="English" Culture="en-CA" KeyboardID="00000409" KeyboardLayout="1009:00000409" />
+    <Locale ID="2409" Name="English (Caribbean)" Language="English" Culture="en-029" KeyboardID="00000409" KeyboardLayout="2409:00000409" />
+    <Locale ID="4009" Name="English (India)" Language="English" Culture="en-IN" KeyboardID="00000409" KeyboardLayout="4009:00000409" />
+    <Locale ID="1809" Name="English (Ireland)" Language="English" Culture="en-IE" KeyboardID="00000409" KeyboardLayout="1809:00000409" />
+    <Locale ID="2009" Name="English (Jamaica)" Language="English" Culture="en-JM" KeyboardID="00000409" KeyboardLayout="2009:00000409" />
+    <Locale ID="4409" Name="English (Malaysia)" Language="English" Culture="en-MY" KeyboardID="00000409" 
+KeyboardLayout="4409:00000409" />
+    <Locale ID="1409" Name="English (New Zealand)" Language="English" Culture="en-NZ" KeyboardID="00000409" KeyboardLayout="1409:00000409" />
+    <Locale ID="3409" Name="English (Republic of the Philippines)" Language="English" Culture="en-PH" KeyboardID="00000409" KeyboardLayout="3409:00000409" />
+    <Locale ID="4809" Name="English (Singapore)" Language="English" Culture="en-SG" KeyboardID="00000409" KeyboardLayout="4809:00000409" />
+    <Locale ID="1c09" Name="English (South Africa)" Language="English" Culture="en-ZA" KeyboardID="00000409" KeyboardLayout="1c09:00000409" />
+    <Locale ID="2c09" Name="English (Trinidad and Tobago)" Language="English" Culture="en-TT" KeyboardID="00000409" KeyboardLayout="2c09:00000409" />
+    <Locale ID="0809" Name="English (United Kingdom)" Language="English" Culture="en-GB" KeyboardID="00000409" KeyboardLayout="0809:00000409" />
+    <Locale ID="0409" Name="English (United States)" Language="English" Culture="en-US" KeyboardID="00000409" KeyboardLayout="0409:00000409" />
+    <Locale ID="3009" Name="English (Zimbabwe)" Language="English" Culture="en-ZW" KeyboardID="00000409" 
+KeyboardLayout="3009:00000409" />
+    <Locale ID="0425" Name="Estonian (Estonia)" Language="Estonian" Culture="et-EE" KeyboardID="00000425" KeyboardLayout="0425:00000425" />
+    <Locale ID="0438" Name="Faroese (Faroe Islands)" Language="Faroese" Culture="fo-FO" KeyboardID="00000438" KeyboardLayout="0438:00000438" />
+    <Locale ID="0464" Name="Filipino (Philippines)" Language="Filipino" Culture="fil-PH" KeyboardID="00000464" KeyboardLayout="0464:00000464" />
+    <Locale ID="040b" Name="Finnish (Finland)" Language="Finnish" Culture="fi-FI" KeyboardID="0000040b" KeyboardLayout="040b:0000040b" />
+    <Locale ID="080c" Name="French (Belgium)" Language="French" Culture="fr-BE" KeyboardID="0000040c" KeyboardLayout="080c:0000040c" />
+    <Locale ID="0c0c" Name="French (Canada)" Language="French" Culture="fr-CA" KeyboardID="0000040c" KeyboardLayout="0c0c:0000040c" />
+    <Locale ID="040c" Name="French (France)" Language="French" Culture="fr-FR" KeyboardID="0000040c" KeyboardLayout="040c:0000040c" />
+    <Locale ID="140c" Name="French (Luxembourg)" Language="French" Culture="fr-LU" KeyboardID="0000040c" 
+KeyboardLayout="140c:0000040c" />
+    <Locale ID="180c" Name="French (Monaco)" Language="French" Culture="fr-MC" KeyboardID="0000040c" KeyboardLayout="180c:0000040c" />
+    <Locale ID="100c" Name="French (Switzerland)" Language="French" Culture="fr-CH" KeyboardID="0000040c" KeyboardLayout="100c:0000040c" />
+    <Locale ID="0462" Name="Frisian (Netherlands)" Language="Frisian" Culture="fy-NL" KeyboardID="00000462" KeyboardLayout="0462:00000462" />
+    <Locale ID="0456" Name="Galician (Galician)" Language="Galician" Culture="gl-ES" KeyboardID="00000456" KeyboardLayout="0456:00000456" />
+    <Locale ID="0437" Name="Georgian (Georgia)" Language="Georgian" Culture="ka-GE" KeyboardID="00000437" KeyboardLayout="0437:00000437" />
+    <Locale ID="0c07" Name="German (Austria)" Language="German" Culture="de-AT" KeyboardID="00000407" KeyboardLayout="0c07:00000407" />
+    <Locale ID="0407" Name="German (Germany)" Language="German" Culture="de-DE" KeyboardID="00000407" KeyboardLayout="0407:00000407" />
+    <Locale ID="1407" Name="German (Liechtenstein)" Language="German" Culture="de-LI" KeyboardID="00000407" KeyboardLayout="1407:00000407" />
+    <Locale ID="1007" Name="German (Luxembourg)" Language="German" Culture="de-LU" KeyboardID="00000407" 
+KeyboardLayout="1007:00000407" />
+    <Locale ID="0807" Name="German (Switzerland)" Language="German" Culture="de-CH" KeyboardID="00000407" KeyboardLayout="0807:00000407" />
+    <Locale ID="0408" Name="Greek (Greece)" Language="Greek" Culture="el-GR" KeyboardID="00000409" KeyboardLayout="0408:00000409" />
+    <Locale ID="046f" Name="Greenlandic (Greenland)" Language="Greenlandic" Culture="kl-GL" KeyboardID="0000046f" KeyboardLayout="046f:0000046f" />
+    <Locale ID="0447" Name="Gujarati (India)" Language="Gujarati" Culture="gu-IN" KeyboardID="00000447" KeyboardLayout="0447:00000447" />
+    <Locale ID="0468" Name="Hausa (Latin, Nigeria)" Language="Hausa (Latin)" Culture="ha-Latn-NG" KeyboardID="00000468" KeyboardLayout="0468:00000468" />
+    <Locale ID="040d" Name="Hebrew (Israel)" Language="Hebrew" Culture="he-IL" KeyboardID="00000409" KeyboardLayout="040d:00000409" />
+    <Locale ID="0439" Name="Hindi (India)" Language="Hindi" Culture="hi-IN" KeyboardID="00000439" KeyboardLayout="0439:00000439" />
+    <Locale ID="040e" Name="Hungarian (Hungary)" Language="Hungarian" Culture="hu-HU" KeyboardID="0000040e" KeyboardLayout="040e:0000040e" />
+    <Locale ID="040f" Name="Icelandic (Iceland)" Language="Icelandic" Culture="is-IS" KeyboardID="0000040f" KeyboardLayout="040f:0000040f" />
+    <Locale ID="0470" Name="Igbo (Nigeria)" Language="Igbo" Culture="ig-NG" KeyboardID="00000468" KeyboardLayout="0470:00000468" />
+    <Locale ID="0421" Name="Indonesian (Indonesia)" Language="Indonesian" Culture="id-ID" KeyboardID="00000421" KeyboardLayout="0421:00000421" />
+    <Locale ID="085d" Name="Inuktitut (Latin, Canada)" Language="Inuktitut (Latin)" Culture="iu-Latn-CA" 
+KeyboardID="0000085d" KeyboardLayout="085d:0000085d" />
+    <Locale ID="045d" Name="Inuktitut (Syllabics, Canada)" Language="Inuktitut" Culture="iu-Cans-CA" KeyboardID="0000085d" KeyboardLayout="045d:0000085d" />
+    <Locale ID="083c" Name="Irish (Ireland)" Language="Irish" Culture="ga-IE" KeyboardID="0000083c" KeyboardLayout="083c:0000083c" />
+    <Locale ID="0434" Name="isiXhosa (South Africa)" Language="isiXhosa" Culture="xh-ZA" KeyboardID="00000434" KeyboardLayout="0434:00000434" />
+    <Locale ID="0435" Name="isiZulu (South Africa)" Language="isiZulu" Culture="zu-ZA" KeyboardID="00000435" KeyboardLayout="0435:00000435" />
+    <Locale ID="0410" Name="Italian (Italy)" Language="Italian" Culture="it-IT" KeyboardID="00000410" KeyboardLayout="0410:00000410" />
+    <Locale ID="0810" Name="Italian (Switzerland)" Language="Italian" Culture="it-CH" KeyboardID="00000410" KeyboardLayout="0810:00000410" />
+    <Locale ID="0411" Name="Japanese (Japan)" Language="Japanese" Culture="ja-JP" KeyboardID="00000411" KeyboardLayout="0411:00000411" />
+    <Locale ID="044b" Name="Kannada (India)" Language="Kannada" Culture="kn-IN" KeyboardID="0000044b" KeyboardLayout="044b:0000044b" />
+    <Locale ID="043f" Name="Kazakh (Kazakhstan)" Language="Kazakh" Culture="kk-KZ" KeyboardID="0000043f" 
+KeyboardLayout="043f:0000043f" />
+    <Locale ID="0453" Name="Khmer (Cambodia)" Language="Khmer" Culture="km-KH" KeyboardID="00000453" KeyboardLayout="0453:00000453" />
+    <Locale ID="0486" Name="K'iche (Guatemala)" Language="K'iche" Culture="qut-GT" KeyboardID="00000486" 
+KeyboardLayout="0486:00000486" />
+    <Locale ID="0487" Name="Kinyarwanda (Rwanda)" Language="Kinyarwanda" Culture="rw-RW" KeyboardID="00000487" KeyboardLayout="0487:00000487" />
+    <Locale ID="0441" Name="Kiswahili (Kenya)" Language="Kiswahili" Culture="sw-KE" KeyboardID="00000441" KeyboardLayout="0441:00000441" />
+    <Locale ID="0457" Name="Konkani (India)" Language="Konkani" Culture="kok-IN" KeyboardID="00000457" KeyboardLayout="0457:00000457" />
+    <Locale ID="0412" Name="Korean (Korea)" Language="Korean" Culture="ko-KR" KeyboardID="00000412" KeyboardLayout="0412:00000412" />
+    <Locale ID="0440" Name="Kyrgyz (Kyrgyzstan)" Language="Kyrgyz" Culture="ky-KG" KeyboardID="00000440" 
+KeyboardLayout="0440:00000440" />
+    <Locale ID="0454" Name="Lao (Lao P.D.R.)" Language="Lao" Culture="lo-LA" KeyboardID="00000454" KeyboardLayout="0454:00000454" />
+    <Locale ID="0426" Name="Latvian (Latvia)" Language="Latvian" Culture="lv-LV" KeyboardID="00010426" KeyboardLayout="0426:00010426" />
+    <Locale ID="0427" Name="Lithuanian (Lithuania)" Language="Lithuanian" Culture="lt-LT" KeyboardID="00010427" KeyboardLayout="0427:00010427" />
+    <Locale ID="082e" Name="Lower Sorbian (Germany)" Language="Lower Sorbian" Culture="dsb-DE" KeyboardID="0000042e" KeyboardLayout="082e:0000042e" />
+    <Locale ID="046e" Name="Luxembourgish (Luxembourg)" Language="Luxembourgish" Culture="lb-LU" KeyboardID="0000046e" KeyboardLayout="046e:0000046e" />
+    <Locale ID="042f" Name="Macedonian, FYRO" Language="Macedonian, FYRO" Culture="mk-MK" KeyboardID="0000042f" KeyboardLayout="042f:0000042f" />
+    <Locale ID="083e" Name="Malay (Brunei Darussalam)" Language="Malay" Culture="ms-BN" KeyboardID="0000043e" KeyboardLayout="083e:0000043e" />
+    <Locale ID="043e" Name="Malay (Malaysia)" Language="Malay" Culture="ms-MY" KeyboardID="0000043e" KeyboardLayout="043e:0000043e" />
+    <Locale ID="044c" Name="Malayalam (India)" Language="Malayalam" Culture="ml-IN" KeyboardID="0000044c" KeyboardLayout="044c:0000044c" />
+    <Locale ID="043a" Name="Maltese (Malta)" Language="Maltese" Culture="mt-MT" KeyboardID="0000043a" KeyboardLayout="043a:0000043a" />
+    <Locale ID="0481" Name="Maori (New Zealand)" Language="Maori" Culture="mi-NZ" KeyboardID="00000481" KeyboardLayout="0481:00000481" />
+    <Locale ID="047a" Name="Mapudungun (Chile)" Language="Mapudungun" Culture="arn-CL" KeyboardID="0000047a" KeyboardLayout="047a:0000047a" />
+    <Locale ID="044e" Name="Marathi (India)" Language="Marathi" Culture="mr-IN" KeyboardID="0000044e" KeyboardLayout="044e:0000044e" />
+    <Locale ID="047c" Name="Mohawk (Mohawk)" Language="Mohawk" Culture="moh-CA" KeyboardID="0000047c" KeyboardLayout="047c:0000047c" />
+    <Locale ID="0450" Name="Mongolian (Cyrillic, Mongolia)" Language="Mongolian (Cyrillic)" Culture="mn-MN" KeyboardID="00000450" KeyboardLayout="0450:00000450" />
+    <Locale ID="0850" Name="Mongolian (Traditional Mongolian, PRC)" Language="Mongolian (Traditional Mongolian)" Culture="mn-Mong-CN" KeyboardID="00000450" KeyboardLayout="0850:00000450" />
+    <Locale ID="0461" Name="Nepali (Nepal)" Language="Nepali" Culture="ne-NP" KeyboardID="00000461" KeyboardLayout="0461:00000461" />
+    <Locale ID="0414" Name="Norwegian, Bokmål (Norway)" Language="Norwegian (Bokmål)" Culture="nb-NO" KeyboardID="00000414" KeyboardLayout="0414:00000414" />
+    <Locale ID="0814" Name="Norwegian, Nynorsk (Norway)" Language="Norwegian (Nynorsk)" Culture="nn-NO" KeyboardID="00000414" KeyboardLayout="0814:00000414" />
+    <Locale ID="0482" Name="Occitan (France)" Language="Occitan" Culture="oc-FR" KeyboardID="00000482" KeyboardLayout="0482:00000482" />
+    <Locale ID="0448" Name="Odia (India)" Language="Odia" Culture="or-IN" KeyboardID="00000448" KeyboardLayout="0448:00000448" />
+    <Locale ID="0463" Name="Pashto (Afghanistan)" Language="Pashto" Culture="ps-AF" KeyboardID="00000463" KeyboardLayout="0463:00000463" />
+    <Locale ID="0429" Name="Persian" Language="Persian" Culture="fa-IR" KeyboardID="00000429" KeyboardLayout="0429:00000429" />
+    <Locale ID="0415" Name="Polish (Poland)" Language="Polish" Culture="pl-PL" KeyboardID="00000415" KeyboardLayout="0415:00000415" />
+    <Locale ID="0416" Name="Portuguese (Brazil)" Language="Portuguese" Culture="pt-BR" KeyboardID="00000416" KeyboardLayout="0416:00000416" />
+    <Locale ID="0816" Name="Portuguese (Portugal)" Language="Portuguese" Culture="pt-PT" KeyboardID="00000416" KeyboardLayout="0816:00000416" />
+    <Locale ID="0446" Name="Punjabi (India)" Language="Punjabi" Culture="pa-IN" KeyboardID="00000446" KeyboardLayout="0446:00000446" />
+    <Locale ID="046b" Name="Quechua (Bolivia)" Language="Quechua" Culture="quz-BO" KeyboardID="0000046b" 
+KeyboardLayout="046b:0000046b" />
+    <Locale ID="086b" Name="Quechua (Ecuador)" Language="Quechua" Culture="quz-EC" KeyboardID="0000046b" 
+KeyboardLayout="086b:0000046b" />
+    <Locale ID="0c6b" Name="Quechua (Peru)" Language="Quechua" Culture="quz-PE" KeyboardID="0000046b" KeyboardLayout="0c6b:0000046b" />
+    <Locale ID="0418" Name="Romanian (Romania)" Language="Romanian" Culture="ro-RO" KeyboardID="00010418" KeyboardLayout="0418:00010418" />
+    <Locale ID="0417" Name="Romansh (Switzerland)" Language="Romansh" Culture="rm-CH" KeyboardID="00000417" KeyboardLayout="0417:00000417" />
+    <Locale ID="0419" Name="Russian (Russia)" Language="Russian" Culture="ru-RU" KeyboardID="00000419" KeyboardLayout="0419:00000419" />
+    <Locale ID="243b" Name="Sami, Inari (Finland)" Language="Sami (Inari)" Culture="smn-FI" KeyboardID="0000043b" KeyboardLayout="243b:0000043b" />
+    <Locale ID="103b" Name="Sami, Lule (Norway)" Language="Sami (Lule)" Culture="smj-NO" KeyboardID="0000043b" KeyboardLayout="103b:0000043b" />
+    <Locale ID="143b" Name="Sami, Lule (Sweden)" Language="Sami (Lule)" Culture="smj-SE" KeyboardID="0000043b" KeyboardLayout="143b:0000043b" />
+    <Locale ID="0c3b" Name="Sami, Northern (Finland)" Language="Sami (Northern)" Culture="se-FI" KeyboardID="0000043b" KeyboardLayout="0c3b:0000043b" />
+    <Locale ID="043b" Name="Sami, Northern (Norway)" Language="Sami (Northern)" Culture="se-NO" KeyboardID="0000043b" KeyboardLayout="043b:0000043b" />
+    <Locale ID="083b" Name="Sami, Northern (Sweden)" Language="Sami (Northern)" Culture="se-SE" KeyboardID="0000043b" KeyboardLayout="083b:0000043b" />
+    <Locale ID="203b" Name="Sami, Skolt (Finland)" Language="Sami (Skolt)" Culture="sms-FI" KeyboardID="0000043b" KeyboardLayout="203b:0000043b" />
+    <Locale ID="183b" Name="Sami, Southern (Norway)" Language="Sami (Southern)" Culture="sma-NO" KeyboardID="0000043b" KeyboardLayout="183b:0000043b" />
+    <Locale ID="1c3b" Name="Sami, Southern (Sweden)" Language="Sami (Southern)" Culture="sma-SE" KeyboardID="0000043b" KeyboardLayout="1c3b:0000043b" />
+    <Locale ID="044f" Name="Sanskrit (India)" Language="Sanskrit" Culture="sa-IN" KeyboardID="0000044f" KeyboardLayout="044f:0000044f" />
+    <Locale ID="1c1a" Name="Serbian (Cyrillic)" Language="Serbian (Cyrillic)" Culture="sr-Cyrl-BA" KeyboardID="0000081a" KeyboardLayout="1c1a:0000081a" />
+    <Locale ID="181a" Name="Serbian (Latin)" Language="Serbian (Latin)" Culture="sr-Latn-BA" KeyboardID="0000081a" KeyboardLayout="181a:0000081a" />
+    <Locale ID="081a" Name="Serbian (Latin, Serbia and Montenegro)" Language="Serbian (Latin)" Culture="sr-Latn-RS" KeyboardID="0000081a" KeyboardLayout="081a:0000081a" />
+    <Locale ID="046c" Name="Sesotho sa Leboa (South Africa)" Language="Sesotho sa Leboa" Culture="nso-ZA" KeyboardID="0000046c" KeyboardLayout="046c:0000046c" />
+    <Locale ID="0432" Name="Setswana (South Africa)" Language="Setswana" Culture="tn-ZA" KeyboardID="00000432" KeyboardLayout="0432:00000432" />
+    <Locale ID="045b" Name="Sinhala (Sri Lanka)" Language="Sinhala" Culture="si-LK" KeyboardID="0000045b" KeyboardLayout="045b:0000045b" />
+    <Locale ID="041b" Name="Slovak (Slovakia)" Language="Slovak" Culture="sk-SK" KeyboardID="0000041b" KeyboardLayout="041b:0000041b" />
+    <Locale ID="0424" Name="Slovenian (Slovenia)" Language="Slovenian" Culture="sl-SI" KeyboardID="00000424" KeyboardLayout="0424:00000424" />
+    <Locale ID="2c0a" Name="Spanish (Argentina)" Language="Spanish" Culture="es-AR" KeyboardID="0000040a" KeyboardLayout="2c0a:0000040a" />
+    <Locale ID="400a" Name="Spanish (Bolivia)" Language="Spanish" Culture="es-BO" KeyboardID="0000040a" KeyboardLayout="400a:0000040a" />
+    <Locale ID="340a" Name="Spanish (Chile)" Language="Spanish" Culture="es-CL" KeyboardID="0000040a" KeyboardLayout="340a:0000040a" />
+    <Locale ID="240a" Name="Spanish (Colombia)" Language="Spanish" Culture="es-CO" KeyboardID="0000040a" 
+KeyboardLayout="240a:0000040a" />
+    <Locale ID="140a" Name="Spanish (Costa Rica)" Language="Spanish" Culture="es-CR" KeyboardID="0000040a" KeyboardLayout="140a:0000040a" />
+    <Locale ID="1c0a" Name="Spanish (Dominican Republic)" Language="Spanish" Culture="es-DO" KeyboardID="0000040a" KeyboardLayout="1c0a:0000040a" />
+    <Locale ID="300a" Name="Spanish (Ecuador)" Language="Spanish" Culture="es-EC" KeyboardID="0000040a" KeyboardLayout="300a:0000040a" />
+    <Locale ID="440a" Name="Spanish (El Salvador)" Language="Spanish" Culture="es-SV" KeyboardID="0000040a" KeyboardLayout="440a:0000040a" />
+    <Locale ID="100a" Name="Spanish (Guatemala)" Language="Spanish" Culture="es-GT" KeyboardID="0000040a" KeyboardLayout="100a:0000040a" />
+    <Locale ID="480a" Name="Spanish (Honduras)" Language="Spanish" Culture="es-HN" KeyboardID="0000040a" 
+KeyboardLayout="480a:0000040a" />
+    <Locale ID="080a" Name="Spanish (Mexico)" Language="Spanish" Culture="es-MX" KeyboardID="0000040a" KeyboardLayout="080a:0000040a" />
+    <Locale ID="4c0a" Name="Spanish (Nicaragua)" Language="Spanish" Culture="es-NI" KeyboardID="0000040a" KeyboardLayout="4c0a:0000040a" />
+    <Locale ID="180a" Name="Spanish (Panama)" Language="Spanish" Culture="es-PA" KeyboardID="0000040a" KeyboardLayout="180a:0000040a" />
+    <Locale ID="3c0a" Name="Spanish (Paraguay)" Language="Spanish" Culture="es-PY" KeyboardID="0000040a" 
+KeyboardLayout="3c0a:0000040a" />
+    <Locale ID="280a" Name="Spanish (Peru)" Language="Spanish" Culture="es-PE" KeyboardID="0000040a" KeyboardLayout="280a:0000040a" />
+    <Locale ID="500a" Name="Spanish (Puerto Rico)" Language="Spanish" Culture="es-PR" KeyboardID="0000040a" KeyboardLayout="500a:0000040a" />
+    <Locale ID="540a" Name="Spanish (United States)" Language="Spanish" Culture="es-US" KeyboardID="0000040a" KeyboardLayout="540a:0000040a" />
+    <Locale ID="380a" Name="Spanish (Uruguay)" Language="Spanish" Culture="es-UY" KeyboardID="0000040a" KeyboardLayout="380a:0000040a" />
+    <Locale ID="200a" Name="Spanish (Venezuela)" Language="Spanish" Culture="es-VE" KeyboardID="0000040a" KeyboardLayout="200a:0000040a" />
+    <Locale ID="081d" Name="Swedish (Finland)" Language="Swedish" Culture="sv-FI" KeyboardID="0000041d" KeyboardLayout="081d:0000041d" />
+    <Locale ID="041d" Name="Swedish (Sweden)" Language="Swedish" Culture="sv-SE" KeyboardID="0000041d" KeyboardLayout="041d:0000041d" />
+    <Locale ID="045a" Name="Syriac (Syria)" Language="Syriac" Culture="syr-SY" KeyboardID="0000045a" KeyboardLayout="045a:0000045a" />
+    <Locale ID="0428" Name="Tajik (Cyrillic, Tajikistan)" Language="Tajik (Cyrillic)" Culture="tg-Cyrl-TJ" KeyboardID="00000428" KeyboardLayout="0428:00000428" />
+    <Locale ID="085f" Name="Tamazight (Latin, Algeria)" Language="Tamazight (Latin)" Culture="tzm-Latn-DZ" KeyboardID="0000085f" KeyboardLayout="085f:0000085f" />
+    <Locale ID="0449" Name="Tamil (India)" Language="Tamil" Culture="ta-IN" KeyboardID="00000449" KeyboardLayout="0449:00000449" />
+    <Locale ID="0444" Name="Tatar (Russia)" Language="Tatar" Culture="tt-RU" KeyboardID="00000444" KeyboardLayout="0444:00000444" />
+    <Locale ID="044a" Name="Telugu (India)" Language="Telugu" Culture="te-IN" KeyboardID="0000044a" KeyboardLayout="044a:0000044a" />
+    <Locale ID="041e" Name="Thai (Thailand)" Language="Thai" Culture="th-TH" KeyboardID="00000409" KeyboardLayout="041e:00000409" />
+    <Locale ID="0451" Name="Tibetan (PRC)" Language="Tibetan" Culture="bo-CN" KeyboardID="00000851" KeyboardLayout="0451:00000851" />
+    <Locale ID="041f" Name="Turkish (Turkey)" Language="Turkish" Culture="tr-TR" KeyboardID="0000041f" KeyboardLayout="041f:0000041f" />
+    <Locale ID="0442" Name="Turkmen (Turkmenistan)" Language="Turkmen" Culture="tk-TM" KeyboardID="00000442" KeyboardLayout="0442:00000442" />
+    <Locale ID="0480" Name="Uighur (PRC)" Language="Uighur" Culture="ug-CN" KeyboardID="00000480" KeyboardLayout="0480:00000480" />
+    <Locale ID="0422" Name="Ukrainian (Ukraine)" Language="Ukrainian" Culture="uk-UA" KeyboardID="00000422" KeyboardLayout="0422:00000422" />
+    <Locale ID="042e" Name="Upper Sorbian (Germany)" Language="Upper Sorbian" Culture="wen-DE" KeyboardID="0000042e" KeyboardLayout="042e:0000042e" />
+    <Locale ID="0420" Name="Urdu (Islamic Republic of Pakistan)" Language="Urdu" Culture="ur-PK" KeyboardID="00000420" KeyboardLayout="0420:00000420" />
+    <Locale ID="0843" Name="Uzbek (Cyrillic, Uzbekistan)" Language="Uzbek (Cyrillic)" Culture="uz-Cyrl-UZ" KeyboardID="00000443" KeyboardLayout="0843:00000443" />
+    <Locale ID="0443" Name="Uzbek (Latin, Uzbekistan)" Language="Uzbek (Latin)" Culture="uz-Latn-UZ" KeyboardID="00000443" KeyboardLayout="0443:00000443" />
+    <Locale ID="042a" Name="Vietnamese (Vietnam)" Language="Vietnamese" Culture="vi-VN" KeyboardID="0000042a" KeyboardLayout="042a:0000042a" />
+    <Locale ID="0452" Name="Welsh (United Kingdom)" Language="Welsh" Culture="cy-GB" KeyboardID="00000452" KeyboardLayout="0452:00000452" />
+    <Locale ID="0488" Name="Wolof (Senegal)" Language="Wolof" Culture="wo-SN" KeyboardID="00000488" KeyboardLayout="0488:00000488" />
+    <Locale ID="0485" Name="Yakut (Russia)" Language="Yakut" Culture="sah-RU" KeyboardID="00000485" KeyboardLayout="0485:00000485" />
+    <Locale ID="0478" Name="Yi (PRC)" Language="Yi" Culture="ii-CN" KeyboardID="00000478" KeyboardLayout="0478:00000478" />
+    <Locale ID="046a" Name="Yoruba (Nigeria)" Language="Yoruba" Culture="yo-NG" KeyboardID="0000046a" KeyboardLayout="046a:0000046a" />
+</Locales>

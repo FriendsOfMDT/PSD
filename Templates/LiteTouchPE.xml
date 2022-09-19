@@ -65,6 +65,8 @@
     <Copy source="%DEPLOYROOT%\Tools\Modules\PSDGather\PSDGather.psm1" dest="Deploy\Tools\Modules\PSDGather\PSDGather.psm1" />
     <Copy source="%DEPLOYROOT%\Tools\Modules\PSDGather\ZTIGather.xml" dest="Deploy\Tools\Modules\PSDGather\ZTIGather.xml" />
     <Copy source="%DEPLOYROOT%\Tools\Modules\PSDWizard\PSDWizard.psm1" dest="Deploy\Tools\Modules\PSDWizard\PSDWizard.psm1" />
+    <Copy source="%DEPLOYROOT%\Tools\Modules\PSDWizardNew\PSDWizardNew.psm1" dest="Deploy\Tools\Modules\PSDWizardNew\PSDWizardNew.psm1" />
+	<Copy source="%DEPLOYROOT%\Tools\Modules\PSDStartLoader\PSDStartLoader.psm1" dest="Deploy\Tools\Modules\PSDStartLoader\PSDStartLoader.psm1" />
 
   </Content>
 

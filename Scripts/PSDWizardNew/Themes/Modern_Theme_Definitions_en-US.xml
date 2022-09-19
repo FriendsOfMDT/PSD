@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Theme>
+	<Global>
+		<TemplateReference>Modern\PSDWizard_Template_Modern_en-US.xaml</TemplateReference>
+		<WelcomeWizardReference>Modern\PSDWizard_Start_en-US.xaml</WelcomeWizardReference>
+	</Global>
+	
+	<PaneDefinitions>
+		<!--
+			For every node in pane (key=Value), will replace any @Value in Pane template
+
+			However there are few that are detected and MUST be in Template:
+			@TabTitle
+			tab01
+		-->
+		<PanesTemplate><![CDATA[
+	<TabItem x:Name="_wiz@id" Width="@Width" Height="60" Margin="0,0,-20,0" Header="@TabTitle" Style="{DynamicResource OOBETabStyle}" IsEnabled="False">
+	@TabItemContent
+	</TabItem>
+	]]></PanesTemplate>
+		<!--
+		#EXAMPLE
+		<Pane id="Readiness" reference="PSDWizard_DeployReadiness_en-US.xaml" margin="0,0,0,0" Width='180' Style="pillTabItemLeft" />
+		-->
+		<Pane id="Readiness" reference="Modern\PSDWizard_DeployReadiness_en-US.xaml" Width='140' />
+		<Pane id="TaskSequence" reference="Modern\PSDWizard_TaskSequence_en-US.xaml" Width='110' />
+		<Pane id="ComputerName" reference="Modern\PSDWizard_DeviceDetails_en-US.xaml" Width='110'/>
+		<Pane id="DomainSettings" reference="Modern\PSDWizard_Domain_en-US.xaml" Width='110'/>	
+		<Pane id="AdminAccount" reference="Modern\PSDWizard_AdminCreds_en-US.xaml" Width='110' />	
+		<Pane id="Language" reference="Modern\PSDWizard_Locale_en-US.xaml" Width='110' />
+		<Pane id="TimeZone" reference="Modern\PSDWizard_TimeZone_en-US.xaml" Width='110' />
+		<Pane id="Applications" reference="Modern\PSDWizard_Applications_en-US.xaml" Width='110' />
+		<Pane id="Ready" reference="Modern\PSDWizard_Ready_en-US.xaml" Width='100' />
+			
+	</PaneDefinitions>
+</Theme>

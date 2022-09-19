@@ -1,22 +1,36 @@
-# // ***************************************************************************
-# // 
-# // PowerShell Deployment for MDT
-# //
-# // File:      PSDTemplate.ps1
-# // 
-# // Purpose:   Apply the specified operating system.
-# // 
-# // 
-# // ***************************************************************************
+<#
+.SYNOPSIS
+    Validate
+.DESCRIPTION
+    Validate
+.LINK
+    https://github.com/FriendsOfMDT/PSD
+.NOTES
+          FileName: PSDValidate.ps1
+          Solution: PowerShell Deployment for MDT
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2022-01-12
+          Version:0.0.1 - () - Finalized functional version 1.
+          TODO:
 
+.Example
+#>
+
+[CmdletBinding()]
 param (
 
 )
 
+# Set scriptversion for logging
+$ScriptVersion = "0.0.1"
+
 # Load core modules
-Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global
-Import-Module PSDUtility
-Import-Module PSDDeploymentShare
+Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global -Verbose:$true
+Import-Module PSDUtility -Verbose:$true
+Import-Module PSDDeploymentShare -Verbose:$true
 
 # Check for debug in PowerShell and TSEnv
 if($TSEnv:PSDDebug -eq "YES"){
@@ -26,12 +40,15 @@ if($PSDDebug -eq $true)
 {
     $verbosePreference = "Continue"
 }
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:ImageSize $($tsenv:ImageSize)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:ImageProcessorSpeed $($tsenv:ImageProcessorSpeed)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:ImageMemory $($tsenv:ImageMemory)"
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): tsenv:VerifyOS $($tsenv:VerifyOS)"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Starting: $($MyInvocation.MyCommand.Name) - Version $ScriptVersion"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): The task sequencer log is located at $("$tsenv:_SMSTSLogPath\SMSTS.LOG"). For task sequence failures, please consult this log."
+Write-PSDEvent -MessageID 41000 -severity 1 -Message "Starting: $($MyInvocation.MyCommand.Name)"
+
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property ImageSize is $($tsenv:ImageSize)"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property ImageProcessorSpeed is $($tsenv:ImageProcessorSpeed)"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property ImageMemory is $($tsenv:ImageMemory)"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property VerifyOS is $($tsenv:VerifyOS)"
 
 <#
     '//----------------------------------------------------------------------------

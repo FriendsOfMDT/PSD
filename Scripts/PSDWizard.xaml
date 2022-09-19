@@ -2,7 +2,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="PSD Wizard" Height="600" Width="800" WindowStartupLocation="CenterScreen" WindowStyle='SingleBorderWindow' ResizeMode='NoResize'>
-
+<Border BorderBrush="Navy" BorderThickness="3" CornerRadius="0,10,0,10" Padding="2"
+HorizontalAlignment="Center" VerticalAlignment="Center">
     <Grid>
 
         <StackPanel Orientation="Vertical">
@@ -10,38 +11,289 @@
                 <TreeView Name="tsTree" HorizontalAlignment="Left" Height="200" Margin="10,5,0,0" VerticalAlignment="Top" Width="250"/>
                 <Grid Height="500" Margin="10,5,0,0" VerticalAlignment="Top" Width="460">
 
-                    <Label Content="TaskSequenceID" HorizontalAlignment="Left" Height="25" Margin="0,0,0,0" VerticalAlignment="Top"/>
-                    <TextBox FontWeight="Bold" Name="TS_TaskSequenceID" HorizontalAlignment="Center" Height="25" Margin="125,0,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="TaskSequenceID" HorizontalAlignment="Left" Height="26" Margin="0,0,0,0" VerticalAlignment="Top"/>
+                    <TextBox FontWeight="Bold" Name="TS_TaskSequenceID" HorizontalAlignment="Center" Height="20" Margin="125,4,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="Deployroot" HorizontalAlignment="Left" Height="25" Margin="0,40,0,0" VerticalAlignment="Top"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Deployroot" Text="1234567890" HorizontalAlignment="Center" Height="25" Margin="125,40,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="Deployroot" HorizontalAlignment="Left" Height="26" Margin="0,25,0,0" VerticalAlignment="Top"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Deployroot" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,29,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="Model" HorizontalAlignment="Left" Height="25" Margin="0,80,0,0" VerticalAlignment="Top"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Model" Text="1234567890" HorizontalAlignment="Center" Height="25" Margin="125,80,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="Model" HorizontalAlignment="Left" Height="26" Margin="0,50,0,0" VerticalAlignment="Top"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Model" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,54,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="SerialNumber" HorizontalAlignment="Left" Height="25" Margin="0,120,0,0" VerticalAlignment="Top"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_SerialNumber" Text="1234567890" HorizontalAlignment="Center" Height="25" Margin="125,120,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="SerialNumber" HorizontalAlignment="Left" Height="26" Margin="0,75,0,0" VerticalAlignment="Top"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_SerialNumber" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,79,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="ComputerName" HorizontalAlignment="Left" Height="25" Margin="0,170,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_OSDComputerName" HorizontalAlignment="Center" Height="25" Margin="125,170,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="ComputerName" HorizontalAlignment="Left" Height="26" Margin="0,100,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_OSDComputerName" HorizontalAlignment="Center" Height="20" Margin="125,104,0,0" VerticalAlignment="Top" Width="310" MaxLength="15"/>
 
-                    <Label Content="Admin Password" HorizontalAlignment="Left" Height="25" Margin="0,210,0,0" VerticalAlignment="Top"/>
-                    <PasswordBox Name="TS_AdminPassword" HorizontalAlignment="Center" Height="25" Margin="125,210,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="Admin Password" HorizontalAlignment="Left" Height="26" Margin="0,125,0,0" VerticalAlignment="Top"/>
+                    <PasswordBox Name="TS_AdminPassword" HorizontalAlignment="Center" Height="20" Margin="125,129,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="Domain" HorizontalAlignment="Left" Height="25" Margin="0,260,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_JoinDomain" HorizontalAlignment="Center" Height="25" Margin="125,260,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="Domain" HorizontalAlignment="Left" Height="26" Margin="0,150,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_JoinDomain" HorizontalAlignment="Center" Height="20" Margin="125,154,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="JoinAccount Name" HorizontalAlignment="Left" Height="25" Margin="0,300,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_DomainAdmin" HorizontalAlignment="Center" Height="25" Margin="125,300,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="JoinAccount Name" HorizontalAlignment="Left" Height="26" Margin="0,175,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_DomainAdmin" HorizontalAlignment="Center" Height="20" Margin="125,179,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="JoinAccount Password" HorizontalAlignment="Left" Height="25" Margin="0,340,0,0" VerticalAlignment="Top"/>
-                    <PasswordBox Name="TS_DomainAdminPassword" HorizontalAlignment="Center" Height="25" Margin="125,340,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="JoinAccount Password" HorizontalAlignment="Left" Height="26" Margin="0,200,0,0" VerticalAlignment="Top"/>
+                    <PasswordBox Name="TS_DomainAdminPassword" HorizontalAlignment="Center" Height="20" Margin="125,204,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="JoinAccount Domain" HorizontalAlignment="Left" Height="25" Margin="0,380,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_DomainAdminDomain" HorizontalAlignment="Center" Height="25" Margin="125,380,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="JoinAccount Domain" HorizontalAlignment="Left" Height="26" Margin="0,225,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_DomainAdminDomain" HorizontalAlignment="Center" Height="20" Margin="125,229,0,0" VerticalAlignment="Top" Width="310"/>
 
-                    <Label Content="OSDRnD" HorizontalAlignment="Left" Height="25" Margin="0,450,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_OSDRnD" HorizontalAlignment="Center" Height="25" Margin="125,450,0,0" VerticalAlignment="Top" Width="310"/>
+                    <Label Content="OSDisk index" HorizontalAlignment="Left" Height="26" Margin="0,250,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="TS_OSDDiskIndex" HorizontalAlignment="Center" Height="20" Margin="125,254,0,0" VerticalAlignment="Top" Width="310"/>
+
+                    <Label Content="Role" HorizontalAlignment="Left" Height="26" Margin="0,275,0,0" VerticalAlignment="Top"/>
+                    <ComboBox Name="TS_PSDRole" HorizontalAlignment="Center" Height="20" Margin="125,279,0,0" VerticalAlignment="Top" Width="310">
+                        <ComboBoxItem>Configuration 001</ComboBoxItem>
+                        <ComboBoxItem>Configuration 002</ComboBoxItem>
+                        <ComboBoxItem>Configuration 003</ComboBoxItem>
+                        <ComboBoxItem>Configuration 004</ComboBoxItem>
+                        <ComboBoxItem>Configuration 005</ComboBoxItem>
+                        <ComboBoxItem>Configuration 006</ComboBoxItem>
+                        <ComboBoxItem>Configuration 007</ComboBoxItem>
+                        <ComboBoxItem>Configuration 008</ComboBoxItem>
+                        <ComboBoxItem>Configuration 009</ComboBoxItem>
+                    </ComboBox>
+                    
+                    <Label Content="Language install" HorizontalAlignment="Left" Height="26" Margin="0,300,0,0" VerticalAlignment="Top"/>
+                    <ComboBox Name="TS_PSDLanguage" HorizontalAlignment="Center" Height="20" Margin="125,304,0,0" VerticalAlignment="Top" Width="310">
+                        <ComboBoxItem>Arabic (Saudi Arabia)</ComboBoxItem>
+                        <ComboBoxItem>Bulgarian (Bulgaria)</ComboBoxItem>
+                        <ComboBoxItem>Chinese (PRC)</ComboBoxItem>
+                        <ComboBoxItem>Chinese (Taiwan)</ComboBoxItem>
+                        <ComboBoxItem>Croatian (Croatia)</ComboBoxItem>
+                        <ComboBoxItem>Czech (Czech Republic)</ComboBoxItem>
+                        <ComboBoxItem>Danish (Denmark)</ComboBoxItem>
+                        <ComboBoxItem>Dutch (Netherlands)</ComboBoxItem>
+                        <ComboBoxItem>English (United States)</ComboBoxItem>
+                        <ComboBoxItem>English (United Kingdom)</ComboBoxItem>
+                        <ComboBoxItem>Estonian (Estonia)</ComboBoxItem>
+                        <ComboBoxItem>Finnish (Finland)</ComboBoxItem>
+                        <ComboBoxItem>French (Canada)</ComboBoxItem>
+                        <ComboBoxItem>French (France)</ComboBoxItem>
+                        <ComboBoxItem>German (Germany)</ComboBoxItem>
+                        <ComboBoxItem>Greek (Greece)</ComboBoxItem>
+                        <ComboBoxItem>Hebrew (Israel)</ComboBoxItem>
+                        <ComboBoxItem>Hungarian (Hungary)</ComboBoxItem>
+                        <ComboBoxItem>Italian (Italy)</ComboBoxItem>
+                        <ComboBoxItem>Japanese (Japan)</ComboBoxItem>
+                        <ComboBoxItem>Korean (Korea)</ComboBoxItem>
+                        <ComboBoxItem>Latvian (Latvia)</ComboBoxItem>
+                        <ComboBoxItem>Lithuanian (Lithuania)</ComboBoxItem>
+                        <ComboBoxItem>Norwegian, Bokm�l (Norway)</ComboBoxItem>
+                        <ComboBoxItem>Polish (Poland)</ComboBoxItem>
+                        <ComboBoxItem>Portuguese (Brazil)</ComboBoxItem>
+                        <ComboBoxItem>Portuguese (Portugal)</ComboBoxItem>
+                        <ComboBoxItem>Romanian (Romania)</ComboBoxItem>
+                        <ComboBoxItem>Russian (Russia)</ComboBoxItem>
+                        <ComboBoxItem>Serbian (Latin, Serbia)</ComboBoxItem>
+                        <ComboBoxItem>Slovak (Slovakia)</ComboBoxItem>
+                        <ComboBoxItem>Slovenian (Slovenia)</ComboBoxItem>
+                        <ComboBoxItem>Spanish (Mexico)</ComboBoxItem>
+                        <ComboBoxItem>Spanish (Spain)</ComboBoxItem>
+                        <ComboBoxItem>Swedish (Sweden)</ComboBoxItem>
+                        <ComboBoxItem>Thai (Thailand)</ComboBoxItem>
+                        <ComboBoxItem>Turkish (Turkey)</ComboBoxItem>
+                        <ComboBoxItem>Ukrainian (Ukraine)</ComboBoxItem>
+                    </ComboBox>
+                    
+                    <Label Content="Locale setting" HorizontalAlignment="Left" Height="26" Margin="0,325,0,0" VerticalAlignment="Top"/>
+                    <ComboBox Name="TS_PSDLocale" HorizontalAlignment="Center" Height="20" Margin="125,329,0,0" VerticalAlignment="Top" Width="310">
+                        <ComboBoxItem>Arabic (Saudi Arabia)</ComboBoxItem>
+                        <ComboBoxItem>Bulgarian (Bulgaria)</ComboBoxItem>
+                        <ComboBoxItem>Chinese (PRC)</ComboBoxItem>
+                        <ComboBoxItem>Chinese (Taiwan)</ComboBoxItem>
+                        <ComboBoxItem>Croatian (Croatia)</ComboBoxItem>
+                        <ComboBoxItem>Czech (Czech Republic)</ComboBoxItem>
+                        <ComboBoxItem>Danish (Denmark)</ComboBoxItem>
+                        <ComboBoxItem>Dutch (Netherlands)</ComboBoxItem>
+                        <ComboBoxItem>English (United States)</ComboBoxItem>
+                        <ComboBoxItem>English (United Kingdom)</ComboBoxItem>
+                        <ComboBoxItem>Estonian (Estonia)</ComboBoxItem>
+                        <ComboBoxItem>Finnish (Finland)</ComboBoxItem>
+                        <ComboBoxItem>French (Canada)</ComboBoxItem>
+                        <ComboBoxItem>French (France)</ComboBoxItem>
+                        <ComboBoxItem>German (Germany)</ComboBoxItem>
+                        <ComboBoxItem>Greek (Greece)</ComboBoxItem>
+                        <ComboBoxItem>Hebrew (Israel)</ComboBoxItem>
+                        <ComboBoxItem>Hungarian (Hungary)</ComboBoxItem>
+                        <ComboBoxItem>Italian (Italy)</ComboBoxItem>
+                        <ComboBoxItem>Japanese (Japan)</ComboBoxItem>
+                        <ComboBoxItem>Korean (Korea)</ComboBoxItem>
+                        <ComboBoxItem>Latvian (Latvia)</ComboBoxItem>
+                        <ComboBoxItem>Lithuanian (Lithuania)</ComboBoxItem>
+                        <ComboBoxItem>Norwegian, Bokm�l (Norway)</ComboBoxItem>
+                        <ComboBoxItem>Polish (Poland)</ComboBoxItem>
+                        <ComboBoxItem>Portuguese (Brazil)</ComboBoxItem>
+                        <ComboBoxItem>Portuguese (Portugal)</ComboBoxItem>
+                        <ComboBoxItem>Romanian (Romania)</ComboBoxItem>
+                        <ComboBoxItem>Russian (Russia)</ComboBoxItem>
+                        <ComboBoxItem>Serbian (Latin, Serbia)</ComboBoxItem>
+                        <ComboBoxItem>Slovak (Slovakia)</ComboBoxItem>
+                        <ComboBoxItem>Slovenian (Slovenia)</ComboBoxItem>
+                        <ComboBoxItem>Spanish (Mexico)</ComboBoxItem>
+                        <ComboBoxItem>Spanish (Spain)</ComboBoxItem>
+                        <ComboBoxItem>Swedish (Sweden)</ComboBoxItem>
+                        <ComboBoxItem>Thai (Thailand)</ComboBoxItem>
+                        <ComboBoxItem>Turkish (Turkey)</ComboBoxItem>
+                        <ComboBoxItem>Ukrainian (Ukraine)</ComboBoxItem>
+                    </ComboBox>
+                    
+                    <Label Content="Keyboard layout" HorizontalAlignment="Left" Height="26" Margin="0,350,0,0" VerticalAlignment="Top"/>
+                    <ComboBox Name="TS_PSDKeyboard" HorizontalAlignment="Center" Height="20" Margin="125,354,0,0" VerticalAlignment="Top" Width="310">
+                        <ComboBoxItem>Arabic (Saudi Arabia)</ComboBoxItem>
+                        <ComboBoxItem>Bulgarian (Bulgaria)</ComboBoxItem>
+                        <ComboBoxItem>Chinese (PRC)</ComboBoxItem>
+                        <ComboBoxItem>Chinese (Taiwan)</ComboBoxItem>
+                        <ComboBoxItem>Croatian (Croatia)</ComboBoxItem>
+                        <ComboBoxItem>Czech (Czech Republic)</ComboBoxItem>
+                        <ComboBoxItem>Danish (Denmark)</ComboBoxItem>
+                        <ComboBoxItem>Dutch (Netherlands)</ComboBoxItem>
+                        <ComboBoxItem>English (United States)</ComboBoxItem>
+                        <ComboBoxItem>English (United Kingdom)</ComboBoxItem>
+                        <ComboBoxItem>Estonian (Estonia)</ComboBoxItem>
+                        <ComboBoxItem>Finnish (Finland)</ComboBoxItem>
+                        <ComboBoxItem>French (Canada)</ComboBoxItem>
+                        <ComboBoxItem>French (France)</ComboBoxItem>
+                        <ComboBoxItem>German (Germany)</ComboBoxItem>
+                        <ComboBoxItem>Greek (Greece)</ComboBoxItem>
+                        <ComboBoxItem>Hebrew (Israel)</ComboBoxItem>
+                        <ComboBoxItem>Hungarian (Hungary)</ComboBoxItem>
+                        <ComboBoxItem>Italian (Italy)</ComboBoxItem>
+                        <ComboBoxItem>Japanese (Japan)</ComboBoxItem>
+                        <ComboBoxItem>Korean (Korea)</ComboBoxItem>
+                        <ComboBoxItem>Latvian (Latvia)</ComboBoxItem>
+                        <ComboBoxItem>Lithuanian (Lithuania)</ComboBoxItem>
+                        <ComboBoxItem>Norwegian, Bokm�l (Norway)</ComboBoxItem>
+                        <ComboBoxItem>Polish (Poland)</ComboBoxItem>
+                        <ComboBoxItem>Portuguese (Brazil)</ComboBoxItem>
+                        <ComboBoxItem>Portuguese (Portugal)</ComboBoxItem>
+                        <ComboBoxItem>Romanian (Romania)</ComboBoxItem>
+                        <ComboBoxItem>Russian (Russia)</ComboBoxItem>
+                        <ComboBoxItem>Serbian (Latin, Serbia)</ComboBoxItem>
+                        <ComboBoxItem>Slovak (Slovakia)</ComboBoxItem>
+                        <ComboBoxItem>Slovenian (Slovenia)</ComboBoxItem>
+                        <ComboBoxItem>Spanish (Mexico)</ComboBoxItem>
+                        <ComboBoxItem>Spanish (Spain)</ComboBoxItem>
+                        <ComboBoxItem>Swedish (Sweden)</ComboBoxItem>
+                        <ComboBoxItem>Thai (Thailand)</ComboBoxItem>
+                        <ComboBoxItem>Turkish (Turkey)</ComboBoxItem>
+                        <ComboBoxItem>Ukrainian (Ukraine)</ComboBoxItem>
+                    </ComboBox>
+
+                    <Label Content="Time Zone" HorizontalAlignment="Left" Height="26" Margin="0,375,0,0" VerticalAlignment="Top"/>
+                    <ComboBox Name="TS_PSDTimeZoneName" HorizontalAlignment="Center" Height="20" Margin="125,379,0,0" VerticalAlignment="Top" Width="310">
+                        <ComboBoxItem>(UTC) Casablanca</ComboBoxItem>
+                        <ComboBoxItem>(UTC) Coordinated Universal Time</ComboBoxItem>
+                        <ComboBoxItem>(UTC) Dublin, Edinburgh, Lisbon, London</ComboBoxItem>
+                        <ComboBoxItem>(UTC) Monrovia, Reykjavik</ComboBoxItem>
+                        <ComboBoxItem>(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna</ComboBoxItem>
+                        <ComboBoxItem>(UTC+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague</ComboBoxItem>
+                        <ComboBoxItem>(UTC+01:00) Brussels, Copenhagen, Madrid, Paris</ComboBoxItem>
+                        <ComboBoxItem>(UTC+01:00) Sarajevo, Skopje, Warsaw, Zagreb</ComboBoxItem>
+                        <ComboBoxItem>(UTC+01:00) West Central Africa</ComboBoxItem>
+                        <ComboBoxItem>(UTC+01:00) Windhoek</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Amman</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Athens, Bucharest</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Beirut</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Cairo</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Damascus</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) E. Europe</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Harare, Pretoria</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Istanbul</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Jerusalem</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Kaliningrad (RTZ 1)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+02:00) Tripoli</ComboBoxItem>
+                        <ComboBoxItem>(UTC+03:00) Baghdad</ComboBoxItem>
+                        <ComboBoxItem>(UTC+03:00) Kuwait, Riyadh</ComboBoxItem>
+                        <ComboBoxItem>(UTC+03:00) Minsk</ComboBoxItem>
+                        <ComboBoxItem>(UTC+03:00) Moscow, St. Petersburg, Volgograd (RTZ 2)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+03:00) Nairobi</ComboBoxItem>
+                        <ComboBoxItem>(UTC+03:30) Tehran</ComboBoxItem>
+                        <ComboBoxItem>(UTC+04:00) Abu Dhabi, Muscat</ComboBoxItem>
+                        <ComboBoxItem>(UTC+04:00) Baku</ComboBoxItem>
+                        <ComboBoxItem>(UTC+04:00) Izhevsk, Samara (RTZ 3)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+04:00) Port Louis</ComboBoxItem>
+                        <ComboBoxItem>(UTC+04:00) Tbilisi</ComboBoxItem>
+                        <ComboBoxItem>(UTC+04:00) Yerevan</ComboBoxItem>
+                        <ComboBoxItem>(UTC+04:30) Kabul</ComboBoxItem>
+                        <ComboBoxItem>(UTC+05:00) Ashgabat, Tashkent</ComboBoxItem>
+                        <ComboBoxItem>(UTC+05:00) Ekaterinburg (RTZ 4)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+05:00) Islamabad, Karachi</ComboBoxItem>
+                        <ComboBoxItem>(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi</ComboBoxItem>
+                        <ComboBoxItem>(UTC+05:30) Sri Jayawardenepura</ComboBoxItem>
+                        <ComboBoxItem>(UTC+05:45) Kathmandu</ComboBoxItem>
+                        <ComboBoxItem>(UTC+06:00) Astana</ComboBoxItem>
+                        <ComboBoxItem>(UTC+06:00) Dhaka</ComboBoxItem>
+                        <ComboBoxItem>(UTC+06:00) Novosibirsk (RTZ 5)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+06:30) Yangon (Rangoon)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+07:00) Bangkok, Hanoi, Jakarta</ComboBoxItem>
+                        <ComboBoxItem>(UTC+07:00) Krasnoyarsk (RTZ 6)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi</ComboBoxItem>
+                        <ComboBoxItem>(UTC+08:00) Irkutsk (RTZ 7)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+08:00) Kuala Lumpur, Singapore</ComboBoxItem>
+                        <ComboBoxItem>(UTC+08:00) Perth</ComboBoxItem>
+                        <ComboBoxItem>(UTC+08:00) Taipei</ComboBoxItem>
+                        <ComboBoxItem>(UTC+08:00) Ulaanbaatar</ComboBoxItem>
+                        <ComboBoxItem>(UTC+09:00) Osaka, Sapporo, Tokyo</ComboBoxItem>
+                        <ComboBoxItem>(UTC+09:00) Seoul</ComboBoxItem>
+                        <ComboBoxItem>(UTC+09:00) Yakutsk (RTZ 8)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+09:30) Adelaide</ComboBoxItem>
+                        <ComboBoxItem>(UTC+09:30) Darwin</ComboBoxItem>
+                        <ComboBoxItem>(UTC+10:00) Brisbane</ComboBoxItem>
+                        <ComboBoxItem>(UTC+10:00) Canberra, Melbourne, Sydney</ComboBoxItem>
+                        <ComboBoxItem>(UTC+10:00) Guam, Port Moresby</ComboBoxItem>
+                        <ComboBoxItem>(UTC+10:00) Hobart</ComboBoxItem>
+                        <ComboBoxItem>(UTC+10:00) Magadan</ComboBoxItem>
+                        <ComboBoxItem>(UTC+10:00) Vladivostok, Magadan (RTZ 9)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+11:00) Chokurdakh (RTZ 10)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+11:00) Solomon Is., New Caledonia</ComboBoxItem>
+                        <ComboBoxItem>(UTC+12:00) Anadyr, Petropavlovsk-Kamchatsky (RTZ 11)</ComboBoxItem>
+                        <ComboBoxItem>(UTC+12:00) Auckland, Wellington</ComboBoxItem>
+                        <ComboBoxItem>(UTC+12:00) Coordinated Universal Time+12</ComboBoxItem>
+                        <ComboBoxItem>(UTC+12:00) Fiji</ComboBoxItem>
+                        <ComboBoxItem>(UTC+12:00) Petropavlovsk-Kamchatsky - Old</ComboBoxItem>
+                        <ComboBoxItem>(UTC+13:00) Nuku alofa</ComboBoxItem>
+                        <ComboBoxItem>(UTC+13:00) Samoa</ComboBoxItem>
+                        <ComboBoxItem>(UTC+14:00) Kiritimati Island</ComboBoxItem>
+                        <ComboBoxItem>(UTC-12:00) International Date Line West</ComboBoxItem>
+                        <ComboBoxItem>(UTC-11:00) Coordinated Universal Time-11</ComboBoxItem>
+                        <ComboBoxItem>(UTC-10:00) Hawaii</ComboBoxItem>
+                        <ComboBoxItem>(UTC-09:00) Alaska</ComboBoxItem>
+                        <ComboBoxItem>(UTC-08:00) Baja California</ComboBoxItem>
+                        <ComboBoxItem>(UTC-08:00) Pacific Time (US + Canada)</ComboBoxItem>
+                        <ComboBoxItem>(UTC-07:00) Arizona</ComboBoxItem>
+                        <ComboBoxItem>(UTC-07:00) Chihuahua, La Paz, Mazatlan</ComboBoxItem>
+                        <ComboBoxItem>(UTC-07:00) Mountain Time (US + Canada)</ComboBoxItem>
+                        <ComboBoxItem>(UTC-06:00) Central America</ComboBoxItem>
+                        <ComboBoxItem>(UTC-06:00) Central Time (US + Canada)</ComboBoxItem>
+                        <ComboBoxItem>(UTC-06:00) Guadalajara, Mexico City, Monterrey</ComboBoxItem>
+                        <ComboBoxItem>(UTC-06:00) Saskatchewan</ComboBoxItem>
+                        <ComboBoxItem>(UTC-05:00) Bogota, Lima, Quito, Rio Branco</ComboBoxItem>
+                        <ComboBoxItem>(UTC-05:00) Chetumal</ComboBoxItem>
+                        <ComboBoxItem>(UTC-05:00) Eastern Time (US + Canada)</ComboBoxItem>
+                        <ComboBoxItem>(UTC-05:00) Indiana (East)</ComboBoxItem>
+                        <ComboBoxItem>(UTC-04:30) Caracas</ComboBoxItem>
+                        <ComboBoxItem>(UTC-04:00) Asuncion</ComboBoxItem>
+                        <ComboBoxItem>(UTC-04:00) Atlantic Time (Canada)</ComboBoxItem>
+                        <ComboBoxItem>(UTC-04:00) Cuiaba</ComboBoxItem>
+                        <ComboBoxItem>(UTC-04:00) Georgetown, La Paz, Manaus, San Juan</ComboBoxItem>
+                        <ComboBoxItem>(UTC-03:30) Newfoundland</ComboBoxItem>
+                        <ComboBoxItem>(UTC-03:00) Brasilia</ComboBoxItem>
+                        <ComboBoxItem>(UTC-03:00) Cayenne, Fortaleza</ComboBoxItem>
+                        <ComboBoxItem>(UTC-03:00) City of Buenos Aires</ComboBoxItem>
+                        <ComboBoxItem>(UTC-03:00) Greenland</ComboBoxItem>
+                        <ComboBoxItem>(UTC-03:00) Montevideo</ComboBoxItem>
+                        <ComboBoxItem>(UTC-03:00) Salvador</ComboBoxItem>
+                        <ComboBoxItem>(UTC-03:00) Santiago</ComboBoxItem>
+                        <ComboBoxItem>(UTC-02:00) Coordinated Universal Time-02</ComboBoxItem>
+                        <ComboBoxItem>(UTC-02:00) Mid-Atlantic - Old</ComboBoxItem>
+                        <ComboBoxItem>(UTC-01:00) Azores</ComboBoxItem>
+                        <ComboBoxItem>(UTC-01:00) Cabo Verde Is.</ComboBoxItem>
+                    </ComboBox>
 
                 </Grid>
             </StackPanel>
@@ -61,4 +313,5 @@
             </Border>
         </StackPanel>
     </Grid>
+</Border>
 </Window>

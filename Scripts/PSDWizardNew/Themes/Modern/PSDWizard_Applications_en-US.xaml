@@ -1,0 +1,29 @@
+<Grid x:Name="_appTabLayout" Background="#004275" Margin="0" Grid.ColumnSpan="2">
+    <Label x:Name="_appTabMainTitle" Content="@MainTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="48" Margin="0,36,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
+    <Label x:Name="_appTabSubTitle"  Content="@SubTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16" Margin="0,119,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
+
+    <TextBox x:Name="_appTabSearch" HorizontalAlignment="Left" Height="47" Margin="200,155,0,0" TextWrapping="Wrap" Text="Search..." VerticalAlignment="Top" Width="522" Foreground='Gray' VerticalContentAlignment="Center" FontSize="18" Padding="50,0,0,0"/>
+    <Button x:Name="_appTabSearchClear" Content="Clear" Height="47" Width="97" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="727,0,0,438" />
+    <Button x:Name="_appTabSearchEnter" Height="40" Width="40" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="204,0,0,441" Style="{DynamicResource SearchBlueMag}" IsEnabled="False" />
+
+    <Button x:Name="_appTabSelectAll" Height="40" Width="40" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="155,0,0,393" Style="{DynamicResource CheckAllBlueBox}"/>
+    <Button x:Name="_appTabSelectNone" Height="40" Width="35" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="155,0,0,339" Style="{DynamicResource UnCheckBlueBox}" />
+
+    <TextBox x:Name="TS_Applications" Margin="829,207,14,393" IsEnabled="False" Visibility="Hidden"/>
+
+    <ListBox x:Name="_appTabList" HorizontalAlignment="Center" Height="372" VerticalAlignment="Top" Width="624" SelectionMode="Multiple" Margin="0,207,0,0">
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+                <Setter Property="IsSelected" Value="{Binding Selected}" />
+                <Setter Property="FontSize" Value="18" />
+            </Style>
+        </ListBox.ItemContainerStyle>
+        <!--<ListBox.ItemTemplate>
+            <DataTemplate>
+                <ListBoxItem>
+                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ListBoxItem, Mode=FindAncestor}}"/>
+                </ListBoxItem>
+            </DataTemplate>
+        </ListBox.ItemTemplate>-->
+    </ListBox>
+</Grid>

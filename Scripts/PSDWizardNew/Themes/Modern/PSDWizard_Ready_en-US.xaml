@@ -1,0 +1,16 @@
+<Grid x:Name="_readyTabLayout" Background="#004275" Margin="0" Grid.ColumnSpan="2">
+    <Label x:Name="_readyTabMainTitle" Content="@MainTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="48" Margin="0,36,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
+    <Label x:Name="_readyTabSubTitle"  Content="@SubTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16" Margin="0,119,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
+
+    <ListView x:Name="_summary" Height="432" Margin="0,155,0,0" HorizontalAlignment="Center" 
+                              VerticalAlignment="Top" Width="599" HorizontalContentAlignment="Stretch" 
+                              BorderThickness="0" Background="#004275" Foreground="White" FontSize="20" TextElement.FontSize="18" TextElement.Foreground="White"
+                              ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+        <ListView.View>
+            <GridView>
+                <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
+                <GridViewColumn Header="Value" DisplayMemberBinding="{Binding Value}" />
+            </GridView>
+        </ListView.View>
+    </ListView>
+</Grid>

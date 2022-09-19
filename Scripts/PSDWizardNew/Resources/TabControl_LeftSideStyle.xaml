@@ -1,0 +1,110 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style x:Key="TabControlLeftSide" TargetType="{x:Type TabControl}">
+		<Setter Property="OverridesDefaultStyle" Value="True" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type TabControl}">
+					<Grid KeyboardNavigation.TabNavigation="Local">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<VisualStateManager.VisualStateGroups>
+							<VisualStateGroup x:Name="CommonStates">
+								<VisualState x:Name="Disabled">
+									<Storyboard>
+										<ColorAnimationUsingKeyFrames Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+											<EasingColorKeyFrame KeyTime="0" Value="#FFAAAAAA" />
+										</ColorAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+							</VisualStateGroup>
+						</VisualStateManager.VisualStateGroups>
+						<ContentPresenter x:Name="PART_SelectedContentHost"
+									  Grid.Column="1"
+									  Margin="0"
+									  ContentSource="SelectedContent" />
+						<StackPanel x:Name="HeaderPanel"
+								Grid.Row="0"
+								Margin="0,0,4,-1"
+								Panel.ZIndex="1"
+								Background="Transparent"
+								IsItemsHost="True"
+								KeyboardNavigation.TabIndex="1" />
+						<Border x:Name="Border"
+							Grid.Row="1"
+							BorderThickness="1"
+							CornerRadius="2"
+							KeyboardNavigation.DirectionalNavigation="Contained"
+							KeyboardNavigation.TabIndex="2"
+							KeyboardNavigation.TabNavigation="Local" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style x:Key="WhiteTabItems" TargetType="{x:Type TabItem}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type TabItem}">
+
+					<Grid x:Name="Root">
+						<VisualStateManager.VisualStateGroups>
+							<VisualStateGroup x:Name="SelectionStates">
+								<VisualState x:Name="Unselected" />
+								<VisualState x:Name="Selected">
+									<Storyboard>
+										<ColorAnimationUsingKeyFrames Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+											<EasingColorKeyFrame KeyTime="0" Value="#FFF" />
+										</ColorAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+							</VisualStateGroup>
+							<VisualStateGroup x:Name="CommonStates">
+								<VisualState x:Name="Normal" />
+								<VisualState x:Name="MouseOver" />
+								<VisualState x:Name="Disabled" />
+							</VisualStateGroup>
+						</VisualStateManager.VisualStateGroups>
+						<Border x:Name="Border"
+							Margin="0,0,0,0"
+							BorderBrush="#FF1D3245"
+							BorderThickness="0,0,0,0"/>
+						<TextBlock Margin="12,10,12,10" Text="{TemplateBinding Header}">
+							<TextBlock.LayoutTransform>
+								<TransformGroup>
+									<ScaleTransform />
+									<SkewTransform />
+									<RotateTransform Angle="0" />
+									<TranslateTransform />
+								</TransformGroup>
+							</TextBlock.LayoutTransform>
+						</TextBlock>
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter TargetName="Border" Property="BorderBrush" Value="Black" />
+							<Setter Property="Background" Value="Black" />
+						</Trigger>
+						<Trigger Property="IsSelected" Value="True">
+							<Setter Property="Panel.ZIndex" Value="100" />
+							<Setter Property="Foreground" Value="#FFA0A0A0"/>
+							<Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
+							<Setter TargetName="Border" Property="Background" Value="white" />
+							<Setter TargetName="Border" Property="BorderThickness" Value="2" />
+							<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentColorBrush}" />
+						</Trigger>
+						<Trigger Property="IsSelected" Value="False">
+							<Setter Property="Panel.ZIndex" Value="100" />
+							<Setter Property="Foreground" Value="#FFF"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+</ResourceDictionary>

@@ -10,7 +10,7 @@
           Solution: PowerShell Deployment for MDT
           Purpose: Script to initialize the wizard content in PSD
           Author: PSD Development Team
-          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @SoupAtWork , @JordanTheItGuy
+          Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus
           Primary: @Mikael_Nystrom 
           Created: 
           Modified: 2019-05-09

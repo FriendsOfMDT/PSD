@@ -1,17 +1,24 @@
 <?xml version="1.0"?>
 <sequence version="3.00" name="PSD Standard Server Task Sequence" description="A complete task sequence for deploying a server operating system using PowerShell">
   <globalVarList>
-    <variable name="OSGUID" property="OSGUID">{262d9ac6-4cec-44d9-8a69-707eb8155148}</variable>
+    <variable name="OSGUID" property="OSGUID">{8a0ddf9a-24ef-4fac-a1c8-2194de1657ad}</variable>
     <variable name="DestinationDisk" property="DestinationDisk">0</variable>
     <variable name="DestinationPartition" property="DestinationPartition">1</variable>
     <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
     <variable name="DestinationOSRefresh" property="DestinationOSRefresh"></variable>
     <variable name="DestinationOSDriveLetter" property="DestinationOSDriveLetter"></variable>
     <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
-    <variable name="OSGUID" property="OSGUID">{262d9ac6-4cec-44d9-8a69-707eb8155148}</variable>
+    <variable name="OSGUID" property="OSGUID">{8a0ddf9a-24ef-4fac-a1c8-2194de1657ad}</variable>
   </globalVarList>
   <group expand="true" name="Initialization" description="" disable="false" continueOnError="false">
     <action />
+    <step type="BDD_Gather" name="Gather" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
+      <defaultVarList>
+        <variable name="GatherLocalOnly" property="GatherLocalOnly">true</variable>
+        <variable name="RulesFile" property="RulesFile"></variable>
+      </defaultVarList>
+      <action>cscript.exe "%SCRIPTROOT%\ZTIGather.wsf"</action>
+    </step>
     <step type="BDD_Validate" name="Validate" successCodeList="0 3010" description="" startIn="" disable="false" continueOnError="false">
       <defaultVarList>
         <variable name="ImageSize" property="ImageSize">20000</variable>
@@ -113,14 +120,28 @@
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTIDiskpart.wsf"</action>
     </step>
-    <action />
-    <step type="SMS_TaskSequence_SetVariableAction" name="Set DriverGroup001" description="" disable="false" continueOnError="false" successCodeList="0 3010">
+    <step type="SMS_TaskSequence_SetVariableAction" name="Set DriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
       <defaultVarList>
-        <variable name="VariableName" property="VariableName">DriverGroup001</variable>
-        <variable name="VariableValue" property="VariableValue">Windows Server 2019\%model%</variable>
+        <variable name="VariableName" property="VariableName">DriverPath</variable>
+        <variable name="VariableValue" property="VariableValue">Windows 10 x64\%make%\%model%</variable>
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
     </step>
+    <step type="SMS_TaskSequence_SetVariableAction" name="Set GenericDriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
+      <defaultVarList>
+        <variable name="VariableName" property="VariableName">GenericDriverPath</variable>
+        <variable name="VariableValue" property="VariableValue">Windows 10 x64\Generic</variable>
+      </defaultVarList>
+      <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+    </step>
+    <step type="SMS_TaskSequence_SetVariableAction" name="Set FallBackDriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
+      <defaultVarList>
+        <variable name="VariableName" property="VariableName">FallBackDriverPath</variable>
+        <variable name="VariableValue" property="VariableValue">Windows 10 x64\FallBack</variable>
+      </defaultVarList>
+      <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+    </step>
+    <action />
     <step type="BDD_InjectDrivers" name="Inject Drivers" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
         <variable name="DriverSelectionProfile" property="DriverSelectionProfile">Nothing</variable>
@@ -131,7 +152,7 @@
     <condition />
     <step type="BDD_InstallOS" name="Install Operating System" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
-        <variable name="OSGUID" property="OSGUID">{262d9ac6-4cec-44d9-8a69-707eb8155148}</variable>
+        <variable name="OSGUID" property="OSGUID">{8a0ddf9a-24ef-4fac-a1c8-2194de1657ad}</variable>
         <variable name="DestinationDisk" property="DestinationDisk">0</variable>
         <variable name="DestinationPartition" property="DestinationPartition">1</variable>
         <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
@@ -168,6 +189,16 @@
         <variable name="RulesFile" property="RulesFile"></variable>
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTIGather.wsf"</action>
+    </step>
+    <step type="SMS_TaskSequence_RunCommandLineAction" name="Tattoo" description="" disable="false" continueOnError="true" startIn="" successCodeList="0 3010" runIn="WinPEandFullOS">
+      <defaultVarList>
+        <variable name="PackageID" property="PackageID" />
+        <variable name="RunAsUser" property="RunAsUser">false</variable>
+        <variable name="SMSTSRunCommandLineUserName" property="SMSTSRunCommandLineUserName"></variable>
+        <variable name="SMSTSRunCommandLineUserPassword" property="SMSTSRunCommandLineUserPassword"></variable>
+        <variable name="LoadProfile" property="LoadProfile">false</variable>
+      </defaultVarList>
+      <action>PowerShell.exe -file %SCRIPTROOT%\PSDTattoo.ps1</action>
     </step>
     <step name="Windows Update Pass 1" disable="false" continueOnError="true" successCodeList="0 3010" description="" startIn="">
       <action>powershell.exe -file %SCRIPTROOT%\PSDWindowsUpdate.ps1</action>

@@ -1,4 +1,24 @@
-﻿#PSD Helper
+﻿<#
+.SYNOPSIS
+    Helper script for troubleshooting.
+.DESCRIPTION
+    Helper script for troubleshooting.
+.LINK
+    https://github.com/FriendsOfMDT/PSD
+.NOTES
+          FileName: PSDHelper.ps1
+          Solution: PowerShell Deployment for MDT
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2020-06-16
+
+          Version - 0.0.1 - () - Finalized functional version 1.
+
+.Example
+#>
+
 Param(
     $MDTDeploySharePath,
     $UserName,
