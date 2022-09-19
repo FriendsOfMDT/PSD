@@ -24,9 +24,9 @@ Supported deployment scenarios include deployment from the following content rep
 PSD is very much a work-in-progress solution, so stay tuned as we rapidly move forward on this.
 
 ## Credits and love goes to
- - Elias Markelis, https://github.com/emarkeli
+ - Elias Markelis, https://github.com/emarkelis
  - George Simos, https://github.com/GeoSimos
- - Dick Tracy, https://github.com/powershellcrack
+ - Richard "Dick" Tracy, https://github.com/powershellcrack
 
 ## Development of PSD
 This repository currently acts as a download repository. If you are interested of participating in the development of PSD the active repository is private and you need an invitation. Please contact 
