@@ -1,14 +1,5 @@
-# Update
-We are curtrently working onm 0.2.1.7, will be released soon...
-
 # README - PowerShell Deployment Extension Kit
-October 2020 (ver 0.2.1.6)
-Lots of changes.
-- Upgrade works, we use it all the times
-- Integration with 2Pint works better, a few issues still to solve
-- Improvments on everything
-
-June 2020 (ver 0.2.0.1)
+Jan 2022 (ver 0.2.2.7)
 
 Welcome to PowerShell Deployment (PSD)
 
@@ -20,15 +11,41 @@ The purpose of PowerShell Deployment for MDT is to create a new deployment solut
 
 Supported deployment scenarios include deployment from the following content repositories:
 
-  -  IIS over HTTP using WebClient (Native PS)
-  -  IIS over HTTP with BITS & BranchCache using 2Pint Software's OSD Toolkit
-  -  UNC (\\server\share)
+  -  IIS over HTTP(s) using WebClient (Native PS)
+  -  IIS over HTTP(s) with BITS & BranchCache using 2Pint Software's OSD Toolkit
  
 PSD is very much a work-in-progress solution, so stay tuned as we rapidly move forward on this.
 
 ## Related References
 (intentionally blank)
 
-## Development of PSD
-This repository currently acts as a “download” repository. If you are interested of participating in the development of PSD the active repository is “private” and you need an invitation. Please contact 
-johan@2pintsoftware.com  or Mikael.nystrom@truesec.se
+## Test Scenarios
+- Verify current supported version of Windows 10 (english)
+- Verify supported version of Windows Server (english), including Core and UI based OS
+- Verify the following Customsettings features
+
+### SerialNumber
+verify that you can deploy a computer, set the serial number in customsettings.ini to configure the computer, test multiple computers in the same settings file, check the sample file
+
+### SLShare
+Verify the SLShare works, you need to create a new web app, with BITS upload setting (someone also needs to create a script that creates it), check the sample file
+
+### Logging
+Check the logfiles, they should make sense, we need to get rid of all crap (that can be enabled in debug mode) but normal logging should be something that can be understood
+
+### FinishAction
+Verify finishaction, it should support reboot, restart, shutdown
+
+### SkipWizard
+Verify, it should work
+
+### FinalSummary
+Verify, it should work (both on and off, in server OS, both on and off)
+
+### HideShell
+Verify, it should work
+
+
+
+
+
