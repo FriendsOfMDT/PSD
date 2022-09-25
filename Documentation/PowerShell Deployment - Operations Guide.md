@@ -13,8 +13,13 @@ PSD enabled deployments works the same as standard MDT Lite Touch Deployments. T
 * **Create Applications** - Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired Applications. Follow MDT-provided instructions and techniques. Make note of application's unique GUIDs for use automating application installation with CustomSettings.ini.
     >PRO TIP: You can copy Applications from other MDT deployment shares.
 
-* **Import/Add Drivers** - Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired DRIVERS. Follow MDT-provided instructions and techniques. After adding new drivers to MDT using the "total control method" (OS/Model), you need to run the New-PSDDriverPackage.ps1 to generate the ZIP archives. One ZIP archive is created for each OS and Model.
-    >PRO TIP: You can copy Drivers from other MDT deployment shares.
+* **Import/Add Drivers** - Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired drivers. After adding new drivers to MDT using the "total control method" (OS/Make/Model, or OS/Model, etc. ), you need to run the New-PSDDriverPackage.ps1 to generate the ZIP or WIM archives. One ZIP or WIM archive is created for each OS and Model.
+    >PRO TIP: You can copy Drivers from other MDT deployment shares, and PSD also supports that you add any existing WIM or ZIP driver packages to the platform.
+
+Sample syntax: 
+.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType WIM
+
+.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType ZIP
 
 * **Check Deployment Share Permissions** - By default, the PSD installer creates an MDT folder structure for PSD. PSD-specific files , scripts and templates are added and a new SMB share is created if specified. Ensure that the necessary domain and/or local computer user accounts have access to the PSD Share. 
 
@@ -30,23 +35,20 @@ PSD enabled deployments works the same as standard MDT Lite Touch Deployments. T
 * **Enable MDT monitoring** - Enable MDT Event Monitoring and specify the MDT server name and ports to be used. 
 
 * **Update CustomSettings.ini** - Edit and Customize CUSTOMSETTINGS.INI to perform the necessary and desired automation and configuration of your OSD deployments. These should be settings to affect the installed OS typically. Be sure to configure new PSD properties and variables. See XXX for more details.
-    >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from CustomSettings.ini. 
 
-* **Update BootStrap.ini** - Edit and customize BOOTSTRAP.INI for your any necessary and desired  configuration of your OSD deployments. These should be settings to affect the OSD environment typically. Be sure to configure new PSD properties and variables. See XXX for more details.
-    >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoots from BootStrap.ini. 
+* **Update BootStrap.ini** - Edit and customize BOOTSTRAP.INI for your any necessary and desired  configuration of your OSD deployments. These should be settings to affect the OSD environment typically. Be sure to configure new PSD properties and variables. 
+    >PRO TIP: If using the new PSDDeployRoots property, remove *all* reference to DeployRoot from BootStrap.ini. 
 
 * **Update Background wallpaper** - By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provided. It can be found at Samples folder of the MDT installation. Adjust the MDT WinPE Customizations tab to reflect this new bmp (or use your own).
     
 * **Configure Extra Files** - Create and populate an ExtraFiles folder that contains anything you want to add to WinPE or images. Things like CMTRACE.EXE, wallpapers, etc.
-    >PRO TIP: Create the same folder structure as where you want the files to land (e.g. \Windows\System32\)
-
-    >PRO TIP WARNING: If using WinPE v1809, you **MUST** source and stage **BCP47Langs.dll** and **BCP47mrm.dll**, otherwise the PSD deployment wizard and final WinForms will crash.
+    >PRO TIP: Create the same folder structure as where you want the files to land (e.g. \Windows\System32)
 
 * **Configure WinPE Drivers** - Using MDT Selection Profiles, customize your WinPE settings to utilize an appropriate set of MDT objects. Be sure to consider Applications, Drivers, Packages, and Task Sequences.
 
 * **Generate new Boot Media** - Using MDT Deployment workbench techniques, generate new boot media. By default the installer, will configure NEW PSD deployment shares to be PSDLiteTouch_x64.iso and PSDLiteTouch_x86.iso. Rename these if necessary.
     
-* **Content Caching and Peer to Peer support** - Currently under development
+* **Content Caching and Peer to Peer support** - Please see the BranchCache Installation Guide for information on how to enable P2P support.
 
 
 

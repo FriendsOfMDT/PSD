@@ -12,36 +12,48 @@ Server operating systems
 
        Windows Server 2016
        Windows Server 2019
+       Windows Server 2022
 
 Windows ADK 10 
 
-        Windows ADK 10 1903
         Windows ADK 10 2004
+
+Windows ADK 11 
+
+        Windows ADK for Windows 11 21H2 (10.1.22000.1)
+
 
 Microsoft Deployment Kit (MDT)
 
-        MDT 8456
+        MDT 8456 
 
 ## PSD Supported Deployments
 The following operating systems have been tested for deployment via PSD:
 
-Server operating systems
+Server operating systems Long-Term Servicing Channel (LTSC) releases
 
-       Windows Server 2016
-       Windows Server 2019
+        Windows Server 2016 Standard and Datacenter (English)
+        Windows Server 2019 Standard and Datacenter (English)
+        Windows Server 2022 Standard and Datacenter (English)
+
 
 Client Operating Systems
         
-        Windows 10 1903 Pro or Enterprise x64 (English)
-        Windows 10 1909 Pro or Enterprise x64 (English)
-        Windows 10 2004 Pro or Enterprise x64 (English)
+        Windows 10 1909 Pro, Education and Enterprise x64 (English)
+        Windows 10 2004 Pro, Education and Enterprise x64 (English)
+        Windows 10 20H2 Pro, Education and Enterprise x64 (English)
+        Windows 10 21H1 Pro, Education and Enterprise x64 (English)
+        Windows 10 21H2 Pro, Education and Enterprise x64 (English)
+        Windows 10 22H2 Pro, Education and Enterprise x64 (English)
+        Windows 11 21H2 Pro, Education and Enterprise x64 (English)
+        Windows 11 22H2 Pro, Education and Enterprise x64 (English)
 
 ## PSD Installation Checklist
 Please review, validate and/or obtain following installation checklist items:
 
-* **Windows ADK 10** - Download and install Microsoft Windows ADK 10 on a computer to be used to host the MDT Deployment workbench. Ensure Microsoft ADK is installed and operational
+* **Windows ADK** - Download and install a supported Microsoft Windows ADK version on a computer to be used to host the MDT Deployment workbench. 
 
-* **MDT** -  Download and install Microsoft MDT on a computer to be used to host the MDT Deployment workbench. Ensure Microsoft MDT is installed and operational
+* **MDT** -  Download and install Microsoft MDT on a computer to be used to host the MDT Deployment workbench. Also install the KB4564442 HotFix for MDT 8456.
 
 * **Source Media (OS)** - Obtain source media for Windows OS
 
@@ -57,13 +69,13 @@ Please review, validate and/or obtain following installation checklist items:
 
 # Installing PSD
 PSD installation requires the following:
-- Existing installation of MDT and Windows ADK 10
+- Existing installation of MDT and Windows ADK
 - Administrative rights on the MDT Server
-- Downloaded the PSD solution
+- The PSD solution downloaded
 
-> WARNING: Again, we strongly recommend that you create a new deployment share for PSD, and copy an existing resources (applications, driversr, images) to it. Once a de ployment share is extended with MDT, standard MDT task sequences will no longer work!
+> WARNING: Again, we strongly recommend that you create a new deployment share for PSD, and copy an existing resources (applications, drivers, images) to it. Once a deployment share is extended with MDT, standard MDT task sequences will no longer work in that deployment share!
 
-> NOTE: Existing MDT scripts are moved to a backup folder in the deployment share specified.
+> NOTE: Existing MDT scripts are moved to a backup folder in the deployment share.
 
 1) If open, close the MDT Deployment Workbench.
 1) Download or clone the PSD content from the [PSD GitHub Home](https://github.com/FriendsOfMDT/PSD)
@@ -75,6 +87,6 @@ PSD installation requires the following:
 1) Review the PSD Installation log for errors
 
 # Next steps
-The default setup configures the PSD deployment share for deployment via SMB. To enable HTTP or HTTPS (recommended) deployments, follow the steps in the "PowerShell Deployment - IIS Configuration Guide"
+After the initial setup, you need to install IIS to enable HTTPS deployments, follow the steps in the "PowerShell Deployment - IIS Configuration Guide"
 
-To enable BranchCache (P2P) support, first complete the steps in the "PowerShell Deployment - IIS Configuration Guide", and then the steps in the "PowerShell Deployment - BranchCache Installation Guide".
+To enable BranchCache (P2P) support [optional], first complete the steps in the "PowerShell Deployment - IIS Configuration Guide", and then the steps in the "PowerShell Deployment - BranchCache Installation Guide".

@@ -1,4 +1,4 @@
-# Developers Guide
+# Toolkit Reference
 In this document you find generic developer info for further customizing PSD, as well as a reference to the scripts used in the solution.
 
 # Enable Debugging
