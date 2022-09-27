@@ -1,11 +1,13 @@
 # README - PowerShell Deployment Extension Kit
 Sept 2022 (ver 0.2.2.8)
-- New Wizard
+
+- New Wizard (enabled via PSDWizard and PSDWizardTheme variables)
 - Better disk handling
 - Extended logging
 - Performance improvments
 - Code cleanup
-- Remote logging support over BITS upload
+- Support for driver packages in WIM format
+- Server Side logging support via BITS upload (enabled via SLShare variable)
 - Many late nights and days has resulted in a much better solution
 
 Welcome to PowerShell Deployment (PSD)
@@ -23,15 +25,12 @@ Supported deployment scenarios include deployment from the following content rep
  
 PSD is very much a work-in-progress solution, so stay tuned as we rapidly move forward on this.
 
-## Credits and love goes to
- - Elias Markelis, https://github.com/emarkelis
+## Credits and love
+For this major PSD release we had an amazing support from the following people, dedicating hundreds of hours to the project:
+ - Elias Markelis, https://github.com/emarkeli
  - George Simos, https://github.com/GeoSimos
- - Richard "Dick" Tracy, https://github.com/powershellcrack
+ - Dick Tracy, https://github.com/powershellcrack
 
 ## Development of PSD
 This repository currently acts as a download repository. If you are interested of participating in the development of PSD the active repository is private and you need an invitation. Please contact 
 johan@2pintsoftware.com or Mikael.nystrom@truesec.se
-
-
-
-

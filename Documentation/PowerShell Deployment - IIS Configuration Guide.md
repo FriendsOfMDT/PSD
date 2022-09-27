@@ -1,7 +1,7 @@
 # IIS Configuration Guide
 
 ## Introduction: 
-In order to support OS deployments using PSD when content is hosted on a web server, a series of configuration items must be completed. This document highlights and outlines the settings and steps known to work with PSD.
+In order to support OS deployments via HTTPS a series of configuration items must be completed. This document highlights and outlines the settings and steps known to work with PSD including steps for the server side logging feature (available in PSD version 0.2.2.8 and later).
 
 > NOTE: Your security team and environment may require additional settings or lock down.
 
@@ -10,6 +10,7 @@ We have tested the IIS Setup for PSD on the following server operating systems
 
        Windows Server 2016
        Windows Server 2019
+       Windows Server 2022
 
 ## Install IIS and configure WebDAV
 To install IIS and configure WebDAV for OSD you need to run two scripts, one for setup, and one for configuration, with a reboot in between.
@@ -23,20 +24,38 @@ Then, to run the configuration, you run the second script (Set-PSDWebInstance.ps
 .\Set-PSDWebInstance.ps1 -psDeploymentFolder E:\PSDProduction -psVirtualDirectory PSDProduction 
 
 ## HTTPS and Certificates
-To support imaging via HTTPS you need to install a proper web server certificate, and make sure the Root CA is added to WinPE. If you export the Root CA to the PSDResources\Certificates folder, PSD will automatically add it to WinPE when updating the deployment share.
+To support imaging via HTTPS you need to install a proper web server certificate, and make sure the Root CA is added to WinPE. If you export your Root CA certificate to the PSDResources\Certificates folder, PSD will automatically add it to WinPE when updating the deployment share.
 
-For lab purposes, we also provide a script (New-PSDSelfSignedCert.ps1) that creates a self-signed certificate and exports it to the PSDResources\Certificates folder. You need to specify the deployment folder, the DNS Name of the cert, the validity period, and a friendly name. Sample syntax:
+For lab purposes, we provide two scripts to create a self-signed certificate for your deployment server. The first script (New-PSDRootCACert.ps1) creates a local Root CA and exports the Root CA to the PSDResources\Certificates folder. The second script (New-PSDServerCert.ps1) creates a self-signed certificate for the deployment server. 
 
-.\New-PSDSelfSignedCert.ps1 -psDeploymentFolder E:\PSDProduction -DNSName mdt01.corp.viamonstra.com -ValidityPeriod 2 -FriendlyName PSDProduction
+**Note:** These two scripts are replacing the New-PSDSelfSignedCert.ps1 script available in the original release of PSD.
+
+Sample syntax for New-PSDRootCACert.ps1 script:
+.\New-PSDRootCACert.ps1 -RootCAName PSDRootCA -ValidityPeriod 20 -psDeploymentFolder E:\PSDProduction
+
+Sample syntax for the New-PSDServerCert.ps1 script:
+
+.\New-PSDServerCert.ps1 -DNSName mdt01.corp.viamonstra.com -FriendlyName mdt01.corp.viamonstra.com -ValidityPeriod 5 -RootCACertFriendlyName PSDRootCA
+
+## Server Side logging via BITS Upload
+To support server side logging via BITS Upload, IIS need to be configured to allow that. To create a BITS Upload folder and virtual directory, run the Set-PSDLogInstance.ps1 script. Sample syntax:
+
+.\Set-PSDWebInstance.ps1 -psDeploymentFolder E:\PSDProductionLogs -psVirtualDirectory PSDProductionLogs
+
+In addition the following rules must be added to the CustomSettings.ini file:
+
+LogUserDomain=ServernameOrDomain
+LogUserID=AccountName
+LogUserPassword=Password
+SLShare=https://mdt01.corp.viamonstra.com/PSDProductionLogs
 
 ## Firewall Ports
 In addition to the IIS setup and configuration the following firewall ports needs to open: 
 
-    * Port 80 for HTTP (not recommended)
-    * Port 443 for HTTPS
-    * Port 9080 for MDT Event Monitoring if enabled (disabled by default)
+* Port 443 for HTTPS
+* Port 9800 and 9801 for MDT Event Monitoring (optional, disabled by default)
 
-* ## IIS Setup Reference 
+## IIS Setup Reference 
 In this section you find a list of all components being added by the setup script as well as info on what the configuration script does.
 
 * **IIS Components**
@@ -77,11 +96,7 @@ The following IIS components are required to ensure that PSD functions as expect
      * IIS 6 Management Compatibility
           * IIS 6 Metabase Compatability
 
-* **WebDAV**
 
-The PSD extension for MDT requires the WebDAV Redirector to be installed. This is a feature and not a role in Server Manager. This feature does require a reboot.
-
-*  WebDAV Redirector
 
 * **Configure IIS**
 
