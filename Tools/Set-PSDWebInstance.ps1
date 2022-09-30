@@ -14,9 +14,9 @@
 .NOTES
     FileName:   New-PSDIISInstance.PS1
     Author:     Jordan Benzing
-    Contact:    @JordanTheITGuy
+    Contact:    @JordanTheITGuy, @jarwidmark
     Created:    2019-04-15
-    Updated:    2019-04-18
+    Updated:    2022-09-29
 
     Version 0.0.0 (2019-04-15) Wrote out framework for code base imported standard helper functions
 	Version 0.1.0 (2019-04-15)- Created a functional version of the script installs IIS, installs WebDav - reboots server to complete setup and then starts WEbDave Services
@@ -60,9 +60,10 @@
 	Version 0.4.5 (2019-04-25) - Discovered a Microsoft Bug with IIS PowerShell Cmdlets developed a way around it by implementing an older command style to first populate the needed
 							   - Attributes and then move on. This related to Bug #12
 	Version 0.4.6 (2019-05-01) - Configured same settings on the Default Web Site related to WebDav 
-								- Logging an issue with not being able to hide the AppCMD output will update an issue tracking number tomorrow
+							   - Logging an issue with not being able to hide the AppCMD output will update an issue tracking number tomorrow
 	Version 0.4.7 (2020-06-30) - Script separated into two diffrent scripts, this script will Configure WebDav.
-                                - The script only works when running locally on the server.
+                               - The script only works when running locally on the server.
+    	Version 0.4.8 (2022-09-29) - Added support for special characters in folder names (allow double escaping)
 
 						
 
@@ -211,8 +212,7 @@ function set-PSDDefaultLogPath{
 
 ############################################
 #region ConfigurationFunctions
-function invoke-IISConfiguration
-{
+function invoke-IISConfiguration{
 	[CmdletBinding()]
 	param(
 		[parameter()]
@@ -310,6 +310,10 @@ function invoke-IISConfiguration
 				set-WebConfigurationProperty -filter /system.webServer/directoryBrowse -name enabled -PSPath "IIS:\Sites\Default Web Site\$($psVirtualDirectory)" -Value $true
 				Write-PSDInstallLog -Message "Directory browsing has been enabled for the $($psVirtualDirectory)"
 				Write-PSDInstallLog -Message "Now configuring security settings for authentication"
+
+				# Enable Double Escaping to support special characters in folder names
+				Write-PSDInstallLog -Message "Enabling Double Escaping"
+				Set-WebConfigurationProperty -filter /system.webServer/Security/requestFiltering -name allowDoubleEscaping -PSPath "IIS:\Sites\Default Web Site\$($psVirtualDirectory)" -value $true 
 
 				#Written using ScriptGenerator from IIS
 				Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "False"
