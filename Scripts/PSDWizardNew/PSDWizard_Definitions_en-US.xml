@@ -16,7 +16,7 @@
 	</Global>
 
     <WelcomeWizard id="Welcome" title="Start">
-		<Condition><![CDATA[UCASE(Property("SkipBDDWelcome")) <> "YES" or UCASE(Property("SkipPSDWelcome")) <> "YES" ]]></Condition>
+		<Condition><![CDATA[UCASE(Property("SkipBDDWelcome")) <> "YES" and UCASE(Property("SkipPSDWelcome")) <> "YES" ]]></Condition>
 		<MainTitle><![CDATA[ "Welcome to the Deployment Wizard" ]]></MainTitle>
 		<SubTitle><![CDATA[ "Let's set this device up for @ORG" ]]></SubTitle>
 	</WelcomeWizard>
@@ -36,12 +36,12 @@
 		<MainTitle><![CDATA[ "Select a Task Sequence" ]]></MainTitle>
 		<SubTitle><![CDATA[ "Which deployment option would you like to perform on this device?" ]]></SubTitle>
 		<Help><![CDATA[ "Select a Task sequence to execute on this device.&#xa;&#xa;Use the filter buttons to drill to a specific task sequence.
-		&#xa;&#xa;WARNING: The Task Sequence may format the disk drive and all data will be lost" ]]></Help>
+		&#xa;&#xa;WARNING: The Task Sequence may format the disk drive and all data will be lost.&#xa;&#xa;TIP: Press F5 to refresh list!" ]]></Help>
 	</Pane>
 
 	<Pane id="DeviceDetails" title="Device Details">
-		<Condition><![CDATA[UCase(Property("SkipDomainMembership"))<>"YES" or UCase(Property("SkipComputerName"))<>"YES"]]></Condition>
-		<Condition><![CDATA[Property("DeploymentType")<>"REPLACE" and Property("DeploymentType")<>"CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType")<> "UPGRADE" ]]></Condition>
+		<Condition><![CDATA[UCase(Property("SkipDomainMembership")) <> "YES" and UCase(Property("SkipComputerName")) <> "YES"]]></Condition>
+		<Condition><![CDATA[Property("DeploymentType") <> "REPLACE" and Property("DeploymentType") <> "CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType") <> "UPGRADE" ]]></Condition>
 		<MainTitle><![CDATA[ "Fill in Device Details" ]]></MainTitle>
 		<SubTitle><![CDATA[ "Let's get the basic things out of the way" ]]></SubTitle>
 		<Context><![CDATA[ "What would you like the device name to be?" ]]></Context>
@@ -49,16 +49,16 @@
 	</Pane>
 
 	<Pane id="ComputerName" title="Computer Name">
-		<Condition><![CDATA[UCase(Property("SkipComputerName"))<>"YES"]]></Condition>
-		<Condition><![CDATA[Property("DeploymentType")<>"REPLACE" and Property("DeploymentType")<>"CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType")<> "UPGRADE" ]]></Condition>
+		<Condition><![CDATA[UCase(Property("SkipComputerName")) <> "YES"]]></Condition>
+		<Condition><![CDATA[Property("DeploymentType") <> "REPLACE" and Property("DeploymentType") <> "CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType") <> "UPGRADE" ]]></Condition>
 		<MainTitle><![CDATA[ "Fill in Device Details" ]]></MainTitle>
 		<SubTitle><![CDATA[ "Let's get the basic things out of the way" ]]></SubTitle>
 		<Help><![CDATA[ "Fill in all available fields.&#xa;&#xa;The device name must meet certain criteria's&#xa;&#xa;Select whether you want the device to join a domain or a workgroup" ]]></Help>
 	</Pane>
 
 	<Pane id="DomainSettings" title="Join Domain">
-		<Condition><![CDATA[UCase(Property("SkipDomainMembership"))<>"YES"]]></Condition>
-		<Condition><![CDATA[Property("DeploymentType")<>"REPLACE" and Property("DeploymentType")<>"CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType")<> "UPGRADE" ]]></Condition>
+		<Condition><![CDATA[UCase(Property("SkipDomainMembership")) <> "YES"]]></Condition>
+		<Condition><![CDATA[Property("DeploymentType") <> "REPLACE" and Property("DeploymentType") <> "CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType") <> "UPGRADE" ]]></Condition>
 		<MainTitle><![CDATA[ "Fill in Network Details" ]]></MainTitle>
 		<SubTitle><![CDATA[ "Would you like to join a domain?" ]]></SubTitle>
 		<Context><![CDATA[ "Join Domain?" ]]></Context>
@@ -75,8 +75,8 @@
 	</Pane>
 	
     <Pane id="LocaleTime" title="Locale and Time">
-		<Condition><![CDATA[ UCase(Property("SkipLocaleSelection")) <> "YES" or UCase(Property("SkipTimeZone"))<>"YES" ]]> </Condition>
-		<Condition><![CDATA[ Property("DeploymentType")<>"REPLACE" and Property("DeploymentType")<>"CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType")<> "UPGRADE" ]]> </Condition>
+		<Condition><![CDATA[ UCase(Property("SkipLocaleSelection")) <> "YES" and UCase(Property("SkipTimeZone")) <> "YES" ]]> </Condition>
+		<Condition><![CDATA[ Property("DeploymentType") <> "REPLACE" and Property("DeploymentType") <> "CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType") <> "UPGRADE" ]]> </Condition>
 	    <MainTitle><![CDATA[ "Select Locales and Time Zone" ]]></MainTitle>
 		<SubTitle><![CDATA[ "Is this the time zone your in?" ]]></SubTitle>
 		<Help><![CDATA[ "Select a locale time zone and language." ]]></Help>
@@ -84,29 +84,29 @@
 
 	<Pane id="Language" title="Language Locale">
 		<Condition><![CDATA[ UCase(Property("SkipLocaleSelection")) <> "YES"]]> </Condition>
-		<Condition><![CDATA[ Property("DeploymentType")<>"REPLACE" and Property("DeploymentType")<>"CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType")<> "UPGRADE" ]]> </Condition>
+		<Condition><![CDATA[ Property("DeploymentType") <> "REPLACE" and Property("DeploymentType") <> "CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType") <> "UPGRADE" ]]> </Condition>
 	    <MainTitle><![CDATA[ "Select Language and Locales" ]]></MainTitle>
 		<SubTitle><![CDATA[ "What language would you like to set for this device?" ]]></SubTitle>
 		<Help><![CDATA[ "Select a keyboard locale and language." ]]></Help>
 	</Pane>
 
 	<Pane id="TimeZone" title="Time Zone">
-		<Condition><![CDATA[ UCase(Property("SkipTimeZone"))<>"YES" ]]> </Condition>
-		<Condition><![CDATA[ Property("DeploymentType")<>"REPLACE" and Property("DeploymentType")<>"CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType")<> "UPGRADE" ]]> </Condition>
+		<Condition><![CDATA[ UCase(Property("SkipTimeZone")) <> "YES" ]]> </Condition>
+		<Condition><![CDATA[ Property("DeploymentType") <> "REPLACE" and Property("DeploymentType") <> "CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType") <> "UPGRADE" ]]> </Condition>
 	    <MainTitle><![CDATA[ "Select a Time Zone" ]]></MainTitle>
 		<SubTitle><![CDATA[ "What timezone would you like to set for this device?" ]]></SubTitle>
 		<Help><![CDATA[ "Select a locale time zone" ]]></Help>
 	</Pane>
 
 	<Pane id="Applications" title="Applications">
-		<Condition><![CDATA[ UCase(Property("DeploymentType"))<>"REPLACE" ]]></Condition>
-		<Condition><![CDATA[ UCase(Property("SkipApplications"))<>"YES" ]]></Condition>
+		<Condition><![CDATA[ UCase(Property("DeploymentType")) <> "REPLACE" ]]></Condition>
+		<Condition><![CDATA[ UCase(Property("SkipApplications")) <> "YES" ]]></Condition>
 		<Condition><![CDATA[ Test-PSDWizardApplicationExist ]]></Condition>
 		<MainTitle><![CDATA[ "Select Applications" ]]></MainTitle>
 		<SubTitle><![CDATA[ "Select additional applications to install" ]]></SubTitle>
 		<Help><![CDATA[ "Select one or more applications to install during the deployment process.
 		&#xa;&#xa;Use the filter buttons to drill to a specific applciations group.
-		&#xa;&#xa;Application Bundles are a set of pre-selected applications" ]]></Help>
+		&#xa;&#xa;Application Bundles are a set of pre-selected applications.&#xa;&#xa;TIP: Press F5 to refresh list!"" ]]></Help>
 	</Pane>
 
 	<Pane id="Ready" title="Summary">

@@ -49,12 +49,12 @@
             </Style>
         </ComboBox.Resources>
     </ComboBox>
-    <TextBox x:Name="TS_UILanguage" Text="" Margin="380,145,10,377" IsEnabled="False" />
-    <TextBox x:Name="TS_SystemLocale" Text="" Margin="380,211,10,311" IsEnabled="False" />
-    <TextBox x:Name="TS_UserLocale" Text="" Margin="380,243,10,279" IsEnabled="False" />
-    <TextBox x:Name="TS_KeyboardLocale" Text="" Margin="380,279,10,243" IsEnabled="False" />
-    <TextBox x:Name="TS_TimeZoneName" Text="" Margin="380,390,10,132" IsEnabled="False" />
-    <TextBox x:Name="TS_TimeZone" Text="" Margin="380,423,10,99" IsEnabled="False" />
+    <TextBox x:Name="TS_UILanguage" Margin="380,145,10,377" IsEnabled="False" />
+    <TextBox x:Name="TS_SystemLocale" Margin="380,211,10,311" IsEnabled="False" />
+    <TextBox x:Name="TS_UserLocale" Margin="380,243,10,279" IsEnabled="False" />
+    <TextBox x:Name="TS_KeyboardLocale" Margin="380,279,10,243" IsEnabled="False" />
+    <TextBox x:Name="TS_TimeZoneName" Margin="380,390,10,132" IsEnabled="False" />
+    <TextBox x:Name="TS_TimeZone" Margin="380,423,10,99" IsEnabled="False" />
 
     <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
     <TextBlock x:Name="_locTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">

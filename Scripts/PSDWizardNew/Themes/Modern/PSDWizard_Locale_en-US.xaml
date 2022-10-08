@@ -2,14 +2,14 @@
     <Label x:Name="_locTabMainTitle" Content="@MainTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="48" Margin="0,36,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
     <Label x:Name="_locTabSubTitle"  Content="@SubTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16" Margin="0,119,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
 
-    <ListBox x:Name="_locTabSystemLocale" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#004275" Foreground="#FFE8EDF9" FontSize="18" Width="700" Height="431" Margin="0,155,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto" SelectionMode="Single"/>
+    <ListBox x:Name="_locTabLanguage" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#004275" Foreground="#FFE8EDF9" FontSize="18" Width="700" Height="431" Margin="0,155,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto" SelectionMode="Single"/>
 
-    <ComboBox x:Name="_locTabLanguage" Margin="672,463,0,0" Visibility="Hidden" />
+    <ComboBox x:Name="_locTabSystemLocale" Margin="672,463,0,0" Visibility="Hidden" />
     <ComboBox x:Name="_locTabKeyboardLocale" Margin="672,531,0,0" Visibility="Hidden"/>
 
-    <TextBox x:Name="TS_UILanguage" Text="" Margin="867,159,73,448" IsEnabled="False" />
-    <TextBox x:Name="TS_SystemLocale" Text="" Margin="867,197,73,411" IsEnabled="False" />
-    <TextBox x:Name="TS_UserLocale" Text="" Margin="867,234,73,370" IsEnabled="False" />
-    <TextBox x:Name="TS_KeyboardLocale" Text="" Margin="867,275,73,329" IsEnabled="False" />
+    <TextBox x:Name="TS_UILanguage" Margin="867,159,73,448" IsEnabled="False" />
+    <TextBox x:Name="TS_SystemLocale" Margin="867,197,73,411" IsEnabled="False" />
+    <TextBox x:Name="TS_UserLocale" Margin="867,234,73,370" IsEnabled="False" />
+    <TextBox x:Name="TS_KeyboardLocale" Margin="867,275,73,329" IsEnabled="False" />
 
 </Grid>

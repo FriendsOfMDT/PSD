@@ -23,12 +23,12 @@
     <Label Content="Time zone:" FontSize="12" Margin="552,106,384,212" HorizontalContentAlignment="Right"/>
     <ComboBox  x:Name="_locTabTimeZoneName" HorizontalAlignment="Left" Margin="635,104,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18" Style="{DynamicResource SimpleComboBoxStyle}"/>
 
-    <TextBox x:Name="TS_UILanguage" Text="" Margin="474,106,474,214" IsEnabled="False" />
-    <TextBox x:Name="TS_SystemLocale" Text="" Margin="474,156,474,164" IsEnabled="False" />
-    <TextBox x:Name="TS_UserLocale" Text="" Margin="545,156,403,164" IsEnabled="False" />
-    <TextBox x:Name="TS_KeyboardLocale" Text="" Margin="474,209,403,111" IsEnabled="False" />
-    <TextBox x:Name="TS_TimeZoneName" Text="" Margin="800,141,50,179" IsEnabled="False" />
-    <TextBox x:Name="TS_TimeZone" Text="" Margin="903,174,50,142" IsEnabled="False" />
+    <TextBox x:Name="TS_UILanguage" Margin="474,106,474,214" IsEnabled="False" />
+    <TextBox x:Name="TS_SystemLocale" Margin="474,156,474,164" IsEnabled="False" />
+    <TextBox x:Name="TS_UserLocale" Margin="545,156,403,164" IsEnabled="False" />
+    <TextBox x:Name="TS_KeyboardLocale" Margin="474,209,403,111" IsEnabled="False" />
+    <TextBox x:Name="TS_TimeZoneName" Margin="800,141,50,179" IsEnabled="False" />
+    <TextBox x:Name="TS_TimeZone" Margin="903,174,50,142" IsEnabled="False" />
 
     <Label Content="More Info" FontSize="14" HorizontalAlignment="Right" Margin="0,259,916,0" VerticalAlignment="Top" Foreground="LightSlateGray" Width="88" HorizontalContentAlignment="Right" />
     <TextBlock x:Name="_localeTabMoreInfo" HorizontalAlignment="Left" Margin="117,266,0,0" Width="675" TextWrapping="Wrap" VerticalAlignment="Top" Height="72">
