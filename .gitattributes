@@ -65,3 +65,4 @@
 *.ps1    eol=crlf
 *.psm1   eol=crlf
 *.xml    eol=crlf
+*.ini    eol=crlf

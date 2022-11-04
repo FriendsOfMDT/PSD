@@ -70,7 +70,7 @@ if($tsenv:drivergroup001 -ne ""){
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property DriverPath is $tsenv:DriverPath"
 }
 
-# Building source and destionation paths based on model DriverPath
+# Building source and destination paths based on model DriverPath
 $BaseDriverPath = "PSDResources\DriverPackages"
 $SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverPath).Replace("\","-")).replace(" ","_")
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property DriverPath is $($tsenv:DriverPath)"

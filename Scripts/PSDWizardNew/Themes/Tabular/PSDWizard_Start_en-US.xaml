@@ -1,28 +1,30 @@
-<Canvas x:Name="_startPage" HorizontalAlignment="Left" Height="400" Width="1024" VerticalAlignment="Top" Background="#004275" Panel.ZIndex="300" Visibility="Visible">
-    <Grid x:Name="_startPageLayout" Height="400" HorizontalAlignment="Center" VerticalAlignment="Top" Width="1024">
+<Canvas x:Name="_startPage" HorizontalAlignment="Left" Height="400" Width="1000" VerticalAlignment="Top" Background="#004275" Panel.ZIndex="300" Visibility="Visible">
+    <Grid x:Name="_startPageLayout" Height="400" HorizontalAlignment="Center" VerticalAlignment="Top" Width="1000">
         <Grid.RowDefinitions>
-            <RowDefinition Height="58*"></RowDefinition>
-            <RowDefinition Height="70*"></RowDefinition>
-            <RowDefinition Height="30*"></RowDefinition>
-            <RowDefinition Height="102*"></RowDefinition>
-            <RowDefinition Height="54*"></RowDefinition>
-            <RowDefinition Height="87*"></RowDefinition>
+            <RowDefinition Height="25*"></RowDefinition>
+            <RowDefinition Height="60*"></RowDefinition>
+            <RowDefinition Height="60*"></RowDefinition>
+            <RowDefinition Height="22*"></RowDefinition>
+            <RowDefinition Height="79*"></RowDefinition>
+            <RowDefinition Height="78*"></RowDefinition>
+            <RowDefinition Height="76*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="120" Width="120" Grid.RowSpan="2">
+        <StackPanel Grid.Row="1" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Height="120" Width="120">
             <Image x:Name="_wizBeginLogo" Height="120" Width="120"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="@MainTitle" VerticalAlignment="Center" FontSize="36" Width="754" TextAlignment="Center" FontFamily="Segoe UI Light" Height="64" Foreground="White"/>
-        <TextBlock Grid.Row="2" HorizontalAlignment="Center" Text="@SubTitle" VerticalAlignment="Center" FontSize="16" FontFamily="Segoe UI Light" Width="722" TextAlignment="Center" Height="26" Foreground="White"/>
+        <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="@ORG" VerticalAlignment="Center" FontSize="24" Width="684" TextAlignment="Center" FontFamily="Segoe UI Light" Height="64" Foreground="White"/>
+        <TextBlock Grid.Row="2" HorizontalAlignment="Center" Text="@MainTitle" VerticalAlignment="Center" FontSize="36" Width="754" TextAlignment="Center" FontFamily="Segoe UI Light" Height="64" Foreground="White"/>
+        <TextBlock Grid.Row="3" HorizontalAlignment="Center" Text="@SubTitle" VerticalAlignment="Center" FontSize="16" FontFamily="Segoe UI Light" Width="722" TextAlignment="Center" Height="26" Foreground="White"/>
 
-        <Button Grid.Row="3" x:Name="_start" Style="{DynamicResource ButtonLightBlueRound}" Width="380" Height="68" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Button Grid.Row="4" x:Name="_start" Style="{DynamicResource ButtonLightBlueRound}" Width="380" Height="68" VerticalAlignment="Center" HorizontalAlignment="Center">
             <TextBlock Text="Lets get started" FontSize="24" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
         </Button>
 
-        <Button Grid.Row="5" x:Name="_startPageOpenPS" Style="{DynamicResource ButtonDarkBlueSquare}" Width="100" HorizontalAlignment="Right" Margin="0,8,20,10">
+        <Button Grid.Row="6" x:Name="_startPageOpenPS" Style="{DynamicResource ButtonDarkBlueSquare}" Width="100" HorizontalAlignment="Left" Margin="880,8,0,10">
             <StackPanel Width="91" Height="44">
-                <Label Content="Exit to PS" Foreground="White" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                <Label Content="Open PowerShell" Foreground="White" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
                 <Rectangle Width="20" Height="20" Fill="White" HorizontalAlignment="Center">
                     <Rectangle.OpacityMask>
                         <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_console}"/>
