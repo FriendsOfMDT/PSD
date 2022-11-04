@@ -3,25 +3,27 @@
         [string]$Title = 'My Menu'
     )
     Clear-Host
-    Write-Host "================ $Title ================" -ForegroundColor Cyan
+    Write-Host "================ $Title ================" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "1" -ForegroundColor Green -NoNewline
-    Write-Host " : Show Physical Disks"
+    Write-Host "1" -ForegroundColor DarkYellow -NoNewline
+    Write-Host " : Show Physical Disks" -ForegroundColor Yellow
+    Write-Host "2" -ForegroundColor DarkYellow -NoNewline
+    Write-Host " : Wipe Physical Disks" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "4" -ForegroundColor Green -NoNewline
-    Write-Host " : Show NetAdapters"
-    Write-Host "5" -ForegroundColor Green -NoNewline
-    Write-Host " : Show IP Addresses"
-    Write-Host "6" -ForegroundColor Green -NoNewline
-    Write-Host " : Set IP Address"
+    Write-Host "4" -ForegroundColor DarkYellow -NoNewline
+    Write-Host " : Show NetAdapters" -ForegroundColor Yellow
+    Write-Host "5" -ForegroundColor DarkYellow -NoNewline
+    Write-Host " : Show IP Addresses" -ForegroundColor Yellow
+    Write-Host "6" -ForegroundColor DarkYellow -NoNewline
+    Write-Host " : Set IP Address" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "8" -ForegroundColor Green -NoNewline
-    Write-Host " : PowerShell prompt"
-    Write-Host "9" -ForegroundColor Green -NoNewline
-    Write-Host " : DART Tools"
+    Write-Host "8" -ForegroundColor DarkYellow -NoNewline
+    Write-Host " : PowerShell prompt" -ForegroundColor Yellow
+    Write-Host "9" -ForegroundColor DarkYellow -NoNewline
+    Write-Host " : DART Tools" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "C" -ForegroundColor Green -NoNewline
-    Write-Host " : Press 'C' to continue."
+    Write-Host " : Press 'C' to continue." -ForegroundColor Yellow
     Write-Host ""
 }
 
@@ -63,6 +65,24 @@ if($val){
                 Get-PhysicalDisk | FT
                 Pause
             } 
+            '2' {
+                Clear-Host
+                Write-Host "Cleaning all disks"
+                #Get-Disk | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false -Verbose
+                #Get-PhysicalDisk | Reset-PhysicalDisk -Verbose
+                # Using diskpart due to issues with Clear-Disk
+                # Borrowed (with pride) code snippet from David Segura
+                $Disks = Get-Disk | Where-Object -Property "BusType" -ne "USB"
+                foreach ($Disk in $Disks){
+$null = @"
+select disk $($Disk.number)
+clean
+exit
+"@ | diskpart.exe
+                }                   
+                Write-Host "Done"
+                Pause
+            } 
             '4' {
                 Clear-Host
                 Get-WmiObject win32_networkadapter -Filter "netconnectionstatus = 2 and NetEnabled='True' and PhysicalAdapter='True'" | Select-Object Name,MACAddress | FT
@@ -73,6 +93,7 @@ if($val){
                 Clear-Host
                 IPconfig /all
                 Pause
+
             }
             '6'{
                 Clear-Host

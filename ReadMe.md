@@ -27,7 +27,7 @@ PSD is very much a work-in-progress solution, so stay tuned as we rapidly move f
 
 ## Credits and love
 For this major PSD release we had an amazing support from the following people, dedicating hundreds of hours to the project:
- - Elias Markelis, https://github.com/emarkeli
+ - Elias Markelis, https://github.com/emarkelis
  - George Simos, https://github.com/GeoSimos
  - Dick Tracy, https://github.com/powershellcrack
 

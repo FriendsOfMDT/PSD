@@ -20,6 +20,7 @@
           Version - 0.1.2 - (2022-05-03) - UEFI Boot issues
           Version - 0.1.5 - (2022-06-15) - added /c to BCDBoot
           Version - 0.1.6 - (Mikael_Nystrom) (2022-06-20) - Replaced some native Posh with Diskpart wrappers, Set-PSDEFIDiskpartition and Set-PSDRecoveryPartitionForMBR
+          Version - 0.1.7 - (Johan Arwidmark) (2022-10-03 - Updated BCD Refresh command
 
 
           TODO:
@@ -189,19 +190,6 @@ if ($tsenv:IsUEFI -eq "False"){
 if ($tsenv:IsUEFI -eq "True"){
 	# Fix the EFI partition type
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Fixing the EFI partition type, flipping $($tsenv:BootVolume) / Partition 1 as 'System'"
-
-#    $Script = "$env:TEMP\Diskpart1.txt"
-#    $Log = "$env:TEMP\Diskpart1.txt.log"
-
-#    Set-Content -Path $Script -Value "select volume $($tsenv:BootVolume)"
-#    Add-Content -Path $Script -Value "select partition 1"
-#    Add-Content -Path $Script -Value "set id=c12a7328-f81f-11d2-ba4b-00a0c93ec93b"
-#    $Executable = "diskpart.exe"
-#    $Arguments = "/s $Script"
-#    $result = Invoke-PSDEXE -Executable $Executable -Arguments $Arguments
-#    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running $Executable with the following arguments: $Arguments"
-#    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $Executable completed, rc = $($result)"
-#    Start-Sleep -Seconds 15
     Set-PSDEFIDiskpartition -Volume $($tsenv:BootVolume)
 }
 
@@ -212,8 +200,9 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Created $($Result.FullNa
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property LTIDirtyOS is true"
 $tsenv:LTIDirtyOS = $true
 
+# Start bcdedit.exe to refresh BCD entries (needed on some hardware)
+Start-Sleep -Seconds 5
 $Executable = "bcdedit.exe"
-$Arguments = "/timeout 0"
-$result = Invoke-PSDEXE -Executable $Executable -Arguments $Arguments
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running $Executable"
+Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to run $Executable"
+$result = Invoke-PSDEXE -Executable $Executable 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): ReturnCode = $($result)"

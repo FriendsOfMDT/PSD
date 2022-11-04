@@ -15,6 +15,20 @@
     <Button x:Name="_tsTabExpand" Height="25" Width="28" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="462,0,0,314" Style="{DynamicResource ExpandBluePlus}" />
     <Button x:Name="_tsTabCollapse" Height="25" Width="25" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="462,0,0,285" Style="{DynamicResource CollapseBlueMinus}" />
 
+    <Canvas x:Name="_tsTabValidation"  Grid.Column="0" Margin="160,182,527,140" Background="LightGreen" Visibility="Visible" >
+        <TextBox x:Name="_tsTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" VerticalAlignment="Center" Width="254" Height="25" />
+        <Rectangle x:Name="_tsTabValidation_Alert" Width="20" Height="20" Fill="Red" Canvas.Left="275" Visibility="Visible" Canvas.Top="2">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+        <Rectangle x:Name="_tsTabValidation_Check" Width="20" Height="20" Fill="Green" Canvas.Left="275" Visibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Top="2">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}" />
+            </Rectangle.OpacityMask>
+        </Rectangle>
+    </Canvas>
+
     <TextBox x:Name="TS_TaskSequenceID" Margin="342,139,14,209" IsEnabled="False" Grid.ColumnSpan="3" />
     <TreeView x:Name="_tsTabTree" HorizontalAlignment="Right" Height="241" Margin="0,9,55,0" VerticalAlignment="Top" Width="467" FontSize="14"  
         ItemContainerStyle="{StaticResource TreeViewItemStandard}" 

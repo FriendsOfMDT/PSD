@@ -123,7 +123,7 @@
     <step type="SMS_TaskSequence_SetVariableAction" name="Set DriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
       <defaultVarList>
         <variable name="VariableName" property="VariableName">DriverPath</variable>
-        <variable name="VariableValue" property="VariableValue">Windows 10 x64\%make%\%model%</variable>
+        <variable name="VariableValue" property="VariableValue">Windows 10 x64\%model%</variable>
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
     </step>

@@ -1,5 +1,28 @@
 # Change log for PSDWizardNew
 
+## 2.2.5 - Oct 8, 2022
+
+- (PC) - Added more descriptive Welcome page response when conditions are checked
+- (PC) - Added TS folder check to error appropriately when selected
+- (PC) - Added F5 refresh help context.
+
+## 2.2.4 - Oct 7, 2022
+
+- (PC) - Fixed default locale output if not set in CustomSettings.ini
+- (PC) - Optimized PSDWizard by moving handlers out of page selection; fixed issue with dual WPF selectionChange events 
+- (PC) - Fixed Serial number variable for ComputerName; supports RAND, SERIAL, SERIALNUMBER
+- (PC) - Changed debug logs for element change to be more clear
+- (PC) - Fixed Definition xml condition query for psdwizard; change from _or_ to _and_; fixes psdwizard toggle
+- (PC) - Add more synopsis to PSDWizard functions; removing majority of test code. 
+
+## 2.2.3 - Sept 30, 2022
+
+- (PC) - Removed beta from version; released to public
+- (PC) - Added character check during xml conversion
+- (PC) - Fix logo not showing when using web url
+- (PC) - Filter language based on TS selected
+- (PC) - Check TS for valid OS; added invalid message to wizard
+
 ## 2.2.2b - Apr 20, 2022
 
 - (PC) - Updated computer name validation to accept 1 character instead of minimum of 5
