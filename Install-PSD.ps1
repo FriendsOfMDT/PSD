@@ -452,13 +452,16 @@ if (!($Upgrade)) {
     Write-PSDInstallLog -Message "Disable support for x86"
     Set-ItemProperty $property -Name "SupportX86" -Value "False"
     
+    # Get localized names
+    Import-LocalizedData -BaseDirectory .\Languages -BindingVariable localLang -ErrorAction SilentlyContinue
+
     # Relax Permissions on DeploymentFolder and DeploymentShare
     Write-PSDInstallLog -Message "Relaxing permissions on $psDeploymentShare"
-    icacls $psDeploymentFolder /grant '"Users":(OI)(CI)(RX)' | Out-Null
-    icacls $psDeploymentFolder /grant '"Administrators":(OI)(CI)(F)' | Out-Null
-    icacls $psDeploymentFolder /grant '"SYSTEM":(OI)(CI)(F)' | Out-Null
-    Grant-SmbShareAccess -Name $psDeploymentShare -AccountName "EVERYONE" -AccessRight Change -Force | Out-Null
-    Revoke-SmbShareAccess -Name $psDeploymentShare -AccountName "CREATOR OWNER" -Force | Out-Null
+    icacls $psDeploymentFolder /grant '"$($localLang.Users)":(OI)(CI)(RX)' | Out-Null
+    icacls $psDeploymentFolder /grant '"$($localLang.Administrators)":(OI)(CI)(F)' | Out-Null
+    icacls $psDeploymentFolder /grant '"$($localLang.System)":(OI)(CI)(F)' | Out-Null
+    Grant-SmbShareAccess -Name $psDeploymentShare -AccountName "$($localLang.Everyone)" -AccessRight Change -Force | Out-Null
+    Revoke-SmbShareAccess -Name $psDeploymentShare -AccountName "$($localLang.CreatorOwner)" -Force | Out-Null
 
     # copy the INI Files
     Copy-Item -Path "$PSScriptRoot\INIFiles\CustomSettings.ini" -Destination "$psDeploymentFolder\Control\CustomSettings.ini" -Force | Out-Null
