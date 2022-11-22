@@ -1,9 +1,9 @@
 # Culture = "en-US"
 ConvertFrom-StringData @"
     Administrator = Administrator
-    Administrators = Administrators
+    Administrators = Administratores
     Guest = Guest
     Users = Users
     Everyone = Everyone
-    CreatorOwner = Creator Owner
+    CreatorOwner = CREATOR OWNER
 "@
