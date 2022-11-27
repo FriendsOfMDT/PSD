@@ -465,7 +465,6 @@ if (!($Upgrade)) {
     $acl.SetAccessRule($accessRule)
     $acl | Set-Acl -Path $folder -Verbose
     Clear-Variable accessRule
-}
 
 # Relax Permissions on DeploymentFolder and DeploymentShare
     Write-PSDInstallLog -Message "Relaxing permissions on $psDeploymentShare"
