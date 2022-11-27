@@ -60,9 +60,9 @@
 Param(
     [Parameter(Mandatory = $true, Position = 0, HelpMessage = "Specify the target MDT/PSD deployment share's physical folder location in the file system.")]
     [string]$psDeploymentFolder,
-    [Parameter(Mandatory = $true, Position = 1,  HelpMessage = "Specify the share name that this deployment's solution data will be accessible from the network.")]
+    [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Specify the share name that this deployment's solution data will be accessible from the network.")]
     [string]$psDeploymentShare,
-    [Parameter(Mandatory = $false, Position = 2,  HelpMessage = "Use this switch to upgrade an existing deployment share.")]
+    [Parameter(Mandatory = $false, Position = 2, HelpMessage = "Use this switch to upgrade an existing deployment share.")]
     [Switch]$Upgrade
 )
 $Script:DeploymentToolkitVersion = "2.2.8"
@@ -89,13 +89,15 @@ function Start-PSDLog {
         if (!(Test-Path $FilePath)) {
             # Create the log file destination if it doesn't exist.
             New-Item $FilePath -Type File | Out-Null
-        } else {
+        }
+        else {
             Remove-Item -Path $FilePath -Force
         }
         # Set the global variable to be used as the FilePath for all subsequent write-PSDInstallLog
         # calls in this session
         $global:ScriptLogFilePath = $FilePath
-    } catch {
+    }
+    catch {
         # In event of an error write an exception
         Write-Error $_.Exception.Message
     }
@@ -110,7 +112,7 @@ function Write-PSDInstallLog {
         [Parameter(Mandatory = $false)]
         [bool]$writetoscreen = $true   
     )
-    $Message =  "$($Message)`nDeployment Tool kit Version:$($Script:DeploymentToolkitVersion)"
+    $Message = "$($Message)`nDeployment Tool kit Version:$($Script:DeploymentToolkitVersion)"
     $TimeGenerated = "$(Get-Date -Format HH:mm:ss).$((Get-Date).Millisecond)+000"
     $Line = '<![LOG[{0}]LOG]!><time="{1}" date="{2}" component="{3}" context="" type="{4}" thread="" file="">'
     $LineFormat = $Message, $TimeGenerated, (Get-Date -Format MM-dd-yyyy), "$($MyInvocation.ScriptName | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)", $LogLevel
@@ -182,12 +184,13 @@ Write-PSDInstallLog -Message "Starting installation script for $DeploymentToolki
 ##############################################################
 ## Test-PSDADK
 ##############################################################
-$mdtADK = (Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |  Where-Object {$_.UninstallString -like "*adksetup.exe*"}).DisplayVersion
+$mdtADK = (Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |  Where-Object { $_.UninstallString -like "*adksetup.exe*" }).DisplayVersion
 $ADKbuild = [int]([string]$mdtADK.Split('.')[2])
 if (($null -eq $mdtADK) -or ($ADKbuild -lt $script:MinADKVersion)) {
     Write-PSDInstallLog -Message "ADK not detected/installed! Aborting." -LogLevel 3 -writetoscreen $true
     exit
-} else {
+}
+else {
     Write-PSDInstallLog -Message "ADK installed version: $mdtADK" -writetoscreen $true
 }
 ##############################################################
@@ -197,13 +200,14 @@ if (($null -eq $mdtADK) -or ($ADKbuild -lt $script:MinADKVersion)) {
 ##############################################################
 ## Test-PSDADKWinPE
 ##############################################################
-$mdtADKPE = (Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.UninstallString -like "*adkwinpesetup.exe*"}).DisplayVersion
+$mdtADKPE = (Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object { $_.UninstallString -like "*adkwinpesetup.exe*" }).DisplayVersion
 # ADK1809 build:17763
 $ADKPEbuild = [int]([string]$mdtADK.Split('.')[2])
 if (($null -eq $mdtADKPE) -or ($ADKPEbuild -lt $script:MinADKVersion)) {
     Write-PSDInstallLog -Message "ADKPE not detected/installed! Aborting." -LogLevel 3 -writetoscreen $true
     exit
-} else {
+}
+else {
     Write-PSDInstallLog -Message "WinPE Addon for ADK(only for ADK1809 or above): $mdtADKPE" -writetoscreen $true
 }
 ##############################################################
@@ -218,7 +222,8 @@ $mdtVer = ((Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uni
 if ($null -eq $mdtVer) {
     Write-PSDInstallLog -Message "MDT not detected/installed! Aborting." -LogLevel 3 -writetoscreen $true
     exit
-} else {
+}
+else {
     Write-PSDInstallLog -Message "MDT installed version: $mdtVer"
     # Load the MDT PowerShell provider
     $mdtDir = $(Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Deployment 4' -Name Install_Dir).Install_Dir
@@ -233,7 +238,7 @@ if ($null -eq $mdtVer) {
 # SMB share and MDT drive description
 $description = "PSD Deployment Share $(Split-Path -Path $psDeploymentFolder -Leaf)"
 
-if (-not ($Upgrade.IsPresent)){
+if (-not ($Upgrade.IsPresent)) {
     if (!$psDeploymentShare) {   
         $share = Split-Path -Path $psDeploymentFolder -Leaf
         $psDeploymentShare = "$($share)$('$')"
@@ -260,7 +265,7 @@ if (-not ($Upgrade.IsPresent)){
     New-PSDrive -Name "$($script:PSDDrive)" -PSProvider "MDTProvider" -Root $psDeploymentFolder -Description $description -Verbose | Add-MDTPersistentDrive | Out-Null
 
     # Cleanup MDT default files
-    $filters =  '*.vbs','*.wsf','DeployWiz*','UDI*','WelcomeWiz_*.xml','Wizard*'
+    $filters = '*.vbs', '*.wsf', 'DeployWiz*', 'UDI*', 'WelcomeWiz_*.xml', 'Wizard*'
     foreach ($filter in $filters) {
         $Result = Get-ChildItem -Path "$psDeploymentFolder\Scripts" -Filter $filter
         foreach ($item in $Result) {
@@ -268,7 +273,8 @@ if (-not ($Upgrade.IsPresent)){
             Remove-Item -Path $item.FullName
         }
     }
-} else {
+}
+else {
     Write-PSDInstallLog -Message "Installer running in upgrade mode"
     $msg = "{0}:{1} share does not exist! Please verify the share name. Aborting installer."
     if (-not (Test-Path $psDeploymentFolder)) {
@@ -285,39 +291,39 @@ if (-not ($Upgrade.IsPresent)){
 
     # PSDRestart backup folder
     [string]$folderCount = (Get-ChildItem -Filter 'PSD_*' -Path "$($psDeploymentFolder)\Backup\" | Measure-Object).Count + 1
-    $FoldercountWithPadding = $FolderCount.PadLeft(5,'0')
+    $FoldercountWithPadding = $FolderCount.PadLeft(5, '0')
     $backupFolder = "$($psDeploymentFolder)\Backup\PSD_$($FoldercountWithPadding)"
     # Backup the MDT folder that will be upgraded.
     write-PSDInstallLog -Message "Backup folder $($backupFolder)" -LogLevel 1
     New-Item -Path $backupFolder -ItemType Directory -Force | Out-Null
-    $FoldersToMove = 'scripts','templates','tools\modules','PSDResources\BGInfo','PSDResources\BootImageFiles','PSDResources\Branding','PSDResources\Certificates','PSDResources\CustomScripts','PSDResources\Plugins','PSDResources\Prestart','PSDResources\UserExitScripts'
-    foreach($folder in $FoldersToMove){
+    $FoldersToMove = 'scripts', 'templates', 'tools\modules', 'PSDResources\BGInfo', 'PSDResources\BootImageFiles', 'PSDResources\Branding', 'PSDResources\Certificates', 'PSDResources\CustomScripts', 'PSDResources\Plugins', 'PSDResources\Prestart', 'PSDResources\UserExitScripts'
+    foreach ($folder in $FoldersToMove) {
         Copy-Item -Path "$($psDeploymentFolder)\$($folder)" -Destination "$($backupFolder)\$($folder)" -Recurse
     }
-  }
+}
 
- # Cleanup MDT files with filters
- $filters =  @(
-               '*.vbs'
-               '*.wsf'
-               'DeployWiz*'
-               'UDI*'
-               'WelcomeWiz_*.xml'
-               '*.gif'
-               '*.png'
-               '*.jpg'
-               'UDIWizard_Config.xml.app'
-               'Wizard.hta'
-               'Wizard.ico'
-               'Wizard.css'
-               'Autorun.inf'
-               'BDD_Welcome_ENU.xml'
-               'Credentials_ENU.xml'
-               'Summary_Definition_ENU.xml'
-               'DeployWiz_Roles.xsl'
-               'ListOfLanguages.xml'
-               'ZTITatoo.mof'
-               )
+# Cleanup MDT files with filters
+$filters = @(
+    '*.vbs'
+    '*.wsf'
+    'DeployWiz*'
+    'UDI*'
+    'WelcomeWiz_*.xml'
+    '*.gif'
+    '*.png'
+    '*.jpg'
+    'UDIWizard_Config.xml.app'
+    'Wizard.hta'
+    'Wizard.ico'
+    'Wizard.css'
+    'Autorun.inf'
+    'BDD_Welcome_ENU.xml'
+    'Credentials_ENU.xml'
+    'Summary_Definition_ENU.xml'
+    'DeployWiz_Roles.xsl'
+    'ListOfLanguages.xml'
+    'ZTITatoo.mof'
+)
 foreach ($filter in $filters) {
     $Result = Get-ChildItem -Path "$psDeploymentFolder\Scripts" -Filter $filter
     foreach ($item in $Result) {
@@ -327,10 +333,10 @@ foreach ($filter in $filters) {
 }
 
 # Copy the scripts directly in the scripts folder (no recursive)
-'*.ps1','*.xaml','*.xml'| ForEach-Object { 
+'*.ps1', '*.xaml', '*.xml' | ForEach-Object { 
     Copy-Item "$PSScriptRoot\Scripts\$($_)" "$psDeploymentFolder\Scripts"
     Get-ChildItem -Path "$psDeploymentFolder\Scripts\$($_)" | Unblock-File 
-    }
+}
 
 # Copy the Wizard folders
 #Copy-PSDFolder "$PSScriptRoot\Scripts\PSDWizard" "$psDeploymentFolder\Scripts\PSDWizard"
@@ -360,15 +366,15 @@ if ((Test-Path "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn") -eq $
     New-Item "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn" -ItemType directory | Out-Null
 }
 $providerModules = @("Microsoft.BDD.PSSnapIn.dll"
-                     "Microsoft.BDD.PSSnapIn.dll.config" 
-                     "Microsoft.BDD.PSSnapIn.dll-help.xml" 
-                     "Microsoft.BDD.PSSnapIn.Format.ps1xml"
-                     "Microsoft.BDD.PSSnapIn.Types.ps1xml"
-                     "Microsoft.BDD.Core.dll"
-                     "Microsoft.BDD.Core.dll.config"
-                     "Microsoft.BDD.ConfigManager.dll")
+    "Microsoft.BDD.PSSnapIn.dll.config" 
+    "Microsoft.BDD.PSSnapIn.dll-help.xml" 
+    "Microsoft.BDD.PSSnapIn.Format.ps1xml"
+    "Microsoft.BDD.PSSnapIn.Types.ps1xml"
+    "Microsoft.BDD.Core.dll"
+    "Microsoft.BDD.Core.dll.config"
+    "Microsoft.BDD.ConfigManager.dll")
 
-foreach($providerModule in $providerModules){
+foreach ($providerModule in $providerModules) {
     Copy-Item "$($mdtDir)Bin\$($providerModule)" -Destination "$psDeploymentFolder\Tools\Modules\Microsoft.BDD.PSSnapIn"
 }
 
@@ -379,16 +385,16 @@ if ((Test-Path "$psDeploymentFolder\Templates") -eq $false) {
     New-Item "$psDeploymentFolder\Templates" | Out-Null
 }
 
-$providerTemplates =@("Groups.xsd"
-                      "Medias.xsd"
-                      "OperatingSystems.xsd"
-                      "Packages.xsd"
-                      "SelectionProfiles.xsd"
-                      "TaskSequences.xsd"
-                      "Applications.xsd"
-                      "Drivers.xsd"
-                      "Groups.xsd"
-                      "LinkedDeploymentShares.xsd")
+$providerTemplates = @("Groups.xsd"
+    "Medias.xsd"
+    "OperatingSystems.xsd"
+    "Packages.xsd"
+    "SelectionProfiles.xsd"
+    "TaskSequences.xsd"
+    "Applications.xsd"
+    "Drivers.xsd"
+    "Groups.xsd"
+    "LinkedDeploymentShares.xsd")
 foreach ($providerTemplate in $providerTemplates) {
     Copy-Item "$($mdtDir)Templates\$providerTemplate" -Destination "$psDeploymentFolder\Templates"     
 }
@@ -453,9 +459,10 @@ if (!($Upgrade)) {
     Set-ItemProperty $property -Name "SupportX86" -Value "False"
     
     # Get localized names
-    Import-LocalizedData -BaseDirectory .\Languages -BindingVariable localLang -ErrorAction SilentlyContinue
+    # NOTE: Limited to translations found in folder 'Languages'
+    Import-LocalizedData -BaseDirectory .\Languages -BindingVariable localLang
 
-# Relax Permissions on DeploymentFolder and DeploymentShare
+    # Relax Permissions on DeploymentFolder and DeploymentShare
     Write-PSDInstallLog -Message "Relaxing permissions on $psDeploymentShare"
     icacls $psDeploymentFolder /grant '"$($localLang.Users)":(OI)(CI)(RX)' | Out-Null
     icacls $psDeploymentFolder /grant '"$($localLang.Administrators)":(OI)(CI)(F)' | Out-Null
