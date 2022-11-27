@@ -455,17 +455,6 @@ if (!($Upgrade)) {
     # Get localized names
     Import-LocalizedData -BaseDirectory .\Languages -BindingVariable localLang -ErrorAction SilentlyContinue
 
-# Configure NTFS permissions for the deployment share
-    $rule = "ReadAndExecute"
-    $rule = "Modify"
-
-    $accessRule = New-Object Security.AccessControl.FileSystemAccessRule ($($serviceAccountName), $rule, 'ContainerInherit, ObjectInherit', 'None', 'Allow')        
-
-    $acl = Get-Acl -Path $folder
-    $acl.SetAccessRule($accessRule)
-    $acl | Set-Acl -Path $folder -Verbose
-    Clear-Variable accessRule
-
 # Relax Permissions on DeploymentFolder and DeploymentShare
     Write-PSDInstallLog -Message "Relaxing permissions on $psDeploymentShare"
     icacls $psDeploymentFolder /grant '"$($localLang.Users)":(OI)(CI)(RX)' | Out-Null
