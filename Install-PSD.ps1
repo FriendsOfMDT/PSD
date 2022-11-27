@@ -466,7 +466,7 @@ if (!($Upgrade)) {
     Write-PSDInstallLog -Message "Relaxing permissions on $psDeploymentShare"
     icacls $psDeploymentFolder /grant '"$($localLang.Users)":(OI)(CI)(RX)' | Out-Null
     icacls $psDeploymentFolder /grant '"$($localLang.Administrators)":(OI)(CI)(F)' | Out-Null
-    icacls $psDeploymentFolder /grant '"$($localLang.System)":(OI)(CI)(F)' | Out-Null
+    icacls $psDeploymentFolder /grant '"SYSTEM":(OI)(CI)(F)' | Out-Null
     Grant-SmbShareAccess -Name $psDeploymentShare -AccountName "$($localLang.Everyone)" -AccessRight Change -Force | Out-Null
     Revoke-SmbShareAccess -Name $psDeploymentShare -AccountName "$($localLang.CreatorOwner)" -Force | Out-Null
 
