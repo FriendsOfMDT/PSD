@@ -20,7 +20,7 @@ One of the newer features in PSD is the wizard. The new wizard closely resembles
 
 ## About the wizard
 
-The structure of the wizard was written to be modular as well as include controllable features like the original MDT wizard had. However the wizard is not using XAML format instead of HTA (HTML) format. You can read more about it here: [XAML Overview](https://learn.microsoft.com/en-us/windows/uwp/xaml-platform/xaml-overview). 
+The structure of the wizard was written to be modular as well as include controllable features like the original MDT wizard had. However the wizard is using XAML format instead of HTA (HTML) format. You can read more about it here: [XAML Overview](https://learn.microsoft.com/en-us/windows/uwp/xaml-platform/xaml-overview). 
 
 The wizard also uses the same xml definitions as the original; however there are additional xml files that control the themes, languages, and pages. For further details review the structure section
 
@@ -57,6 +57,7 @@ DeploymentShare
                 
 ```
 > Keep in mind only **en-US** is supported right now, but has potential to use additional.
+
 
 ## File explanations
 
@@ -115,6 +116,61 @@ DeploymentShare
 - **F5** will refresh Task sequence list
 - **F9** minimizes the wizard
 
+## Additional Language support (TEST ONLY - NOT SUPPORTED)
+ Currently the PSD only supports english (en-US). However if you are multilingual and want to test additional languages here are the steps to do it.
+
+1. Edit the PSDStart.ps1 line: 669 from:
+
+```powershell
+$result = Show-PSDWizard "$scripts\PSDWizard.xaml"
+```
+To
+```powershell
+$result = Show-PSDWizard "$scripts\PSDWizard.xaml" -Language $tsenv:Language
+```
+
+2. Edit Customsettings.ini to match language locale (eg en-ES)
+```ini
+Language=en-ES
+```
+...and make sure your setting the CustomSAetting.ini values to match the theme (see themes section)
+
+3. Make a copy of each page and definition files and rename to reflect new language (using **en-ES** as an example)
+```
+DeploymentShare
+    |-Scripts
+        |-PSDWizardNew
+            |--PSDWizard.Definition_en-ES.xml
+            |-Themes
+                |--Classic_Theme_Definitions_en-ES.xml
+                |-Classic
+                    |--PSDWizard_AdminCreds_en-ES.xml
+                    |--PSDWizard_Applications_en-ES.xml
+                    |--PSDWizard_DeployReadiness_en-ES.xml
+                    |--PSDWizard_DeviceDetails_en-ES.xml
+                    |--PSDWizard_Locale_en-ES.xml
+                    |--PSDWizard_Ready_en-ES.xml
+                    |--PSDWizard_Start_en-ES.xml
+                    |--PSDWizard_TaskSequence_en-ES.xml
+                    |--PSDWizard_Template_Classic_en-ES.xml
+
+```
+
+4. Edit each file.
+    - Edit the Wizard definition's xml file. Change the quoted values for _MainTitle_ element, _Subtitle_ element, and _title_ attribute value (DO NOT CHANGE **ID** or ANYTHING ELSE)
+        - Be sure keep it in this format
+        ```xml
+            <![CDATA[" you language text "]]>
+        ```
+    - Edit the theme definition's references values to point to new language pages (DO NOT CHANGE **ID**)
+    - Edit each page within theme folder editing values for Content (DO NOT CHANGE **XNAME** or ANYTHING ELSE)
+
+5. Provide Feedback to [@powershellcrack](https://github.com/PowerShellCrack) or team
+
+
+
+
+
 # Custom Pages
 
 It is possible to add (or remove pages) to the PSD Wizard. Sine there is not UDI wizard (...yet); this is a manual process. 
@@ -122,7 +178,7 @@ It is possible to add (or remove pages) to the PSD Wizard. Sine there is not UDI
 ### Here are the steps
 
 1. Open the definition file for a theme (eg. <PSD>\Script\PSDWizardNew\Themes\Classic_Theme_Definitions_en-US.xml) in a Text editor
-2. Add a new pane line with page details (eg. <Pane id="GroupPage" reference="Classic\PSDWizard_GroupPage_en-US.xaml" margin="0,0,0,0" />). Order does NOT matter.
+2. Add a new pane line with page details (eg. <Pane id="GroupPage" reference="Classic\PSDWizard_GroupPage_en-US.xaml" margin="0,0,0,0" />). Order DOES matter.
 
 ![screenshot1](.images/image1.png)
 
