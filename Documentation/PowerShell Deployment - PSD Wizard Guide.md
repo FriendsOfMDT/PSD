@@ -81,7 +81,7 @@ DeploymentShare
     - **_%SERIAL%_** --> replaced with serial number of device 
     - **_%SERIAL:\<NUM\>%_** --> replaced with last **num**bers of serial number  (eg %SERIAL:7%)
     - **_%\<NUM\>:SERIAL%_** --> replaced with first **num**bers of serial number  (eg %7:SERIAL%)
-    - **_%RAND:\<NUM\>%_** -> replaced with alpha numberic character of **num**bers (eg. %RAND:7&)
+    - **_%RAND:\<NUM\>%_** -> replaced with alphanumeric character of **num**bers (eg. %RAND:7&)
 
 - **SkipBDDWelcome**--> YES or NO. Toggles the Welcome splash screen. 
 - **SkipWelcome** --> YES or NO. Toggles the Welcome splash screen (same as _SkipBDDWelcome_)
@@ -101,7 +101,7 @@ DeploymentShare
 - **SkipPSDWelcome** --> YES or NO. Toggles the Welcome splash screen. 
 - **PSDWizard** --> Native or PSDWizardNew. Native is the original wizard (not new)
 - **PSDWizardTheme** --> Classic, Modern, Refresh, Tabular (see theme section for details and screenshots)
-- **SkipDeployReadiness** --> YES or NO. Toggles the deployment readiness page (first page after welceome wizard). This page isn't very useful yet. 
+- **SkipDeployReadiness** --> YES or NO. Toggles the deployment readiness page (first page after welcome wizard). This page isn't very useful yet. 
 - **PSDWizardLogo** --> Adds logo to top left corner of wizard and on Welcome page. (eg. PSDWizardLogo=%SCRIPTROOT%\powershell.png)
 - **PSDDebug** --> YES or NO. Will activate the Debug Mode and constructed UI will be exported with logs
 
@@ -117,7 +117,9 @@ DeploymentShare
 - **F9** minimizes the wizard
 
 ## Additional Language support (TEST ONLY - NOT SUPPORTED)
- Currently the PSD only supports english (en-US). However if you are multilingual and want to test additional languages here are the steps to do it.
+ Currently PSD only supports English (en-US). However if you are multilingual and want to test additional languages here are the steps to do it:
+
+> NOTE: this only works for the PSDWizardNew UI
 
 1. Edit the PSDStart.ps1 line: 669 from:
 
@@ -129,11 +131,11 @@ To
 $result = Show-PSDWizard "$scripts\PSDWizard.xaml" -Language $tsenv:Language
 ```
 
-2. Edit Customsettings.ini to match language locale (eg en-ES)
+2. Edit CustomSettings.ini to match language locale (eg en-ES)
 ```ini
 Language=en-ES
 ```
-...and make sure your setting the CustomSAetting.ini values to match the theme (see themes section)
+...and make sure your setting the CustomSetting.ini values to match the theme (see themes section)
 
 3. Make a copy of each page and definition files and rename to reflect new language (using **en-ES** as an example)
 ```
