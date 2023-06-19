@@ -251,7 +251,7 @@ The changelog can be found here: [CHANGELOG.MD](..\Scripts\PSDWizardNew\CHANGELO
 
 ## Future releases / in-development
 
-- Use runspace for multithreading, refesh capability, and faster response
+- Use runspace for multithreading, refresh capability, and faster response
 - Support application profiles
 - Support profile selections
 - Support Autopilot Tasksequence
