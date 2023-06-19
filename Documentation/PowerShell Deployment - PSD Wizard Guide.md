@@ -4,19 +4,19 @@ One of the newer features in PSD is the wizard. The new wizard closely resembles
 
 ## Themes
 - Native --> Original theme for PSD (Set _PSDWizard=**Native**_ or leave blank)
-![nativeui](.images\nativeui.png)
+![nativeui](.images/nativeui.png)
 
 - Classic --> Default theme. Looks and feels like MDT original menu (Set _PSDWizard=**PSDWizardNew**_ and _PSDWizardTheme=**Classic**_)
-![psdwizardnewclassic](.images\psdwizardnew_classic.png)
+![psdwizardnew_classic](.images/psdwizardnew_classic.png)
 
 - Modern --> Looks and feels like Windows 10 OOBE (Set _PSDWizard=**PSDWizardNew**_ and _PSDWizardTheme=**Modern**_)
-![psdwizardnew_modern](.images\psdwizardnew_modern.png)
+![psdwizardnew_modern](.images/psdwizardnew_modern.png)
 
 - Refresh --> Looks and feels like MDT original menu but with cleaner input and buttons (Set _PSDWizard=**PSDWizardNew**_ and _PSDWizardTheme=**Refresh**_)
-![psdwizardnew_refresh](.images\psdwizardnew_refresh.png)
+![psdwizardnew_refresh](.images/psdwizardnew_refresh.png)
 
 - Tabular --> wider and short height menu. provides a horizontal menu (Set _PSDWizard=**PSDWizardNew**_ and _PSDWizardTheme=**Tabular**_)
-![psdwizardnew_tabular](.images\psdwizardnew_tabular.png)
+![psdwizardnew_tabular](.images/psdwizardnew_tabular.png)
 
 ## About the wizard
 
@@ -103,7 +103,7 @@ DeploymentShare
 - **SkipDeployReadiness** --> YES or NO. Toggles the deployment readiness page (first page after welceome wizard). This page isn't very useful yet. 
 - **PSDWizardLogo** --> Adds logo to top left corner of wizard and on Welcome page. (eg. PSDWizardLogo=%SCRIPTROOT%\powershell.png)
 - **PSDDebug** --> YES or NO. Will activate the Debug Mode and constructed UI will be exported with logs
-![screenshot9](.images\image9.png)
+![screenshot9](.images/image9.png)
 
 # Keyboard shortcuts
 
@@ -122,10 +122,10 @@ It is possible to add (or remove pages) to the PSD Wizard. Sine there is not UDI
 
 1. Open the definition file for a theme (eg. <PSD>\Script\PSDWizardNew\Themes\Classic_Theme_Definitions_en-US.xml) in a Text editor
 2. Add a new pane line with page details (eg. <Pane id="GroupPage" reference="Classic\PSDWizard_GroupPage_en-US.xaml" margin="0,0,0,0" />). Order does NOT matter.
-![screenshot1](.images\image1.png)
+![screenshot1](.images/image1.png)
 
 3. Add a new xaml file in the <themes> folder and name it the same as the reference. In this example I would add a new file here:  <PSD>\Script\PSDWizardNew\Themes\Classic\PSDWizard_GroupPage_en-US.xaml. 
-![screenshot2](.images\image2.png)
+![screenshot2](.images/image2.png)
 
 4. Edit the page. It must consist of these elements (expect what's in bold). Be sure give the name of the tab something unique (eg. x:Name="_grpTabLayout")
 
@@ -146,15 +146,15 @@ It is possible to add (or remove pages) to the PSD Wizard. Sine there is not UDI
     </TextBlock>
 </Grid>
 ```
-![screenshot3](.images\image3.png)
+![screenshot3](.images/image3.png)
 
 5. Within the grid you can add code to make inputs, dropdowns, buttons, etc. The problem is this code HAS to be formatted correctly or the whole wizard won't load! I like to take code from other pages as an example. If you do this any x:Name MUST be unique and by setting one of the x:Name with a TS_<value>; will be exported as a variable when wizard is closed.
 
 > HINT: Knowing the margins can be tricky; either use Visual Studio Community to edit the xaml or copy code from another page of the same property. I copied the search input box from the application page and removed some properties. In this screenshot there is a section to build a two column page (help menu is in Column 1)
-![screenshot4](.images\image4.png)
+![screenshot4](.images/image4.png)
 
 Here is what it looks like in VS2022
-![screenshot5](.images\image5.png)
+![screenshot5](.images/image5.png)
 
 > The last thing to do is control how the page will display and what language. You'll notice in the VS2020 Screenshot, some text with @ in the. These are placeholders for words in a language. Even though English is the only supported language right now, this definition contains all types of pages and their conditions. 
 
@@ -170,15 +170,15 @@ Add a new Pane to where you want the pane to show up (order does matter here). T
 	&#xa;&#xa;Add this device to an Intune group" ]]></Help>
 </Pane>
 ```
-![screenshot6](.images\image6.png)
+![screenshot6](.images/image6.png)
 
 > Optional: You can fill in the conditions, Main title, subtitle and help with what you want. 
 If done correctly you should get this:
 
-![screenshot7](.images\image7.png)
+![screenshot7](.images/image7.png)
 and at the ready pages, it will show up:
 
-![screenshot8](.images\image8.png)
+![screenshot8](.images/image8.png)
 
 ## CHANGELOG
 
