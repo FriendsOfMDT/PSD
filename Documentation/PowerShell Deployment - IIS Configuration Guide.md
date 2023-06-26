@@ -47,8 +47,11 @@ To support server side logging via BITS Upload, IIS need to be configured to all
 In addition the following rules must be added to the CustomSettings.ini file:
 
 LogUserDomain=ServernameOrDomain
+
 LogUserID=AccountName
+
 LogUserPassword=Password
+
 SLShare=https://mdt01.corp.viamonstra.com/PSDProductionLogs
 
 ## Firewall Ports
