@@ -82,9 +82,9 @@ PSD installation requires the following:
 > NOTE: If downloading the Zip archive, ensure to unblock the file before extracting the content.
 1) Open an elevated Powershell command prompt, run one of the following commands
     - For **NEW** installations of PSD run:
-        - .\Install-PSD.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name>
+        - .\Install-PSD.ps1 -psDeploymentFolder \<your absolute folder path including drive letter> -psDeploymentShare \<your share name>
     - To **UPGRADE** an existing MDT/PSD installation run: 
-        - .\Install-PSD.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name> **-upgrade**
+        - .\Install-PSD.ps1 -psDeploymentFolder \<your absolute folder path including drive letter> -psDeploymentShare \<your share name> **-upgrade**
 1) Review the PSD Installation log for errors
 
 # Next steps
