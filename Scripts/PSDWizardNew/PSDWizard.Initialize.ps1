@@ -1594,7 +1594,12 @@ Function Test-PSDWizardApplicationExist {
         Checks to see if there are applications present
     #>
     $apps = Get-PSDWizardTSChildItem -Path "DeploymentShare:\Applications" -Recurse
-    If ($apps.count -gt 1) { return $true }Else { return $false }
+    If ($apps.count -ge 1){
+        return $true
+    }
+    Else{
+        return $false
+    }
 }
 #endregion
 
