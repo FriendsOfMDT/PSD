@@ -18,7 +18,7 @@
     <Label x:Name="_appBundleslabel" Content="Application Bundles:" FontSize="14" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top"/>
     <ComboBox x:Name="_appBundlesCmb" HorizontalAlignment="Left" Margin="151,142,0,0" VerticalAlignment="Top" Width="326"/>
 
-    <Button x:Name="_appTabSelectAll" Content="Expand All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="12,0,0,353" />
+    <Button x:Name="_appTabSelectAll" Content="Select All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="12,0,0,353" />
     <Button x:Name="_appTabSelectNone" Content="Select None" Height="25" Width="114" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="130,0,0,353" />
 
     <TextBox x:Name="TS_Applications" Margin="341,129,13.5,379" IsEnabled="False" Visibility="Hidden"/>

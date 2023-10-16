@@ -1,5 +1,20 @@
 # Change log for PSDWizardNew
 
+## 2.2.7 Aug 27, 2023
+
+- (PC) - Changed test functions to reflect module for PSDWizard; ensure no conflict
+- (PC) - Added more PSD debug logging; fixed cmdlet entry.
+- (PC) - Updated PSDWizard details page
+- (PC) - Resolved majority of PSScriptAnalyzer checks
+- (PC) - Fixed App list when only one item exists; declared app list as an array; if array not defined, single item has 0 count
+- (PC) - Fixed issue where apps that have not been accessed or set to enabled or not hidden won't show in UI without using * to search for them
+- (PC) - Fixed issue if one app exists the UI does not list it. THis is because a single item in an array is considered count 0. Fixed this by defining array first and adding the single app to list
+- (PC) - Fixed Computer name while processing variable %; it always appended %% to non-variable based computer names.
+
+## 2.2.6 - Aug 20, 2023
+
+- Changed Application count from -GT 1 -GE 1, to show applications when the count is 1
+
 ## 2.2.5 - Oct 8, 2022
 
 - (PC) - Added more descriptive Welcome page response when conditions are checked
@@ -9,17 +24,17 @@
 ## 2.2.4 - Oct 7, 2022
 
 - (PC) - Fixed default locale output if not set in CustomSettings.ini
-- (PC) - Optimized PSDWizard by moving handlers out of page selection; fixed issue with dual WPF selectionChange events 
+- (PC) - Optimized PSDWizard by moving handlers out of page selection; fixed issue with dual WPF selectionChange events
 - (PC) - Fixed Serial number variable for ComputerName; supports RAND, SERIAL, SERIALNUMBER
 - (PC) - Changed debug logs for element change to be more clear
-- (PC) - Fixed Definition xml condition query for psdwizard; change from _or_ to _and_; fixes psdwizard toggle
-- (PC) - Add more synopsis to PSDWizard functions; removing majority of test code. 
+- (PC) - Fixed Definition xml condition query for PSDWizard; change from _or_ to _and_; fixes PSDWizard toggle
+- (PC) - Add more synopsis to PSDWizard functions; removing majority of test code.
 
 ## 2.2.3 - Sept 30, 2022
 
 - (PC) - Removed beta from version; released to public
 - (PC) - Added character check during xml conversion
-- (PC) - Fix logo not showing when using web url
+- (PC) - Fix logo not showing when using web URL
 - (PC) - Filter language based on TS selected
 - (PC) - Check TS for valid OS; added invalid message to wizard
 
@@ -27,7 +42,7 @@
 
 - (PC) - Updated computer name validation to accept 1 character instead of minimum of 5
 - (PC) - Hid features still in testing: OSDAddAdmin, Profile Selection, App bundle selection
-- (PC) - Updated keyboard locale to check for culture value as well as keyboardlayout; ensure all locale are defaulted to english if not found
+- (PC) - Updated keyboard locale to check for culture value as well as keyboard layout; ensure all locale are defaulted to English if not found
 - (PC) - Removed Timezone from UI export; not needed after Windows XP
 - (PC) - Fixed theme control from CS.ini
 
@@ -43,7 +58,7 @@
 - (PC) - Cleaned up PSDWizardNew module's log output; more consistent during debugging
 - (PC) - Added more debugging logs and outputs
 - (PC) - Added Modern theme; can be selected in CustomerSettings.ini now
-- (PC) - Fixed script path for initializer; using older path that does not exist. 
+- (PC) - Fixed script path for initializer; using older path that does not exist.
 - (PC) - Changed Tabular theme to classic; add new Tabular theme and refresh theme
 - (PC) - Fixed paths for language and index xml; path is now using copied location instead of deployroot; breaks http deployments
 - (PC) - Fixed locale conversion to culture and keyboard layout; variables need to be global for it to work in PE
@@ -51,13 +66,13 @@
 
 ## 2.1.9b - Feb 21, 2022
 
-- (PC) - Updates to UI; colored icons to make the page more recognizable; removed start buttons for static ip and cmd.
+- (PC) - Updates to UI; colored icons to make the page more recognizable; removed start buttons for static IP and cmd.
 
 ## 2.1.8b - Feb 20, 2022
 
-- (PC) - Optimized PSDwizard load time; preload variables instead of loping through all variables for comparison 
+- (PC) - Optimized PSDWizard load time; preload variables instead of loping through all variables for comparison
 - (PC) - Added ability to launch PS from start wizard; same as debug window
-- (PC) - Added ability to parse TS value with %deployroot% and %scriptroot%; Updates value with actual paths. 
+- (PC) - Added ability to parse TS value with %deployroot% and %scriptroot%; Updates value with actual paths.
 - (PC) - Added logo control using CustomSettings.ini; add PSDLogoImg and a valid path to display in Wizard
 - (PC) - Added try/catch and checks for null values; Fixed errors and null values with verbose output;
 
@@ -77,7 +92,7 @@
 
 ## 2.1.5b - Feb 10, 2022
 
-- (PC) - Replaced Definition file param with language param for Show-PSDwizard; enforce naming standard while support future languages
+- (PC) - Replaced Definition file parameter with language parameter for Show-PSDWizard; enforce naming standard while support future languages
 - (PC) - Added -AsSynJob to call in PSDstart; if PE is running set this option to false; provides better UI experience
 - (PC) - Added summary page to Wizard and function to output TS variables
 - (PC) - Cleaned UI; aligned lines and buttons and removed window frame with drag ability
@@ -85,7 +100,7 @@
 ## 2.1.4b - Feb 4, 2022
 
 - (PC) - Changed all Functions to \<Verb\>-PSDWizard\<Noun\>
-- (PC) - Changed module name to PSDwizardNew; removed conflict with original PSDWizard
+- (PC) - Changed module name to PSDWizardNew; removed conflict with original PSDWizard
 
 ## 2.1.3b - Feb 14, 2021
 
@@ -123,7 +138,7 @@
 ## 2.0.7b - Dec 07, 2020
 
 - (PC) Added Admin credential page; added functionality to check password
-- (PC) Added TaskSequecne tree Objects to check if item has been selected; enabls next if selected
+- (PC) Added TaskSequence tree Objects to check if item has been selected; enabls next if selected
 - (PC) disable navigation via tabs. only use back and next buttons
 
 ## 2.0.6b - Dec 06, 2020
@@ -162,4 +177,4 @@
 
 ## 2.0.0b - Nov 22, 2020
 
-- (PC) built xaml generate functions - dynamically builds xaml based on definition file and existing pages
+- (PC) built XAML generate functions - dynamically builds XAML based on definition file and existing pages

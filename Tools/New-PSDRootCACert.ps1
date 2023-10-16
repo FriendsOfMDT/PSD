@@ -174,4 +174,6 @@ $CertStore.close()
 # Export the Root certificate for WinPE
 Write-PSDInstallLog -Message "Export Self-signed Certificate"
 Write-PSDInstallLog -Message "Export path: $psDeploymentFolder\PSDResources\Certificates\PSDCert.cer"
-Export-Certificate -Cert $rootCA -FilePath "$psDeploymentFolder\PSDResources\Certificates\PSDCert.cer"
+$null = Export-Certificate -Cert $rootCA -FilePath "$psDeploymentFolder\PSDResources\Certificates\PSDCert.cer"
+
+Write-Verbose -Verbose -Message "The script has completed"

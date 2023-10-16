@@ -2,7 +2,7 @@
 In this document you find generic developer info for further customizing PSD, as well as a reference to the scripts used in the solution.
 
 # Enable Debugging
-By adding the -Debug parameter to the PSDStart.ps1 command line in Templates\LiteTouchPE.xml you get an option to enable debug when starting a deployment. Enabling debug will start transcripts of every scripts, as well as echoing all output to the screen in a separate PowerShell window during imaging.
+By adding PSDDebug=YES to Bootstrap.ini you force PSD to run in debug mode. The old method of specifying the -Debug parameter to the PSDStart.ps1 command line still works, and is useful when doing interactive troubleshooting in WinPE or Windows.
 
 # Logging via Write-PSDLog
 Logging in all PSD modules and scripts is, and should be accomplished via a new **Write-PSDLog** function found in PSDUtility.psm1. For PSD development you should leverage this new function to capture output for logging and or debug purposes. The following syntax should be used or duplicated:

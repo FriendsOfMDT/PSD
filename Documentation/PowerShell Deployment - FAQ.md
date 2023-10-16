@@ -1,5 +1,4 @@
 # Frequent Asked Questions - PowerShell Deployment Extension Kit
-April 2019
 
 This document highlights and captures some of the known issues and limitations of PSD (as of the published date above). 
 
@@ -23,23 +22,8 @@ Q: What are the client/target hardware requirements for baremetal PSD deployment
 Q: Are system clocks synchronized?
   >A: Yes, PSDStart.ps1 will attempt to synchronize the time are deployment target computers. Deployment Roots servers and or the HTTP/S target servers will be NTP synchronized.
 
-Q: Does PSD work with 2Pint's ACP solution?
-  >A: TBD
-
-Q: How does PSD work with 2Pint's ACP solution?
-  >A: lightweight description here. See [link] (http://somedocument.com}
-
-Q: Does PSD work with 1E's Nomad solution?
-  >A: PSD has not been tested in conjunction with 1E's Nomad product (yet)
-
-Q: Does PSD work with Deployment Optimization?
-  >A: TBD
-
-Q: Does PSD work with Branch Cache?
-  >A: TBD
-
-Q: Does PSD work with Peer Cache?
->A: TBD
+Q: Does PSD work with 2Pint's OSD Toolkit?
+  >A: Yes: See the BranchCache installation guide
 
 Q: Why does the PowerShell window appear to flash and then change size?
 >A: The default window is resized by PSDStart by design. You should observe it to change from full screen to roughly one third the screen early in the boot/start process. This is again by design.

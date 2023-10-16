@@ -321,6 +321,12 @@ function invoke-IISConfiguration{
 				#Written Using Script Generator from IIS
 				Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/authentication/windowsAuthentication" -name "enabled" -value "True"
 
+				#Written using ScriptGenerator from IIS
+				Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site" -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "False"
+
+				#Written Using Script Generator from IIS
+				Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site" -filter "system.webServer/security/authentication/windowsAuthentication" -name "enabled" -value "True"
+
 				#Setting WebDav Settings
 				Write-PSDInstallLog -Message "Setting WEBDavSettings"
 				Write-PSDInstallLog -Message "Setting the Authoring rules for Default MimeType"
@@ -399,4 +405,7 @@ process
 	Write-PSDInstallLog -Message "The script has completed running and took $($Duration.Hours) Hours and $($Duration.Minutes) Minutes and $($Duration.Seconds) seconds"
 	#endregion ShutdownChecks
 	############################################
+
+    Write-Verbose -Verbose -Message "The script has completed"
 }
+

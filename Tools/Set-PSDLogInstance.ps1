@@ -171,11 +171,11 @@ Function New-PSDLogWeb {
         $Name
     )
 
-    Add-WindowsFeature BITS-IIS-Ext
+    $null = Add-WindowsFeature BITS-IIS-Ext
 
     [system.reflection.assembly]::loadwithpartialname("System.DirectoryServices.dll")
 
-    New-Item -Path $Path -ItemType Directory -Force
+    $null = New-Item -Path $Path -ItemType Directory -Force
 
     $VirtualDirectory = New-WebVirtualDirectory -Name "$Name" -Site "Default Web Site" -PhysicalPath "$Path"
     $Name = $VirtualDirectory.Name
@@ -223,10 +223,18 @@ process
 	############################################
 	#region ConfigureActions
 
-    New-Item -Path $psLogFolder -ItemType Directory -Force
+    $null = New-Item -Path $psLogFolder -ItemType Directory -Force
 
     Write-PSDInstallLog -Message "Now configuring the IIS for the MDT Logs at $($psLogFolder) with $($PSWebsite)"
-	New-PSDLogWeb -Path $psLogFolder -Name $psVirtualLogDirectory	
+	New-PSDLogWeb -Path $psLogFolder -Name $psVirtualLogDirectory
+
+
+	#Written using ScriptGenerator from IIS
+	Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "False"
+
+	#Written Using Script Generator from IIS
+	Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/authentication/windowsAuthentication" -name "enabled" -value "True"
+
 
 	#endregion ConfigureActions
 	############################################
@@ -238,4 +246,6 @@ process
 	Write-PSDInstallLog -Message "The script has completed running and took $($Duration.Hours) Hours and $($Duration.Minutes) Minutes and $($Duration.Seconds) seconds"
 	#endregion ShutdownChecks
 	############################################
+
+    Write-Verbose -Verbose -Message "The script has completed"
 }

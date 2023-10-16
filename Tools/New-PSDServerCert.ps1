@@ -220,3 +220,5 @@ catch{
 # Write-PSDInstallLog -Message "Export path: $psDeploymentFolder\PSDResources\Certificates\PSDCert.cer"
 # Export-Certificate -Cert $cert -FilePath "$psDeploymentFolder\PSDResources\Certificates\PSDCert.cer" | Out-Null
 $CurrentLocation | Set-Location
+
+Write-Verbose -Verbose -Message "The script has completed"

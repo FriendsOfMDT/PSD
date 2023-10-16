@@ -183,13 +183,20 @@ Write-PSDInstallLog -Message "Starting installation script for $DeploymentToolki
 ## Test-PSDADK
 ##############################################################
 $mdtADK = (Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |  Where-Object {$_.UninstallString -like "*adksetup.exe*"}).DisplayVersion
-$ADKbuild = [int]([string]$mdtADK.Split('.')[2])
-if (($null -eq $mdtADK) -or ($ADKbuild -lt $script:MinADKVersion)) {
+
+if ($null -eq $mdtADK){
     Write-PSDInstallLog -Message "ADK not detected/installed! Aborting." -LogLevel 3 -writetoscreen $true
+    exit
+}
+
+$ADKbuild = [int]([string]$mdtADK.Split('.')[2])
+if ($ADKbuild -lt $script:MinADKVersion) {
+    Write-PSDInstallLog -Message "Installed ADK is older then $($script:MinADKVersion) ,Aborting." -LogLevel 3 -writetoscreen $true
     exit
 } else {
     Write-PSDInstallLog -Message "ADK installed version: $mdtADK" -writetoscreen $true
 }
+
 ##############################################################
 ## Test-PSDADK
 ## End
@@ -250,14 +257,22 @@ if (-not ($Upgrade.IsPresent)){
         exit
     }
     # Create the folder and the smb share
-    Write-PSDInstallLog -Message "Creating deploymentshare in $psDeploymentFolder" -writetoscreen $true
-    New-Item -Path $psDeploymentFolder -ItemType Directory
-    New-SmbShare -Name $psDeploymentShare -Path $psDeploymentFolder -FullAccess Administrators -Description $description
+    Write-PSDInstallLog -Message "Creating deployment share in $psDeploymentFolder" -writetoscreen $true
+    try{
+        $null = New-Item -Path $psDeploymentFolder -ItemType Directory -ErrorAction Stop
+        }
+    catch{
+        Write-PSDInstallLog -Message "Failed to create the deployment share $psDeploymentFolder" -LogLevel 3 -writetoscreen $true
+        Write-Warning -Message "Failed to create the deployment share $psDeploymentFolder"
+        Break
+    }
+  
+    $Null = New-SmbShare -Name $psDeploymentShare -Path $psDeploymentFolder -FullAccess Administrators -Description $description -ErrorAction Stop
     Write-PSDInstallLog -Message "Deployment folder has now been shared as $($psDeploymentshare)" -writetoscreen $true
     # Create the deployment share at the specified path
     $script:PSDDrive = "PSD$(([string]((Get-MDTPersistentDrive | Where-Object Name -Like "PSD*").Count+1)).PadLeft(3,'0'))"
     Write-PSDInstallLog -Message "Create PSdrive using MDTProvider with the name of $($script:PSDDrive)" -LogLevel 1 -writetoscreen $true
-    New-PSDrive -Name "$($script:PSDDrive)" -PSProvider "MDTProvider" -Root $psDeploymentFolder -Description $description -Verbose | Add-MDTPersistentDrive | Out-Null
+    New-PSDrive -Name "$($script:PSDDrive)" -PSProvider "MDTProvider" -Root $psDeploymentFolder -Description $description | Add-MDTPersistentDrive | Out-Null
 
     # Cleanup MDT default files
     $filters =  '*.vbs','*.wsf','DeployWiz*','UDI*','WelcomeWiz_*.xml','Wizard*'
@@ -464,3 +479,6 @@ if (!($Upgrade)) {
     Copy-Item -Path "$PSScriptRoot\INIFiles\CustomSettings.ini" -Destination "$psDeploymentFolder\Control\CustomSettings.ini" -Force | Out-Null
     Copy-Item -Path "$PSScriptRoot\INIFiles\BootStrap.ini" -Destination "$psDeploymentFolder\Control\BootStrap.ini" -Force | Out-Null
 }
+
+
+Write-Verbose -Message "PSD is installed to $psDeploymentShare" -Verbose

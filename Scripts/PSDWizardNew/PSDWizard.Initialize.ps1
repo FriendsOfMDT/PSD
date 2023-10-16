@@ -1,28 +1,33 @@
 <#
 .SYNOPSIS
-    PSDWizard Help File
+    PSDWizard Intializer File
 .DESCRIPTION
-    Help File that manages functionality of PSDWizard
+    Help file that manages functionality of PSDWizard
 .LINK
-
+    PSDWizardNew.psm1
 .NOTES
-        FileName: PSDWizard.Initialize.ps1
-        Solution: PowerShell Deployment for MDT
-        Purpose: Help File that manages functionality of PSDWizard
-        Author: PSD Development Team
-        Contact: @PowershellCrack
-        Primary: @PowershellCrack
-        Created: 2020-01-12
-        Modified: 2022-10-07
-        Version: 2.2.5
+    FileName: PSDWizard.Initialize.ps1
+    Solution: PowerShell Deployment for MDT
+    Purpose: Help File that manages functionality of PSDWizard
+    Author: PSD Development Team
+    Contact: Dick Tracy (@PowershellCrack)
+    Primary: Dick Tracy (@PowershellCrack)
+    Created: 2020-01-12
+    Modified: 2023-08-27
+    Version: 2.2.7
 
-        SEE CHANGELOG.MD
-.Example
+    SEE CHANGELOG.MD
 #>
 
+#region FUNCTION: Check if running in WinPE
+Function Test-PSDWizardInPE{
+    return Test-Path -Path Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlset\Control\MiniNT
+}
+#endregion
 
-#region FUNCTION: Test-IsISE
-Function Test-IsISE {
+
+#region FUNCTION: Test-PSDWizardInISE
+Function Test-PSDWizardInISE {
     <#
     .SYNOPSIS
     Check if running in ISE
@@ -37,8 +42,8 @@ Function Test-IsISE {
 }
 #endregion
 
-#region FUNCTION: Test-VSCode
-Function Test-VSCode {
+#region FUNCTION: Test-PSDWizardInVSC
+Function Test-PSDWizardInVSC {
     <#
     .SYNOPSIS
         Check if running in Visual Studio Code
@@ -58,8 +63,8 @@ Function Get-PSDWizardScriptPath {
     .SYNOPSIS
         Finds the current script path even in ISE or VSC
     .LINK
-        Test-VSCode
-        Test-IsISE
+        Test-PSDWizardInVSC
+        Test-PSDWizardInISE
     #>
     param(
         [switch]$Parent
@@ -69,10 +74,10 @@ Function Get-PSDWizardScriptPath {
     Process {
         Try {
             if ($PSScriptRoot -eq "") {
-                if (Test-IsISE) {
+                if (Test-PSDWizardInISE) {
                     $ScriptPath = $psISE.CurrentFile.FullPath
                 }
-                elseif (Test-VSCode) {
+                elseif (Test-PSDWizardInVSC) {
                     $context = $psEditor.GetEditorContext()
                     $ScriptPath = $context.CurrentFile.Path
                 }
@@ -139,20 +144,20 @@ Function Get-PSDWizardLocale {
     $LocaleData = @()
 
     $FilePath = Join-Path $Path -ChildPath $FileName
-    
+
 
     If (Test-Path $FilePath) {
         if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Grabbing content from [{1}] " -f ${CmdletName}, $FilePath) }
 
         $LocaleData = ([xml](Get-Content $FilePath)).Locales.Locale
-        
+
         Write-PSDLog -Message ("{0}: [{1}] language locales found" -f ${CmdletName}, $LocaleData.count) -loglevel 1
     }
     Else {
         Write-PSDLog -Message ("{0}: Unable to find locale file [{1}] in path [{2}]" -f ${CmdletName}, $FileName, $Path) -LogLevel 3
 
         #populate sample data otherwise
-        $locale = '' | Select ID, Name, Language, Culture, KeyboardID, KeyboardLayout
+        $locale = '' | Select-Object ID, Name, Language, Culture, KeyboardID, KeyboardLayout
         $locale.ID = '0409'
         $locale.Name = 'English (United States)'
         $locale.Language = 'English'
@@ -185,14 +190,14 @@ Function Get-PSDWizardTSData{
         [switch]$Passthru
     )
 
-    $ContentPath = Get-PSDContent -content Control 
+    $ContentPath = Get-PSDContent -content Control
     If($TS -ne 'ID'){
         [xml]$TSdata = Get-Content "$ContentPath\$TS\TS.xml"
         If($DataSet){
             switch($DataSet){
                 'Name' {return $TSdata.sequence.name}
-                'OSGUID' {$OSInstallGroup = ($TSdata.sequence.group.step | Where Type -eq 'BDD_InstallOS').defaultVarList.variable
-                        return ($OSInstallGroup | Where Name -eq 'OSGUID').'#text'
+                'OSGUID' {$OSInstallGroup = ($TSdata.sequence.group.step | Where-Object Type -eq 'BDD_InstallOS').defaultVarList.variable
+                        return ($OSInstallGroup | Where-Object Name -eq 'OSGUID').'#text'
                         }
             }
         }Else{
@@ -211,7 +216,7 @@ Function Get-PSDWizardOSList{
         $ContentPath = '\\192.168.1.10\dep-psd$\control'
         Get-PSDWizardOSList
     #>
-    $ContentPath = Get-PSDContent -content Control 
+    $ContentPath = Get-PSDContent -content Control
     [xml]$OSdata = Get-Content "$ContentPath\OperatingSystems.xml"
     Return $OSdata.oss.os
 }
@@ -248,7 +253,7 @@ Function Get-PSDWizardTimeZoneIndex {
         Write-PSDLog -Message ("{0}: Unable to find index file [{1}] in path [{2}]" -f ${CmdletName}, $FileName, $Path) -LogLevel 3
 
         #populate sample data otherwise
-        $index = '' | Select id, TimeZone, DisplayName, Name, UTC
+        $index = '' | Select-Object id, TimeZone, DisplayName, Name, UTC
         $index.id = 4
         $index.TimeZone = '(GMT-08:00) Pacific Standard Time'
         $index.DisplayName = 'Pacific Standard Time'
@@ -271,7 +276,7 @@ Function ConvertTo-PSDWizardHexaDecimal{
     #>
     Param(
         [Parameter(Mandatory = $false, Position = 0)]
-        [AllowEmptyString()] 
+        [AllowEmptyString()]
         [string]$String = ''
     )
 
@@ -368,15 +373,15 @@ Function Get-PSDWizardTSItem {
         $Results = $TSItem
     }
     Finally {
-        if ($PSDDeBug -eq $true) { 
+        if ($PSDDeBug -eq $true) {
             If($Results.Value){
                 Write-PSDLog -Message ("{0}: Value is [{1}]" -f ${CmdletName}, $Results.Value) -LogLevel 1
             }Else{
                 Write-PSDLog -Message ("{0}: Value is [Null]" -f ${CmdletName}) -LogLevel 1
             }
         }
-            
-        $Results | Select @param
+
+        $Results | Select-Object @param
     }
 }
 #endregion
@@ -389,7 +394,7 @@ Function Get-PSDWizardEnvValue {
     .EXAMPLE
         $TSItem = $test = "" | Select Name,value; $test.name='Locale';$test.Value='en-US'
         $TSItem = $test = "" | Select Name,value; $test.name='PSDWizardLogo';$test.Value='%SCRIPTROOT%\powershell.png'
-        Get-PSDWizardEnvValue $TSItem 
+        Get-PSDWizardEnvValue $TSItem
     #>
     [CmdletBinding()]
     Param(
@@ -401,7 +406,7 @@ Function Get-PSDWizardEnvValue {
 
     If ($TSItem.Value) {
         #breakup the value by %
-        $EnvironmentValues = [Regex]::Matches($TSItem.Value, '(?<=\%).*?(?=\%)') | Select -ExpandProperty Value
+        $EnvironmentValues = [Regex]::Matches($TSItem.Value, '(?<=\%).*?(?=\%)') | Select-Object -ExpandProperty Value
 
         #sometimes mutliple values exist, loop through each
         foreach ($EnvironmentValue in $EnvironmentValues) {
@@ -414,9 +419,9 @@ Function Get-PSDWizardEnvValue {
 
             if ( ($PSDDeBug -eq $true) -and ($null -ne $value) ) { Write-PSDLog -Message ("{0}: Replaced TS value [{1}] with [{2}]" -f ${CmdletName}, $EnvironmentValue, $Value) -LogLevel 1 }
 
-            If ($value) { 
+            If ($value) {
                 #replace %value% with correct variable value
-                $TSItem.Value = $TSItem.Value.replace(('%' + $EnvironmentValue + '%'), $Value) 
+                $TSItem.Value = $TSItem.Value.replace(('%' + $EnvironmentValue + '%'), $Value)
             }
         }#end loop
     }
@@ -448,9 +453,9 @@ Function Set-PSDWizardTSItem {
     )
     ## Get the name of this function
     [string]${CmdletName} = $MyInvocation.MyCommand
-    
+
     If ($PSBoundParameters.ContainsKey('WildCard')) {
-        Get-PSDWizardTSItem $Name -WildCard | % {
+        Get-PSDWizardTSItem $Name -WildCard | ForEach-Object {
              Set-Item -Path TSEnv:$_.Name -Value $Value -Force
              if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Set [{1}] to [{2}]" -f ${CmdletName}, $_.Name, $Value) -LogLevel 1 }
         }
@@ -483,7 +488,7 @@ function Switch-PSDWizardTabItem {
     .EXAMPLE
         Switch-PSDWizardTabItem -TabControlObject $_wizTabControl -name '_wizReady'
     #>
-    
+
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true, Position = 0)]
@@ -510,20 +515,20 @@ function Switch-PSDWizardTabItem {
         }
         #Set new tab index
         $TabControlObject.SelectedIndex = $newtab
-        $TabSelected = $TabControlObject.items | Where IsSelected -eq $true
+        $TabSelected = $TabControlObject.items | Where-Object IsSelected -eq $true
 
         $message = ("Selected tab index [{0}] with name [{1}] and header [{2}]" -f $newtab, $TabSelected.Name, $TabSelected.Header)
     }
-    
+
     If ($PSCmdlet.ParameterSetName -eq "header") {
-        $newtab = $TabControlObject.items | Where Header -eq $header
+        $newtab = $TabControlObject.items | Where-Object-Object Header -eq $header
         $newtab.IsSelected = $true
 
         $message = ("Selected tab header [{0}] with name of [{1}]" -f $newtab.Header, $newtab.Name)
     }
 
     If ($PSCmdlet.ParameterSetName -eq "name") {
-        $newtab = $TabControlObject.items | Where Name -eq $name
+        $newtab = $TabControlObject.items | Where-Object Name -eq $name
         $newtab.IsSelected = $true
 
         $message = ("Selected tab name [{0}] with header of [{1}]" -f , $newtab.Name, $newtab.Header)
@@ -541,7 +546,7 @@ Function Get-PSDWizardElement {
     .EXAMPLE
         Get-PSDWizardElement -Name "appBundles" -wildcard
     .EXAMPLE
-        Get-PSDWizardElement -Name "_wizNext" 
+        Get-PSDWizardElement -Name "_wizNext"
     #>
     [CmdletBinding()]
     param(
@@ -557,19 +562,19 @@ Function Get-PSDWizardElement {
         $Elements = @()
     }
     Process {
-        
+
         If ($Wildcard) {
-            $Elements += ($Global:PSDWizardElements | Where { $_.Name -like "*$Name*" }).Value
+            $Elements += ($Global:PSDWizardElements | Where-Object { $_.Name -like "*$Name*" }).Value
         }
         Else {
-            $Elements += ($Global:PSDWizardElements | Where { $_.Name -eq $Name }).Value
+            $Elements += ($Global:PSDWizardElements | Where-Object { $_.Name -eq $Name }).Value
         }
 
         If ($Elements.count -gt 0) {
             Foreach ($Element in $Elements) {
                 If ($Element) {
                     If ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Found UI object named [{1}]" -f ${CmdletName}, $Element.Name) }
-                } 
+                }
             }
         }
         Else {
@@ -631,7 +636,7 @@ Function Set-PSDWizardElement {
             #loop each field object
             Foreach ($item in $Object) {
                 #grab all the parameters
-                $Parameters = $PSBoundParameters | Select -ExpandProperty Keys
+                $Parameters = $PSBoundParameters | Select-Object -ExpandProperty Keys
                 #Write-Host ('Found parameter: {0}' -f $Parameters)
                 #loop each parameter
                 Foreach ($Parameter in $Parameters) {
@@ -682,7 +687,7 @@ Function Invoke-PSDWizardNotification {
     [CmdletBinding()]
     Param(
         [String]$Message,
-        [ValidateSet('Error', 'Info', 'Hide')]
+        [ValidateSet('Error', 'Info', 'Warning', 'Hide')]
         [String]$Type,
         $HighlightObject,
         $OutputObject,
@@ -704,6 +709,17 @@ Function Invoke-PSDWizardNotification {
         'Info' {
             $CanvasColor = 'LightGreen';
             $Highlight = 'Green';
+            $ReturnValue = $true
+            If ($OutputObject) {
+                $OutputObject.Visibility = "Visible"
+                (Get-Variable ($OutputObject.Name + '_Check') -Value).Visibility = "Visible"
+                (Get-Variable ($OutputObject.Name + '_Alert') -Value).Visibility = "Hidden"
+                (Get-Variable ($OutputObject.Name + '_Name') -Value).Visibility = "Visible"
+            }
+        }
+        'Warning' {
+            $CanvasColor = 'Black';
+            $Highlight = 'Yellow';
             $ReturnValue = $true
             If ($OutputObject) {
                 $OutputObject.Visibility = "Visible"
@@ -833,7 +849,7 @@ Function Get-PSDWizardRandomAlphanumericString {
     }
 
     Process {
-        Write-Output ( -join ((0x30..0x39) + ( 0x41..0x5A) + ( 0x61..0x7A) | Get-Random -Count $length  | % { [char]$_ }) )
+        Write-Output ( -join ((0x30..0x39) + ( 0x41..0x5A) + ( 0x61..0x7A) | Get-Random -Count $length  | ForEach-Object { [char]$_ }) )
     }
 }
 #endregion
@@ -906,7 +922,7 @@ function Set-PSDWizardStringLength {
                 [int]$length = $Str.length
                 #length is not a integer
             }
-        
+
             #$Str[0..($Length-1)] -join ""
             If ($TrimOff -eq 'Left') {
                 [string]$Str.Substring($length + 1)
@@ -922,8 +938,8 @@ function Set-PSDWizardStringLength {
 
 #region FUNCTION: Get-PSDWizardComputerName
 Function Get-PSDWizardComputerName {
-    <# 
-    .SYNOPSIS 
+    <#
+    .SYNOPSIS
         Convert known wariable based comptuer name into a valid TS name
 
     .EXAMPLE
@@ -945,87 +961,99 @@ Function Get-PSDWizardComputerName {
         Get-PSDWizardComputerName "%PREFIX%-%RAND:6%"
         Get-PSDWizardComputerName "%PREFIX%-%SERIAL:7%"
         Get-PSDWizardComputerName "%PREFIX%-%7:SERIAL%"
-        Get-PSDWizardComputerName "%PREFIX%-%SERIALNUMBER%" 
+        Get-PSDWizardComputerName "%PREFIX%-%SERIALNUMBER%"
     #>
     [CmdletBinding()]
     param(
+        [Parameter(Mandatory = $true, Position = 0)]
         $Value
     )
-    #Split Up based on variables
-    $Parts = $Value.Split('%')
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
+    #set new name array
     $NewNameParts = @()
 
-    Foreach ($Part in $Parts) {
-        If ( -Not[string]::IsNullOrEmpty($Part) ) {
-            Switch -regex ($Part) {
-                'SERIAL' {
-                    
-                    #write-host 'Replaced: Serial'
-                    $SerialValue = Get-PSDWizardTSItem 'SerialNumber' -ValueOnly
-                    If ([string]::IsNullOrEmpty($SerialValue) ) {
-                        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Paring Computername portion [{1}]; SERIAL expression has no value" -f ${CmdletName}, $Part, $SerialValue) }
-                        [string]$Part = "NA"
+    If($Value -match '%'){
+
+        #Split Up based on variables
+        $Parts = $Value.Split('%')
+        #TEST $Part = $Parts[0]
+        Foreach ($Part in $Parts) {
+            If ( -Not[string]::IsNullOrEmpty($Part) ) {
+                Switch -regex ($Part) {
+                    'SERIAL' {
+
+                        #write-host 'Replaced: Serial'
+                        $SerialValue = Get-PSDWizardTSItem 'SerialNumber' -ValueOnly
+                        If ([string]::IsNullOrEmpty($SerialValue) ) {
+                            if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Paring Computername portion [{1}]; SERIAL expression has no value" -f ${CmdletName}, $Part, $SerialValue) }
+                            [string]$Part = "NA"
+                        }
+                        Else {
+                            #check if serial is truncated with colon (eg. %SERIAL:6%)
+                            If ($Part -match '(?<=\:).*?(?=\d{1,2})') {
+                                $Length = $Part.split(':')[1]
+                                [string]$SerialValue = $SerialValue | Set-PSDWizardStringLength -Length $Length -TrimOff Right
+                            }
+                            ElseIf ($Part -match '(?<=^\d{1,2}:)') {
+                                $Length = $Part.split(':')[0]
+                                [string]$SerialValue = $SerialValue | Set-PSDWizardStringLength -Length $Length -TrimOff Left
+                            }
+
+                            if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Parsing Computername portion [{1}]; Using SERIAL expression with value [{2}]" -f ${CmdletName}, $Part, $SerialValue) }
+
+                            #replace part with serial number
+                            [string]$Part = $SerialValue
+                        }
                     }
-                    Else {
+
+                    'RAND' {
+                        #write-host 'Replaced: Random'
                         #check if serial is truncated with colon (eg. %SERIAL:6%)
-                        If ($Part -match '(?<=\:).*?(?=\d{1,2})') {
+                        If ($Part -match '(?<=\:).*?(?=\d)') {
                             $Length = $Part.split(':')[1]
-                            [string]$SerialValue = $SerialValue | Set-PSDWizardStringLength -Length $Length -TrimOff Right
+                            [string]$RandValue = Get-PSDWizardRandomAlphanumericString -length $Length
                         }
-                        ElseIf ($Part -match '(?<=^\d{1,2}:)') {
-                            $Length = $Part.split(':')[0]
-                            [string]$SerialValue = $SerialValue | Set-PSDWizardStringLength -Length $Length -TrimOff Left
+                        Else {
+                            [string]$RandValue = Get-PSDWizardRandomAlphanumericString
                         }
-                        
-                        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Paring Computername portion [{1}]; Using SERIAL expression with value [{2}]" -f ${CmdletName}, $Part, $SerialValue) }
+                        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Parsing Computername portion [{1}]; Using RAND expression with value [{2}]" -f ${CmdletName}, $Part, $RandValue) }
 
-                        #replace part with serial number
-                        [string]$Part = $SerialValue
+                        #replace part with random name
+                        $Part = $RandValue
+                    }
+
+                    #if any value is - or a number, ignore
+                    '-|\d+' {}
+
+                    #check any other characters for
+                    default {
+                        #determine if there is a TSenv variabel that matches a part of name
+                        $TSItem = Get-PSDWizardTSItem $Part -ValueOnly
+
+                        If (-Not[string]::IsNullOrEmpty($TSItem) ) {
+                            if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Parsing Computername portion [{1}]; found TaskSequence variable that matches with value of [{2}]" -f ${CmdletName}, $Part, $TSItem) }
+                            [string]$Part = $TSItem
+                        } Else{
+                            [string]$Part = "%$Part%"
+                        }
                     }
                 }
-
-                'RAND' {
-                    #write-host 'Replaced: Random'
-                    #check if serial is truncated with colon (eg. %SERIAL:6%)
-                    If ($Part -match '(?<=\:).*?(?=\d)') {
-                        $Length = $Part.split(':')[1]
-                        [string]$RandValue = Get-PSDWizardRandomAlphanumericString -length $Length
-                    }
-                    Else {
-                        [string]$RandValue = Get-PSDWizardRandomAlphanumericString
-                    }
-                    if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Paring Computername portion [{1}]; Using RAND expression with value [{2}]" -f ${CmdletName}, $Part, $RandValue) }
-                    
-                    #replace part with random name
-                    $Part = $RandValue
-                }
-
-                #if any value is - or a number, ignore
-                '-|\d+' {}
-
-                #check any other characters for 
-                default {
-                    If ($TSItem = Get-PSDWizardTSItem $Part -ValueOnly) {
-                        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Paring Computername portion [{1}]; found TaskSequence variable that matches with value of [{2}]" -f ${CmdletName}, $Part, $TSItem) }
-                        [string]$Part = $TSItem
-                    }
-                    Else {
-                        [string]$Part = "%$Part%"
-                    }
-                }
+                #write-host 'Replaced: Nothing'
+                $NewNameParts += $Part
             }
 
-            #write-host 'Replaced: Nothing'
-            $NewNameParts += $Part
-
         }
-
+    }Else{
+        $NewNameParts += $Value
     }
+
 
     #Build name back together
     $NewName = [string]::Concat($NewNameParts)
     if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: New computername formed from expressions is [{1}]" -f ${CmdletName}, $NewName) }
-    
+
     return $NewName.ToUpper()
 }
 #endregion
@@ -1109,7 +1137,7 @@ Function Confirm-PSDWizardPassword {
     }
 
     if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Validating [{1} = {2}]: {3}" -f ${CmdletName}, $PasswordObject.Name, $ConfirmedPasswordObject.Name, $Validation) }
-    
+
     If ($Passthru) {
         return $Validation
     }
@@ -1124,7 +1152,7 @@ Function ConvertTo-PSDWizardTSVar {
         Converts from a PSobject to a TS variable
     .EXAMPLE
         ConvertTo-PSDWizardTSVar -Object $Global:PSDWizardLocales -InputValue $this.SelectedItem -MappedProperty 'Name' -DefaultValueOnNull $SelectedUILanguage.Name
-    
+
      .EXAMPLE
         $Object=$Global:PSDWizardLocales
         $InputValue=$_locTabLanguage.SelectedItem
@@ -1182,11 +1210,11 @@ Function ConvertTo-PSDWizardTSVar {
     }
     Else {
         If ($SelectedProperty) {
-            $Value = ($ObjectArray | Where { $_.$MappedProperty -eq $InputValue }).$SelectedProperty
+            $Value = ($ObjectArray | Where-Object { $_.$MappedProperty -eq $InputValue }).$SelectedProperty
             if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Queried [{1}] items where ['{2}' = '{3}'] using [{4}] property." -f ${CmdletName}, $ObjectArray.Count, $MappedProperty, $InputValue, $SelectedProperty) }
         }
         Else {
-            $Value = ($ObjectArray | Where { $_.$MappedProperty -eq $InputValue })
+            $Value = ($ObjectArray | Where-Object { $_.$MappedProperty -eq $InputValue })
             if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Queried [{1}] items where ['{2}' = '{3}']" -f ${CmdletName}, $ObjectArray.Count, $MappedProperty, $InputValue) }
         }
     }
@@ -1202,7 +1230,7 @@ Function ConvertTo-PSDWizardTSVar {
     Else {
         Write-PSDLog -Message ("{0}: Unable to map property [{1}] with input of [{2}]" -f ${CmdletName}, $MappedProperty, $InputValue) -LogLevel 2
     }
-    
+
 }
 #endregion
 
@@ -1213,7 +1241,7 @@ Function Get-PSDWizardTSChildItem {
         Retrieve items from deployment share
     .EXAMPLE
         Get-PSDWizardTSChildItem -path "DeploymentShare:\Task Sequences" -Recurse -Passthru
-    
+
     .NOTES
         $AllFiles = Get-ChildItem -Path "DeploymentShare:\Task Sequences" | Where {$_.PSIsContainer -eq $false} | Select * |
             Select ID,Name,Hide,Enable,Comments,GUID,@{Name = 'Path'; Expression = { (($_.PSPath) -split 'Task Sequences\\','')[1] }}
@@ -1255,18 +1283,18 @@ Function Get-PSDWizardTSChildItem {
     if ($PSBoundParameters.ContainsKey('Directory')) {
 
         If ($Passthru) {
-            $Content = Get-ChildItem @Param | Where { $_.PSIsContainer } | Select *
+            $Content = Get-ChildItem @Param | Where-Object { $_.PSIsContainer } | Select-Object *
         }Else {
-            $Content = Get-ChildItem @Param | Where { $_.PSIsContainer } |
-            Select Name, Enable, Comments, GUID, @{Name = 'Path'; Expression = { (($_.PSPath) -split $EscapePath, '')[1] } }
+            $Content = Get-ChildItem @Param | Where-Object { $_.PSIsContainer } |
+                                            Select-Object Name, Enable, Comments, GUID, @{Name = 'Path'; Expression = { (($_.PSPath) -split $EscapePath, '')[1] } }
         }
     }Else {
         #display content. Passthru displays all info
         If ($Passthru) {
-            $Content = Get-ChildItem @Param | Where { $_.PSIsContainer -eq $false } | Select *
+            $Content = Get-ChildItem @Param | Where-Object { $_.PSIsContainer -eq $false } | Select-Object *
         }Else {
-            $Content = Get-ChildItem @Param | Where { $_.PSIsContainer -eq $false } |
-            Select ID, Name, Hide, Enable, Comments, GUID, @{Name = 'Path'; Expression = { (($_.PSPath) -split $EscapePath, '')[1] } }
+            $Content = Get-ChildItem @Param | Where-Object { $_.PSIsContainer -eq $false } |
+                                            Select-Object ID, Name, Hide, Enable, Comments, GUID, @{Name = 'Path'; Expression = { (($_.PSPath) -split $EscapePath, '')[1] } }
         }
     }
 
@@ -1307,7 +1335,7 @@ Function Add-PSDWizardComboList {
         [hashtable]$HashTable,
 
         [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "array")]
-        [array]$List,
+        [array]$Array,
 
         [Parameter(Mandatory = $true, Position = 1)]
         [System.Windows.Controls.ComboBox]$ListObject,
@@ -1320,21 +1348,26 @@ Function Add-PSDWizardComboList {
     ## Get the name of this function
     [string]${CmdletName} = $MyInvocation.MyCommand
 
+    $List = @()
+
     If ($PSCmdlet.ParameterSetName -eq "source") {
-        $List = (Get-PSDWizardTSChildItem -Path $SourcePath -Recurse)
+        $List += (Get-PSDWizardTSChildItem -Path $SourcePath -Recurse)
     }
     If ($PSCmdlet.ParameterSetName -eq "script") {
-        $List = Invoke-command $ScriptBlock
+        $List += Invoke-command $ScriptBlock
     }
     If ($PSCmdlet.ParameterSetName -eq "object") {
-        $List = $InputObject
+        $List += $InputObject
+    }
+    If ($PSCmdlet.ParameterSetName -eq "array") {
+        $List += $Array
     }
 
-    $ListObject.Items.Clear() | Out-Null 
+    $ListObject.Items.Clear() | Out-Null
 
     If ($PSCmdlet.ParameterSetName -eq "hashtable") {
         Try {
-            $List = $HashTable
+            $List += $HashTable
 
             $List.keys | ForEach-Object -ErrorAction Stop {
                 $ListObject.Items.Add($_) | Out-Null
@@ -1346,17 +1379,18 @@ Function Add-PSDWizardComboList {
         foreach ($item in $List) {
             If ($Identifier) {
                 If($item.$Identifier -notin $ListObject.Items){
+                    if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Added to [{2}] dropdown: {1}" -f ${CmdletName},$item.$Identifier,$ListObject.Name) }
                     $ListObject.Items.Add($item.$Identifier) | Out-Null
                 }
             }
             Else {
                 If($item -notin $ListObject.Items){
+                    if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Added to [{2}] dropdown: {1}" -f ${CmdletName},$item,$ListObject.Name) }
                     $ListObject.Items.Add($item) | Out-Null
                 }
             }
         }
     }
-    if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Added [{1}] items to [{2}] list" -f ${CmdletName}, $List.count, $ListObject.Name) }
 
     #select the item
     If ($null -ne $PreSelect) {
@@ -1410,38 +1444,48 @@ Function Add-PSDWizardList {
         [string]$Preselect,
         [switch]$Passthru
     )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
+    $List = @()
 
     If ($null -eq $Identifier) { $Identifier = '' }
 
     If ($PSBoundParameters.ContainsKey('Exclude')) {
-        [scriptblock]$ExcludeItemFilter = { ($_.$Identifier -NotLike "*$Exclude*") -and ($_.hide -eq $false) -and ($_.enable -eq $true)}
+        [scriptblock]$ExcludeItemFilter = { ($_.$Identifier -NotLike "*$Exclude*") -and ($_.hide -ne $true) -and ($_.enable -ne $false)}
     }
     Else {
-        [scriptblock]$ExcludeItemFilter = { ($_.$Identifier -like '*') -and ($_.hide -eq $false) -and ($_.enable -eq $true)}
+        [scriptblock]$ExcludeItemFilter = { ($_.$Identifier -like '*') -and ($_.hide -ne $true) -and ($_.enable -ne $false)}
     }
 
     If ($PSCmdlet.ParameterSetName -eq "source") {
-        $List = (Get-PSDWizardTSChildItem -Path $SourcePath -Recurse) | Where -FilterScript $ExcludeItemFilter
+        $List += (Get-PSDWizardTSChildItem -Path $SourcePath -Recurse) | Where-Object -FilterScript $ExcludeItemFilter
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Found total of [{2}] from source: {1}" -f ${CmdletName},$SourcePath,$List.count) }
     }
     If ($PSCmdlet.ParameterSetName -eq "script") {
-        $List = Invoke-command $ScriptBlock | Where -FilterScript $ExcludeItemFilter
+        $List += Invoke-command $ScriptBlock | Where-Object -FilterScript $ExcludeItemFilter
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Found total of [{2}] from script: {1}" -f ${CmdletName},$ScriptBlock.ToString(),$List.count) }
     }
 
     If ($PSCmdlet.ParameterSetName -eq "object") {
-        $List = $InputObject
+        $List += $InputObject
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Found total of [{1}] from object" -f ${CmdletName},$List.count) }
     }
 
-    $ListObject.Items.Clear() | Out-Null 
+    #clear list first
+    $ListObject.Items.Clear() | Out-Null
 
     foreach ($item in $List ) {
         #Check to see if propertiues exists
         If ($item.PSobject.Properties.Name.Contains($Identifier)) {
             If($item.$Identifier -notin $ListObject.Items){
+                if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Added to [{2}] list: {1}" -f ${CmdletName},$item.$Identifier,$ListObject.Name) }
                 $ListObject.Items.Add($item.$Identifier) | Out-Null
             }
         }
         Else {
             If($item -notin $ListObject.Items){
+                if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Added to [{2}] list: {1}" -f ${CmdletName},$item,$ListObject.Name) }
                 $ListObject.Items.Add($item) | Out-Null
             }
         }
@@ -1478,14 +1522,18 @@ Function Add-PSDWizardSelectionProfile {
         [string]$Filter = 'Deployment',
         [switch]$Passthru
     )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
 
-    $ListObject.Items.Clear() | Out-Null 
+    $ListObject.Items.Clear() | Out-Null
 
-    $List = Get-PSDWizardTSChildItem -Path $SourcePath | Where { $_.Name -like "$Filter*" -and $_.enable -eq $True }
-
+    $List = @() #declare array
+    #grab all profiles
+    $List += Get-PSDWizardTSChildItem -Path $SourcePath | Where-Object {( $_.Name -like "$Filter*") -and ($_.enable -ne $False) }
 
     foreach ($item in $List) {
         $TrimName = ($item.Name).split('-')[1].Trim()
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Added selection profile: {1}" -f ${CmdletName},$TrimName) }
         $ListObject.Items.Add($TrimName) | Out-Null
     }
 
@@ -1514,14 +1562,19 @@ Function Add-PSDWizardBundle {
         [switch]$ClearFirst,
         [switch]$Passthru
     )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
 
     If ($ClearFirst) {
-        $ListObject.Items.Clear() | Out-Null 
+        $ListObject.Items.Clear() | Out-Null
     }
 
-    $List = Get-PSDWizardTSChildItem -Path $SourcePath -Recurse | Where { $_.Name -like "*Bundles*" -and $_.enable -eq $True }
+    $List = @() #declare array
+    #grab all bundles
+    $List += Get-PSDWizardTSChildItem -Path $SourcePath -Recurse | Where-Object { $_.Name -like "*Bundles*" -and $_.enable -ne $False }
 
     foreach ($item in $List) {
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Added to app bundle list: {1}" -f ${CmdletName},$item.Name) }
         $ListObject.Items.Add($item.Name) | Out-Null
     }
 
@@ -1560,12 +1613,16 @@ Function Search-PSDWizardList {
         [string]$Filter,
         [switch]$IncludeAll
     )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
+    $List = @() #declare array
 
     If ($PSCmdlet.ParameterSetName -eq "source") {
-        $List = (Get-PSDWizardTSChildItem -Path $SourcePath -Recurse)
+        $List += (Get-PSDWizardTSChildItem -Path $SourcePath -Recurse)
     }
     If ($PSCmdlet.ParameterSetName -eq "script") {
-        $List = Invoke-command $ScriptBlock
+        $List += Invoke-command $ScriptBlock
     }
 
     If ($PSBoundParameters.ContainsKey('IncludeAll')) {
@@ -1573,13 +1630,16 @@ Function Search-PSDWizardList {
         [scriptblock]$IncludeItemFilter = { $_.Name -Like "*" }
     }
     Else {
-        [scriptblock]$IncludeFolderFilter = { $_.enable -eq $True }
-        [scriptblock]$IncludeItemFilter = { ($_.enable -eq $True) -and ( ($_.hide -eq $False) -or ([string]::IsNullOrEmpty($_.hide)) ) }
+        [scriptblock]$IncludeFolderFilter = { $_.enable -ne $False }
+        [scriptblock]$IncludeItemFilter = { ($_.enable -ne $False) -and ($_.hide -ne $True) }
     }
 
-    $ListObject.Items.Clear() | Out-Null 
+    $ListObject.Items.Clear() | Out-Null
 
     foreach ($item in ($List | Where-Object -FilterScript $IncludeItemFilter | Where-Object { $_.$Identifier -like "*$Filter*" })) {
+
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Added to search list: {1}" -f ${CmdletName},$item.Name) }
+
         #only include what items exist in either in the folders collected initially or root locations
         $ListObject.Tag = @($item.Name, $item.Path, $item.Guid)
         $ListObject.Items.Add($item.$Identifier) | Out-Null
@@ -1592,12 +1652,24 @@ Function Test-PSDWizardApplicationExist {
     <#
     .SYNOPSIS
         Checks to see if there are applications present
+    .LINK
+        Get-PSDWizardTSChildItem
     #>
-    $apps = Get-PSDWizardTSChildItem -Path "DeploymentShare:\Applications" -Recurse
-    If ($apps.count -ge 1){
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
+    #define an array first
+    #fixed issue where a single app will be returned as a string with a count of 0
+    $applist = @()
+
+    #build list of all enabled apps
+    $appList += Get-PSDWizardTSChildItem -Path "DeploymentShare:\Applications" -Recurse | Where-Object { ($_.enable -ne $False) -and ($_.hide -ne $True) }
+
+    If ($appList.count -gt 0) {
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Found {1} applications" -f ${CmdletName},$appList.count) }
         return $true
-    }
-    Else{
+    } Else {
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Found 0 applications" -f ${CmdletName}) }
         return $false
     }
 }
@@ -1636,16 +1708,16 @@ Function Add-PSDWizardTree {
     }
     Else {
         [int32]$ShowAll = 0
-        [scriptblock]$IncludeFolderFilter = { $_.enable -eq $True }
-        [scriptblock]$IncludeItemFilter = { ($_.enable -eq $True) -and ( ($_.hide -eq $False) -or ([string]::IsNullOrEmpty($_.hide)) ) }
+        [scriptblock]$IncludeFolderFilter = { $_.enable -ne $False }
+        [scriptblock]$IncludeItemFilter = { ($_.enable -ne $False) -and ($_.hide -ne $True) }
     }
     #Write-host ("Including all root items? {0} using filter: [{1}]" -f $ShowAll,$IncludeItemFilter.ToString())
 
-    $TreeObject.Items.Clear() | Out-Null 
+    $TreeObject.Items.Clear() | Out-Null
     $dummyNode = $null
     # ================== Handle FIRST LEVEL Folders ===========================
     # TEST: foreach ($folder in (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences" -Directory | Where -FilterScript $IncludeFilter)){$folder}
-    foreach ($folder in (Get-PSDWizardTSChildItem -Path $SourcePath -Directory | Where -FilterScript $IncludeFolderFilter)) {
+    foreach ($folder in (Get-PSDWizardTSChildItem -Path $SourcePath -Directory | Where-Object -FilterScript $IncludeFolderFilter)) {
 
         $treeViewFolder = [Windows.Controls.TreeViewItem]::new()
         $treeViewFolder.Header = $folder.Name
@@ -1665,7 +1737,7 @@ Function Add-PSDWizardTree {
 
     # ================== Handle FIRST LEVEL Files ===========================
     # TEST: foreach ($item in (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences" | Where -FilterScript $IncludeItemFilter)){$item}
-    foreach ($item in (Get-PSDWizardTSChildItem -Path $SourcePath | Where -FilterScript $IncludeItemFilter)) {
+    foreach ($item in (Get-PSDWizardTSChildItem -Path $SourcePath | Where-Object -FilterScript $IncludeItemFilter)) {
         #write-host ("Found item --> id:{0},Name:{1},enable:{2},hide:{3}" -f $item.id,$item.Name,$item.enable,$item.hide)
         $treeViewItem = [Windows.Controls.TreeViewItem]::new()
         $treeViewItem.Header = $item.Name
@@ -1697,8 +1769,8 @@ Function Add-PSDWizardTree {
     }
     If ($null -ne $PreSelect) {
         #Select item from tree
-        $SelectedTreeItem = $TreeObject.Items | Where {$_.Tag[2] -eq $PreSelect}
-        $ItemSelected = $TreeObject.ItemContainerGenerator.ContainerFromItem($SelectedTreeItem) 
+        $SelectedTreeItem = $TreeObject.Items | Where-Object {$_.Tag[2] -eq $PreSelect}
+        $ItemSelected = $TreeObject.ItemContainerGenerator.ContainerFromItem($SelectedTreeItem)
         if ($null -ne $ItemSelected){
             $ItemSelected.IsSelected = $true
             if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Preselected item [{1}] for [{2}]" -f ${CmdletName}, $PreSelect, $SelectedTreeItem.Header) }
@@ -1727,7 +1799,7 @@ Function Expand-PSDWizardTree {
         foreach ($item in (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences\Workstations" | Where -FilterScript $IncludeItemFilter)){$item}
         foreach ($folder in (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences\Servers" -Directory | Where -FilterScript $IncludeItemFilter )){$folder}
 
-        (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences\VRA\Server" | Where {[string]::IsNullOrEmpty($_.hide) -or ($_.hide -eq $False)})
+        (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences\VRA\Server" | Where {[string]::IsNullOrEmpty($_.hide) -or ($_.hide -ne $True)})
         [Boolean]::Parse((Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences\Servers" | Select -First 1 | Select -ExpandProperty Hide)) -eq 'True'
     .LINK
         Get-PSDWizardTSChildItem
@@ -1754,8 +1826,8 @@ Function Expand-PSDWizardTree {
     }
     Else {
         [int32]$ShowAll = 0
-        [scriptblock]$IncludeFolderFilter = { $_.enable -eq $True }
-        [scriptblock]$IncludeItemFilter = { ($_.enable -eq $True) -and ( ($_.hide -eq $False) -or ([string]::IsNullOrEmpty($_.hide)) ) }
+        [scriptblock]$IncludeFolderFilter = { $_.enable -ne $False }
+        [scriptblock]$IncludeItemFilter = { ($_.enable -ne $False) -and ($_.hide -ne $True) }
     }
 
     #Write-host ("Including all items: {0}; Filter {1}" -f $ShowAll,$IncludeItemFilter.ToString())
@@ -1764,7 +1836,7 @@ Function Expand-PSDWizardTree {
         $TreeItem.Clear() | Out-Null
         Try {
             #drill into subfolders. $TreeItem.Tag[0] comes from Tag in Root folders
-            foreach ($folder in ( Get-PSDWizardTSChildItem -Path ($SourcePath + '\' + $TreeItem.Tag[0].ToString()) -Directory | Where -FilterScript $IncludeFolderFilter) ) {
+            foreach ($folder in ( Get-PSDWizardTSChildItem -Path ($SourcePath + '\' + $TreeItem.Tag[0].ToString()) -Directory | Where-Object -FilterScript $IncludeFolderFilter) ) {
                 $subFolder = [Windows.Controls.TreeViewItem]::new();
                 $subFolder.Header = $folder.Name
                 $subFolder.Tag = @($folder.Path, $SourcePath, $Identifier, $ShowAll)
@@ -1783,7 +1855,7 @@ Function Expand-PSDWizardTree {
             }
 
             #get all files
-            foreach ($item in (Get-PSDWizardTSChildItem -Path ($SourcePath + '\' + $TreeItem.Tag[0].ToString()) | Where -FilterScript $IncludeItemFilter) ) {
+            foreach ($item in (Get-PSDWizardTSChildItem -Path ($SourcePath + '\' + $TreeItem.Tag[0].ToString()) | Where-Object -FilterScript $IncludeItemFilter) ) {
                 #write-host ("Found item --> id:{0},Name:{1},enable:{2},hide:{3}" -f $item.id,$item.Name,$item.enable,$item.hide)
                 $subitem = [Windows.Controls.TreeViewItem]::new()
                 $subitem.Header = $item.Name
@@ -1816,11 +1888,11 @@ Function Expand-PSDWizardTree {
 
 #region FUNCTION: Search-PSDWizardTree
 Function Search-PSDWizardTree {
-    <# 
+    <#
     .SYNOPSIS
         Search the tree view
     .EXAMPLE
-        $Filter='Server'    
+        $Filter='Server'
         Search-PSDWizardTree -SourcePath "DeploymentShare:\Task Sequences" -TreeObject $_tsTabTree -Identifier 'ID' -Filter $Filter
     .EXAMPLE
         $SourcePath="DeploymentShare:\Task Sequences"
@@ -1828,11 +1900,11 @@ Function Search-PSDWizardTree {
         $Identifier='ID'
         $Filter='Windows'
         Search-PSDWizardTree -SourcePath $SourcePath -TreeObject $TreeObject -Identifier $Identifier -Filter $Filter
-    
+
     .NOTES
-        foreach ($item in (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences" -Recurse | Where-Object { (Split-Path $_.Path -Parent) -in $FolderCollection} | 
+        foreach ($item in (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences" -Recurse | Where-Object { (Split-Path $_.Path -Parent) -in $FolderCollection} |
                 Where -FilterScript $IncludeItemFilter | Where-Object { $_.Name -like "*Server*" })){$item}
-        foreach ($item in (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences" -Recurse | Where-Object { (Split-Path $_.Path -Parent) -in $FolderCollection} | 
+        foreach ($item in (Get-PSDWizardTSChildItem -Path "DeploymentShare:\Task Sequences" -Recurse | Where-Object { (Split-Path $_.Path -Parent) -in $FolderCollection} |
                 Where -FilterScript $IncludeItemFilter | Where-Object { $_.Name -like "*Windows*" })){$item}
     .LINK
         Get-PSDWizardTSChildItem
@@ -1857,15 +1929,15 @@ Function Search-PSDWizardTree {
         [scriptblock]$IncludeItemFilter = { $_.Name -Like "*" }
     }
     Else {
-        [scriptblock]$IncludeFolderFilter = { $_.enable -eq $True }
-        [scriptblock]$IncludeItemFilter = { ($_.enable -eq $True) -and ( ($_.hide -eq $False) -or ([string]::IsNullOrEmpty($_.hide)) ) }
+        [scriptblock]$IncludeFolderFilter = { $_.enable -ne $False }
+        [scriptblock]$IncludeItemFilter = { ($_.enable -ne $False) -and ($_.hide -ne $True) }
     }
 
-    $TreeObject.Items.Clear() | Out-Null 
+    $TreeObject.Items.Clear() | Out-Null
 
     # Grab all folders
     $FolderCollection = @()
-    foreach ($folder in ( Get-PSDWizardTSChildItem -Path $SourcePath -Recurse -Directory | Where -FilterScript $IncludeFolderFilter) ) {
+    foreach ($folder in ( Get-PSDWizardTSChildItem -Path $SourcePath -Recurse -Directory | Where-Object -FilterScript $IncludeFolderFilter) ) {
         #collect all folders based on filter into an array
         If ($folder.Path -notin $FolderCollection) { $FolderCollection += $folder.Path }
     }
@@ -1902,6 +1974,89 @@ Function Search-PSDWizardTree {
 }
 #endregion
 
+#region FUNCTION: Test-PSDWizardTaskSequence
+Function Test-PSDWizardTaskSequence {
+    <#
+    .SYNOPSIS
+        Checks if the task sequence is valid
+    .LINK
+        Get-PSDWizardTSData
+        Write-PSDLog
+        Get-PSDWizardElement
+        Set-PSDWizardElement
+    #>
+    Param(
+        [parameter(Mandatory = $true)]
+        $UIObject,
+        [string]$TaskSequenceID,
+        [switch]$ShowValidation
+
+    )
+    ## Get the name of this function
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
+    If($null -ne $TaskSequenceID){
+
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Selected task sequence: {1}" -f ${CmdletName}, $TaskSequenceID) }
+
+        $TSAssignedOSGUID = Get-PSDWizardTSData -TS $TaskSequenceID -DataSet OSGUID
+        #validate OS GUID exists in OS list
+        #If ($TaskSequenceID -in $Global:TaskSequencesList.ID) {
+        If([string]::IsNullOrEmpty($TSAssignedOSGUID))
+        {
+            Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$False
+            If($ShowValidation){Invoke-PSDWizardNotification -Message ('Invalid TS: No OS found!') -OutputObject $_tsTabValidation -Type Error}
+
+        }Else{
+            If($TSAssignedOSGUID -in $Global:OperatingSystemList.Guid)
+            {
+                If($ShowValidation){Invoke-PSDWizardNotification -OutputObject $_tsTabValidation -Type Hide}
+                #find the language name in full langauge object list
+                $Global:OSSupportedLanguages = @(($Global:OperatingSystemList | Where-Object Guid -eq $TSAssignedOSGUID).Language)
+                #Get only available locales settings from Select OS
+                $Global:LanguageList = $Global:PSDWizardLocales | Where-Object {$_.Culture -in $Global:OSSupportedLanguages}
+                #set button to enable
+                Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$True
+            }
+            ElseIf($TaskSequenceID -eq 'ID'){
+                Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$False
+                #If($ShowValidation){Invoke-PSDWizardNotification -Message 'Folder Selected!' -OutputObject $_tsTabValidation -Type Error}
+            }
+            Else {
+                Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$False
+                If($ShowValidation){Invoke-PSDWizardNotification -Message ('Invalid TS: OS guid not found: {0}!' -f $TSAssignedOSGUID) -OutputObject $_tsTabValidation -Type Error}
+            }
+        }
+
+        If($TSAssignedOSGUID -in $Global:OperatingSystemList.Guid)
+        {
+            If($ShowValidation){Invoke-PSDWizardNotification -OutputObject $_tsTabValidation -Type Hide}
+            #find the language name in full langauge object list
+            $Global:OSSupportedLanguages = @(($Global:OperatingSystemList | Where-Object Guid -eq $TSAssignedOSGUID).Language)
+            #Get only available locales settings from Select OS
+            $Global:LanguageList = $Global:PSDWizardLocales | Where-Object {$_.Culture -in $Global:OSSupportedLanguages}
+            #set button to enable
+            Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$True
+        }
+        ElseIf($TaskSequenceID -eq 'ID'){
+            Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$False
+            #If($ShowValidation){Invoke-PSDWizardNotification -Message 'Folder Selected!' -OutputObject $_tsTabValidation -Type Error}
+        }
+        Else {
+            Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$False
+            If($ShowValidation){Invoke-PSDWizardNotification -Message ('Invalid TS: OS guid not found: {0}!' -f $TSAssignedOSGUID) -OutputObject $_tsTabValidation -Type Error}
+        }
+        
+    }Else{
+        Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$False
+        If($ShowValidation){Invoke-PSDWizardNotification -Message 'No selected task sequence!' -OutputObject $_tsTabValidation -Type Warning}
+        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: No task sequence was selected" -f ${CmdletName}) }
+    }
+
+
+}
+#endregion
+
 #region FUNCTION: Get-PSDWizardSelectedApplications
 Function Get-PSDWizardSelectedApplications {
      <#
@@ -1934,15 +2089,15 @@ Function Get-PSDWizardSelectedApplications {
     #Add index property to app list
     $AllApps = Get-PSDWizardTSChildItem -Path "DeploymentShare:\Applications" -Recurse
 
-    $DefaultAppList = $InputObject | Where { ($_.Name -notlike 'Skip*') -and ($_.Name -notlike '*Codes') -and -not([string]::IsNullOrEmpty($_.Value)) }
-    $AppGuids = $DefaultAppList.Value | select -Unique
+    $DefaultAppList = $InputObject | Where-Object { ($_.Name -notlike 'Skip*') -and ($_.Name -notlike '*Codes') -and -not([string]::IsNullOrEmpty($_.Value)) }
+    $AppGuids = $DefaultAppList.Value | Select-Object -Unique
 
     #Set an emptry valus if not specified
     If ($null -eq $Identifier) { $Identifier = '' }
 
     $SelectedGuids = @()
     Foreach ($AppGuid in $AppGuids) {
-        $AppInfo = $AllApps | Where { $_.Guid -eq $AppGuid }
+        $AppInfo = $AllApps | Where-Object { $_.Guid -eq $AppGuid }
         #collect GUIDs (for Passthru output)
         $SelectedGuids += $AppGuid
 
@@ -1988,11 +2143,13 @@ Function Set-PSDWizardSelectedApplications {
     ## Get the name of this function
     [string]${CmdletName} = $MyInvocation.MyCommand
 
-    $AllApps = Get-PSDWizardTSChildItem -Path "DeploymentShare:\Applications" -Recurse
+    $AllApps = @()
+    $AllApps += Get-PSDWizardTSChildItem -Path "DeploymentShare:\Applications" -Recurse
+
     $SelectedApps = $FieldObject.SelectedItems
 
     #Get current applist
-    $CurrentAppList = $InputObject | Where { ($_.Name -notlike 'Skip*') -and ($_.Name -notlike '*Codes') -and -not([string]::IsNullOrEmpty($_.Value)) }
+    $CurrentAppList = $InputObject | Where-Object { ($_.Name -notlike 'Skip*') -and ($_.Name -notlike '*Codes') -and -not([string]::IsNullOrEmpty($_.Value)) }
     #TODO: remove apps from list and rebuild
 
     $i = 1
@@ -2000,7 +2157,7 @@ Function Set-PSDWizardSelectedApplications {
     Foreach ($App in $SelectedApps) {
         [string]$NumPad = "{0:d3}" -f [int]$i
 
-        $AppInfo = $AllApps | Where { $_.Name -eq $App }
+        $AppInfo = $AllApps | Where-Object { $_.Name -eq $App }
         #collect GUIDs (for Passthru output)
         $SelectedGuids += $AppInfo.Guid
 
@@ -2074,6 +2231,7 @@ Function Get-PSDWizardConsole {
     #>
     ## Get the name of this function
     [string]${CmdletName} = $MyInvocation.MyCommand
+
     Try {
         #Console control
         # Credits to - http://powershell.cz/2013/04/04/hide-and-show-console-window-from-gui/
@@ -2104,6 +2262,7 @@ function Show-PSDWizardConsole {
     #>
     ## Get the name of this function
     [string]${CmdletName} = $MyInvocation.MyCommand
+
     Try {
         $consolePtr = Get-PSDWizardConsole
         [Console.Window]::ShowWindow($consolePtr, 5)
@@ -2124,6 +2283,7 @@ function Hide-PSDWizardConsole {
     #>
     ## Get the name of this function
     [string]${CmdletName} = $MyInvocation.MyCommand
+
     Try {
         $consolePtr = Get-PSDWizardConsole
         [Console.Window]::ShowWindow($consolePtr, 0)
