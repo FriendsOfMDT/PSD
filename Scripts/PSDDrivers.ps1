@@ -143,51 +143,61 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Getting driver(s)..."
 $Zips = Get-ChildItem -Path "$($tsenv:OSVolume):\MININT\Cache\PSDResources\DriverPackages" -Filter *.zip -Recurse
 $WIMs = Get-ChildItem -Path "$($tsenv:OSVolume):\MININT\Cache\PSDResources\DriverPackages" -Filter *.wim -Recurse
 
-# Did we find any ZIP Files?
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($Zips.count) ZIP package(s)"
-Show-PSDActionProgress -Message "Found $($Zips.count) package(s)" -Step "1" -MaxStep "1"
-Foreach($Zip in $Zips){
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unpacking $($Zip.FullName)"
-    #Need to use this method, since the assemblys can not be loaded due to an issue...
-    if($PSDDebug -eq $true){
-        $ArgumentList = "Expand-Archive -Path $($Zip.FullName) -DestinationPath $($tsenv:OSVolume):\Drivers -Force -Verbose"
-    }
-    else{
-        $ArgumentList = "Expand-Archive -Path $($Zip.FullName) -DestinationPath $($tsenv:OSVolume):\Drivers -Force"
+# Check if ZIP or WIM files exist, no need to run foreach if x doesnt exist.
+if ($Zips -or $WIMs) {
+    # Process ZIP files
+    if ($Zips) {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($Zips.count) ZIP package(s)"
+        Show-PSDActionProgress -Message "Found $($Zips.count) package(s)" -Step "1" -MaxStep "1"
+        Foreach($Zip in $Zips){
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unpacking $($Zip.FullName)"
+            Show-PSDActionProgress -Message "Unpacking $($Zip.Name)" -Step "1" -MaxStep "1"
+            #Need to use this method, since the assemblys can not be loaded due to an issue...
+            if($PSDDebug -eq $true){
+                $ArgumentList = "Expand-Archive -Path $($Zip.FullName) -DestinationPath $($tsenv:OSVolume):\Drivers -Force -Verbose"
+            }
+            else{
+                $ArgumentList = "Expand-Archive -Path $($Zip.FullName) -DestinationPath $($tsenv:OSVolume):\Drivers -Force"
+            }
+
+            $Process = "PowerShell"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering ZIP file section"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to run: $Process $ArgumentList"
+            Start-Process $Process -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
+        }
     }
 
-    $Process = "PowerShell"
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering ZIP file section"
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to run: $Process $ArgumentList"
-    Start-Process $Process -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
+    # Process WIM files
+    if ($WIMs) {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($WIMs.count) WIM package(s)"
+        Show-PSDActionProgress -Message "Found $($WIMs.count) package(s)" -Step "1" -MaxStep "1"
+        Foreach($WIM in $WIMs){
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unpacking $($WIM.FullName)"
+            Show-PSDActionProgress -Message "Unpacking $($WIM.Name)" -Step "1" -MaxStep "1"
+            # Expanding WIM files for now, since we may have multiple WIM files
+            if($PSDDebug -eq $true){
+                $ArgumentList = "Expand-WindowsImage -ImagePath $($WIM.FullName) -ApplyPath $($tsenv:OSVolume):\Drivers -Index 1 -Verbose"
+            }
+            else{
+                $ArgumentList = "Expand-WindowsImage -ImagePath $($WIM.FullName) -ApplyPath $($tsenv:OSVolume):\Drivers -Index 1"
+            }
+        
+            $Process = "PowerShell"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering WIM file section"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to run: $Process $ArgumentList"
+            Start-Process $Process -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
+        }
+    }
+} else {
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No ZIP or WIM packages found"
 }
-
-# Did we find any WIM Files?
-Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($WIMs.count) WIM package(s)"
-Show-PSDActionProgress -Message "Found $($WIMs.count) package(s)" -Step "1" -MaxStep "1"
-Foreach($WIM in $WIMs){
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unpacking $($WIM.FullName)"
-    # Expanding WIM files for now, since we may have multiple WIM files
-    if($PSDDebug -eq $true){
-        $ArgumentList = "Expand-WindowsImage -ImagePath $($WIM.FullName) -ApplyPath $($tsenv:OSVolume):\Drivers -Index 1 -Verbose"
-    }
-    else{
-        $ArgumentList = "Expand-WindowsImage -ImagePath $($WIM.FullName) -ApplyPath $($tsenv:OSVolume):\Drivers -Index 1"
-    }
-
-    $Process = "PowerShell"
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering WIM file section"
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to run: $Process $ArgumentList"
-    Start-Process $Process -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
-}
-
-Start-Sleep -Seconds 1
 
 # What do we have here
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Get list of drivers from \Drivers"
 $Drivers = Get-ChildItem -Path "$($tsenv:OSVolume):\Drivers" -Filter *.inf -Recurse
 foreach($Driver in $Drivers){
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): $($Driver.Name) is now in the \Drivers folder"
+    Show-PSDActionProgress -Message "$($Driver.Name) is now in Drivers folder" -Step "1" -MaxStep "1"
     $PSDDriverInfo = Get-PSDDriverInfo -Path $Driver.FullName
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Driverinfo: Name:$($PSDDriverInfo.Name)  Vendor:$($PSDDriverInfo.Manufacturer)  Class:$($PSDDriverInfo.Class)  Date:$($PSDDriverInfo.Date)  Version:$($PSDDriverInfo.Version)"
 }
