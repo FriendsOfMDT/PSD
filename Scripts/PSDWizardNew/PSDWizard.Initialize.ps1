@@ -1833,7 +1833,7 @@ Function Expand-PSDWizardTree {
     #Write-host ("Including all items: {0}; Filter {1}" -f $ShowAll,$IncludeItemFilter.ToString())
     $dummyNode = $null
     If ($TreeItem.Items.Count -eq 1 -and $TreeItem.Items[0] -eq $dummyNode) {
-        $TreeItem.Clear() | Out-Null
+        $TreeItem.Items.Clear() | Out-Null
         Try {
             #drill into subfolders. $TreeItem.Tag[0] comes from Tag in Root folders
             foreach ($folder in ( Get-PSDWizardTSChildItem -Path ($SourcePath + '\' + $TreeItem.Tag[0].ToString()) -Directory | Where-Object -FilterScript $IncludeFolderFilter) ) {
