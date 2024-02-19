@@ -1,4 +1,7 @@
 # README - PowerShell Deployment Extension Kit
+Feb 2024 (ver 0.2.2.9)
+- Changed ModelAlis for WMware, all VMware models are no defined as "VMware"
+
 Sept 2022 (ver 0.2.2.8)
 
 - New Wizard (enabled via PSDWizard and PSDWizardTheme variables)

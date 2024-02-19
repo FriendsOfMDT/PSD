@@ -72,7 +72,7 @@ if($tsenv:drivergroup001 -ne ""){
 
 # Building source and destination paths based on model DriverPath
 $BaseDriverPath = "PSDResources\DriverPackages"
-$SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverPath).Replace("\","-")).replace(" ","_")
+$SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverPath).Replace("\","-")).Replace(" ","_")
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property DriverPath is $($tsenv:DriverPath)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property GenericDriverPath is $($tsenv:GenericDriverPath)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property FallbackDriverPath is $($tsenv:FallbackDriverPath)"
