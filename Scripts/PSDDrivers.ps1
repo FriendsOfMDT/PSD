@@ -21,6 +21,7 @@
           Version - 0.0.1 - () - Changed BaseDriverPath = "PSDResources\DriverPackages", to "fit" the new folder structure
           Version - 0.0.2 - () - Testing if there is a driver package to download.
           Version - 0.0.3 - () - Added support for DriverPath, GenericDriverPath, FallBackDriverPath
+          Version - 0.0.4 - () - Added support for importing VMware drivers that contains "," in the folder name
 
           TODO:
           - Verify that it works with new package format
@@ -72,7 +73,8 @@ if($tsenv:drivergroup001 -ne ""){
 
 # Building source and destination paths based on model DriverPath
 $BaseDriverPath = "PSDResources\DriverPackages"
-$SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverPath).Replace("\","-")).Replace(" ","_")
+#$SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverPath).Replace("\","-")).Replace(" ","_")
+$SourceDriverPackagePath = ($BaseDriverPath + "\" + ($tsenv:DriverPath).Replace("\","-").Replace(" ","_").Replace(",","_"))
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property DriverPath is $($tsenv:DriverPath)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property GenericDriverPath is $($tsenv:GenericDriverPath)"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property FallbackDriverPath is $($tsenv:FallbackDriverPath)"
