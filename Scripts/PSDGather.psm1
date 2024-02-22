@@ -23,6 +23,7 @@
 		  Version - 0.0.5 - (PC) - Output from PSDLocalInfo, minor change
 		  Version - 0.0.6 - (PC) - Removed loging to show "TODO", no point in showing things that does not work yet
 		  Version - 0.0.7 - (MN) - Added rule to VMware modelalias section, all VMware modelalias will now be "WMware"
+		  Version - 0.0.8 - (MN) - Added rule to VMware modelalias section, replacing the "," with "_", replace " " with "_"
 
           TODO:
 
@@ -276,8 +277,9 @@ Function Get-PSDLocalInfo {
 			"*VMWare*" {
 				$LocalInfo['MakeAlias'] = "VMWare"
                 # $LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim() # Default, sets alias to same as model
-                # $LocalInfo['ModelAlias'] = ((Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()).replace(",","") # Remove the "," and replace with ""
-                $LocalInfo['ModelAlias'] = "VMWare" # Sets all models to VMware
+                # $LocalInfo['ModelAlias'] = ((Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()).replace(",","_") # Remove the "," and replace with "_"
+                $LocalInfo['ModelAlias'] = ((Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()).replace(" ","_").replace(",","_") # Remove the "," and replace with "_", Remove the " " and replace with "_"
+
 				$LocalInfo['SystemAlias'] = Get-WmiObject -Namespace "root\wmi" -Class "MS_SystemInformation" | Select-Object -ExpandProperty SystemSKU
 				$LocalInfo['IsVM'] = "True"
 			}
