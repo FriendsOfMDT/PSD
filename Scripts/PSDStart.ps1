@@ -185,7 +185,7 @@ if($BootfromWinPE -eq $true){
     # We need more than 1.5 GB (Testing for at least 1499MB of RAM)
     Write-PSDBootInfo -SleepSec 2 -Message "Checking that we have at least 1.5 GB of RAM"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking that we have at least 1.5 GB of RAM"
-    if ((Get-WmiObject -Class Win32_computersystem).TotalPhysicalMemory -le 1499MB){
+    if ((Get-CimInstance -ClassName Win32_computersystem).TotalPhysicalMemory -le 1499MB){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Not enough memory to run PSD, aborting..."
         Show-PSDInfo -Message "Not enough memory to run PSD, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
         Start-Process PowerShell -Wait
@@ -453,7 +453,7 @@ else{
             $ipListv4 = @()
             $macList = @()
             $gwList = @()
-            Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1" | % {
+            Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1" | % {
                 $_.IPAddress | % {$ipList += $_ }
                 $_.MacAddress | % {$macList += $_ }
                 if ($_.DefaultIPGateway) {
@@ -466,7 +466,7 @@ else{
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found IP address $IPv4"
             }
 
-            if (((Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1").Index).count -ge 1){
+            if (((Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1").Index).count -ge 1){
                 $NICIPOK = $True
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): We have at least one network adapter with an IP address, continuing..."
             }

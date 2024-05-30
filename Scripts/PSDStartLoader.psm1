@@ -84,13 +84,13 @@ Function Get-PlatformInfo {
     [OutputType([PsObject])]
     Param()
     try{
-        $CIMSystemEncloure = Get-CIMInstance Win32_SystemEnclosure -ErrorAction Stop
-        $CIMComputerSystem = Get-CIMInstance CIM_ComputerSystem -ErrorAction Stop
-        $CIMBios = Get-CIMInstance Win32_BIOS -ErrorAction Stop
+        $CIMSystemEncloure = Get-CimInstance -ClassName Win32_SystemEnclosure -ErrorAction Stop
+        $CIMComputerSystem = Get-CimInstance -ClassName CIM_ComputerSystem -ErrorAction Stop
+        $CIMBios = Get-CimInstance -ClassName Win32_BIOS -ErrorAction Stop
 
         $ChassisType = ConvertTo-ChassisType -ChassisId $CIMSystemEncloure.chassistypes
 
-        [boolean]$Is64Bit = [boolean]((Get-WmiObject -Class 'Win32_Processor' | Where-Object { $_.DeviceID -eq 'CPU0' } | Select-Object -ExpandProperty 'AddressWidth') -eq 64)
+        [boolean]$Is64Bit = [boolean]((Get-CimInstance -ClassName 'Win32_Processor' | Where-Object { $_.DeviceID -eq 'CPU0' } | Select-Object -ExpandProperty 'AddressWidth') -eq 64)
         If ($Is64Bit) { [string]$envOSArchitecture = '64-bit' } Else { [string]$envOSArchitecture = '32-bit' }
 
         New-Object -TypeName PsObject -Property @{
@@ -333,7 +333,7 @@ Function Get-ClientGateway
     [CmdletBinding()]
     [OutputType([PsObject])]
     Param()
-    $arrGateways = (Get-CIMInstance Win32_networkAdapterConfiguration | Where-Object {$_.IPEnabled}).DefaultIPGateway
+    $arrGateways = (Get-CIMInstance -ClassName Win32_networkAdapterConfiguration | Where-Object {$_.IPEnabled}).DefaultIPGateway
     foreach ($gateway in $arrGateways) {If ([string]::IsNullOrWhiteSpace($gateway)){}Else{$clientGateway = $gateway}}
     If ($clientGateway) {
         New-Object -TypeName PsObject -Property @{"IPv4address" = $clientGateway}
@@ -350,16 +350,16 @@ Function Get-NetworkInterface {
         [switch]$PassThru
     )
     #pull each network interface on device
-    $netInt = Get-CimInstance Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | Where-Object { $_.IPEnabled -eq $true }
+    $netInt = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | Where-Object { $_.IPEnabled -eq $true }
     $Interfaces = $netInt | Where-Object { $_ -notmatch '\b(?:0{1,3}\.){3}\d{1,3}\b|(169.254)|::' }
 
     #grab all nic in wmi to compare later (its faster than querying individually)
-    $wminics = Get-CimInstance win32_NetworkAdapter | Where {($null -ne $_.MACAddress) -and ($_.Name -notlike '*Bluetooth*') -and ($_.Name -notlike '*Miniport*') -and ($_.Name -notlike '*Xbox*') }
+    $wminics = Get-CimInstance -ClassName Win32_NetworkAdapter | Where-Object {($null -ne $_.MACAddress) -and ($_.Name -notlike '*Bluetooth*') -and ($_.Name -notlike '*Miniport*') -and ($_.Name -notlike '*Xbox*') }
 
 
     $InterfaceDetails = @()
     Foreach($Interface in $Interfaces){
-        $Status = (ConvertTo-NetworkStatus ($wminics | Where {$_.Name -eq $Interface.Description}).NetConnectionStatus)
+        $Status = (ConvertTo-NetworkStatus ($wminics | Where-Object {$_.Name -eq $Interface.Description}).NetConnectionStatus)
 
         $InterfaceDetails += New-Object -TypeName PSObject -Property @{
             InterfaceName=$Interface.Description;
@@ -385,10 +385,10 @@ Function Get-InterfaceDetails
 {
     #pull each network interface on device
     #use .net class due to limited commands in PE
-    $nics=[Net.NetworkInformation.NetworkInterface]::GetAllNetworkInterfaces() | Where {($_.NetworkInterfaceType -ne 'Loopback') -and ($_.NetworkInterfaceType -ne 'Ppp') -and ($_.Supports('IPv4'))}
+    $nics=[Net.NetworkInformation.NetworkInterface]::GetAllNetworkInterfaces() | Where-Object {($_.NetworkInterfaceType -ne 'Loopback') -and ($_.NetworkInterfaceType -ne 'Ppp') -and ($_.Supports('IPv4'))}
 
     #grab all nic in wmi to compare later (its faster than querying individually)
-    $wminics = Get-CimInstance win32_NetworkAdapter | Where {($null -ne $_.MACAddress) -and ($_.Name -notlike '*Bluetooth*') -and ($_.Name -notlike '*Miniport*') -and ($_.Name -notlike '*Xbox*') }
+    $wminics = Get-CimInstance -ClassName win32_NetworkAdapter | Where-Object {($null -ne $_.MACAddress) -and ($_.Name -notlike '*Bluetooth*') -and ($_.Name -notlike '*Miniport*') -and ($_.Name -notlike '*Xbox*') }
 
     Write-Debug ("Detected {0} Network Inferfaces" -f $nics.Count)
 

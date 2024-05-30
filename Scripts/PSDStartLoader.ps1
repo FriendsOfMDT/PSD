@@ -173,7 +173,7 @@ if ($Global:PSDDebug -ne $True) {
 
 if ($BootfromWinPE -eq $true) {
 	# Windows ADK v1809 could be missing certain files, we need to check for that.
-	if ($(Get-WmiObject Win32_OperatingSystem).BuildNumber -eq "17763") {
+	if ($(Get-CimInstance -ClassName Win32_OperatingSystem).BuildNumber -eq "17763") {
 		Write-PSDLog -Message ("{0}: Check for BCP47Langs.dll and BCP47mrm.dll, needed for WPF" -f $MyInvocation.MyCommand.Name)
 		if (-not(Test-Path -Path X:\Windows\System32\BCP47Langs.dll) -or -not(Test-Path -Path X:\Windows\System32\BCP47mrm.dll)) {
 			Start-Process PowerShell -ArgumentList {
@@ -185,7 +185,7 @@ if ($BootfromWinPE -eq $true) {
 	Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Checking that there is at least 1.5 GB of RAM..." -PercentComplete (($i++ / $Maxsteps) * 100)
 
 	Write-PSDLog -Message ("{0}: Check for minimum amount of memory in WinPE to run PSD" -f $MyInvocation.MyCommand.Name)
-	if ((Get-WmiObject -Class Win32_computersystem).TotalPhysicalMemory -le 1499MB) {
+	if ((Get-CimInstance -ClassName Win32_computersystem).TotalPhysicalMemory -le 1499MB) {
 		Show-PSDInfo -Message "Not enough memory to run PSD, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
 		Start-Process PowerShell -Wait
 		exit 1
@@ -435,7 +435,7 @@ else {
 			$ipListv4 = @()
 			$macList = @()
 			$gwList = @()
-			Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1" | % {
+			Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1" | % {
 				$_.IPAddress | % { $ipList += $_ }
 				$_.MacAddress | % { $macList += $_ }
 				if ($_.DefaultIPGateway) {
@@ -448,7 +448,7 @@ else {
 				Write-PSDLog -Message ("{0}: Found IP address {1}" -f $MyInvocation.MyCommand.Name, $IPv4)
 			}
 
-			if (((Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1").Index).count -ge 1) {
+			if (((Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1").Index).count -ge 1) {
 				$NICIPOK = $True
 				Write-PSDLog -Message ("{0}: We have at least one network adapter with a IP address, we should be able to continue" -f $MyInvocation.MyCommand.Name)
 			}
