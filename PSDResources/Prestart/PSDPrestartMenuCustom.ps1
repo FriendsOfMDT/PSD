@@ -85,7 +85,7 @@ exit
             } 
             '4' {
                 Clear-Host
-                Get-WmiObject win32_networkadapter -Filter "netconnectionstatus = 2 and NetEnabled='True' and PhysicalAdapter='True'" | Select-Object Name,MACAddress | FT
+                Get-CimInstance -ClassName win32_networkadapter -Filter "netconnectionstatus = 2 and NetEnabled='True' and PhysicalAdapter='True'" | Select-Object Name,MACAddress | FT
                 Pause
 
             } 
@@ -97,7 +97,7 @@ exit
             }
             '6'{
                 Clear-Host
-                $Nics = Get-WmiObject Win32_NetworkAdapterConfiguration | Where-Object IPenabled -eq $true
+                $Nics = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object IPenabled -eq $true
                 Clear-Host
                 $Menu = @{}
                 $Nics | ForEach-Object -Begin {$i = 1} { 

@@ -46,7 +46,7 @@ if($PSDDebug -eq $true)
 switch ($Config)
 {
     'Custom' {
-        [string]$SerialNumber = (Get-WmiObject win32_bios).Serialnumber
+        [string]$SerialNumber = (Get-CimInstance -ClassName win32_bios).Serialnumber
         $CleanSerialNumber =  $SerialNumber.Replace("/","").Replace("\","").Replace("|","").Replace("-","").Replace(" ","")
         $CutOfNumber = 10
         $checklength = $CleanSerialNumber.Length
