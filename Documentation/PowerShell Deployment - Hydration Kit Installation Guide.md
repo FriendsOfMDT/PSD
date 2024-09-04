@@ -36,9 +36,9 @@ PSD installation requires the following:
 1) Download or clone the PSD content from the [PSD GitHub Home](https://github.com/FriendsOfMDT/PSD)
 1) Open an elevated Powershell command prompt, run one of the following commands
     - For **NEW** installations of PSD run:
-        - ./PSD_Install.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name>
+        - .\Install-PSD.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name>
     - To **UPGRADE** an existing MDT/PSD installation run: 
-        - ./PSD_Install.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name> **-upgrade**
+        - .\Install-PSD.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name> **-upgrade**
 1) Review the command window and PSD Installation log (future) for errors
 1) You should see PSD folders ./SCRIPTS and ./TOOLS in your MDT workbench.
     >PRO TIP: You may need to refresh or open and close your Workbench for the PSD Deployment Share to appear.
