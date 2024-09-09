@@ -1,0 +1,46 @@
+<Grid x:Name="_tsTabLayout" Margin="0" Grid.ColumnSpan="2" FocusManager.FocusedElement="{Binding ElementName=tsTree}">
+
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_tsTabMainTitle" Content="@MainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" />
+    <Rectangle Grid.Column="0" Fill="HotPink" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_listoutline}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Label x:Name="_tsTabSubTitle" Content="@SubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top" />
+    <TextBox x:Name="_tsTabSearch" HorizontalAlignment="Left" Height="31" Margin="10,103,0,0" TextWrapping="Wrap" Text="Search..." VerticalAlignment="Top" Width="331" VerticalContentAlignment="Center" FontSize="18" Style="{DynamicResource TextBoxDarkTheme}"/>
+    <Button x:Name="_tsTabSearchClear" Content="Clear" Height="31" Width="63" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="414,0,0,416" Style="{DynamicResource ButtonDarkThemeSquare}" />
+    <Button x:Name="_tsTabSearchEnter" Content="Search" Height="31" Width="63" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="346,0,0,416" Style="{DynamicResource ButtonDarkThemeSquare}" />
+
+    <Button x:Name="_tsTabExpand" Content="Expand All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="10,0,0,386" Style="{DynamicResource ButtonDarkThemeSquare}" />
+    <Button x:Name="_tsTabCollapse" Content="Collapse All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="128,0,0,386" Style="{DynamicResource ButtonDarkThemeSquare}" />
+
+    <Canvas x:Name="_tsTabValidation" Margin="242,73,14,452" Background="LightGreen" Visibility="Visible" >
+        <TextBox x:Name="_tsTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" Text="test" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" VerticalAlignment="Center" Width="195" Height="25" />
+        <Rectangle x:Name="_tsTabValidation_Alert" Width="20" Height="20" Fill="Red" Canvas.Left="210" Visibility="Visible" Canvas.Top="2" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+        <Rectangle x:Name="_tsTabValidation_Check" Width="20" Height="20" Fill="Green" Canvas.Left="210" Visibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Center" Canvas.Top="2">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}" />
+            </Rectangle.OpacityMask>
+        </Rectangle>
+    </Canvas>
+
+    <TextBox x:Name="TS_TaskSequenceID" Margin="342,139,14,386" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}"/>
+    <TreeView x:Name="_tsTabTree" HorizontalAlignment="Left" Height="371" Margin="10,169,0,0" VerticalAlignment="Top" Width="467" FontSize="14"  
+                        ItemsSource="{Binding Mode=OneTime}"
+                        ItemTemplate="{StaticResource CheckBoxItemTemplate}" >
+    </TreeView>
+
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_tsTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+</Grid>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<DATABASE xsi:schemaLocation="urn:schemas.microsoft.com/appx/2006/07/Dbu Driver.xsd" xmlns="urn:schemas.microsoft.com/appx/2006/07/Dbu" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" MAX_HTMLHELPID="110033">
+
+    <DRIVER>
+        <HISTORY>
+            <DESCRIPTION>
+                Insert your description here. This field will be written to the log if a match is found.
+            </DESCRIPTION>
+        </HISTORY>
+        <LOOKUP NAME=" _BIOS_DESCRIPTION_HERE_ ">
+            <DATA NAME="Computer Manufacturer" VALUETYPE="string" VALUE=" _COMPUTER_MFG_HERE_ "/>
+            <DATA NAME="Model" VALUETYPE="string" VALUE=" _COMPUTER_MODEL_HERE_"/>
+            <DATA NAME="Date" VALUETYPE="string" VALUE=" _DATE_TIME_HERE_ "/>
+        </LOOKUP>
+    </DRIVER>
+
+    <DRIVER>
+        <HISTORY>
+            <DESCRIPTION>
+                The WYSIWYG Super Cool Computer 2007 has a bug in version 1.23 of the BIOS that prevents Windows Vista from installing.
+                Version 1.24 fixes the problem, please update the BIOS. Check http://drivers.WYSIWYGComputers.com/
+            </DESCRIPTION>
+        </HISTORY>
+        <LOOKUP NAME="XXX ROM BIOS Version 1.23">
+            <DATA NAME="Computer Manufacturer" VALUETYPE="string" VALUE="Wysiwyg Computers"/>
+            <DATA NAME="Model" VALUETYPE="string" VALUE="WYSIWYG Super Cool Computer 2007"/>
+            <DATA NAME="Date" VALUETYPE="string" VALUE="20060801000000.000000+000"/>
+        </LOOKUP>
+    </DRIVER>
+
+    <!--
+    If you have a computer BIOS version that needs to be indentified during the BDD installation process,
+    you can run the following VBScript program to extract out the necessary fields on the computer system.
+
+ZTIBIOS_Extract_Utility.vbs
+    wscript.echo "<DRIVER>"
+    wscript.echo "	<HISTORY><DESCRIPTION>Insert your description here.</DESCRIPTION></HISTORY>"
+
+    For each Computer in GetObject("winmgmts:\\.\root\cimv2").InstancesOf("Win32_ComputerSystemProduct")
+        For each BIOS in GetObject("winmgmts:\\.\root\cimv2").InstancesOf("Win32_BIOS")
+            wscript.echo "	<LOOKUP NAME=""" & BIOS.Description & """ >"
+            wscript.echo "		<DATA NAME=""Computer Manufacturer"" VALUETYPE=""string"" VALUE=""" & Computer.Vendor & """/>"
+            wscript.echo "		<DATA NAME=""Model"" VALUETYPE=""string"" VALUE=""" & Computer.Name & """/>"
+            wscript.echo "		<DATA NAME=""Date"" VALUETYPE=""string"" VALUE=""" & BIOS.ReleaseDate & """/>"
+        next
+    next
+
+    wscript.echo "	</LOOKUP>"
+    wscript.echo "</DRIVER>"
+
+    -->
+
+</DATABASE>

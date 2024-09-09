@@ -1,9 +1,0 @@
-<Grid Background="#004275">
-    <Label x:Name="_tzTabMainTitle" Content="@MainTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="48" Margin="0,36,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
-    <Label x:Name="_tzTabSubTitle"  Content="@SubTitle" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16" Margin="0,119,0,0" Width="1024" Foreground="White" HorizontalContentAlignment="Center"/>
-    <ListBox x:Name="_locTabTimeZoneName" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#004275" Foreground="#FFE8EDF9" FontSize="18" Width="700" Height="431" Margin="0,155,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto" SelectionMode="Single"/>
-
-
-    <TextBox x:Name="TS_TimeZoneName" Margin="867,159,73,449" IsEnabled="False" />
-    <TextBox x:Name="TS_TimeZone" Margin="867,196,73,408" IsEnabled="False" />
-</Grid>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+
+<Theme>
+	<Global>
+		<TemplateReference>Dark\PSDWizard_Template_Dark_en-US.xaml</TemplateReference>
+		<WelcomeWizardReference>Dark\PSDWizard_Start_en-US.xaml</WelcomeWizardReference>
+	</Global>
+	
+	<PaneDefinitions>
+		<!--
+			For every node in pane (key=Value), will replace any @Value in Pane template
+
+			However there are few that are detected and MUST be in Template:
+			@TabTitle
+			tab01
+		-->
+		<PanesTemplate><![CDATA[
+	<TabItem x:Name="_wiz@id" Header="@TabTitle" Width="150" Margin="@margin" IsEnabled="False">
+	@TabItemContent
+	</TabItem>
+	]]></PanesTemplate>
+		<PaneStartingMargin><![CDATA[0,70,0,0]]></PaneStartingMargin>
+		<!--
+		#EXAMPLE
+		<Pane id="Readiness" reference="PSDWizard_DeployReadiness_en-US.xaml" margin="0,0,0,0" Width='180' Style="pillTabItemLeft" />
+		-->
+		<Pane id="Readiness" reference="Dark\PSDWizard_DeployReadiness_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="TaskSequence" reference="Dark\PSDWizard_TaskSequence_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="TargetDisk" reference="Dark\PSDWizard_TargetDisk_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="DeviceDetails" reference="Dark\PSDWizard_DeviceDetails_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="DeviceRole" reference="Dark\PSDWizard_DeviceRole_en-US.xaml" margin="0,0,0,0" />	
+		<Pane id="IntuneGroup" reference="Dark\PSDWizard_IntuneGroup_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="AdminAccount" reference="Dark\PSDWizard_AdminCreds_en-US.xaml" margin="0,0,0,0"/>
+		<Pane id="LocaleTime" reference="Dark\PSDWizard_Locale_en-US.xaml" margin="0,0,0,0"/>
+		<Pane id="Applications" reference="Dark\PSDWizard_Applications_en-US.xaml" margin="0,0,0,0"/>
+		<Pane id="Ready" reference="Dark\PSDWizard_Ready_en-US.xaml" margin="0,0,0,0" />
+			
+	</PaneDefinitions>
+</Theme>

@@ -76,7 +76,7 @@ Function Get-PSDLocalInfo {
 		$LocalInfo['IsServerOS'] = "False"
 
 		# Look up OS details
-		Get-WmiObject Win32_OperatingSystem | ForEach-Object { $LocalInfo['OSCurrentVersion'] = $_.Version; $LocalInfo['OSCurrentBuild'] = $_.BuildNumber }
+		Get-CimInstance -ClassName Win32_OperatingSystem | ForEach-Object { $LocalInfo['OSCurrentVersion'] = $_.Version; $LocalInfo['OSCurrentBuild'] = $_.BuildNumber }
 		if (Test-Path HKLM:System\CurrentControlSet\Control\MiniNT) {
 			$LocalInfo['OSVersion'] = "WinPE"
 		}
@@ -97,7 +97,7 @@ Function Get-PSDLocalInfo {
 		$ipList = @()
 		$macList = @()
 		$gwList = @()
-		Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1" | ForEach-Object {
+		Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1" | ForEach-Object {
 			$_.IPAddress | ForEach-Object { $ipList += $_ }
 			$_.MacAddress | ForEach-Object { $macList += $_ }
 			if ($_.DefaultIPGateway) {
@@ -114,7 +114,7 @@ Function Get-PSDLocalInfo {
 		$LocalInfo['IsServer'] = "False"
 		$LocalInfo['IsSFF'] = "False"
 		$LocalInfo['IsTablet'] = "False"
-		Get-WmiObject Win32_SystemEnclosure | ForEach-Object {
+		Get-CimInstance -ClassName Win32_SystemEnclosure | ForEach-Object {
 			$LocalInfo['AssetTag'] = $_.SMBIOSAssetTag.Trim()
 			if ($_.ChassisTypes[0] -in "8", "9", "10", "11", "12", "14", "18", "21") { $LocalInfo['IsLaptop'] = "True"; $LocalInfo['Chassis'] = "Laptop"}
 			if ($_.ChassisTypes[0] -in "3", "4", "5", "6", "7", "15", "16") { $LocalInfo['IsDesktop'] = "True"; $LocalInfo['Chassis'] = "Desktop"}
@@ -123,7 +123,7 @@ Function Get-PSDLocalInfo {
 			if ($_.ChassisTypes[0] -in "13", "31", "32", "30") {$LocalInfo['IsTablet'] = "True"; $LocalInfo['Chassis'] = "Tablet"}
 		}
 
-		Get-WmiObject Win32_BIOS | ForEach-Object {
+		Get-CimInstance -ClassName Win32_BIOS | ForEach-Object {
 			$LocalInfo['SerialNumber'] = $_.SerialNumber.Trim()
 		}
 
@@ -144,14 +144,14 @@ Function Get-PSDLocalInfo {
 			}
 		}
 
-		Get-WmiObject Win32_Processor | ForEach-Object {
+		Get-CimInstance -ClassName Win32_Processor | ForEach-Object {
 			$LocalInfo['ProcessorSpeed'] = $_.MaxClockSpeed
 			$LocalInfo['SupportsSLAT'] = $_.SecondLevelAddressTranslationExtensions
 		}
 
 		# TODO: Capable architecture
 
-		Get-WmiObject Win32_ComputerSystem | ForEach-Object {
+		Get-CimInstance -ClassName Win32_ComputerSystem | ForEach-Object {
 			$LocalInfo['Manufacturer'] = $_.Manufacturer.Trim()
 			$LocalInfo['Make'] = $_.Manufacturer.Trim()
 			$LocalInfo['Model'] = $_.Model.Trim()
@@ -159,26 +159,26 @@ Function Get-PSDLocalInfo {
 		}
 
 		if ($LocalInfo['Make'] -eq "") {
-			$Make = (Get-WmiObject -Class "Win32_BaseBoard" | Select-Object -ExpandProperty Manufacturer).Trim()
+			$Make = (Get-CimInstance -ClassName Win32_BaseBoard | Select-Object -ExpandProperty Manufacturer).Trim()
 			$LocalInfo['Make'] = $Make
 			$LocalInfo['Manufacturer'] = $Make
 		}
 
 		if ($LocalInfo['Model'] -eq "") {
-			$LocalInfo['Model'] = (Get-WmiObject -Class "Win32_BaseBoard" | Select-Object -ExpandProperty Product).Trim()
+			$LocalInfo['Model'] = (Get-CimInstance -ClassName Win32_BaseBoard | Select-Object -ExpandProperty Product).Trim()
 		}
 
-		Get-WmiObject Win32_ComputerSystemProduct | ForEach-Object {
+		Get-CimInstance -ClassName Win32_ComputerSystemProduct | ForEach-Object {
 			$LocalInfo['UUID'] = $_.UUID.Trim()
 			$LocalInfo['CSPVersion'] = $_.Version.Trim()
 		}
 
-		Get-CIMInstance -ClassName MS_SystemInformation -NameSpace root\WMI | ForEach-Object {
+		Get-CimInstance -ClassName MS_SystemInformation -NameSpace root\WMI | ForEach-Object {
 			$LocalInfo['BaseBoardProduct'] = $_.BaseBoardProduct.Trim()
 			$LocalInfo['SystemSku'] = $_.SystemSku.Trim()
 		}
 
-		Get-WmiObject Win32_BaseBoard | ForEach-Object {
+		Get-CimInstance -ClassName Win32_BaseBoard | ForEach-Object {
 			$LocalInfo['Product'] = $_.Product.Trim()
 		}
 
@@ -197,7 +197,7 @@ Function Get-PSDLocalInfo {
 		$bFoundAC = $false
 		$bOnBattery = $false
 		$bFoundBattery = $false
-		foreach ($Battery in (Get-WmiObject -Class Win32_Battery)) {
+		foreach ($Battery in (Get-CimInstance -ClassName Win32_Battery)) {
 			$bFoundBattery = $true
 			if ($Battery.BatteryStatus -eq "2") {
 				$bFoundAC = $true
@@ -208,7 +208,7 @@ Function Get-PSDLocalInfo {
 		}
 
 		#https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getproductinfo
-		$sku = (Get-WmiObject win32_operatingsystem).OperatingSystemSKU
+		$sku = (Get-CimInstance -ClassName win32_operatingsystem).OperatingSystemSKU
 		switch ($sku)
 		{
 			0       {$LocalInfo['OSSku']="Undefined";break}
@@ -261,80 +261,80 @@ Function Get-PSDLocalInfo {
 		Switch -Wildcard ($LocalInfo['Make']) {
 			"*Microsoft*" {
 				$LocalInfo['MakeAlias'] = "Microsoft"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = Get-WmiObject -Namespace "root\wmi" -Class "MS_SystemInformation" | Select-Object -ExpandProperty SystemSKU
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemSKU
 				# Logic for Hyper-V Testing
 				If ($LocalInfo['ModelAlias'] -eq "Virtual Machine") {
-					$LocalInfo['SystemAlias'] = Get-WmiObject -Namespace "root\wmi" -Class "MS_SystemInformation" | Select-Object -ExpandProperty SystemVersion
+					$LocalInfo['SystemAlias'] = Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemVersion
 					$LocalInfo['IsVM'] = "True"
 				}
 			}
 			"*HP*" {
 				$LocalInfo['MakeAlias'] = "HP"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = (Get-CIMInstance -ClassName "MS_SystemInformation" -NameSpace "root\WMI").BaseBoardProduct.Trim()
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName MS_SystemInformation -NameSpace root\wmi).BaseBoardProduct.Trim()
 			}
 			"*VMWare*" {
 				$LocalInfo['MakeAlias'] = "VMWare"
-                # $LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim() # Default, sets alias to same as model
-                # $LocalInfo['ModelAlias'] = ((Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()).replace(",","_") # Remove the "," and replace with "_"
-                $LocalInfo['ModelAlias'] = ((Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()).replace(" ","_").replace(",","_") # Remove the "," and replace with "_", Remove the " " and replace with "_"
+                # $LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim() # Default, sets alias to same as model
+                # $LocalInfo['ModelAlias'] = ((Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()).replace(",","_") # Remove the "," and replace with "_"
+                $LocalInfo['ModelAlias'] = ((Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()).replace(" ","_").replace(",","_") # Remove the "," and replace with "_", Remove the " " and replace with "_"
 
-				$LocalInfo['SystemAlias'] = Get-WmiObject -Namespace "root\wmi" -Class "MS_SystemInformation" | Select-Object -ExpandProperty SystemSKU
+				$LocalInfo['SystemAlias'] = Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemSKU
 				$LocalInfo['IsVM'] = "True"
 			}
 			"*QEMU*" {
 				$LocalInfo['MakeAlias'] = "QEMU"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = Get-WmiObject -Namespace "root\wmi" -Class "MS_SystemInformation" | Select-Object -ExpandProperty SystemSKU
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemSKU
 				$LocalInfo['IsVM'] = "True"
 			}
 			"*Innotek*" {
 				$LocalInfo['MakeAlias'] = "Innotek"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = Get-WmiObject -Namespace "root\wmi" -Class "MS_SystemInformation" | Select-Object -ExpandProperty SystemSKU
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemSKU
 				$LocalInfo['IsVM'] = "True"
 			}
 			"*Hewlett-Packard*" {
 				$LocalInfo['MakeAlias'] = "HP"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = (Get-CIMInstance -ClassName "MS_SystemInformation" -NameSpace "root\WMI").BaseBoardProduct.Trim()
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName MS_SystemInformation -NameSpace root\wmi).BaseBoardProduct.Trim()
 			}
 			"*Dell*" {
 				$LocalInfo['MakeAlias'] = "Dell"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = (Get-CIMInstance -ClassName "MS_SystemInformation" -NameSpace "root\WMI" ).SystemSku.Trim()
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName MS_SystemInformation -NameSpace root\wmi ).SystemSku.Trim()
 			}
 			"*Lenovo*" {
 				$LocalInfo['MakeAlias'] = "Lenovo"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystemProduct" | Select-Object -ExpandProperty Version).Trim()
-				$LocalInfo['SystemAlias'] = ((Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).SubString(0, 4)).Trim()
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystemProduct | Select-Object -ExpandProperty Version).Trim()
+				$LocalInfo['SystemAlias'] = ((Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).SubString(0, 4)).Trim()
 			}
 			"*Intel(R) Client Systems*" {
 				$LocalInfo['MakeAlias'] = "Intel(R) Client Systems"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystemProduct" | Select-Object -ExpandProperty Version).Trim()
-				$LocalInfo['SystemAlias'] = ((Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim())
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystemProduct | Select-Object -ExpandProperty Version).Trim()
+				$LocalInfo['SystemAlias'] = ((Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim())
 				$LocalInfo['SystemAlias'] = $LocalInfo['SystemAlias'].SubString(0, $LocalInfo['SystemAlias'].IndexOf("i")).Trim()
 			}
 			"*Panasonic*" {
 				$LocalInfo['MakeAlias'] = "Panasonic Corporation"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = (Get-CIMInstance -ClassName "MS_SystemInformation" -NameSpace "root\WMI" ).BaseBoardProduct.Trim()
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName MS_SystemInformation -NameSpace root\wmi ).BaseBoardProduct.Trim()
 			}
 			"*Viglen*" {
 				$LocalInfo['MakeAlias'] = "Viglen"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = (Get-WmiObject -Class "Win32_BaseBoard" | Select-Object -ExpandProperty SKU).Trim()
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName Win32_BaseBoard | Select-Object -ExpandProperty SKU).Trim()
 			}
 			"*AZW*" {
 				$LocalInfo['MakeAlias'] = "AZW"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = (Get-CIMInstance -ClassName "MS_SystemInformation" -NameSpace "root\WMI" ).BaseBoardProduct.Trim()
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName MS_SystemInformation -NameSpace root\wmi ).BaseBoardProduct.Trim()
 			}
 			"*Fujitsu*" {
 				$LocalInfo['MakeAlias'] = "Fujitsu"
-				$LocalInfo['ModelAlias'] = (Get-WmiObject -Class "Win32_ComputerSystem" | Select-Object -ExpandProperty Model).Trim()
-				$LocalInfo['SystemAlias'] = (Get-WmiObject -Class "Win32_BaseBoard" | Select-Object -ExpandProperty SKU).Trim()
+				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName Win32_BaseBoard | Select-Object -ExpandProperty SKU).Trim()
 			}
 			Default {
 				$LocalInfo['MakeAlias'] = "NA"

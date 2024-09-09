@@ -24,6 +24,6 @@ The team behind PSD is:
 * Andreas Hammarskjold (@AndHammarskjold)
 * Richard "Dick" Tracy (@rick2_1979)
 * George Simos (@GSimos)
-* Elias Markelis (@emarkelis)
+* Elias Markelius (@emarkelis)
 
 

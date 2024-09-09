@@ -1,0 +1,116 @@
+<Grid x:Name="_detTabLayout" Margin="0" Grid.ColumnSpan="2">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_detTabMainTitle" Content="@MainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" />
+    <Rectangle Grid.Column="0" Fill="#EBEBEB" HorizontalAlignment="Right" Height="40" Width="56" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_laptop}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Grid x:Name="_grdDeviceDetails" Grid.Column="0" Margin="10,78,10,439">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="122"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Content="Device Name:" Grid.Column="0" FontSize="14" HorizontalAlignment="Left" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="114" Height="30"  />
+        <TextBox x:Name="TS_OSDComputerName" Grid.Column="1" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="NoWrap" VerticalContentAlignment="Center" Height="30" Style="{DynamicResource TextBoxDarkTheme}"/>
+
+        <Canvas x:Name="_detTabValidation" Grid.Column="0" Margin="0,40,0,-57" Background="LightGreen" Grid.ColumnSpan="2" Visibility="Visible" >
+            <TextBox x:Name="_detTabValidation_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Width="376" Height="30" Text="test" />
+            <Rectangle x:Name="_detTabValidation_Alert" Width="30" Height="30" Fill="Red" Canvas.Left="429" Canvas.Top="8" Visibility="Visible">
+                <Rectangle.OpacityMask>
+                    <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
+                </Rectangle.OpacityMask>
+            </Rectangle>
+            <Rectangle x:Name="_detTabValidation_Check" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Visible">
+                <Rectangle.OpacityMask>
+                    <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}" />
+                </Rectangle.OpacityMask>
+            </Rectangle>
+        </Canvas>
+    </Grid>
+
+    <Grid x:Name="_grdNetworkDetails" Grid.Column="0" Margin="10,178,10,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="173*"></ColumnDefinition>
+            <ColumnDefinition Width="305*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32*"></RowDefinition>
+            <RowDefinition Height="27*"></RowDefinition>
+            <RowDefinition Height="196*"></RowDefinition>
+            <RowDefinition Height="28*"></RowDefinition>
+            <RowDefinition Height="36*"></RowDefinition>
+            <RowDefinition Height="47*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Label Content="Network Details" FontSize="22" HorizontalAlignment="Left" Grid.Row="0" VerticalAlignment="Top" Height="37" Width="164" Grid.RowSpan="2" />
+        <RadioButton x:Name="_JoinDomainRadio" GroupName="joinoption" Content="Join a domain" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Margin="20,6,60,6" Width="93"/>
+        <Grid x:Name="_grdJoinDomain" Grid.ColumnSpan="2" Grid.Row="2" Margin="0,0,-0.5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" MinWidth="175"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="34*"></RowDefinition>
+                <RowDefinition Height="34*"></RowDefinition>
+                <RowDefinition Height="34*"></RowDefinition>
+                <RowDefinition Height="34*"></RowDefinition>
+                <RowDefinition Height="34*"></RowDefinition>
+                <RowDefinition Height="34*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Label Content="Domain to Join:" FontSize="14" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+            <TextBox x:Name="TS_JoinDomain" Text="" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,2,0,5" Style="{DynamicResource TextBoxDarkTheme}"/>
+            <Label Content="Org Unit:" FontSize="14" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+            <TextBox x:Name="TS_MachineObjectOU" Text="" Grid.Column="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" Visibility="Hidden" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2" Style="{DynamicResource TextBoxDarkTheme}"/>
+            <ComboBox x:Name="_DomainOUs" Grid.Column="1" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2" />
+            <Label Content="Domain Admin:" FontSize="14" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
+            <TextBox x:Name="TS_DomainAdmin" Text="" Grid.Column="1" Grid.Row="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,33,0,5" Grid.RowSpan="2" Style="{DynamicResource TextBoxDarkTheme}"/>
+            <Label Content="Password:" FontSize="14" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>
+            <PasswordBox x:Name="TS_DomainAdminPassword" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center" Width="295" Margin="0,0,0,5" Style="{DynamicResource PasswordDarkTheme}"/>
+            <Label Content="Confirm Password:" FontSize="14" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right"/>
+            <PasswordBox x:Name="_DomainAdminConfirmPassword" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="4" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center" Width="295" Margin="0,0,0,5" Style="{DynamicResource PasswordDarkTheme}"/>
+            <Label Content="Domain:" FontSize="14" Grid.Column="0" Grid.Row="5"  HorizontalAlignment="Right"/>
+            <TextBox x:Name="TS_DomainAdminDomain" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="4" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Width="295" Margin="0,33,0,4" Grid.RowSpan="2" Style="{DynamicResource TextBoxDarkTheme}"/>
+        </Grid>
+
+        <RadioButton x:Name="_JoinWorkgroupRadio" GroupName="joinoption" Content="Join a workgroup" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="14" Margin="11,7,51,7" Width="111"/>
+        <Grid x:Name="_grdJoinWorkgroup" Grid.ColumnSpan="2" Grid.Row="4" Margin="0,0,-0.5,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" MinWidth="175"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="34*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Label Content="Workgroup:" FontSize="14" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+            <TextBox x:Name="TS_JoinWorkgroup" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,0,0,4" Style="{DynamicResource TextBoxDarkTheme}"/>
+        </Grid>
+        <Canvas x:Name="_detTabValidation2" Grid.ColumnSpan="2" Grid.Row="4" Margin="0,36,0,0" Background="LightGreen" Visibility="Visible" Grid.RowSpan="2">
+            <TextBox x:Name="_detTabValidation2_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Width="376" Height="30" Text="test" />
+            <Rectangle x:Name="_detTabValidation2_Alert" Width="30" Height="30" Fill="Red" Canvas.Left="426" Canvas.Top="10" Visibility="Visible">
+                <Rectangle.OpacityMask>
+                    <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
+                </Rectangle.OpacityMask>
+            </Rectangle>
+            <Rectangle x:Name="_detTabValidation2_Check" Width="30" Height="30" Fill="Green" Canvas.Left="426" Canvas.Top="10" Visibility="Visible">
+                <Rectangle.OpacityMask>
+                    <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
+                </Rectangle.OpacityMask>
+            </Rectangle>
+        </Canvas>
+    </Grid>
+
+
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_detTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+
+</Grid>

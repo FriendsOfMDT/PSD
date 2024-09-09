@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mappings>
+
+	<mapping id="ComputerName" type="ini">
+		<section>UserData</section>
+	</mapping>
+	<mapping id="FullName" type="ini">
+		<section>UserData</section>
+	</mapping>
+	<mapping id="OrgName" type="ini">
+		<section>UserData</section>
+	</mapping>
+	<mapping id="ProductKey" type="ini">
+		<section>UserData</section>
+	</mapping>
+
+	<mapping id="JoinDomain" type="ini">
+		<section>Identification</section>
+	</mapping>
+	<mapping id="MachineObjectOU" type="ini">
+		<section>Identification</section>
+	</mapping>
+	<mapping id="JoinWorkgroup" type="ini">
+		<section>Identification</section>
+	</mapping>
+	<mapping id="DomainAdmin" type="ini">
+		<section>Identification</section>
+	</mapping>
+	<mapping id="DomainAdminPassword" type="ini">
+		<section>Identification</section>
+	</mapping>
+
+	<mapping id="InputLocale" type="ini">
+		<section>RegionalSettings</section>
+	</mapping>
+	<mapping id="Language" type="ini">
+		<section>RegionalSettings</section>
+	</mapping>
+	<mapping id="LanguageGroup" type="ini">
+		<section>RegionalSettings</section>
+	</mapping>
+	<mapping id="SystemLocale" type="ini">
+		<section>RegionalSettings</section>
+	</mapping>
+	<mapping id="UserLocale" type="ini">
+		<section>RegionalSettings</section>
+	</mapping>
+
+	<mapping id="TimeZone" type="ini">
+		<section>GuiUnattended</section>
+	</mapping>
+	<mapping id="AutoLogon" type="ini">
+		<section>GuiUnattended</section>
+	</mapping>
+	<mapping id="AutoLogonCount" type="ini">
+		<section>GuiUnattended</section>
+	</mapping>
+	<mapping id="AdminPassword" type="ini">
+		<section>GuiUnattended</section>
+	</mapping>
+
+	<mapping id="BitsPerPel" type="ini">
+		<section>Display</section>
+	</mapping>
+	<mapping id="Xresolution" type="ini">
+		<section>Display</section>
+	</mapping>
+	<mapping id="Yresolution" type="ini">
+		<section>Display</section>
+	</mapping>
+	<mapping id="Vrefresh" type="ini">
+		<section>Display</section>
+	</mapping>
+
+	<mapping id="AreaCode" type="ini">
+		<section>TapiLocation</section>
+	</mapping>
+	<mapping id="CountryCode" type="ini">
+		<section>TapiLocation</section>
+	</mapping>
+	<mapping id="Dialing" type="ini">
+		<section>TapiLocation</section>
+	</mapping>
+	<mapping id="LongDistanceAccess" type="ini">
+		<section>TapiLocation</section>
+	</mapping>
+	<mapping id="Home_Page" type="ini">
+		<section>URL</section>
+	</mapping>
+	<mapping id="AutoMode" type="ini">
+		<section>LicenseFilePrintData</section>
+	</mapping>
+	<mapping id="AutoUsers" type="ini">
+		<section>LicenseFilePrintData</section>
+	</mapping>
+
+
+
+
+	<mapping id="Upgrade" type="xml">
+                <xpath removeIfBlank="Parent"><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-Setup"]/unattend:UpgradeData/unattend:Upgrade]]></xpath>
+	</mapping>
+	<mapping id="OSDComputerName" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:ComputerName]]></xpath>
+	</mapping>
+	<mapping id="ProductKey" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:ProductKey]]></xpath>
+                <xpath removeIfBlank="Parent"><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-Setup"]/unattend:UserData/unattend:ProductKey/unattend:Key]]></xpath>
+	</mapping>
+	<mapping id="OverrideProductKey" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:ProductKey]]></xpath>
+	</mapping>
+	<mapping id="JoinDomain" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:JoinDomain]]></xpath>
+                <remove><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:JoinWorkgroup]]></remove>
+	</mapping>
+	<mapping id="MachineObjectOU" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:MachineObjectOU]]></xpath>
+	</mapping>
+	<mapping id="JoinWorkgroup" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:JoinWorkgroup]]></xpath>
+                <remove><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:JoinDomain]]></remove>
+                <remove><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:Credentials]]></remove>
+                <remove><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:MachineObjectOU]]></remove>
+	</mapping>
+	<mapping id="DomainAdmin" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:Credentials/unattend:Username]]></xpath>
+	</mapping>
+	<mapping id="DomainAdminDomain" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:Credentials/unattend:Domain]]></xpath>
+	</mapping>
+	<mapping id="DomainAdminPassword" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-UnattendedJoin"]/unattend:Identification/unattend:Credentials/unattend:Password]]></xpath>
+	</mapping>
+	<mapping id="InstallFromPath" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-Setup"]/unattend:ImageInstall/unattend:OSImage/unattend:InstallFrom/unattend:Path]]></xpath>
+	</mapping>
+	<mapping id="ImageIndex" type="xml">
+                <xpath key="/image/index"><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-Setup"]/unattend:ImageInstall/unattend:OSImage/unattend:InstallFrom/unattend:MetaData]]></xpath>
+                <xpath key="/IMAGE/INDEX"><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-Setup"]/unattend:ImageInstall/unattend:OSImage/unattend:InstallFrom/unattend:MetaData]]></xpath>
+	</mapping>
+	<mapping id="AdminPassword" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:AutoLogon/unattend:Password/unattend:Value]]></xpath>
+                <xpath><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:UserAccounts/unattend:AdministratorPassword/unattend:Value]]></xpath>
+	</mapping>
+	<mapping id="RemoveLocalAccountElementFromUnattendXML" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:UserAccounts/unattend:LocalAccounts]]></xpath>
+	</mapping>
+	<mapping id="Organization" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:RegisteredOrganization]]></xpath>
+	</mapping>
+	<mapping id="FullName" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:RegisteredOwner]]></xpath>
+	</mapping>
+	<mapping id="BitsPerPel" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:Display/unattend:ColorDepth]]></xpath>
+	</mapping>
+	<mapping id="Xresolution" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:Display/unattend:HorizontalResolution]]></xpath>
+	</mapping>
+	<mapping id="Yresolution" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:Display/unattend:VerticalResolution]]></xpath>
+	</mapping>
+	<mapping id="Vrefresh" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:Display/unattend:RefreshRate]]></xpath>
+	</mapping>
+	<mapping id="AreaCode" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-TapiSetup"]/unattend:TapiUnattendLocation/unattend:AreaCode]]></xpath>
+	</mapping>
+	<mapping id="CountryCode" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-TapiSetup"]/unattend:TapiUnattendLocation/unattend:CountryOrRegion]]></xpath>
+	</mapping>
+	<mapping id="LongDistanceAccess" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-TapiSetup"]/unattend:TapiUnattendLocation/unattend:LongDistanceAccess]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-TapiSetup"]/unattend:TapiUnattendLocation/unattend:OutsideAccess]]></xpath>
+	</mapping>
+	<mapping id="TimeZoneName" type="xml" >
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:TimeZone]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:TimeZone]]></xpath>
+	</mapping>
+	<mapping id="KeyboardLocale" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-International-Core"]/unattend:InputLocale]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-International-Core"]/unattend:InputLocale]]></xpath>
+	</mapping>
+	<mapping id="UserLocale" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-International-Core"]/unattend:SystemLocale]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-International-Core"]/unattend:SystemLocale]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-International-Core"]/unattend:UserLocale]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-International-Core"]/unattend:UserLocale]]></xpath>
+	</mapping>
+	<mapping id="UILanguage" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-International-Core"]/unattend:UILanguage]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-International-Core"]/unattend:UILanguage]]></xpath>
+	</mapping>
+	<mapping id="ImageLanguage001" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-International-Core-WinPE"]/unattend:SystemLocale]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-International-Core-WinPE"]/unattend:UserLocale]]></xpath>
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-International-Core-WinPE"]/unattend:UILanguage]]></xpath>
+	</mapping>
+	<mapping id="Home_Page" type="xml">
+                <xpath removeIfBlank="Self"><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-IE-InternetExplorer"]/unattend:Home_Page]]></xpath>
+	</mapping>
+	<mapping id="OrgName" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:RegisteredOrganization]]></xpath>
+                <xpath><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:RegisteredOrganization]]></xpath>
+	</mapping>
+	<mapping id="FullName" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="specialize"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:RegisteredOwner]]></xpath>
+                <xpath><![CDATA[//unattend:settings[@pass="oobeSystem"]/unattend:component[@name="Microsoft-Windows-Shell-Setup"]/unattend:RegisteredOwner]]></xpath>
+	</mapping>
+	<mapping id="DestinationDisk" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-Setup"]/unattend:ImageInstall/unattend:OSImage/unattend:InstallTo/unattend:DiskID]]></xpath>
+	</mapping>
+	<mapping id="DestinationPartition" type="xml">
+                <xpath><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-Setup"]/unattend:ImageInstall/unattend:OSImage/unattend:InstallTo/unattend:PartitionID]]></xpath>
+	</mapping>
+</mappings>

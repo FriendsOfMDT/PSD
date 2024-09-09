@@ -22,7 +22,7 @@
             <TextBlock Text="Lets get started" FontSize="24" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
         </Button>
 
-        <Button Grid.Row="5" x:Name="_startPageOpenPS" Style="{DynamicResource ButtonDarkBlueSquare}" Width="100" HorizontalAlignment="Right" Margin="0,124,20,10" Grid.RowSpan="2">
+        <Button Grid.Row="5" x:Name="_startPageOpenPS" Style="{DynamicResource ButtonDarkBlueSquare}" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,10,10" Grid.RowSpan="2">
             <StackPanel Width="91" Height="44">
                 <Label Content="Open PowerShell" Foreground="White" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
                 <Rectangle Width="20" Height="20" Fill="White" HorizontalAlignment="Center">

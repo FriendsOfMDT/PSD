@@ -3,14 +3,14 @@
         <ColumnDefinition Width="490"></ColumnDefinition>
         <ColumnDefinition Width="150"></ColumnDefinition>
     </Grid.ColumnDefinitions>
-    <Label x:Name="_appTabMainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle"/>
+    <Label x:Name="_appTabMainTitle" Content="@MainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22"/>
     <Rectangle Grid.Column="0" Fill="DarkBlue" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
         <Rectangle.OpacityMask>
             <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_apps}"/>
         </Rectangle.OpacityMask>
     </Rectangle>
 
-    <Label Content="Search the name of an application..." FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top"/>
+    <Label x:Name="_appTabSubTitle" Content="@SubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top"/>
     <TextBox x:Name="_appTabSearch" HorizontalAlignment="Left" Height="31" Margin="10,103,0,0" TextWrapping="Wrap" Text="Search..." VerticalAlignment="Top" Width="331" Foreground='Gray' VerticalContentAlignment="Center" FontSize="18"/>
     <Button x:Name="_appTabSearchClear" Content="Clear" Height="31" Width="62" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="414,0,0,416" />
     <Button x:Name="_appTabSearchEnter" Content="Search" Height="31" Width="63" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="346,0,0,416" />

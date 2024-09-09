@@ -1,0 +1,54 @@
+<Grid x:Name="_cusTabLayout" Margin="0" Grid.ColumnSpan="2">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_cusTabMainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle"/>
+    <Rectangle Grid.Column="0" Fill="Black" HorizontalAlignment="Right" Height="40" Width="56" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_barcode}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Label Content="Name Selection" FontSize="18" HorizontalAlignment="Center" Margin="0,81,0,0" VerticalAlignment="Top" Width="470"/>
+
+    <Label Content="Region:" FontSize="12" Margin="44,120,322,405"/>
+    <ComboBox x:Name="_cmbTabRegion" HorizontalAlignment="Left" Margin="46,145,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18"/>
+
+    <Label Content="Area:" FontSize="12" Margin="44,186,296,339"/>
+    <ComboBox x:Name="_cmbTabArea" HorizontalAlignment="Left" Margin="46,211,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18"/>
+
+    <Label Content="Digits:" FontSize="12" Margin="46,254,322,271"/>
+    <TextBox x:Name="_txtTabDigits" HorizontalAlignment="Left" Height="32" Margin="46,279,0,0" VerticalAlignment="Top" Width="122" Foreground='Gray' FontSize="18" MaxLength="4"/>
+
+    <Button x:Name="_btnADCheck" Content="Check Availability" Height="32" Width="154" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,115,239" />
+
+    <Label Content="Device Name:" FontSize="14" HorizontalAlignment="Left" HorizontalContentAlignment="Right" VerticalAlignment="Top" Width="114" Height="30" Margin="12,342,0,0" IsEnabled="False"/>
+    <TextBox x:Name="TS_OSDComputerName" FontSize="14" FontWeight="Bold" VerticalAlignment="Top" TextWrapping="NoWrap" VerticalContentAlignment="Center" Height="30" Margin="131,342,115,0" IsEnabled="False"/>
+    
+    <Label Content="Organization Location" FontSize="18" HorizontalAlignment="Center" Margin="0,444,0,0" VerticalAlignment="Top" Width="470"/>
+
+    <Label Content="OU Selection:" FontSize="12" Margin="44,480,322,45"/>
+    <TextBox x:Name="TS_MachineObjectOU" Text="" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" Visibility="Hidden" HorizontalAlignment="Left" Margin="46,505,0,0" VerticalAlignment="Top" Width="329" Height="28"/>
+    <ComboBox x:Name="_cmbDomainOUs" HorizontalAlignment="Left" Margin="46,505,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18" />
+
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_cusTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+    <Run Text="@Help"/>
+    </TextBlock>
+
+
+    <Canvas x:Name="_cusTabValidation1" Margin="0,394,0,106" Background="LightGreen" Visibility="Visible" >
+        <TextBox x:Name="_cusTabValidation1_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Height="30" />
+        <Rectangle x:Name="_cusTabValidation1_Alert" Width="30" Height="30" Fill="Red" Canvas.Left="426" Canvas.Top="10" Visibility="Visible">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+        <Rectangle x:Name="_cusTabValidation1_Check" Width="30" Height="30" Fill="Green" Canvas.Left="426" Canvas.Top="10" Visibility="Visible">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+    </Canvas>
+</Grid>

@@ -1,0 +1,70 @@
+<Window x:Class="PSDWizard.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PSDWizard"
+        Height="600" Width="800"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False">
+    <Window.Resources>
+
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Button_DarkStyle.xaml" />
+				<ResourceDictionary Source="Resources/CheckBox_DarkStyle.xaml" />
+                <ResourceDictionary Source="Resources/ComboBox_DarkStyle.xaml" />
+                <ResourceDictionary Source="Resources/Colors.xaml" />
+				<ResourceDictionary Source="Resources/Icons.xaml" />
+                <ResourceDictionary Source="Resources/ListBox_DarkStyle.xaml" />
+				<ResourceDictionary Source="Resources/ListViewItem_DarkStyle.xaml" />
+				<ResourceDictionary Source="Resources/TabControl_DarkSyle.xaml" />
+				<ResourceDictionary Source="Resources/Text_DarkStyle.xaml" />
+                <ResourceDictionary Source="Resources/TreeViewItem_DarkStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!--#region window-->
+			<Style TargetType="{x:Type Window}">
+				<Setter Property="Tag" Value="{DynamicResource {x:Static SystemParameters.HighContrastKey}}" />
+				<Style.Triggers>
+					<DataTrigger Binding="{Binding RelativeSource= {x:Static RelativeSource.Self}, Path=Tag}" Value="False">
+						<Setter Property="Background" Value="#2D2D2F" />
+					</DataTrigger>
+					<DataTrigger Binding="{Binding RelativeSource= {x:Static RelativeSource.Self},  Path=Tag}" Value="True">
+						<Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowColor}}"/>
+					</DataTrigger>
+				</Style.Triggers>
+			</Style>
+			<!--#endregion window-->
+
+            <HierarchicalDataTemplate x:Key="CheckBoxItemTemplate" ItemsSource="{Binding Children, Mode=OneTime}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Focusable="False" IsChecked="{Binding IsChecked}" VerticalAlignment="Center" />
+                    <ContentPresenter Content="{Binding Name, Mode=OneTime}" Margin="2,0" />
+                </StackPanel>
+            </HierarchicalDataTemplate>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        @StartPage
+
+        <Rectangle Fill="#2D2D2F" HorizontalAlignment="Left" Height="600" VerticalAlignment="Center" Width="150"/>
+		<Rectangle Fill="#202020" HorizontalAlignment="Right" Height="600" VerticalAlignment="Center" Width="156"/>
+		<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10">
+			<Image x:Name="_wizMainLogo" Height="48" Width="132" Stretch="Uniform" />
+		</StackPanel>
+
+        <!-- START TAB MENU -->
+        <TabControl x:Name="_wizTabControl" Width="800" Height="550" HorizontalAlignment="Center" VerticalAlignment="Top">
+            @TabItems
+        </TabControl>
+        <Label x:Name="_wizVersion" Content="v 2.15b" HorizontalAlignment="Left" Margin="10,576,0,0" VerticalAlignment="Top" Width="127" FontSize="10" Foreground="LightSlateGray"/>
+		<Button x:Name="_wizBack" Content="Back" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,277,6" Style="{DynamicResource ButtonDarkThemeSquare}"/>
+		<Button x:Name="_wizNext" Content="Next" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,169,6" Style="{DynamicResource ButtonDarkThemeSquare}"/>
+		<Button x:Name="_wizCancel" Content="Cancel" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,10,6.5" Style="{DynamicResource ButtonDarkThemeSquare}"/>
+		<Button x:Name="_wizDebugConsole" Content="Debug Console" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,534,6" Visibility="Hidden" Style="{DynamicResource ButtonDarkThemeSquare}"/>
+    </Grid>
+</Window>

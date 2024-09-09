@@ -20,7 +20,7 @@
     <Button x:Name="_tsTabCollapse" Content="Collapse All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="128,0,0,386" />
 
     <Canvas x:Name="_tsTabValidation" Margin="242,73,14,452" Background="LightGreen" Visibility="Visible" >
-        <TextBox x:Name="_tsTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" VerticalAlignment="Center" Width="195" Height="25" />
+        <TextBox x:Name="_tsTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" VerticalAlignment="Center" Width="195" Height="25" />
         <Rectangle x:Name="_tsTabValidation_Alert" Width="20" Height="20" Fill="Red" Canvas.Left="210" Visibility="Visible" Canvas.Top="2" HorizontalAlignment="Left" VerticalAlignment="Center">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
@@ -35,8 +35,29 @@
 
     <TextBox x:Name="TS_TaskSequenceID" Margin="342,139,14,386" IsEnabled="False" />
     <TreeView x:Name="_tsTabTree" HorizontalAlignment="Left" Height="371" Margin="10,169,0,0" VerticalAlignment="Top" Width="467" FontSize="14"  
-        ItemContainerStyle="{StaticResource TreeViewItemStandard}" 
-        ItemTemplate="{StaticResource CheckBoxItemTemplate}" />
+                    ItemContainerStyle="{StaticResource TreeViewItemStandard}" 
+                    ItemTemplate="{StaticResource CheckBoxItemTemplate}"  >
+			<TreeView.Resources>
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <HierarchicalDataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                    <Rectangle  HorizontalAlignment="Right" Height="20" Width="20" VerticalAlignment="Top">
+                                        <Rectangle.OpacityMask>
+                                            <VisualBrush  Stretch="Fill" Visual="{DynamicResource icons_tasksequence}"/>
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+                        
+                                    <TextBlock Text="{Binding}"
+                                        Margin="5,0" />
+                                </StackPanel>
+                            </HierarchicalDataTemplate >
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TreeView.Resources>		
+		</TreeView>
 
     <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
     <TextBlock x:Name="_tsTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">

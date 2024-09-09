@@ -701,24 +701,24 @@ Function Show-PSDInfoForm {
             }
         }
 
-        Get-WmiObject Win32_ComputerSystem | % {
+        Get-CimInstance -ClassName Win32_ComputerSystem | % {
             $Manufacturer = $_.Manufacturer
             $Model = $_.Model
             $Memory = [int] ($_.TotalPhysicalMemory / 1024 / 1024)
         }
 
-        Get-WmiObject Win32_ComputerSystemProduct | % {
+        Get-CimInstance -ClassName Win32_ComputerSystemProduct | % {
             $UUID = $_.UUID
         }
 
-        Get-WmiObject Win32_BaseBoard | % {
+        Get-CimInstance -ClassName Win32_BaseBoard | % {
             $Product = $_.Product
             $SerialNumber = $_.SerialNumber
         }
 
         try { Get-SecureBootUEFI -Name SetupMode -ErrorAction Stop; $BIOSUEFI = "UEFI" } catch { $BIOSUEFI = "BIOS" }
 
-        Get-WmiObject Win32_SystemEnclosure | % {
+        Get-CimInstance -ClassName Win32_SystemEnclosure | % {
             $AssetTag = $_.SMBIOSAssetTag.Trim()
             if ($_.ChassisTypes[0] -in "8", "9", "10", "11", "12", "14", "18", "21") { $ChassisType = "Laptop" }
             if ($_.ChassisTypes[0] -in "3", "4", "5", "6", "7", "15", "16") { $ChassisType = "Desktop" }
@@ -730,7 +730,7 @@ Function Show-PSDInfoForm {
         $ipList = @()
         $macList = @()
         $gwList = @()
-        Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1" | % {
+        Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1" | % {
             $_.IPAddress | % { $ipList += $_ }
             $_.MacAddress | % { $macList += $_ }
             if ($_.DefaultIPGateway) {

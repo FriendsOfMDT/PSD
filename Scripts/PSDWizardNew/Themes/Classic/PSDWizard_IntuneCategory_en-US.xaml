@@ -1,0 +1,25 @@
+<Grid x:Name="_catTabLayout" Margin="0" Grid.ColumnSpan="2">
+	<Grid.ColumnDefinitions>
+		<ColumnDefinition Width="490"></ColumnDefinition>
+		<ColumnDefinition Width="150"></ColumnDefinition>
+	</Grid.ColumnDefinitions>
+	<Label x:Name="_catTabMainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle"/>
+	
+	<Rectangle Grid.Column="0" Fill="Black" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+		<Rectangle.OpacityMask>
+			<VisualBrush Stretch="Fill" Visual="{DynamicResource icons_cloudsearch}"/>
+		</Rectangle.OpacityMask>
+	</Rectangle>
+
+	<Label x:Name="_catTabSubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top" Content="@SubTitle"/>
+
+	<ComboBox Name="_cmbIntuneCategory" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="340" Height="28" FontSize="18" />
+	<TextBox Name="TS_IntuneCategory" Margin="10,145,44,377" IsEnabled="False" />
+	<Button Name="_btnIntuneCheck" Content="Get Categories" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,34,418" />
+	
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+	
+    <TextBlock x:Name="_catTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+	<Run Text="@Help"/>
+	</TextBlock>
+</Grid>

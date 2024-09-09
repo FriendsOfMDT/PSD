@@ -1,10 +1,11 @@
 <#
 .SYNOPSIS
-    Module for the PSD Start
+    Module for the PSD Start to Load a UI
 .DESCRIPTION
-    Module for the PSD Start to replace the PSDstart BGInfo wallpaper
+    Module to replace the PSDstart BGInfo wallpaper with a WPF UI
 .LINK
     https://github.com/FriendsOfMDT/PSD
+
 .NOTES
         FileName: PSDStartLoader.psm1
         Solution: PowerShell Deployment for MDT
@@ -12,36 +13,90 @@
         Contact: @PowershellCrack
         Primary: @PowershellCrack
         Created: 2022-02-21
-        Modified: 2022-04-23
-        Version: 1.0.4b
+        Modified: 2024-06-25
+        Version: 1.1.2
 
-        SEE CHANGELOG.MD
+        SEE PSDSTARTLOADER.MD
 
         TODO:
-            - Add functionality to WipeDisk button
-            - Add functionality to Disk Manager button
-            - Add functionality to StatIP buttone
-            - Replace Chassis and IP retrivable cmdlets with PSDGather
-.Example
+
+.EXAMPLE
+    $PSDStartLoader = New-PSDStartLoader -LogoImgPath 'D:\DeploymentShares\PSDRestartUIv2\Scripts\powershell.png' -MenuPosition VerticalRight -FullScreen
+    Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Loading core PowerShell modules..." -Indeterminate
+    Close-PSDStartLoader -Runspace $PSDStartLoader
 #>
 
+
+#region FUNCTION: Check if running in ISE
+Function Test-PSDStartLoaderIsISE {
+    # trycatch accounts for:
+    # Set-StrictMode -Version latest
+    try {
+        return ($null -ne $psISE);
+    }
+    catch {
+        return $false;
+    }
+}
+#endregion
+
+#region FUNCTION: Check if running in Visual Studio Code
+Function Test-PSDStartLoaderVSCode{
+    if($env:TERM_PROGRAM -eq 'vscode') {
+        return $true;
+    }
+    Else{
+        return $false;
+    }
+}
+#endregion
+
 #region FUNCTION: Check if running in WinPE
-Function Test-WinPE{
+Function Test-PSDStartLoaderInWinPE{
     return Test-Path -Path Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlset\Control\MiniNT
 }
 #endregion
 
-Function Test-DartPE{
-    If(Test-WinPE){
+
+#region FUNCTION: Check for cmtrace path
+Function Get-PSDStartLoaderCmtrace {
+    #grab current registered path for exe to open log file
+    $UserLogpath = "HKCU:\SOFTWARE\Classes\Log.File\shell\open\command"
+    
+    #check other known paths
+    If(Test-Path "$env:windir\System32\cmtrace.exe"){
+        return "$env:windir\System32\cmtrace.exe"
+    }
+    ElseIf(Test-Path "$env:windir\CCM\cmtrace.exe"){
+        return "$env:windir\CCM\cmtrace.exe"
+    }
+    ElseIf(Test-Path $UserLogpath){
+        $LoggerTool = (Get-Item $UserLogpath).GetValue("").split('"')[1]
+        If(Test-Path $LoggerTool){
+            Return $LoggerTool
+        }Else{
+            Return $false
+        }
+    }
+    Else{
+        return $false
+    }
+}
+#endregion
+
+#region FUNCTION: Check for Dart tools
+Function Test-PSDStartLoaderHasDartPE{
+    If(Test-PSDStartLoaderInWinPE){
         Return Test-Path X:\Sources\Recovery\Tools\MsDartTools.exe
     }
     Else{
         Return $false
     }
 }
+#endregion
 
 #region FUNCTION: convert chassis Types to friendly name
-Function ConvertTo-ChassisType{
+Function ConvertTo-PSDStartLoaderChassisType{
     [CmdletBinding()]
     Param($ChassisId)
     Switch ($ChassisId)
@@ -77,56 +132,43 @@ Function ConvertTo-ChassisType{
 #endregion
 
 #region FUNCTION: Grab all machine platform details
-Function Get-PlatformInfo {
-# Returns device Manufacturer, Model and BIOS version, populating global variables for use in other functions/ validation
-# Note that platformType is appended to psobject by Get-PlatformValid - type is manually defined by user to ensure accuracy
+Function Get-PSDStartLoaderPlatformInfo {
+    # Returns device Manufacturer, Model and BIOS version, populating global variables for use in other functions/ validation
+    # Note that platformType is appended to psobject by Get-PlatformValid - type is manually defined by user to ensure accuracy
     [CmdletBinding()]
     [OutputType([PsObject])]
     Param()
+    [string]${CmdletName} = $MyInvocation.MyCommand
     try{
         $CIMSystemEncloure = Get-CIMInstance Win32_SystemEnclosure -ErrorAction Stop
         $CIMComputerSystem = Get-CIMInstance CIM_ComputerSystem -ErrorAction Stop
         $CIMBios = Get-CIMInstance Win32_BIOS -ErrorAction Stop
 
-        $ChassisType = ConvertTo-ChassisType -ChassisId $CIMSystemEncloure.chassistypes
+        $ChassisType = ConvertTo-PSDStartLoaderChassisType -ChassisId $CIMSystemEncloure.chassistypes
 
         [boolean]$Is64Bit = [boolean]((Get-WmiObject -Class 'Win32_Processor' | Where-Object { $_.DeviceID -eq 'CPU0' } | Select-Object -ExpandProperty 'AddressWidth') -eq 64)
         If ($Is64Bit) { [string]$envOSArchitecture = '64-bit' } Else { [string]$envOSArchitecture = '32-bit' }
 
         New-Object -TypeName PsObject -Property @{
-            "computerName" = [system.environment]::MachineName
-            "computerDomain" = $CIMComputerSystem.Domain
-            "platformBIOS" = $CIMBios.SMBIOSBIOSVersion
-            "platformManufacturer" = $CIMComputerSystem.Manufacturer
-            "platformModel" = $CIMComputerSystem.Model
+            "ComputerName" = [system.environment]::MachineName
+            "ComputerDomain" = $CIMComputerSystem.Domain
+            "BIOS" = $CIMBios.SMBIOSBIOSVersion
+            "Manufacturer" = $CIMComputerSystem.Manufacturer
+            "Model" = $CIMComputerSystem.Model
             "AssetTag" = $CIMSystemEncloure.SMBiosAssetTag
             "SerialNumber" = $CIMBios.SerialNumber
             "Architecture" = $envOSArchitecture
             "Chassis" = $ChassisType
             }
     }
-    catch{Write-Output "CRITICAL" "Failed to get information from Win32_Computersystem/ Win32_BIOS"}
-}
-#endregion
-
-#region FUNCTION: Converts IP Address to binary
-Function Convert-IPv4AddressToBinaryString {
-    Param(
-        [IPAddress]$IPAddress='0.0.0.0'
-    )
-    $addressBytes=$IPAddress.GetAddressBytes()
-
-    $strBuilder=New-Object -TypeName Text.StringBuilder
-    foreach($byte in $addressBytes){
-        $8bitString=[Convert]::ToString($byte,2).PadRight(8,'0')
-        [void]$strBuilder.Append($8bitString)
+    catch{
+        Write-PSDLog -Message ("{0}: Failed to get information from Win32_Computersystem/ Win32_BIOS" -f ${CmdletName}) -loglevel 3
     }
-    Return $strBuilder.ToString()
 }
 #endregion
 
 #region FUNCTION: Converts IP Address to integer
-Function Convert-IPv4ToInt {
+Function Convert-PSDStartLoaderIPv4ToInt {
     [CmdletBinding()]
     Param(
         [String]$IPv4Address
@@ -145,7 +187,7 @@ Function Convert-IPv4ToInt {
 #endregion
 
 #region FUNCTION: Converts integer to IP Address
-Function Convert-IntToIPv4 {
+Function Convert-PSDStartLoaderIntToIPv4 {
     [CmdletBinding()]
     Param(
         [uint32]$Integer
@@ -161,16 +203,16 @@ Function Convert-IntToIPv4 {
 #endregion
 
 #region FUNCTION: Converts subnet to a CIDR address (eg. /24)
-Function Add-IntToIPv4Address {
+Function Add-PSDStartLoaderIntToIPv4 {
     Param(
         [String]$IPv4Address,
         [int64]$Integer
     )
     Try{
-        $ipInt = Convert-IPv4ToInt -IPv4Address $IPv4Address -ErrorAction Stop
+        $ipInt = Convert-PSDStartLoaderIPv4ToInt -IPv4Address $IPv4Address -ErrorAction Stop
         $ipInt += $Integer
 
-        Convert-IntToIPv4 -Integer $ipInt
+        Convert-PSDStartLoaderIntToIPv4 -Integer $ipInt
     }Catch{
         Write-Error -Exception $_.Exception -Category $_.CategoryInfo.Category
     }
@@ -178,7 +220,7 @@ Function Add-IntToIPv4Address {
 #endregion
 
 #region FUNCTION: Converts a CIDR to a subnet address
-Function Convert-CIDRToNetmask {
+Function Convert-PSDStartLoaderCIDRToNetmask {
     [CmdletBinding()]
     Param(
     [ValidateRange(0,32)]
@@ -198,7 +240,7 @@ Function Convert-CIDRToNetmask {
 #endregion
 
 #region FUNCTION: Converts subnet to a CIDR address (eg. /24)
-Function Convert-NetmaskToCIDR {
+Function Convert-PSDStartLoaderNetmaskToCIDR {
     [CmdletBinding()]
     Param(
         [String]$SubnetMask='255.255.255.0'
@@ -235,7 +277,7 @@ Function Convert-NetmaskToCIDR {
 #endregion
 
 #region FUNCTION: Get the subnet information
-Function Get-IPv4Subnet {
+Function Get-PSDStartLoaderIPv4Subnet {
     [CmdletBinding(DefaultParameterSetName='PrefixLength')]
     Param(
         [Parameter(Mandatory=$true,Position=0)]
@@ -253,21 +295,21 @@ Function Get-IPv4Subnet {
     Process{
         Try{
             if($PSCmdlet.ParameterSetName -eq 'SubnetMask'){
-                $PrefixLength= Convert-NetmaskToCIDR -SubnetMask $SubnetMask -ErrorAction Stop
+                $PrefixLength= Convert-PSDStartLoaderNetmaskToCIDR -SubnetMask $SubnetMask -ErrorAction Stop
             }else{
-                $SubnetMask = Convert-CIDRToNetmask -PrefixLength $PrefixLength -ErrorAction Stop
+                $SubnetMask = Convert-PSDStartLoaderCIDRToNetmask -PrefixLength $PrefixLength -ErrorAction Stop
             }
 
-            $netMaskInt = Convert-IPv4ToInt -IPv4Address $SubnetMask
-            $ipInt = Convert-IPv4ToInt -IPv4Address $IPAddress
+            $netMaskInt = Convert-PSDStartLoaderIPv4ToInt -IPv4Address $SubnetMask
+            $ipInt = Convert-PSDStartLoaderIPv4ToInt -IPv4Address $IPAddress
 
-            $networkID = Convert-IntToIPv4 -Integer ($netMaskInt -band $ipInt)
+            $networkID = Convert-PSDStartLoaderIntToIPv4 -Integer ($netMaskInt -band $ipInt)
 
             $maxHosts=[math]::Pow(2,(32-$PrefixLength)) - 2
-            $broadcast = Add-IntToIPv4Address -IPv4Address $networkID -Integer ($maxHosts+1)
+            $broadcast = Add-PSDStartLoaderIntToIPv4 -IPv4Address $networkID -Integer ($maxHosts+1)
 
-            $firstIP = Add-IntToIPv4Address -IPv4Address $networkID -Integer 1
-            $lastIP = Add-IntToIPv4Address -IPv4Address $broadcast -Integer -1
+            $firstIP = Add-PSDStartLoaderIntToIPv4 -IPv4Address $networkID -Integer 1
+            $lastIP = Add-PSDStartLoaderIntToIPv4 -IPv4Address $broadcast -Integer -1
 
             if($PrefixLength -eq 32){
                 $broadcast=$networkID
@@ -327,62 +369,35 @@ function ConvertTo-NetworkStatus{
 #endregion
 
 #region FUNCTION: Grabs current client gateway
-Function Get-ClientGateway
+Function Get-PSDStartLoaderGateway
 {
 # Uses WMI to return IPv4-enabled network adapter gateway address for use in location identification
     [CmdletBinding()]
     [OutputType([PsObject])]
     Param()
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
     $arrGateways = (Get-CIMInstance Win32_networkAdapterConfiguration | Where-Object {$_.IPEnabled}).DefaultIPGateway
     foreach ($gateway in $arrGateways) {If ([string]::IsNullOrWhiteSpace($gateway)){}Else{$clientGateway = $gateway}}
     If ($clientGateway) {
         New-Object -TypeName PsObject -Property @{"IPv4address" = $clientGateway}
     }
     Else {
-        Write-Host "Unable to detect Client IPv4 Gateway Address, check IPv4 network adapter/ DHCP configuration" -ForegroundColor Red
+        Write-PSDLog -Message ("{0}: Unable to detect Client IPv4 Gateway Address, check IPv4 network adapter/ DHCP configuration" -f ${CmdletName}) -loglevel 3
     }
 }
 #endregion
 
-Function Get-NetworkInterface {
-    [CmdletBinding()]
-    Param(
-        [switch]$PassThru
-    )
-    #pull each network interface on device
-    $netInt = Get-CimInstance Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | Where-Object { $_.IPEnabled -eq $true }
-    $Interfaces = $netInt | Where-Object { $_ -notmatch '\b(?:0{1,3}\.){3}\d{1,3}\b|(169.254)|::' }
-
-    #grab all nic in wmi to compare later (its faster than querying individually)
-    $wminics = Get-CimInstance win32_NetworkAdapter | Where {($null -ne $_.MACAddress) -and ($_.Name -notlike '*Bluetooth*') -and ($_.Name -notlike '*Miniport*') -and ($_.Name -notlike '*Xbox*') }
-
-
-    $InterfaceDetails = @()
-    Foreach($Interface in $Interfaces){
-        $Status = (ConvertTo-NetworkStatus ($wminics | Where {$_.Name -eq $Interface.Description}).NetConnectionStatus)
-
-        $InterfaceDetails += New-Object -TypeName PSObject -Property @{
-            InterfaceName=$Interface.Description;
-            MacAddress=$Interface.MACAddress;
-            IPAddressv4=$Interface.IPAddress[0];
-            IPAddressv6=$Interface.IPAddress[1];
-            DefaultGateway=$Interface.DefaultIPGateway | Select -ExpandProperty $_
-            Status = $Status
-        }
-    }
-
-    If($PassThru){
-        return $InterfaceDetails
-    }Else{
-        $PrimaryInterface = $InterfaceDetails | where {$null -ne $_.DefaultGateway}
-        return $PrimaryInterface
-    }
-}
-
 
 #region FUNCTION: Get the primary interface not matter the number of nics
-Function Get-InterfaceDetails
+Function Get-PSDStartLoaderInterfaceDetails
 {
+    Param(
+        [switch]$Passthru
+    )
+    [string]${CmdletName} = $MyInvocation.MyCommand
+    Write-PSDLog -Message ("{0}: Collecting Network Interface details..." -f ${CmdletName})
+
     #pull each network interface on device
     #use .net class due to limited commands in PE
     $nics=[Net.NetworkInformation.NetworkInterface]::GetAllNetworkInterfaces() | Where {($_.NetworkInterfaceType -ne 'Loopback') -and ($_.NetworkInterfaceType -ne 'Ppp') -and ($_.Supports('IPv4'))}
@@ -390,10 +405,9 @@ Function Get-InterfaceDetails
     #grab all nic in wmi to compare later (its faster than querying individually)
     $wminics = Get-CimInstance win32_NetworkAdapter | Where {($null -ne $_.MACAddress) -and ($_.Name -notlike '*Bluetooth*') -and ($_.Name -notlike '*Miniport*') -and ($_.Name -notlike '*Xbox*') }
 
-    Write-Debug ("Detected {0} Network Inferfaces" -f $nics.Count)
+    Write-PSDLog -Message ("{0}: Detected {1} Network Inferfaces" -f ${CmdletName},$nics.Count)
 
-    #$InterfaceDetails =
-    $interface = $nics[0]
+    #TEST $interface = $nics[0]
     foreach($interface in $nics ){
 
         $ipProperties=$interface.GetIPProperties()
@@ -411,7 +425,7 @@ Function Get-InterfaceDetails
                 $adapterInfo = $wminics | Where Name -eq $interface.Description |
                         select MACAddress,Manufacturer,netconnectionstatus
 
-                $subnetInfo = Get-IPv4Subnet -IPAddress $_.Address.IPAddressToString -PrefixLength $_.PrefixLength
+                $subnetInfo = Get-PSDStartLoaderIPv4Subnet -IPAddress $_.Address.IPAddressToString -PrefixLength $_.PrefixLength
                 New-Object -TypeName PSObject -Property @{
                         InterfaceName=$interface.Name;
                         InterfaceDescription=$interface.Description;
@@ -430,682 +444,50 @@ Function Get-InterfaceDetails
                     }
 
                 }
-                Write-Debug ("Interface Detected: {0}" -f $interface.Name)
-                Write-Debug ("MAC Address: {0}" -f $adapterInfo.MACAddress)
-                Write-Debug ("IP Address assigned: {0}" -f $_.Address.IPAddressToString)
-                Write-Debug ("Gateway assigned: {0}" -f $gateway)
             }
     }
 
-    #grab local route to find primary interface
-    #wmi class is not avaliable WinPE, instead parse route print command
-    <#
-    Try{
-        Write-Debug "Processing routing table..."
-        $computer = 'localhost'
-        $wmi = Get-CimInstance -namespace root\StandardCimv2 -ComputerName 'localhost' -Query "Select * from MSFT_NetRoute" -ErrorAction Stop
-        $route = $wmi | ? { $_.DestinationPrefix -eq '0.0.0.0/0' } |
-            Select @{Name = "Destination"; Expression = {$_.DestinationPrefix}},
-                     @{Name = "Gateway"; Expression = {$_.NextHop}},
-                     @{Name = "Metric"; Expression = {$_.InterfaceMetric}} -First 1
+    #Pass all interfaces
+    If($Passthru){
+        return $InterfaceDetails
     }
-    Catch{
-        $tmpRoute = ((route print | ? { $_.trimstart() -like "0.0.0.0*" }) | % {$_}).split() | ? { $_ }
-        $route = @{'Destination' = $tmpRoute[0];
-               'Netmask'     = $tmpRoute[1];
-               'Gateway'     = $tmpRoute[2];
-               #'Interface'   = $tmpRoute[3];
-               'Metric'      = $tmpRoute[4];
-              }
+    Else{
+        #pass only interface that is connected and has a gateway
+        $currentGateway = Get-PSDStartLoaderGateway
+        $PrimaryInterface = $InterfaceDetails | where {($_.GatewayAddresses -eq $currentGateway.IPv4address) -and ($_.Status -eq 'Connected')}
+        return $PrimaryInterface
     }
-    #>
-    $currentGateway = Get-ClientGateway
-
-    Write-Debug "Determining primary interface by using routing table..."
-
-    $PrimaryInterface = $InterfaceDetails | where {($_.GatewayAddresses -eq $currentGateway.IPv4address) -and ($_.Status -eq 'Connected')}
-    return $PrimaryInterface
 }
 #endregion
 
-Function New-PSDStartLoader {
+function Get-PSDStartTSProgress {
     <#
-        .SYNOPSIS
-        Present PSDStartLoader like interface with status
-
-        .LINK
-        https://tiberriver256.github.io/powershell/PowerShellProgress-Pt3/
+    https://docs.microsoft.com/en-us/mem/configmgr/develop/reference/core/clients/client-classes/iprogressui-interface
     #>
-    [CmdletBinding()]
-    Param(
-        [string]$LogoImgPath,
-        [switch]$FullScreen
-    )
-    
-    [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
-    $syncHash = [hashtable]::Synchronized(@{})
-    $PSDRunSpace =[runspacefactory]::CreateRunspace()
-    $syncHash.Runspace = $PSDRunSpace
-    $syncHash.InPE = Test-WinPE
-    $syncHash.DartTools = Test-DartPE
-    $SyncHash.DebugMode = $PSDDeBug
-    $SyncHash.Indeterminate = $False
-    $SyncHash.ProgressColor = 'LightGreen'
-    $SyncHash.ShowPercentage = 'Visible'
-    $SyncHash.LogoImg = $LogoImgPath
-    $syncHash.Status = ''
-    $syncHash.PercentComplete = 0
-    $syncHash.Countdown = 0
-    $syncHash.Fullscreen = $FullScreen
-    $PSDRunSpace.ApartmentState = "STA"
-    $PSDRunSpace.ThreadOptions = "ReuseThread"
-    $data = $PSDRunSpace.Open() | Out-Null
-    $PSDRunSpace.SessionStateProxy.SetVariable("syncHash",$syncHash)
-    $PowerShellCommand = [PowerShell]::Create().AddScript({
 
-    [string]$xaml = @"
-    <Window
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="PSDStartLoader"
-    Width="1024"
-    Height="768"
-    Background="#012456"
-    WindowStartupLocation="CenterScreen"
-    mc:Ignorable="d">
-<Window.Resources>
-    <ResourceDictionary>
-
-        <Canvas x:Key="icons_cog" Width="24" Height="24">
-            <Path Stretch="Fill" Fill="White" Data="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M10,22C9.75,22 9.54,21.82 9.5,21.58L9.13,18.93C8.5,18.68 7.96,18.34 7.44,17.94L4.95,18.95C4.73,19.03 4.46,18.95 4.34,18.73L2.34,15.27C2.21,15.05 2.27,14.78 2.46,14.63L4.57,12.97L4.5,12L4.57,11L2.46,9.37C2.27,9.22 2.21,8.95 2.34,8.73L4.34,5.27C4.46,5.05 4.73,4.96 4.95,5.05L7.44,6.05C7.96,5.66 8.5,5.32 9.13,5.07L9.5,2.42C9.54,2.18 9.75,2 10,2H14C14.25,2 14.46,2.18 14.5,2.42L14.87,5.07C15.5,5.32 16.04,5.66 16.56,6.05L19.05,5.05C19.27,4.96 19.54,5.05 19.66,5.27L21.66,8.73C21.79,8.95 21.73,9.22 21.54,9.37L19.43,11L19.5,12L19.43,13L21.54,14.63C21.73,14.78 21.79,15.05 21.66,15.27L19.66,18.73C19.54,18.95 19.27,19.04 19.05,18.95L16.56,17.95C16.04,18.34 15.5,18.68 14.87,18.93L14.5,21.58C14.46,21.82 14.25,22 14,22H10M11.25,4L10.88,6.61C9.68,6.86 8.62,7.5 7.85,8.39L5.44,7.35L4.69,8.65L6.8,10.2C6.4,11.37 6.4,12.64 6.8,13.8L4.68,15.36L5.43,16.66L7.86,15.62C8.63,16.5 9.68,17.14 10.87,17.38L11.24,20H12.76L13.13,17.39C14.32,17.14 15.37,16.5 16.14,15.62L18.57,16.66L19.32,15.36L17.2,13.81C17.6,12.64 17.6,11.37 17.2,10.2L19.31,8.65L18.56,7.35L16.15,8.39C15.38,7.5 14.32,6.86 13.12,6.62L12.75,4H11.25Z" />
-        </Canvas>
-
-        <Canvas x:Key="icons_ps" Width="24" Height="24">
-            <Path Fill="White" Data="M20,19V7H4V19H20M20,3A2,2 0 0,1 22,5V19A2,2 0 0,1 20,21H4A2,2 0 0,1 2,19V5C2,3.89 2.9,3 4,3H20M13,17V15H18V17H13M9.58,13L5.57,9H8.4L11.7,12.3C12.09,12.69 12.09,13.33 11.7,13.72L8.42,17H5.59L9.58,13Z" />
-        </Canvas>
-
-        <Canvas x:Key="icons_target" Width="24" Height="24">
-            <Path Width="20" Height="20" Fill="White" Stretch="Uniform" Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10Z"/>
-        </Canvas>
-
-        <Canvas x:Key="icons_disk" Width="24" Height="24">
-            <Path Fill="Black" Data="M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M12,4A6,6 0 0,0 6,10C6,13.31 8.69,16 12.1,16L11.22,13.77C10.95,13.29 11.11,12.68 11.59,12.4L12.45,11.9C12.93,11.63 13.54,11.79 13.82,12.27L15.74,14.69C17.12,13.59 18,11.9 18,10A6,6 0 0,0 12,4M12,9A1,1 0 0,1 13,10A1,1 0 0,1 12,11A1,1 0 0,1 11,10A1,1 0 0,1 12,9M7,18A1,1 0 0,0 6,19A1,1 0 0,0 7,20A1,1 0 0,0 8,19A1,1 0 0,0 7,18M12.09,13.27L14.58,19.58L17.17,18.08L12.95,12.77L12.09,13.27Z" />
-        </Canvas>
-
-        <Canvas x:Key="icons_wipe" Width="24" Height="24">
-            <Path Fill="Black" Data="M12,4C5,4 2,9 2,9L9,16C9,16 9.5,15.1 10.4,14.5L10.7,16.5C10.3,16.8 10,17.4 10,18A2,2 0 0,0 12,20A2,2 0 0,0 14,18C14,17.1 13.5,16.4 12.7,16.1L12.3,14C14.1,14.2 15,16 15,16L22,9C22,9 19,4 12,4M15.1,13.1C14.3,12.5 13.3,12 12,12L11,6.1C11.3,6 11.7,6 12,6C15.7,6 18.1,7.7 19.3,8.9L15.1,13.1M8.9,13.1L4.7,8.9C5.5,8 7,7 9,6.4L10,12.4C9.6,12.6 9.2,12.8 8.9,13.1Z" />
-        </Canvas>
-
-        <Canvas x:Key="icons_exit"  Width="24" Height="24">
-            <Path Fill="Black" Data="M16.56,5.44L15.11,6.89C16.84,7.94 18,9.83 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,9.83 7.16,7.94 8.88,6.88L7.44,5.44C5.36,6.88 4,9.28 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,9.28 18.64,6.88 16.56,5.44M13,3H11V13H13" />
-        </Canvas>
-
-        <Style TargetType="{x:Type Window}">
-            <Setter Property="FontFamily" Value="Segoe UI" />
-            <Setter Property="FontWeight" Value="Light" />
-            <Setter Property="Background" Value="#012456" />
-            <Setter Property="Foreground" Value="white" />
-        </Style>
-
-        <Style x:Key="CheckRadioFocusVisual">
-            <Setter Property="Control.Template">
-                <Setter.Value>
-                    <ControlTemplate>
-                        <Rectangle Margin="24,0,0,0" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="ModernCircleSlider" TargetType="{x:Type CheckBox}">
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type CheckBox}">
-                        <ControlTemplate.Resources>
-                            <Storyboard x:Key="StoryboardIsChecked">
-                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="CheckFlag">
-                                    <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
-                                    <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="24"/>
-                                </DoubleAnimationUsingKeyFrames>
-                            </Storyboard>
-                            <Storyboard x:Key="StoryboardIsCheckedOff">
-                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="CheckFlag">
-                                    <EasingDoubleKeyFrame KeyTime="0" Value="24"/>
-                                    <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0"/>
-                                </DoubleAnimationUsingKeyFrames>
-                            </Storyboard>
-                        </ControlTemplate.Resources>
-                        <BulletDecorator Background="Transparent" SnapsToDevicePixels="true">
-                            <BulletDecorator.Bullet>
-                                <Border x:Name="ForegroundPanel" BorderThickness="1" Width="55" Height="30" CornerRadius="15">
-                                    <Canvas>
-                                        <Border Background="White" x:Name="CheckFlag" CornerRadius="15" VerticalAlignment="Center" BorderThickness="1" Width="29" Height="28" RenderTransformOrigin="0.5,0.5">
-                                            <Border.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform/>
-                                                    <SkewTransform/>
-                                                    <RotateTransform/>
-                                                    <TranslateTransform/>
-                                                </TransformGroup>
-                                            </Border.RenderTransform>
-                                            <Border.Effect>
-                                                <DropShadowEffect ShadowDepth="1" Direction="180" />
-                                            </Border.Effect>
-                                        </Border>
-                                    </Canvas>
-                                </Border>
-                            </BulletDecorator.Bullet>
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
-                        </BulletDecorator>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="HasContent" Value="true">
-                                <Setter Property="FocusVisualStyle" Value="{StaticResource CheckRadioFocusVisual}"/>
-                                <Setter Property="Padding" Value="4,0,0,0"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="false">
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <!--<Setter TargetName="ForegroundPanel" Property="Background" Value="{DynamicResource Accent}" />-->
-                                <Setter TargetName="ForegroundPanel" Property="Background" Value="Green" />
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard x:Name="BeginStoryboardCheckedTrue" Storyboard="{StaticResource StoryboardIsChecked}" />
-                                    <RemoveStoryboard BeginStoryboardName="BeginStoryboardCheckedFalse" />
-                                </Trigger.EnterActions>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="False">
-                                <Setter TargetName="ForegroundPanel" Property="Background" Value="Gray" />
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard x:Name="BeginStoryboardCheckedFalse" Storyboard="{StaticResource StoryboardIsCheckedOff}" />
-                                    <RemoveStoryboard BeginStoryboardName="BeginStoryboardCheckedTrue" />
-                                </Trigger.EnterActions>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-
-        <Style x:Key="ButtonLightGrayRounded" TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="LightGray" />
-            <Setter Property="Foreground" Value="Black" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button" >
-
-                        <Border Name="border"
-                    BorderThickness="1"
-                    Padding="4,2"
-                    BorderBrush="DarkGray"
-                    CornerRadius="5,0,5,0"
-                    Background="#FFE8EDF9">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    TextBlock.TextAlignment="Center"
-                                    />
-                        </Border>
-
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="lightblue" />
-                            </Trigger>
-
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="LightGray" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-
-    </ResourceDictionary>
-</Window.Resources>
-<Grid x:Name="background" Height="768" HorizontalAlignment="Center" VerticalAlignment="Center">
-
-    <Grid Width="1024" Height="614" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FFFFFFFF" Margin="0,50,0,0" >
-        <StackPanel Margin="20,0,512,0">
-            <Label Content="Progress:" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" VerticalAlignment="Top" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Left"/>
-            <TextBlock x:Name="txtStatus" Text="Status" Foreground="Black" FontSize="18" HorizontalAlignment="Left" Width="962" Margin="10,0,0,0" />
-
-            <Label Content="Computer Info:" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" Margin="0,20,0,0" VerticalAlignment="Top" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Left"/>
-            <Grid Height="135" Width="323" HorizontalAlignment="Left" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" MinWidth="121"></ColumnDefinition>
-                    <ColumnDefinition></ColumnDefinition>
-                    <ColumnDefinition Width="auto"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                </Grid.RowDefinitions>
-                <Label Content="Manufacturer:" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontSize="16"  VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
-                <TextBox x:Name="txtManufacturer" Text="Demo" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-                <Label Content="Model:" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
-                <TextBox x:Name="txtModel" Text="Demo" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-                <Label Content="Serial Number:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
-                <TextBox x:Name="txtSerialNumber" Text="Demo" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-                <Label Content="Asset Tag:" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
-                <TextBox x:Name="txtAssetTag" Text="Demo" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-            </Grid>
-            <Label Content="Network Info:" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Left"/>
-
-            <Grid Height="165" Width="314" HorizontalAlignment="Left" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" MinWidth="121"></ColumnDefinition>
-                    <ColumnDefinition></ColumnDefinition>
-                    <ColumnDefinition Width="auto"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                </Grid.RowDefinitions>
-                <Label Content="Mac Address:" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
-                <TextBox x:Name="txtMac" Text="Demo" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-                <Label Content="IP Address:" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
-                <TextBox x:Name="txtIP" Text="Demo" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-                <Label Content="Subnet:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
-                <TextBox x:Name="txtSubnet" Text="Demo" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-                <Label Content="Default Gateway:" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right"/>
-                <TextBox x:Name="txtGateway" Text="Demo" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-                <Label Content="DHCP Server:" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
-                <TextBox x:Name="txtDHCP" Text="Demo" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
-            </Grid>
-
-
-
-            <Button x:Name="btnAddStaticIP" Style="{DynamicResource ButtonLightGrayRounded}" Width="129" HorizontalAlignment="Left" Margin="20">
-                <StackPanel Width="91" Height="44">
-                    <Label x:Name="lblAddStaticIP" Content="Configure Static IP" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
-                    <Rectangle Width="20" Height="20" Fill="Black" HorizontalAlignment="Center">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_cog}"/>
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                </StackPanel>
-            </Button>
-        </StackPanel>
-
-        <TextBlock x:Name="txtPercentage" Text="{Binding ElementName=ProgressBar, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Top" Foreground="#012456" Margin="0,564,0,0" />
-        <ProgressBar x:Name="ProgressBar" Width="724" Height="4" Margin="0,585,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Background="white" Foreground="Green" />
-        <StackPanel HorizontalAlignment="Left" Width="200" VerticalAlignment="Center" Height="478" Margin="824,0,0,0">
-            <TextBlock x:Name="txtCountdown" Text="10" HorizontalAlignment="Center" VerticalAlignment="Top" Foreground="#012456" FontSize="24" />
-
-            <StackPanel Orientation="Horizontal" Margin="0,0,20,10" >
-                <TextBlock x:Name="txtDebug" Text="Debug Mode" Foreground="Black" VerticalAlignment="Center" Margin="10" FontSize="18"/>
-                <CheckBox x:Name="chkDebug" Style="{DynamicResource ModernCircleSlider}" Margin="0,10,20,10" Width="58" HorizontalAlignment="Right" />
-            </StackPanel>
-
-
-            <Button x:Name="btnWipeDisk" Style="{DynamicResource ButtonLightGrayRounded}" Width="122" HorizontalAlignment="Right" Margin="0,0,20,10" >
-                <StackPanel Width="91" Height="44">
-                    <Label x:Name="lblWipeDisk" Content="Wipe Disks" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
-                    <Rectangle Width="24" Height="20" Fill="Black" HorizontalAlignment="Center">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_wipe}"/>
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                </StackPanel>
-            </Button>
-
-            <Button x:Name="btnOpenDisk" Style="{DynamicResource ButtonLightGrayRounded}" Width="122" HorizontalAlignment="Right" Margin="0,10,20,10" >
-                <StackPanel Width="91" Height="44">
-                    <Label x:Name="lblOpenDisk" Content="Show Disks" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
-                    <Rectangle Width="20" Height="20" Fill="DarkGray" HorizontalAlignment="Center">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_disk}"/>
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                </StackPanel>
-            </Button>
-
-
-            <Button x:Name="btnOpenPSWindow" Style="{DynamicResource ButtonLightGrayRounded}" Width="122" HorizontalAlignment="Right" Margin="0,10,20,10" >
-                <StackPanel Width="91" Height="44">
-                    <Label x:Name="lblOpenPSWindow" Content="Launch PowerShell" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
-                    <Rectangle Width="20" Height="20" Fill="Blue" HorizontalAlignment="Center">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_ps}"/>
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                </StackPanel>
-            </Button>
-
-            <Button x:Name="btnDartPE" Style="{DynamicResource ButtonLightGrayRounded}" Width="122" HorizontalAlignment="Right" Margin="0,10,20,10" >
-                <StackPanel Width="91" Height="44">
-                    <Label x:Name="lblDartPE" Content="Launch Dart PE" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
-                    <Rectangle Width="20" Height="20" Fill="Green" HorizontalAlignment="Center">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_target}"/>
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                </StackPanel>
-            </Button>
-
-            <Button x:Name="btnExit" Style="{DynamicResource ButtonLightGrayRounded}" Width="122" HorizontalAlignment="Right" Margin="0,10,20,10" >
-                <StackPanel Width="91" Height="44">
-                    <Label x:Name="lblExit" Content="Exit" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
-                    <Rectangle Width="20" Height="20" Fill="Red" HorizontalAlignment="Center">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_exit}"/>
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                </StackPanel>
-            </Button>
-
-
-        </StackPanel>
-
-
-    </Grid>
-    <Image x:Name="imgLogo" Width="72" Height="66" Margin="23,688,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
-    <Label Width="423" Margin="0,0,20,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Content="Powershell Deployment" FontSize="36" Foreground="White" Height="70" />
-
-
-</Grid>
-</Window>
-"@
-
-        [xml]$xaml = $xaml -replace 'mc:Ignorable="d"',$FullScreenXaml -replace "x:N",'N' -replace '^<Win.*', '<Window'
-        $reader=(New-Object System.Xml.XmlNodeReader $xaml)
-        $syncHash.Window=[Windows.Markup.XamlReader]::Load( $reader )
-        #===========================================================================
-        # Store Form Objects In PowerShell
-        #===========================================================================
-        $xaml.SelectNodes("//*[@Name]") | %{ $SyncHash."$($_.Name)" = $SyncHash.Window.FindName($_.Name)}
-        
-        # INNER  FUNCTIONS
-        #Closes UI objects and exits (within runspace)
-        Function Close-PSDStartLoader
-        {
-            if ($syncHash.hadCritError) { Write-Host -Message "Background thread had a critical error" -ForegroundColor red }
-            #if runspace has not errored Dispose the UI
-            if (!($syncHash.isClosing)) { Stop-PSDStartLoader }
-        }
-
-        #Disposes UI objects and exits (within runspace)
-        Function Stop-PSDStartLoader
-        {
-            $syncHash.Window.Close()
-            $PSDRunSpace.Close()
-            $PSDRunSpace.Dispose()
-        }
-
-        #add xaml elements that you want to update often
-        #the value must also be added to top of function as synchash property
-        #then it can be called by that value later on
-        $updateBlock = {
-            #progress bar
-            $SyncHash.ProgressBar.IsIndeterminate = $SyncHash.Indeterminate
-            $SyncHash.ProgressBar.Value = $SyncHash.PercentComplete
-            #$SyncHash.ProgressBar.Foreground = $Runspace.ProgressColor
-
-            #Text boxes
-            $SyncHash.txtPercentage.Visibility = $SyncHash.ShowPercentage
-                       
-            $SyncHash.txtStatus.Text = $SyncHash.Status
-        }
-
-        $syncHash.Window.Add_SourceInitialized( {
-            ## Before the window's even displayed ...
-            ## We'll create a timer
-            $timer = new-object System.Windows.Threading.DispatcherTimer
-            ## Which will fire 4 times every second
-            $timer.Interval = [TimeSpan]"0:0:0.01"
-            ## And will invoke the $updateBlock
-            $timer.Add_Tick( $updateBlock )
-            ## Now start the timer running
-            $timer.Start()
-            if( $timer.IsEnabled ) {
-               Write-Host "Clock is running. Don't forget: RIGHT-CLICK to close it."
-            } else {
-               $clock.Close()
-               Write-Error "Timer didn't start"
-            }
-        } )
-
-        #maximze window if called
-        If($SyncHash.Fullscreen){
-            $syncHash.Window.WindowState = "Maximized"
-            $syncHash.Window.WindowStyle = "None"
-        }
-
-        #Image
-        $SyncHash.imgLogo.Source = $SyncHash.LogoImg
-
-        #Update Debug Checkbox
-        $SyncHash.txtCountdown.Visibility = 'Hidden'
-        $SyncHash.chkDebug.IsChecked = $SyncHash.DebugMode
-        [System.Windows.RoutedEventHandler]$Script:CheckedEventHandler = {
-            $SyncHash.DebugMode = $true
-        }
-        #Do Debug actions when checked
-        $SyncHash.chkDebug.AddHandler([System.Windows.Controls.CheckBox]::CheckedEvent, $CheckedEventHandler)
-
-        [System.Windows.RoutedEventHandler]$Script:UnCheckedEventHandler = {
-            $SyncHash.DebugMode = $false
-        }
-        #Do Debug action when unchecked
-        $SyncHash.chkDebug.AddHandler([System.Windows.Controls.CheckBox]::UncheckedEvent, $UnCheckedEventHandler)
-        
-        #hide options not allowed in Windows
-        If(-Not($SyncHash.InPE) ){
-            $syncHash.btnDartPE.Visibility = 'Hidden'
-            $syncHash.btnWipeDisk.Visibility = 'Hidden'
-            $syncHash.btnAddStaticIP.Visibility = 'Hidden'
-        }
-
-        If(-Not($syncHash.DartTools)){
-            $syncHash.btnDartPE.Visibility = 'hidden'
-        }
-
-        #Add smooth closing for Window
-        $syncHash.Window.Add_Loaded({ $syncHash.isLoaded = $True })
-    	$syncHash.Window.Add_Closing({ $syncHash.isClosing = $True; Close-PSDStartLoader })
-    	$syncHash.Window.Add_Closed({ $syncHash.isClosed = $True })
-
-        #action for poshwindow button
-        $syncHash.btnOpenPSWindow.Dispatcher.Invoke([action]{
-            $syncHash.btnOpenPSWindow.Add_Click({
-                If($syncHash.InPE){
-                    Start-Process 'powershell.exe' -WorkingDirectory 'X:\deploy'
-                }Else{
-                    Start-Process 'powershell.exe' -WorkingDirectory $env:windir
-                }
-            })
-        })
-
-        $syncHash.btnDartPE.Dispatcher.Invoke([action]{
-            $syncHash.btnDartPE.Add_Click({
-                If($syncHash.DartTools){
-                    Start-Process X:\Sources\Recovery\Tools\MsDartTools.exe -Wait
-                }
-            })
-        })
-          
-
-        #action for exit button
-        $syncHash.btnExit.Dispatcher.Invoke([action]{
-            $syncHash.btnExit.Add_Click({
-                $syncHash.Window.Dispatcher.Invoke([action]{ 
-                    Close-PSDStartLoader 
-                })
-            })
-        })
-        
-        $syncHash.Window.ShowDialog() | Out-Null
-        $syncHash.Error = $Error
-    })
-
-
-    $PowerShellCommand.Runspace = $PSDRunSpace
-    $data = $PowerShellCommand.BeginInvoke()
-
-    Register-ObjectEvent -InputObject $SyncHash.Runspace `
-            -EventName 'AvailabilityChanged' `
-            -Action {
-
-                    if($Sender.RunspaceAvailability -eq "Available")
-                    {
-                        $Sender.Closeasync()
-                        $Sender.Dispose()
-                    }
-
-                } | Out-Null
-
-
-
-    return $syncHash
-
-}#end runspacce
-
-Function Set-PSDStartLoaderWindow {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory=$true)]
-        [System.Object[]]$Runspace,
-
-        [boolean]$OnTop
-    )
-    Try{
-        $Runspace.Window.Dispatcher.invoke([action]{
-            $Runspace.Window.Topmost = $OnTop
-        },'Normal')
-    }Catch{}
-}
-
-
-Function Invoke-PSDStartLoaderCountdown
-{
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory=$true)]
-        $Runspace,    
-        [Parameter(Position=0,Mandatory=$true)]
-        [int]$StartCount,
-        [String]$TextElement,
-        [scriptblock]$Action
-    )
-
-    #detemine supported elements and the property to update
-    Switch($Runspace.$TextElement.GetType().Name){
-        'Button' {$property = 'Content'}
-        'Label' {$property = 'Content'}
-        'TextBox' {$property = 'Text'}
-        'TextBlock' {$property = 'Text'}
-        default {$property = 'Text'}
+    Begin{
+        $tsenv = New-Object -ComObject Microsoft.SMS.TSEnvironment -ErrorAction SilentlyContinue
+        #$TSProgressUi = New-Object -ComObject Microsoft.SMS.TSProgressUI -ErrorAction SilentlyContinue
     }
-
-    #ensure element is visable
-    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName $TextElement -Property Visibility -Value 'Visible'
-
-    #display the elements countdown value
-    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName $TextElement -Property $property -Value $StartCount
-
-    while ($StartCount -ge 0)
+    Process
     {
-        #update the elements countdown value
-        Set-PSDStartLoaderElement -Runspace $Runspace -ElementName $TextElement -Property $property -Value $StartCount
-        start-sleep 1
-        $StartCount -= 1
+        Try{
+            $TSProgressData = @{
+                "OrgName" = $tsenv.Value("_SMSTSOrgName")
+                "PackageName" = $tsenv.Value("_SMSTSPackageName")
+                "DialogMessage" = $tsenv.Value("_SMSTSCustomProgressDialogMessage")
+                "ActionName" = $tsenv.Value("_SMSTSCurrentActionName")
+                "Step" = [Convert]::ToUInt32($tsenv.Value("_SMSTSNextInstructionPointer"))
+                "MaxSteps" = [Convert]::ToUInt32($tsenv.Value("_SMSTSInstructionTableSize"))
+            } 
+        }Catch{}
     }
-
-    #invoke an action if specified
-    If($Action){
-        Invoke-Command $Action
+    End{
+        return $TSProgressData
     }
 }
 
-function Update-PSDStartLoaderProgressBar
-{
-    [CmdletBinding(DefaultParameterSetName='percent')]
-    Param (
-        [Parameter(Mandatory=$true)]
-        $Runspace,
-        [parameter(Mandatory=$true, ParameterSetName="percent")]
-        [int]$PercentComplete,
-        [parameter(Mandatory=$true, ParameterSetName="steps")]
-        [int]$Step,
-        [parameter(Mandatory=$true, ParameterSetName="steps")]
-        [int]$MaxSteps,
-        [parameter(Mandatory=$false, ParameterSetName="steps")]
-        [int]$Timespan = 1,
-        [parameter(Mandatory=$true, ParameterSetName="indeterminate")]
-        [switch]$Indeterminate,
-        [String]$Status = $Null,
-        [ValidateSet("Green", "Yellow", "Red")]
-        [string]$Color = 'Green'
-    )
-
-    #build field object from name
-    If ($PSCmdlet.ParameterSetName -eq "steps")
-    {
-        #calculate percentage
-        $PercentComplete = (($Step / $MaxSteps) * 100)
-        #determine where increment will start
-        If($Step -eq 1){
-            $IncrementFrom = 1
-        }Else{
-            $IncrementFrom = ((($Step-1) / $MaxSteps) * 100)
-        }
-        $IncrementBy = ($PercentComplete-$IncrementFrom)/$Timespan
-    }
-
-    if($PSCmdlet.ParameterSetName -eq "indeterminate"){
-        $Runspace.Indeterminate = $True
-        $Runspace.ShowPercentage ='Hidden'
-        $Runspace.ProgressColor = $Color
-        $Runspace.Status = $Status
-    }
-    else
-    {
-        if($PercentComplete -gt 0)
-        {
-            if($Timespan -gt 1){
-                $t=1
-                #Determine the incement to go by based on timespan and difference
-                Do{                   
-                    $IncrementTo = $IncrementFrom + ($IncrementBy * $t)
-                    $Runspace.Indeterminate = $False
-                    $Runspace.ShowPercentage ='Visible'
-                    $Runspace.ProgressColor = $Color
-                    $Runspace.PercentComplete = $IncrementTo
-                    $Runspace.Status = $Status
-                    $t++
-                    Start-Sleep 1
-                } Until ($IncrementTo -ge $PercentComplete -or $t -gt $Timespan)
-            }
-            Else{
-                $Runspace.Indeterminate = $False
-                $Runspace.ShowPercentage ='Visible'
-                $Runspace.ProgressColor = $Color
-                $Runspace.PercentComplete = $PercentComplete
-                $Runspace.Status = $Status
-            }
-        }
-        Else{
-            $Runspace.Status = $Status
-        }
-    }
-}
-
-
-function Show-TSProgressStatus
+function Set-PSDStartTSProgress
 {
     <#
     .SYNOPSIS
@@ -1142,78 +524,2552 @@ function Show-TSProgressStatus
     .EXAMPLE
         Set's "Custom Step 1" at 100 percent complete
         Show-ProgressStatus -Message "Running Custom Step 1" -Step 300 -MaxStep 300
+    .LINK
+    https://docs.microsoft.com/en-us/mem/configmgr/develop/reference/core/clients/client-classes/iprogressui--showactionprogress-method
     #>
     param(
         [Parameter(Mandatory=$true)]
+        [string] $ActionMessage,
+        [Parameter(Mandatory=$true)]
         [string] $Message,
         [Parameter(Mandatory=$true)]
+        [int]$ActionStep,
+        [int]$ActionMaxStep,
         [int]$Step,
-        [Parameter(Mandatory=$true)]
-        [int]$MaxStep,
-        [string]$SubMessage,
-        [int]$IncrementSteps,
-        [switch]$Outhost
+        [int]$MaxStep
     )
 
     Begin{
-
-        If($SubMessage){
-            $StatusMessage = ("{0} [{1}]" -f $Message,$SubMessage)
-        }
-        Else{
-            $StatusMessage = $Message
-
+        $tsenv = New-Object -ComObject Microsoft.SMS.TSEnvironment -ErrorAction SilentlyContinue
+        $TSProgressUi = New-Object -ComObject Microsoft.SMS.TSProgressUI -ErrorAction SilentlyContinue
+        If($RunningAction){
+            $Action = $RunningAction
+        }Else{
+            $Action = $tsenv.Value("_SMSTSCurrentActionName")
         }
     }
     Process
     {
         If($tsenv){
+            #ShowActionProgress(string, string, string, string, uint, uint, string, uint, uint)
             $TSProgressUi.ShowActionProgress(`
                 $tsenv.Value("_SMSTSOrgName"),`
                 $tsenv.Value("_SMSTSPackageName"),`
                 $tsenv.Value("_SMSTSCustomProgressDialogMessage"),`
-                $tsenv.Value("_SMSTSCurrentActionName"),`
+                $Action,`
                 [Convert]::ToUInt32($tsenv.Value("_SMSTSNextInstructionPointer")),`
                 [Convert]::ToUInt32($tsenv.Value("_SMSTSInstructionTableSize")),`
-                $StatusMessage,`
+                $Message,`
                 $Step,`
                 $Maxstep)
         }
-        Else{
-            Write-Progress -Activity "$Message ($Step of $Maxstep)" -Status $StatusMessage -PercentComplete (($Step / $Maxstep) * 100) -id 1
-        }
     }
     End{
-        Write-LogEntry $Message -Severity 1 -Outhost:$Outhost
+
     }
 }
 
+#region FUNCTION: Loader for modern checkbox style
+Function Add-PSDStartLoaderCheckboxStyle{
+    [string]$ChkStyleXaml = @"
 
-Function Get-PSDStartLoaderElement {
+        <Style x:Key="CheckRadioFocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle Margin="24,0,0,0" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        </Style>
+
+        <Style x:Key="ModernCircleSlider" TargetType="{x:Type CheckBox}">
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <ControlTemplate.Resources>
+                        <Storyboard x:Key="StoryboardIsChecked">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="CheckFlag">
+                                <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="24"/>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                        <Storyboard x:Key="StoryboardIsCheckedOff">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="CheckFlag">
+                                <EasingDoubleKeyFrame KeyTime="0" Value="24"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0"/>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </ControlTemplate.Resources>
+                    <BulletDecorator Background="Transparent" SnapsToDevicePixels="true">
+                        <BulletDecorator.Bullet>
+                            <Border x:Name="ForegroundPanel" BorderThickness="1" Width="55" Height="30" CornerRadius="15">
+                                <Canvas>
+                                    <Border Background="White" x:Name="CheckFlag" CornerRadius="15" VerticalAlignment="Center" BorderThickness="1" Width="29" Height="28" RenderTransformOrigin="0.5,0.5">
+                                        <Border.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform/>
+                                                <SkewTransform/>
+                                                <RotateTransform/>
+                                                <TranslateTransform/>
+                                            </TransformGroup>
+                                        </Border.RenderTransform>
+                                        <Border.Effect>
+                                            <DropShadowEffect ShadowDepth="1" Direction="180" />
+                                        </Border.Effect>
+                                    </Border>
+                                </Canvas>
+                            </Border>
+                        </BulletDecorator.Bullet>
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
+                    </BulletDecorator>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HasContent" Value="true">
+                            <Setter Property="FocusVisualStyle" Value="{StaticResource CheckRadioFocusVisual}"/>
+                            <Setter Property="Padding" Value="4,0,0,0"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <!--<Setter TargetName="ForegroundPanel" Property="Background" Value="{DynamicResource Accent}" />-->
+                            <Setter TargetName="ForegroundPanel" Property="Background" Value="Green" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="BeginStoryboardCheckedTrue" Storyboard="{StaticResource StoryboardIsChecked}" />
+                                <RemoveStoryboard BeginStoryboardName="BeginStoryboardCheckedFalse" />
+                            </Trigger.EnterActions>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter TargetName="ForegroundPanel" Property="Background" Value="Gray" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="BeginStoryboardCheckedFalse" Storyboard="{StaticResource StoryboardIsCheckedOff}" />
+                                <RemoveStoryboard BeginStoryboardName="BeginStoryboardCheckedTrue" />
+                            </Trigger.EnterActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        </Style>
+"@
+    return $ChkStyleXaml
+}
+#endregion
+
+#region FUNCTION: Loader for network configuration menu
+Function Show-PSDStartLoaderNetCfgWindow
+{
+    [string]${CmdletName} = $MyInvocation.MyCommand
+    Write-PSDLog -Message ("{0}: Network configurator window started" -f ${CmdletName})
+
+    #build runspace
+    $syncHash = [hashtable]::Synchronized(@{})
+    $PSDRunSpace =[runspacefactory]::CreateRunspace()
+    $syncHash.Runspace = $PSDRunSpace
+    $syncHash.CheckBoxStyle = (Add-PSDStartLoaderCheckboxStyle)
+    $PSDRunSpace.ApartmentState = "STA"
+    $PSDRunSpace.ThreadOptions = "ReuseThread"
+    $PSDRunSpace.Open() | Out-Null
+    $PSDRunSpace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+    $PowerShellCommand = [PowerShell]::Create().AddScript({
+
+    [string]$xaml = @"
+        <Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Network Settings"
+        mc:Ignorable="d"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Height="600" Width="410"
+        AllowsTransparency="True"
+        WindowStyle="None">
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Setter Property="BorderBrush" Value="Black" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Border.Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="Black" BlurRadius="100" Opacity="0.5" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            $($syncHash.CheckBoxStyle)
+
+            <ControlTemplate x:Key="ComboBoxToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="20" />
+                    </Grid.ColumnDefinitions>
+                    <Border x:Name="Border"
+                    Grid.ColumnSpan="2"
+                    BorderThickness="1">
+                        <Border.BorderBrush>
+                            <SolidColorBrush Color="#FF1D3245"/>
+                        </Border.BorderBrush>
+                        <Border.Background>
+                            <SolidColorBrush Color="White"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Grid.Column="0"
+                    Margin="1" >
+                        <Border.BorderBrush>
+                            <SolidColorBrush Color="LightBlue"/>
+                        </Border.BorderBrush>
+                        <Border.Background>
+                            <SolidColorBrush Color="LightGray"/>
+                        </Border.Background>
+                    </Border>
+                    <Path x:Name="Arrow"
+                Grid.Column="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+                Fill="#444444">
+                    </Path>
+                </Grid>
+            </ControlTemplate>
+
+            <Style x:Key="SimpleComboBoxStyle" TargetType="{x:Type ComboBox}">
+                <Setter Property="SnapsToDevicePixels" Value="true" />
+                <Setter Property="OverridesDefaultStyle" Value="true" />
+                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+                <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
+                <Setter Property="MinWidth" Value="120" />
+                <Setter Property="MinHeight" Value="20" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ComboBox}">
+                            <Grid>
+                                <ToggleButton x:Name="ToggleButton"
+                                        Template="{StaticResource ComboBoxToggleButtonStyle}"
+                                        Grid.Column="2"
+                                        Focusable="false"
+                                        ClickMode="Press"
+                                        IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <ContentPresenter x:Name="ContentSite"
+                                            IsHitTestVisible="False"
+                                            Content="{TemplateBinding SelectionBoxItem}"
+                                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                            Margin="3,3,23,3"
+                                            VerticalAlignment="Stretch"
+                                            HorizontalAlignment="Left">
+                                </ContentPresenter>
+                                <TextBox x:Name="PART_EditableTextBox"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Bottom"
+                                Margin="3,3,23,3"
+                                Focusable="True"
+                                Background="White"
+                                Visibility="Hidden"
+                                IsReadOnly="{TemplateBinding IsReadOnly}" >
+                                    <TextBox.Template>
+                                        <ControlTemplate TargetType="TextBox" >
+                                            <Border Name="PART_ContentHost" Focusable="False" />
+                                        </ControlTemplate>
+                                    </TextBox.Template>
+                                </TextBox>
+                                <Popup x:Name="Popup"
+                                Placement="Bottom"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                AllowsTransparency="False"
+                                Focusable="False"
+                                PopupAnimation="Slide">
+                                    <Grid x:Name="DropDown"
+                                Background="White"
+                                SnapsToDevicePixels="True"
+                                MinWidth="{TemplateBinding ActualWidth}"
+                                MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                        <Border x:Name="DropDownBorder"
+                                        BorderThickness="1">
+                                            <Border.BorderBrush>
+                                                <SolidColorBrush Color="{DynamicResource BorderMediumColor}" />
+                                            </Border.BorderBrush>
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{DynamicResource ControlLightColor}" />
+                                            </Border.Background>
+                                        </Border>
+                                        <ScrollViewer Margin="4,6,4,6"
+                                            SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Contained" />
+                                        </ScrollViewer>
+                                    </Grid>
+                                </Popup>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="HasItems" Value="false">
+                                    <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95" />
+                                </Trigger>
+                                <Trigger Property="HasItems" Value="True">
+                                    <Setter Property="Background" Value="White" />
+                                </Trigger>
+                                <Trigger Property="IsGrouping" Value="true">
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="false" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <StackPanel Margin="10,0,10,0">
+            <ComboBox x:Name="cmbNetAdapters" FontSize="18" Style="{DynamicResource SimpleComboBoxStyle}" Height="28" Margin="10" />
+            <Label Content="Network Settings:" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" Foreground="Black" Height="31" HorizontalContentAlignment="Left"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Edit" Foreground="Black" VerticalAlignment="Center" Margin="10" FontSize="18"/>
+                <CheckBox x:Name="chkEdit" Style="{DynamicResource ModernCircleSlider}" Margin="0,10,10,10" Width="58" HorizontalAlignment="Right" />
+                <TextBlock x:Name="txtDhcp" Text="Automatic (Use DHCP)" Foreground="Gray" VerticalAlignment="Center" Margin="10" FontSize="18"/>
+            </StackPanel>
+            <Grid x:Name="Ipv4settings" HorizontalAlignment="Left" Height="360" Width="381" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="121"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Label Content="MAC Address" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" IsEnabled="False" FontSize="16" VerticalAlignment="Center" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
+                <TextBox x:Name="txtMac" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" IsEnabled="False" IsReadOnly="True" BorderThickness="0" FontSize="16" Margin="0,5,0,5" Width="249" VerticalContentAlignment="Center" Padding="2,0,0,0"/>
+                <Label Content="IP Address v4:" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
+                <TextBox x:Name="txtNetIPv4" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="16" Margin="0,5,0,5" Width="249" VerticalContentAlignment="Center" Padding="2,0,0,0"/>
+                <Label x:Name="lblNetIPv6" Content="IP Address v6:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
+                <TextBox x:Name="txtNetIPv6" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="16" Margin="0,5,0,5" Width="249" VerticalContentAlignment="Center" Padding="2,0,0,0"/>
+                <Label Content="Subnet:" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
+                <TextBox x:Name="txtNetSubnet" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="16" Margin="0,5,0,5" Width="249" VerticalContentAlignment="Center" Padding="2,0,0,0"/>
+                <Label Content="Gateway:" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
+                <TextBox x:Name="txtNetGateway" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="16" Margin="0,5,0,5" Width="249" VerticalContentAlignment="Center" Padding="2,0,0,0"/>
+                <Label Content="Primary DNS:" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
+                <TextBox x:Name="txtNetDNS1" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="16" Margin="0,5,0,5" Width="249" VerticalContentAlignment="Center" Padding="2,0,0,0"/>
+                <Label Content="Secondary DNS:" Grid.Row="6" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
+                <TextBox x:Name="txtNetDNS2" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="16" Margin="0,5,0,5" Width="249" VerticalContentAlignment="Center" Padding="2,0,0,0"/>
+                <Label Content="DNS Suffix(s):" Grid.Row="7" Grid.Column="0" HorizontalAlignment="Right" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" Margin="0,9"/>
+                <TextBox x:Name="txtNetSuffix" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="16" Margin="0,5,0,5" Width="249" VerticalContentAlignment="Center" Padding="2,0,0,0"/>
+            </Grid>
+            <Viewbox Stretch="Uniform" Width="306" Margin="75,10,0,0" Height="39" HorizontalAlignment="Left">
+                <TextBox x:Name="txtTestResult" TextWrapping="Wrap" IsReadOnly="True" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
+            </Viewbox>
+        </StackPanel>
+        <Button x:Name="btnTest" Content="Test" Height="42" Width="75" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="10,0,0,61" />
+        <Button x:Name="btnSave" Content="Save" Height="42" Width="163" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="10,0,0,10" />
+        <Button x:Name="btnCancel" Content="Cancel" Height="42" Width="163" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="227,0,0,10" />
+    </Grid>
+</Window>
+"@
+
+        #Load assembies to display UI
+        [void][System.Reflection.Assembly]::LoadWithPartialName('PresentationFramework')
+
+        [xml]$xaml = $xaml -replace 'mc:Ignorable="d"','' -replace "x:N",'N' -replace '^<Win.*', '<Window'
+        $reader=(New-Object System.Xml.XmlNodeReader $xaml)
+        $syncHash.Window=[Windows.Markup.XamlReader]::Load( $reader )
+        #===========================================================================
+        # Store Form Objects In PowerShell
+        #===========================================================================
+        $xaml.SelectNodes("//*[@Name]") | %{ $syncHash."$($_.Name)" = $syncHash.Window.FindName($_.Name)}
+
+        # INNER  FUNCTIONS
+        #Closes UI objects and exits (within runspace)
+        Function Close-NetSettingsWindow
+        {
+            if ($syncHash.hadCritError) { Write-Host -Message "Background thread had a critical error" -ForegroundColor red }
+            #if runspace has not errored Dispose the UI
+            if (!($syncHash.isClosing)) { $syncHash.Window.Close() | Out-Null }
+        }
+
+        Function Get-NetAdapterInfo {
+            Param (
+                [Parameter(Mandatory = $false)]
+                [ArgumentCompleter( {
+                    param ( $commandName,
+                            $parameterName,
+                            $wordToComplete,
+                            $commandAst,
+                            $fakeBoundParameters )
+
+
+                    $Adapters = Get-WmiObject win32_networkadapterconfiguration -filter "ipenabled ='true'"
+
+                    $Adapters | Where-Object {
+                        $_ -like "$wordToComplete*"
+                    } | Select @{Name='description';Expression={"'" + $_.description + "'"}} | Select -ExpandProperty description
+
+                } )]
+                [Alias("config")]
+                [string]$Adapter
+            )
+            $NetInfo = @{}
+            $NetInfo = Get-WmiObject win32_networkadapterconfiguration -filter "ipenabled ='true'"
+            If($Adapter)
+            {
+                $NetInfo = $NetInfo | Where Description -eq $Adapter
+            }
+            Return $NetInfo
+        }
+
+        #hide features not ready
+        $syncHash.btnTest.Visibility = 'Hidden'
+        $syncHash.txtNetIPv6.Visibility = 'Hidden'
+        $syncHash.lblNetIPv6.Visibility = 'Hidden'
+
+        #immediately grab all network adapters
+        $syncHash.NetAdapters = Get-NetAdapterInfo
+        $syncHash.NetAdapters.description | ForEach-object {$syncHash.cmbNetAdapters.Items.Add($_) | Out-Null}
+
+        #Disable edit options until adapter has been choosen
+        $syncHash.chkEdit.IsEnabled = $False
+        $syncHash.btnSave.IsEnabled = $false
+        $syncHash.GetEnumerator() | where Key -like 'txtNet*' | %{$_.Value.IsEnabled = $False}
+
+        #update interface based on selection
+        $syncHash.cmbNetAdapters.Add_SelectionChanged( {
+            $syncHash.chkEdit.IsEnabled = $True
+            #store current selected adapter
+            $syncHash.SelectedAdapter = Get-NetAdapterInfo -Adapter $syncHash.cmbNetAdapters.SelectedItem
+            $syncHash.txtMAC.text = $syncHash.SelectedAdapter.MACAddress
+            If($syncHash.SelectedAdapter.IPAddress){
+                $syncHash.txtNetIPv4.text = $syncHash.SelectedAdapter.IPAddress[0]
+                $syncHash.txtNetIPv6.text = $syncHash.SelectedAdapter.IPAddress[1]
+            }
+            If($syncHash.SelectedAdapter.IPSubnet){$syncHash.txtNetSubnet.text = $syncHash.SelectedAdapter.IPSubnet[0]}
+            If($syncHash.SelectedAdapter.DefaultIPGateway){$syncHash.txtNetGateway.text = $syncHash.SelectedAdapter.DefaultIPGateway[0]}
+            If($syncHash.SelectedAdapter.DNSServerSearchOrder){
+                $syncHash.txtNetDNS1.text = $syncHash.SelectedAdapter.DNSServerSearchOrder[0]
+                $syncHash.txtNetDNS2.text = $syncHash.SelectedAdapter.DNSServerSearchOrder[1]
+            }
+            $syncHash.txtNetSuffix.text = ($syncHash.SelectedAdapter.DNSDomainSuffixSearchOrder -join ',').ToString()
+        })
+
+        [System.Windows.RoutedEventHandler]$Script:CheckedEventHandler = {
+            $syncHash.GetEnumerator() | Where-Object Key -like 'txtNet*' | %{$_.Value.IsEnabled = $True}
+            $syncHash.txtDhcp.text = 'Static Assigned'
+            #$syncHash.chkEdit.IsEnabled = $false
+        }
+        #Do editing actions when checked
+        $syncHash.chkEdit.AddHandler([System.Windows.Controls.CheckBox]::CheckedEvent, $CheckedEventHandler)
+
+        [System.Windows.RoutedEventHandler]$Script:UnCheckedEventHandler = {
+            $syncHash.GetEnumerator() | Where-Object Key -like 'txtNet*' | %{$_.Value.IsEnabled = $False}
+            $syncHash.txtDhcp.text = 'Automatic (Use DHCP)'
+            #reset adapter when unchecked
+            $syncHash.txtMAC.text = $syncHash.SelectedAdapter.MACAddress
+            If($syncHash.SelectedAdapter.IPAddress){
+                $syncHash.txtNetIPv4.text = $syncHash.SelectedAdapter.IPAddress[0]
+                $syncHash.txtNetIPv6.text = $syncHash.SelectedAdapter.IPAddress[1]
+            }
+            If($syncHash.SelectedAdapter.IPSubnet){$syncHash.txtNetSubnet.text = $syncHash.SelectedAdapter.IPSubnet[0]}
+            If($syncHash.SelectedAdapter.DefaultIPGateway){$syncHash.txtNetGateway.text = $syncHash.SelectedAdapter.DefaultIPGateway[0]}
+            If($syncHash.SelectedAdapter.DNSServerSearchOrder){
+                $syncHash.txtNetDNS1.text = $syncHash.SelectedAdapter.DNSServerSearchOrder[0]
+                $syncHash.txtNetDNS2.text = $syncHash.SelectedAdapter.DNSServerSearchOrder[1]
+            }
+            $syncHash.txtNetSuffix.text = ($syncHash.SelectedAdapter.DNSDomainSuffixSearchOrder -join ',').ToString()
+        }
+        #Do readonly action when unchecked
+        $syncHash.chkEdit.AddHandler([System.Windows.Controls.CheckBox]::UncheckedEvent, $UnCheckedEventHandler)
+
+        $ipv4regex = '^(?:(?:0?0?\d|0?[1-9]\d|1\d\d|2[0-5][0-5]|2[0-4]\d)\.){3}(?:0?0?\d|0?[1-9]\d|1\d\d|2[0-5][0-5]|2[0-4]\d)$'
+        $ipv6regex = '(([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4})'
+        $syncHash.txtNetIPv4.Add_GotFocus( {
+            #CHECK VALUE AS TYPED
+            $syncHash.txtNetIPv4.AddHandler(
+                [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                [System.Windows.RoutedEventHandler] {
+                    $syncHash.btnSave.IsEnabled = ($syncHash.txtNetIPv4.Text -match $ipv4regex)
+                }
+            )
+        })
+
+        <#
+        $syncHash.txtNetIPv6.Add_GotFocus( {
+            #CHECK VALUE AS TYPED
+            $syncHash.txtNetIPv4.AddHandler(
+                [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                [System.Windows.RoutedEventHandler] {
+                    $syncHash.btnSave.IsEnabled = ($syncHash.txtNetIPv6.Text -match $ipv6regex)
+                }
+            )
+        })
+        #>
+
+        $syncHash.txtNetSubnet.Add_GotFocus( {
+            #CHECK VALUE AS TYPED
+            $syncHash.txtNetSubnet.AddHandler(
+                [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                [System.Windows.RoutedEventHandler] {
+                    $syncHash.btnSave.IsEnabled = ($syncHash.txtNetSubnet.Text -match $ipv4regex)
+                }
+            )
+        })
+
+        $syncHash.txtNetGateway.Add_GotFocus( {
+            #CHECK VALUE AS TYPED
+            $syncHash.txtNetGateway.AddHandler(
+                [System.Windows.Controls.Primitives.TextBoxBase]::TextChangedEvent,
+                [System.Windows.RoutedEventHandler] {
+                    $syncHash.btnSave.IsEnabled = ($syncHash.txtNetGateway.Text -match $ipv4regex)
+                }
+            )
+        })
+
+        $syncHash.btnSave.Add_Click({
+            If($syncHash.chkEdit.IsChecked){
+                $syncHash.SelectedAdapter.EnableStatic($syncHash.txtNetIPv4.Text, $syncHash.txtNetSubnet.Text);
+                $syncHash.SelectedAdapter.SetGateways($syncHash.txtNetGateway.Text, 1);
+                If($syncHash.txtNetDNS1.Text -and $syncHash.txtNetDNS2.Text){
+                    $syncHash.SelectedAdapter.SetDNSServerSearchOrder($syncHash.txtNetDNS1.Text,$syncHash.txtNetDNS2.Text);
+                }
+                ElseIf($syncHash.txtNetDNS1.Text){
+                    $syncHash.SelectedAdapter.SetDNSServerSearchOrder($syncHash.txtNetDNS1.Text);
+                }
+            }
+            Else{
+                $syncHash.SelectedAdapter.EnableDHCP();
+                $syncHash.SelectedAdapter.SetDNSServerSearchOrder();
+            }
+            $syncHash.chkEdit.IsChecked = $False
+            Close-NetSettingsWindow
+        })
+
+        $syncHash.btnCancel.Add_Click({
+            Close-NetSettingsWindow
+        })
+
+        #Allow UI to be dragged around screen
+        $syncHash.Window.Add_MouseLeftButtonDown( {
+            $syncHash.Window.DragMove()
+        })
+
+        #Add smooth closing for Window
+        $syncHash.Window.Add_Loaded({ $syncHash.isLoaded = $True })
+        $syncHash.Window.Add_Closing({ $syncHash.isClosing = $True; Close-NetSettingsWindow })
+        $syncHash.Window.Add_Closed({ $syncHash.isClosed = $True })
+
+        #make sure this display on top of every window
+        $syncHash.Window.Topmost = $true
+
+        $syncHash.window.ShowDialog()
+        $syncHash.Error = $Error
+    }) # end scriptblock
+
+    #collect data from runspace
+    $Data = $syncHash
+
+    #invoke scriptblock in runspace
+    $PowerShellCommand.Runspace = $PSDRunSpace
+    $AsyncHandle = $PowerShellCommand.BeginInvoke()
+
+    #wait until runspace is completed before ending
+    do {
+        Start-sleep -m 100 }
+    while (!$AsyncHandle.IsCompleted)
+    #end invoked process
+    $null = $PowerShellCommand.EndInvoke($AsyncHandle)
+
+    #cleanup registered object
+    Register-ObjectEvent -InputObject $syncHash.Runspace `
+            -EventName 'AvailabilityChanged' `
+            -Action {
+
+                    if($Sender.RunspaceAvailability -eq "Available")
+                    {
+                        $Sender.Closeasync()
+                        $Sender.Dispose()
+                        # Speed up resource release by calling the garbage collector explicitly.
+                        # Note that this will pause *all* threads briefly.
+                        [GC]::Collect()
+                    }
+
+                } | Out-Null
+
+    If($Data.Error){Write-PSDLog -Message ("{0}: Network configurator window errored: {1}" -f ${CmdletName}, $Data.Error) -LogLevel 3}
+    Else{Write-PSDLog -Message ("{0}: Network configurator Window closed" -f ${CmdletName})}
+    return $Data
+
+}#end networksettings runspace
+#endregion
+
+#region FUNCTION: Loader for disk cleaner menu
+Function Show-PSDStartLoaderDiskCleanWindow
+{
+    [string]${CmdletName} = $MyInvocation.MyCommand
+    Write-PSDLog -Message ("{0}: Disk Cleaner window started" -f ${CmdletName})
+
+    #build runspace
+    $syncHash = [hashtable]::Synchronized(@{})
+    $PSDRunSpace =[runspacefactory]::CreateRunspace()
+    $syncHash.Runspace = $PSDRunSpace
+    $syncHash.CheckBoxStyle = (Add-PSDStartLoaderCheckboxStyle)
+    $PSDRunSpace.ApartmentState = "STA"
+    $PSDRunSpace.ThreadOptions = "ReuseThread"
+    $PSDRunSpace.Open() | Out-Null
+    $PSDRunSpace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+    $PowerShellCommand = [PowerShell]::Create().AddScript({
+
+    [string]$xaml = @"
+    <Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="DiskClean"
+        mc:Ignorable="d"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Height="350" Width="800"
+        AllowsTransparency="True"
+        WindowStyle="None">
+    <Window.Resources>
+        <ResourceDictionary>
+
+            <Canvas x:Key="icons_refresh" Width="24" Height="24">
+                <Path Stretch="Fill" Fill="White" Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+            </Canvas>
+
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Setter Property="BorderBrush" Value="Red" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Border.Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="Black" BlurRadius="100" Opacity="0.1" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            $($syncHash.CheckBoxStyle)
+
+            <Style x:Key="ButtonClean" TargetType="{x:Type Button}">
+                <Setter Property="Background" Value="Pink" />
+                <Setter Property="Foreground" Value="Black" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button" >
+
+                            <Border Name="border"
+                    BorderThickness="1"
+                    Padding="4,2"
+                    BorderBrush="DarkGray"
+                    CornerRadius="5,0,5,0"
+                    Background="Pink">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    TextBlock.TextAlignment="Center"
+                                    />
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="Black" />
+                                    <Setter TargetName="border" Property="Background" Value="Red" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="Darkred" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="Pink" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <StackPanel  Margin="10,0,10,0">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Disk Selection" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" Foreground="Black" Height="31" HorizontalContentAlignment="Left"/>
+
+                <Button x:Name="btnRefresh" Width="20" HorizontalAlignment="Right" Margin="5" Height="20" Background="White" >
+                    <Rectangle Width="16" Height="16" Fill="Black" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_refresh}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </Button>
+            </StackPanel>
+
+            <ListView x:Name="lstDisks" HorizontalAlignment="Center" Height="137" Width="765">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Disk Number" DisplayMemberBinding="{Binding Number}" />
+                        <GridViewColumn Header="Drive Name" DisplayMemberBinding="{Binding FriendlyName}" />
+                        <GridViewColumn Header="Partition Table" DisplayMemberBinding="{Binding PartitionStyle}" />
+                        <GridViewColumn Header="Disk Type" DisplayMemberBinding="{Binding ProvisioningType}" />
+                        <GridViewColumn Header="Total Size" DisplayMemberBinding="{Binding Size}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Acknowledge" Foreground="Black" VerticalAlignment="Center" Margin="10" FontSize="18"/>
+                <CheckBox x:Name="chkAck" Style="{DynamicResource ModernCircleSlider}" Margin="0,10,10,10" Width="58" HorizontalAlignment="Right" />
+                <TextBlock x:Name="txtAckStatement" Text="I understand the risks. This will DELETE ALL DATA on disk(s)" Foreground="Red" VerticalAlignment="Center" Margin="10" FontSize="18"/>
+            </StackPanel>
+            <TextBox x:Name="txtResult" TextWrapping="NoWrap" IsReadOnly="True" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0" Margin="10" Height="41"/>
+        </StackPanel>
+        <Button x:Name="btnCleanDisk" Style="{DynamicResource ButtonClean}" Content="Clean Selected Disk" Height="61" Width="188" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="10,0,0,8" />
+        <Button x:Name="btnCleanAll" Style="{DynamicResource ButtonClean}" Content="Clean All Disks" Height="61" Width="163" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="203,0,0,8" />
+        <Button x:Name="btnCancel" Content="Close" Height="42" Width="163" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="626,0,0,10" />
+    </Grid>
+</Window>
+"@
+        #Load assembies to display UI
+        [void][System.Reflection.Assembly]::LoadWithPartialName('PresentationFramework')
+
+        [xml]$xaml = $xaml -replace 'mc:Ignorable="d"','' -replace "x:N",'N' -replace '^<Win.*', '<Window'
+        $reader=(New-Object System.Xml.XmlNodeReader $xaml)
+        $syncHash.Window=[Windows.Markup.XamlReader]::Load( $reader )
+        #===========================================================================
+        # Store Form Objects In PowerShell
+        #===========================================================================
+        $xaml.SelectNodes("//*[@Name]") | %{ $syncHash."$($_.Name)" = $syncHash.Window.FindName($_.Name)}
+
+        # INNER  FUNCTIONS
+        #Closes UI objects and exits (within runspace)
+        Function Close-DiskCleanWindow
+        {
+            if ($syncHash.hadCritError) { Write-Host -Message "Background thread had a critical error" -ForegroundColor red }
+            #if runspace has not errored Dispose the UI
+            if (!($syncHash.isClosing)) { $syncHash.Window.Close() | Out-Null }
+        }
+
+        #populate data on start
+        $syncHash.Disks = Get-Disk
+        $syncHash.txtResult.Visibility = 'Hidden'
+        $syncHash.btnCleanAll.IsEnabled = $False
+        $syncHash.btnCleanAll.Visibility = 'Hidden'
+        $syncHash.btnCleanDisk.IsEnabled = $False
+        $syncHash.chkAck.IsEnabled = $False
+        $syncHash.txtAckStatement.Visibility = 'Hidden'
+
+
+        $syncHash.lstDisks.ItemsSource = @($syncHash.Disks | Sort DiskNumber | Select Number,FriendlyName,PartitionStyle,ProvisioningType,
+                                    @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}})
+
+        #enable clean disk button if ack is checkec and disk selected
+        $syncHash.lstDisks.Add_SelectionChanged({
+            $syncHash.chkAck.IsEnabled = $true
+            $syncHash.chkAck.IsChecked = $false
+            $Global:SelectedDisks = $syncHash.lstDisks.SelectedItems
+            $Global:DisksListString =  $Global:SelectedDisks.Number -Join ','
+            $syncHash.txtAckStatement.Visibility = 'Visible'
+            $syncHash.txtAckStatement.Text = ("You have selected disk(s) [{0}]" -f $Global:DisksListString )
+            $syncHash.txtAckStatement.Foreground = 'Black'
+            If($syncHash.chkAck.IsChecked -and ($Global:SelectedDisks.count -gt 0) ){
+                $syncHash.btnCleanDisk.IsEnabled = $True
+            }
+        })
+
+        [System.Windows.RoutedEventHandler]$Script:CheckedEventHandler = {
+            $syncHash.btnCleanAll.IsEnabled = $True
+            If($Global:SelectedDisks.count -gt 0)
+            {
+                $syncHash.btnCleanDisk.IsEnabled = $True
+            }
+            $syncHash.txtAckStatement.Visibility = 'Visible'
+            $syncHash.txtAckStatement.Foreground = 'Red'
+            If( $Global:SelectedDisks.count -gt 0 ){
+                $syncHash.txtAckStatement.Text = ('I understand the risks. This will DELETE ALL DATA on disk(s) [{0}]!'-f $Global:DisksListString)
+            }Else{
+                $syncHash.txtAckStatement.Text = 'I understand the risks. This will DELETE ALL DATA on disk(s)'
+            }
+        }
+        #Do editing actions when checked
+        $syncHash.chkAck.AddHandler([System.Windows.Controls.CheckBox]::CheckedEvent, $CheckedEventHandler)
+
+        [System.Windows.RoutedEventHandler]$Script:UnCheckedEventHandler = {
+            $syncHash.btnCleanAll.IsEnabled = $False
+            $syncHash.btnCleanDisk.IsEnabled = $False
+            $syncHash.txtAckStatement.Foreground = 'Black'
+            If( $Global:SelectedDisks.count -gt 0 ){
+                $syncHash.txtAckStatement.Text = ("You have selected disk(s) [{0}]" -f $Global:DisksListString )
+            }Else{
+                $syncHash.txtAckStatement.Text = 'You have selected no disk(s)'
+            }
+            #$syncHash.txtAckStatement.Visibility = 'Hidden'
+        }
+        #Do disable button action when unchecked
+        $syncHash.chkAck.AddHandler([System.Windows.Controls.CheckBox]::UncheckedEvent, $UnCheckedEventHandler)
+
+        $syncHash.btnRefresh.Add_Click({
+            $syncHash.lstDisks.UnselectAll()
+
+            $syncHash.Disks = Get-Disk
+            $syncHash.lstDisks.ItemsSource = @($syncHash.Disks | Sort DiskNumber | Select Number,FriendlyName,PartitionStyle,ProvisioningType,
+                                            @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}})
+            $syncHash.txtAckStatement.Text = ''
+            $syncHash.chkAck.IsChecked = $false
+            $syncHash.chkAck.IsEnabled = $False
+        })
+
+        $syncHash.btnCleanDisk.Add_Click({
+            $SelectedDisks = $syncHash.lstDisks.SelectedItems
+            $syncHash.txtResult.Text = ("Cleaning disk(s) [{0}], please wait..." -f $Global:DisksListString)
+            Try{
+                $syncHash.Disks | Where {$_.Number -in $Global:SelectedDisks.Number} | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false | Out-Null
+                Get-PhysicalDisk | Where {$_.DeviceNumber -in $Global:SelectedDisks.Number} | Reset-PhysicalDisk | Out-Null
+                $syncHash.txtResult.Foreground = 'Green'
+                $syncHash.txtResult.Text = ("Successfully cleaned disk(s) [{0}]!" -f $Global:DisksListString)
+            }
+            Catch{
+                $syncHash.txtResult.Foreground = 'Red'
+                $syncHash.txtResult.Text = ("Failed to clean disk(s) [{0}]: {1}" -f $Global:DisksListString,$_.exception.message)
+            }
+            Finally{
+                $syncHash.lstDisks.ItemsSource = @($syncHash.Disks | Sort DiskNumber | Select Number,FriendlyName,PartitionStyle,ProvisioningType,
+                                    @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}})
+                $syncHash.btnCancel.Text = 'Done'
+            }
+        })
+
+        <#
+        $syncHash.btnClearSelected.Add_Click({
+            #unslect everything
+            $syncHash.lstDisks.UnselectAll()
+        })
+
+        $syncHash.btnCleanAll.Add_Click({
+            $syncHash.txtResult.Text = "Cleaning disks, please wait..."
+            Try{
+                Get-Disk | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false | Out-Null
+                Get-PhysicalDisk | Reset-PhysicalDisk | Out-Null
+                $syncHash.txtResult.Foreground = 'Green'
+                $syncHash.txtResult.Text = "Successfully cleaned all disks!"
+            }
+            Catch{
+                $syncHash.txtResult.Foreground = 'Red'
+                $syncHash.txtResult.Text = ("Failed to clean disks! {0}" -f $_.exception.message)
+            }
+            Finally{
+                $syncHash.lstDisks.ItemsSource = @(Get-Disk | Sort DiskNumber | Select Number,FriendlyName,PartitionStyle,ProvisioningType,
+                                    @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}})
+                $syncHash.btnCancel.Text = 'Done'
+            }
+        })
+        #>
+
+        $syncHash.btnCancel.Add_Click({
+            Close-DiskCleanWindow
+        })
+
+        #Allow UI to be dragged around screen
+        $syncHash.Window.Add_MouseLeftButtonDown( {
+            $syncHash.Window.DragMove()
+        })
+
+        #Add smooth closing for Window
+        $syncHash.Window.Add_Loaded({ $syncHash.isLoaded = $True })
+        $syncHash.Window.Add_Closing({ $syncHash.isClosing = $True; Close-DiskCleanWindow })
+        $syncHash.Window.Add_Closed({ $syncHash.isClosed = $True })
+
+        #make sure this display on top of every window
+        $syncHash.Window.Topmost = $true
+
+        $syncHash.window.ShowDialog()
+        $syncHash.Error = $Error
+    }) # end scriptblock
+
+    #collect data from runspace
+    $Data = $syncHash
+
+    #invoke scriptblock in runspace
+    $PowerShellCommand.Runspace = $PSDRunSpace
+    $AsyncHandle = $PowerShellCommand.BeginInvoke()
+
+    #wait until runspace is completed before ending
+    do {
+        Start-sleep -m 100 }
+    while (!$AsyncHandle.IsCompleted)
+    #end invoked process
+    $null = $PowerShellCommand.EndInvoke($AsyncHandle)
+
+    #cleanup registered object
+    Register-ObjectEvent -InputObject $syncHash.Runspace `
+            -EventName 'AvailabilityChanged' `
+            -Action {
+
+                    if($Sender.RunspaceAvailability -eq "Available")
+                    {
+                        $Sender.Closeasync()
+                        $Sender.Dispose()
+                        # Speed up resource release by calling the garbage collector explicitly.
+                        # Note that this will pause *all* threads briefly.
+                        [GC]::Collect()
+                    }
+
+                } | Out-Null
+
+    If($Data.Error){Write-PSDLog -Message ("{0}: Disk Cleaner window errored: {1}" -f ${CmdletName}, $Data.Error) -LogLevel 3}
+    Else{Write-PSDLog -Message ("{0}: Disk Cleaner Window closed" -f ${CmdletName})}
+    return $Data
+
+}#end diskclean runspace
+#endregion
+
+#region FUNCTION: Loader for disk viewer menu
+Function Show-PSDStartLoaderDiskViewerWindow
+{
+    [string]${CmdletName} = $MyInvocation.MyCommand
+    Write-PSDLog -Message ("{0}: Disk Manager window started" -f ${CmdletName})
+
+    #build runspace
+    $syncHash = [hashtable]::Synchronized(@{})
+    $PSDRunSpace =[runspacefactory]::CreateRunspace()
+    $syncHash.Runspace = $PSDRunSpace
+    $PSDRunSpace.ApartmentState = "STA"
+    $PSDRunSpace.ThreadOptions = "ReuseThread"
+    $PSDRunSpace.Open() | Out-Null
+    $PSDRunSpace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+    $PowerShellCommand = [PowerShell]::Create().AddScript({
+
+    [string]$xaml = @"
+    <Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="DiskMgr"
+        mc:Ignorable="d"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Height="450" Width="800"
+        AllowsTransparency="True"
+        WindowStyle="None">
+    <Window.Resources>
+        <ResourceDictionary>
+
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Setter Property="BorderBrush" Value="DarkGray" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Border.Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="Black" BlurRadius="100" Opacity="0.1" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <StackPanel  Margin="10,0,10,0">
+            <Label Content="Disk viewer" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" Foreground="Black" Height="31" HorizontalContentAlignment="Left"/>
+            <ListView x:Name="lstDisks" HorizontalAlignment="Center" Height="137" Width="765" SelectionMode="Single">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Disk Number" DisplayMemberBinding="{Binding Number}" />
+                        <GridViewColumn Header="Drive Name" DisplayMemberBinding="{Binding FriendlyName}" />
+                        <GridViewColumn Header="Partition Table" DisplayMemberBinding="{Binding PartitionStyle}" />
+                        <GridViewColumn Header="Disk Type" DisplayMemberBinding="{Binding ProvisioningType}" />
+                        <GridViewColumn Header="Total Size" DisplayMemberBinding="{Binding Size}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <Label Content="Volume viewer" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" Foreground="Black" Height="31" HorizontalContentAlignment="Left"/>
+            <StackPanel Orientation="Horizontal">
+                <ListView x:Name="lstVolumes" Height="160" Width="564" SelectionMode="Single" Margin="5,0,0,0" >
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Disk Number" DisplayMemberBinding="{Binding Disk}" />
+                            <GridViewColumn Header="Drive Letter" DisplayMemberBinding="{Binding DriveLetter}" />
+                            <GridViewColumn Header="Partition Name" DisplayMemberBinding="{Binding FileSystemLabel}" />
+                            <GridViewColumn Header="Format" DisplayMemberBinding="{Binding FileSystem}" />
+                            <GridViewColumn Header="Drive Type" DisplayMemberBinding="{Binding DriveType}" />
+                            <GridViewColumn Header="Partition Size" DisplayMemberBinding="{Binding Size}" />
+                            <GridViewColumn Header="Remaining Size" DisplayMemberBinding="{Binding SizeRemaining}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <Image x:Name="imgPieChart" VerticalAlignment="Top" Width="200" Height="160" />
+            </StackPanel>
+        </StackPanel>
+        <Button x:Name="btnRefresh" Content="Refresh" Height="42" Width="163" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="10,0,0,10" />
+        <Button x:Name="btnOk" Content="Ok" Height="42" Width="163" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="626,0,0,10" />
+    </Grid>
+</Window>
+"@
+
+        #Load assembies to display UI
+        [void][System.Reflection.Assembly]::LoadWithPartialName('PresentationFramework')
+
+        [xml]$xaml = $xaml -replace 'mc:Ignorable="d"','' -replace "x:N",'N' -replace '^<Win.*', '<Window'
+        $reader=(New-Object System.Xml.XmlNodeReader $xaml)
+        $syncHash.Window=[Windows.Markup.XamlReader]::Load( $reader )
+        #===========================================================================
+        # Store Form Objects In PowerShell
+        #===========================================================================
+        $xaml.SelectNodes("//*[@Name]") | %{ $syncHash."$($_.Name)" = $syncHash.Window.FindName($_.Name)}
+
+        # INNER  FUNCTIONS
+        #Closes UI objects and exits (within runspace)
+        Function Close-DiskMgrWindow
+        {
+            if ($syncHash.hadCritError) { Write-Host -Message "Background thread had a critical error" -ForegroundColor red }
+            #if runspace has not errored Dispose the UI
+            if (!($syncHash.isClosing)) { $syncHash.Window.Close() | Out-Null }
+        }
+
+        # Function to create a Windows Forms pie chart
+        # Modified from https://www.simple-talk.com/sysadmin/powershell/building-a-daily-systems-report-email-with-powershell/
+        Function New-PieChart {
+            param(
+                [hashtable]$Window,
+                [hashtable]$Data,
+                [string]$Name,
+                [switch]$SaveAsFile,
+                [switch]$Passthru
+            )
+            Add-Type -AssemblyName System.Windows.Forms,System.Windows.Forms.DataVisualization
+
+            #Create our chart object
+            $Chart = New-object System.Windows.Forms.DataVisualization.Charting.Chart
+            $Chart.Width = 200
+            $Chart.Height = 160
+            $Chart.Left = 0
+            $Chart.Top = 0
+
+            #Create a chartarea to draw on and add this to the chart
+            $ChartArea = New-Object System.Windows.Forms.DataVisualization.Charting.ChartArea
+            $Chart.ChartAreas.Add($ChartArea)
+            [void]$Chart.Series.Add("Data")
+
+            #Add a datapoint for each value specified in the parameter hash table
+            $Data.GetEnumerator() | foreach {
+                $datapoint = new-object System.Windows.Forms.DataVisualization.Charting.DataPoint(0, $_.Value.Value)
+                $datapoint.AxisLabel = "$($_.Value.Header)" + "(" + $($_.Value.Value) + " GB)"
+                $Chart.Series["Data"].Points.Add($datapoint)
+            }
+
+            $Chart.Series["Data"].ChartType = [System.Windows.Forms.DataVisualization.Charting.SeriesChartType]::Pie
+            $Chart.Series["Data"]["PieLabelStyle"] = "Outside"
+            $Chart.Series["Data"]["PieLineColor"] = "Black"
+            $Chart.Series["Data"]["PieDrawingStyle"] = "Concave"
+            ($Chart.Series["Data"].Points.FindMaxByValue())["Exploded"] = $true
+
+            #Set the title of the Chart
+            $Title = new-object System.Windows.Forms.DataVisualization.Charting.Title
+            $Chart.Titles.Add($Title)
+            $Chart.Titles[0].Text = $Name
+
+            If($SaveAsFile){
+                # save chart to file
+                $FileName = $Name -replace '[\W+]', ' ' -replace '\s+','_'
+                $File = ($env:Temp + '\' + $FileName + '_' + $(get-date -format "yyyyMMdd_hhmmsstt") + '.png')
+                Try{$Chart.SaveImage($File, "PNG")}
+                Catch{Remove-Item $File -Force -ErrorAction SilentlyContinue;$Chart.SaveImage($File, "PNG")}
+
+                If($Passthru){
+                    Return $File
+                }
+            }
+            Else{
+                #Save the chart to a memory stream, then to the hash table as a byte array
+                #$Stream = New-Object System.IO.MemoryStream
+                #$Chart.SaveImage($Stream,"png")
+                #$Window.Stream = $Stream.GetBuffer()
+                #$Stream.Dispose()
+                $bitmap = New-Object System.Windows.Media.Imaging.BitmapImage
+                $bitmap.BeginInit()
+                $bitmap.StreamSource = [System.IO.MemoryStream]
+                [System.Convert]::FromBase64String($Chart)
+                $bitmap.EndInit()
+                $bitmap.Freeze()
+
+                If($Passthru){
+                    Return $bitmap
+                }
+            }
+            $Chart.Dispose()
+        }
+
+        #populate data on start
+        $syncHash.Disks = Get-Disk
+        $syncHash.Volumes = $syncHash.Disks | Get-Partition | Get-Volume
+
+        $syncHash.lstDisks.ItemsSource = @($syncHash.Disks | Sort DiskNumber | Select Number,FriendlyName,PartitionStyle,ProvisioningType,
+                                    @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}})
+
+        $syncHash.lstVolumes.ItemsSource = @($syncHash.Volumes | Sort DriveLetter |
+                                    Select @{Name="Disk";Expression={Get-Partition -DriveLetter $_.Driveletter | Select-Object -ExpandProperty DiskNumber}},
+                                        DriveLetter,FileSystemLabel,FileSystem,DriveType,
+                                        @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}},
+                                        @{Name="SizeRemaining";Expression={([math]::round($_.SizeRemaining /1Gb, 2)).ToString() + ' GB'}})
+
+        <#
+        $syncHash.lstDisks.Add_SelectionChanged({
+            $VolumeDisk = Get-Disk -Number ($syncHash.lstDisks.SelectedItem).Number | Get-Partition | Get-Volume | Sort DriveLetter |
+                                    Select @{Name = 'Disk'; Expression={($syncHash.lstDisks.SelectedItem).Number}},DriveLetter,FileSystemLabel,FileSystem,DriveType,
+                                        @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}},
+                                        @{Name="SizeRemaining";Expression={([math]::round($_.SizeRemaining /1Gb, 2)).ToString() + ' GB'}}
+
+            $syncHash.lstVolumes.ItemsSource = $VolumeDisk
+        })
+        #>
+        $syncHash.lstVolumes.Add_SelectionChanged({
+            #$syncHash.Window.Add_ContentRendered({
+                # Create a hash table to store values
+                $VolDataSet = @{}
+                # Get local Volume usage from WMI
+                $Vol = $syncHash.Volumes | Where-Object{$_.DriveLetter -eq ($syncHash.lstVolumes.SelectedItem).DriveLetter}
+                # Add Free Volume to a hash table
+                $VolDataSet.FreeVol = @{}
+                $VolDataSet.FreeVol.Header = "Free Space"
+                $VolDataSet.FreeVol.Value = [math]::Round(($Vol.SizeRemaining / 1Gb),2)
+                # Add used Volume to a hash table
+                $VolDataSet.UsedVol = @{}
+                $VolDataSet.UsedVol.Header = "Used Space"
+                $VolDataSet.UsedVol.Value = [math]::Round(($Vol.Size / 1Gb - $Vol.SizeRemaining / 1Gb),2)
+                # Create the Chart
+
+                # Set the image source
+                #$syncHash.imgPieChart.Source = New-PieChart -Window $syncHash -Data $VolDataSet -Name ('Volume Usage for: {0}' -f ($syncHash.lstVolumes.SelectedItem).DriveLetter) -Passthru
+                $syncHash.imgPieChart.Source = New-PieChart -Data $VolDataSet -Name ('Volume Usage for: {0}' -f ($syncHash.lstVolumes.SelectedItem).DriveLetter) -SaveAsFile -Passthru
+            #})
+        })
+
+        $syncHash.btnRefresh.Add_Click({
+            #unslect everything
+            $syncHash.lstDisks.UnselectAll()
+            $syncHash.lstVolumes.UnselectAll()
+
+            #refresh disks and volumes
+            $syncHash.Disks = Get-Disk
+            $syncHash.Volumes = $syncHash.Disks | Get-Partition | Get-Volume
+
+            $syncHash.lstDisks.ItemsSource = @($syncHash.Disks | Sort DiskNumber | Select Number,FriendlyName,PartitionStyle,ProvisioningType,
+                                    @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}})
+
+            $syncHash.lstVolumes.ItemsSource = @($syncHash.Volumes | Sort DriveLetter | Select Disk,DriveLetter,FileSystemLabel,FileSystem,DriveType,
+                                        @{Name="Size";Expression={([math]::round($_.Size /1Gb, 2)).ToString() + ' GB'}},
+                                        @{Name="SizeRemaining";Expression={([math]::round($_.SizeRemaining /1Gb, 2)).ToString() + ' GB'}})
+        })
+
+        $syncHash.btnOK.Add_Click({
+            Close-DiskMgrWindow
+        })
+
+        #Allow UI to be dragged around screen
+        $syncHash.Window.Add_MouseLeftButtonDown( {
+            $syncHash.Window.DragMove()
+        })
+
+        #Add smooth closing for Window
+        $syncHash.Window.Add_Loaded({ $syncHash.isLoaded = $True })
+        $syncHash.Window.Add_Closing({ $syncHash.isClosing = $True; Close-DiskMgrWindow })
+        $syncHash.Window.Add_Closed({ $syncHash.isClosed = $True })
+
+        #make sure this display on top of every window
+        $syncHash.Window.Topmost = $true
+
+        $syncHash.window.ShowDialog()
+        $syncHash.Error = $Error
+    }) # end scriptblock
+
+    #collect data from runspace
+    $Data = $syncHash
+
+    #invoke scriptblock in runspace
+    $PowerShellCommand.Runspace = $PSDRunSpace
+    $AsyncHandle = $PowerShellCommand.BeginInvoke()
+
+    #wait until runspace is completed before ending
+    do {
+        Start-sleep -m 100 }
+    while (!$AsyncHandle.IsCompleted)
+    #end invoked process
+    $null = $PowerShellCommand.EndInvoke($AsyncHandle)
+
+    #cleanup registered object
+    Register-ObjectEvent -InputObject $syncHash.Runspace `
+            -EventName 'AvailabilityChanged' `
+            -Action {
+
+                    if($Sender.RunspaceAvailability -eq "Available")
+                    {
+                        $Sender.Closeasync()
+                        $Sender.Dispose()
+                        # Speed up resource release by calling the garbage collector explicitly.
+                        # Note that this will pause *all* threads briefly.
+                        [GC]::Collect()
+                    }
+
+                } | Out-Null
+
+    If($Data.Error){Write-PSDLog -Message ("{0}: Disk Manager window errored: {1}" -f ${CmdletName}, $Data.Error) -LogLevel 3}
+    Else{Write-PSDLog -Message ("{0}: Disk Manager Window closed" -f ${CmdletName})}
+    return $Data
+
+}#end diskmgr runspace
+#endregion
+
+#region FUNCTION: Loader for confirmation menu
+Function Show-PSDStartLoaderConfirmWindow
+{
+    <#
+        .SYNOPSIS
+        Present PSD Prestart Action Menu
+
+        .LINK
+        https://tiberriver256.github.io/powershell/PowerShellProgress-Pt3/
+    #>
+    [CmdletBinding()]
+    Param(
+        [string]$Message,
+        [scriptblock]$Action,
+        [switch]$Passthru
+    )
+    [string]${CmdletName} = $MyInvocation.MyCommand
+    Write-PSDLog -Message ("{0}: Confirm window started" -f ${CmdletName})
+
+    #build runspace
+    $syncHash = [hashtable]::Synchronized(@{})
+    $PSDRunSpace =[runspacefactory]::CreateRunspace()
+    $syncHash.Runspace = $PSDRunSpace
+    $syncHash.InPE = Test-PSDStartLoaderInWinPE
+    $syncHash.ConfirmAction = $Action
+    $syncHash.ConfirmPassthru = $Passthru
+    $syncHash.Message = $Message
+    $syncHash.TriggerAction = $false
+    $PSDRunSpace.ApartmentState = "STA"
+    $PSDRunSpace.ThreadOptions = "ReuseThread"
+    $PSDRunSpace.Open() | Out-Null
+    $PSDRunSpace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+    $PowerShellCommand = [PowerShell]::Create().AddScript({
+
+    [string]$xaml = @"
+    <Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Confirm Action"
+        mc:Ignorable="d"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Height="120" Width="400"
+        AllowsTransparency="True"
+        WindowStyle="None">
+    <Window.Effect>
+        <DropShadowEffect Color="Gray" BlurRadius="20" Direction="-90" RenderingBias="Quality" ShadowDepth="4"/>
+    </Window.Effect>
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Setter Property="BorderBrush" Value="#004275" />
+                <Setter Property="BorderThickness" Value="1" />
+
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <TextBox x:Name="txtMessage" Text="Do you confirm?" TextWrapping="Wrap" IsReadOnly="True" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0" Margin="12,10,8,52" FontSize="18"/>
+        <Button x:Name="btnConfirm" Content="Yes" Height="42" Width="94" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="10,0,0,10" />
+        <Button x:Name="btnCancel" Content="No" Height="42" Width="94" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="18" Padding="2" Margin="296,0,0,10" />
+    </Grid>
+</Window>
+
+"@
+
+        #Load assembies to display UI
+        [void][System.Reflection.Assembly]::LoadWithPartialName('PresentationFramework')
+
+        [xml]$xaml = $xaml -replace 'mc:Ignorable="d"','' -replace "x:N",'N' -replace '^<Win.*', '<Window'
+        $reader=(New-Object System.Xml.XmlNodeReader $xaml)
+        $syncHash.Window=[Windows.Markup.XamlReader]::Load( $reader )
+        #===========================================================================
+        # Store Form Objects In PowerShell
+        #===========================================================================
+        $xaml.SelectNodes("//*[@Name]") | %{ $syncHash."$($_.Name)" = $syncHash.Window.FindName($_.Name)}
+
+
+        # INNER  FUNCTIONS
+        #Closes UI objects and exits (within runspace)
+        Function Close-ConfirmWindow
+        {
+            if ($syncHash.hadCritError) { Write-Host -Message "Background thread had a critical error" -ForegroundColor red }
+            #if runspace has not errored Dispose the UI
+            if (!($syncHash.isClosing)) { $syncHash.Window.Close() | Out-Null }
+        }
+
+        If($syncHash.Message){
+            $syncHash.txtMessage.text = $syncHash.Message
+        }
+
+        $syncHash.btnCancel.Add_Click({
+            Close-ConfirmWindow
+        })
+
+        $syncHash.btnConfirm.Add_Click({
+            $syncHash.TriggerAction = $true
+            #$syncHash.btnConfirm.Dispatcher.Invoke([action]{
+                #If($syncHash.ConfirmAction){
+                    #$syncHash.ConfirmResult = Invoke-Command -ScriptBlock $syncHash.ConfirmAction
+                    #Invoke-Command -ScriptBlock $syncHash.ConfirmAction
+                #}
+            #},'Normal')
+            If($syncHash.ConfirmPassthru){
+                $syncHash.ConfirmResult = Invoke-Command -ScriptBlock $syncHash.ConfirmAction
+            }Else{
+                $syncHash.ConfirmResult = Invoke-Command -ScriptBlock $syncHash.ConfirmAction -ComputerName $env:COMPUTERNAME -AsJob
+            }
+                
+            Close-ConfirmWindow
+        })
+
+        #Allow UI to be dragged around screen
+        $syncHash.Window.Add_MouseLeftButtonDown( {
+            $syncHash.Window.DragMove()
+        })
+
+        #Add smooth closing for Window
+        $syncHash.Window.Add_Loaded({ $syncHash.isLoaded = $True })
+        $syncHash.Window.Add_Closing({ $syncHash.isClosing = $True; Close-ConfirmWindow })
+        $syncHash.Window.Add_Closed({ $syncHash.isClosed = $True })
+
+        #make sure this display on top of every window
+        $syncHash.Window.Topmost = $true
+
+        $syncHash.window.ShowDialog()
+        $syncHash.Error = $Error
+    }) # end scriptblock
+
+    #collect data from runspace
+    $Data = $syncHash
+
+    #invoke scriptblock in runspace
+    $PowerShellCommand.Runspace = $PSDRunSpace
+    $AsyncHandle = $PowerShellCommand.BeginInvoke()
+
+    If($Wait){
+        #wait until runspace is completed before ending
+        do {
+            Start-sleep -m 100 }
+        while (!$AsyncHandle.IsCompleted)
+        #end invoked process
+        $null = $PowerShellCommand.EndInvoke($AsyncHandle)
+    }
+
+    #cleanup registered object
+    Register-ObjectEvent -InputObject $syncHash.Runspace `
+            -EventName 'AvailabilityChanged' `
+            -Action {
+
+                    if($Sender.RunspaceAvailability -eq "Available")
+                    {
+                        $Sender.Closeasync()
+                        $Sender.Dispose()
+                        # Speed up resource release by calling the garbage collector explicitly.
+                        # Note that this will pause *all* threads briefly.
+                        [GC]::Collect()
+                    }
+
+                } | Out-Null
+
+    If($Data.Error){Write-PSDLog -Message ("{0}: Confirm Window errored: {1}" -f ${CmdletName}, $Data.Error) -LogLevel 3}
+    Else{Write-PSDLog -Message ("{0}: Confirm Window closed" -f ${CmdletName})}
+    return $Data
+
+}#end confirm runspace
+#endregion
+
+#region FUNCTION: Loader for debug menu
+Function New-PSDStartLoaderPrestartMenu
+{
+    <#
+        .SYNOPSIS
+        Present PSD Prestart Action Menu
+
+        .LINK
+        https://tiberriver256.github.io/powershell/PowerShellProgress-Pt3/
+    #>
+    [CmdletBinding()]
+    Param(
+        [ValidateSet('HorizontalTop','HorizontalBottom','VerticalLeft','VerticalRight')]
+        [string]$Position = 'VerticalRight',
+        [switch]$OnTop,
+        [switch]$Wait
+    )
+    [string]${CmdletName} = $MyInvocation.MyCommand
+    Write-PSDLog -Message ("{0}: Debug Menu started" -f ${CmdletName})
+
+    #build runspace
+    $syncHash = [hashtable]::Synchronized(@{})
+    $PSDRunSpace =[runspacefactory]::CreateRunspace()
+    $syncHash.Runspace = $PSDRunSpace
+    $syncHash.InPE = Test-PSDStartLoaderInWinPE
+    $syncHash.CmtracePath = Get-PSDStartLoaderCmtrace
+    $syncHash.DartTools = Test-PSDStartLoaderHasDartPE
+    $syncHash.Test = Test-PSDStartLoaderVSCode
+    $syncHash.LogPath = "X:\MININT\SMSOSD\OSDLOGS\PSDStart.log"
+    $syncHash.Position = $Position
+    $syncHash.TopMost = $OnTop
+    $syncHash.NicWindow = {Show-PSDStartLoaderNetCfgWindow}
+    $syncHash.PEShutdownConfirm = {Start-Process 'wpeutil' -ArgumentList 'shutdown' -PassThru}
+    $syncHash.OSShutdownConfirm = {Show-PSDStartLoaderConfirmWindow -Message "Are you sure you want to shutdown this device?" -Action {Stop-Computer -Force}}
+    $syncHash.DiskWindow = {Show-PSDStartLoaderDiskViewerWindow}
+    $syncHash.CleanWindow = {Show-PSDStartLoaderDiskCleanWindow}
+    $PSDRunSpace.ApartmentState = "STA"
+    $PSDRunSpace.ThreadOptions = "ReuseThread"
+    $PSDRunSpace.Open() | Out-Null
+    $PSDRunSpace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+    $PowerShellCommand = [PowerShell]::Create().AddScript({
+
+        [string]$xaml = @"
+        <Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="PrestartMenu"
+        mc:Ignorable="d"
+        ResizeMode="NoResize"
+        Height="480" Width="120"
+        AllowsTransparency="True"
+        WindowStyle="None">
+    <Window.Resources>
+        <ResourceDictionary>
+
+            <Canvas x:Key="icons_cog" Width="24" Height="24">
+                <Path Stretch="Fill" Fill="White" Data="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M10,22C9.75,22 9.54,21.82 9.5,21.58L9.13,18.93C8.5,18.68 7.96,18.34 7.44,17.94L4.95,18.95C4.73,19.03 4.46,18.95 4.34,18.73L2.34,15.27C2.21,15.05 2.27,14.78 2.46,14.63L4.57,12.97L4.5,12L4.57,11L2.46,9.37C2.27,9.22 2.21,8.95 2.34,8.73L4.34,5.27C4.46,5.05 4.73,4.96 4.95,5.05L7.44,6.05C7.96,5.66 8.5,5.32 9.13,5.07L9.5,2.42C9.54,2.18 9.75,2 10,2H14C14.25,2 14.46,2.18 14.5,2.42L14.87,5.07C15.5,5.32 16.04,5.66 16.56,6.05L19.05,5.05C19.27,4.96 19.54,5.05 19.66,5.27L21.66,8.73C21.79,8.95 21.73,9.22 21.54,9.37L19.43,11L19.5,12L19.43,13L21.54,14.63C21.73,14.78 21.79,15.05 21.66,15.27L19.66,18.73C19.54,18.95 19.27,19.04 19.05,18.95L16.56,17.95C16.04,18.34 15.5,18.68 14.87,18.93L14.5,21.58C14.46,21.82 14.25,22 14,22H10M11.25,4L10.88,6.61C9.68,6.86 8.62,7.5 7.85,8.39L5.44,7.35L4.69,8.65L6.8,10.2C6.4,11.37 6.4,12.64 6.8,13.8L4.68,15.36L5.43,16.66L7.86,15.62C8.63,16.5 9.68,17.14 10.87,17.38L11.24,20H12.76L13.13,17.39C14.32,17.14 15.37,16.5 16.14,15.62L18.57,16.66L19.32,15.36L17.2,13.81C17.6,12.64 17.6,11.37 17.2,10.2L19.31,8.65L18.56,7.35L16.15,8.39C15.38,7.5 14.32,6.86 13.12,6.62L12.75,4H11.25Z" />
+            </Canvas>
+
+            <Canvas x:Key="icons_ps" Width="24" Height="24">
+                <Path Fill="White" Data="M20,19V7H4V19H20M20,3A2,2 0 0,1 22,5V19A2,2 0 0,1 20,21H4A2,2 0 0,1 2,19V5C2,3.89 2.9,3 4,3H20M13,17V15H18V17H13M9.58,13L5.57,9H8.4L11.7,12.3C12.09,12.69 12.09,13.33 11.7,13.72L8.42,17H5.59L9.58,13Z" />
+            </Canvas>
+
+            <Canvas x:Key="icons_target" Width="24" Height="24">
+                <Path Width="20" Height="20" Fill="White" Stretch="Uniform" Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10Z"/>
+            </Canvas>
+
+            <Canvas x:Key="icons_disk" Width="24" Height="24">
+                <Path Fill="Black" Data="M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M12,4A6,6 0 0,0 6,10C6,13.31 8.69,16 12.1,16L11.22,13.77C10.95,13.29 11.11,12.68 11.59,12.4L12.45,11.9C12.93,11.63 13.54,11.79 13.82,12.27L15.74,14.69C17.12,13.59 18,11.9 18,10A6,6 0 0,0 12,4M12,9A1,1 0 0,1 13,10A1,1 0 0,1 12,11A1,1 0 0,1 11,10A1,1 0 0,1 12,9M7,18A1,1 0 0,0 6,19A1,1 0 0,0 7,20A1,1 0 0,0 8,19A1,1 0 0,0 7,18M12.09,13.27L14.58,19.58L17.17,18.08L12.95,12.77L12.09,13.27Z" />
+            </Canvas>
+
+            <Canvas x:Key="icons_searchlog" Width="24" Height="24">
+                <Path Fill="Black" Data="M9 6V8H2V6H9M9 11V13H2V11H9M18 16V18H2V16H18M19.31 11.5C19.75 10.82 20 10 20 9.11C20 6.61 18 4.61 15.5 4.61S11 6.61 11 9.11 13 13.61 15.5 13.61C16.37 13.61 17.19 13.36 17.88 12.93L21 16L22.39 14.61L19.31 11.5M15.5 11.61C14.12 11.61 13 10.5 13 9.11S14.12 6.61 15.5 6.61 18 7.73 18 9.11 16.88 11.61 15.5 11.61Z" />
+            </Canvas>
+
+            <Canvas x:Key="icons_wipe" Width="24" Height="24">
+                <Path Fill="Black" Data="M12,4C5,4 2,9 2,9L9,16C9,16 9.5,15.1 10.4,14.5L10.7,16.5C10.3,16.8 10,17.4 10,18A2,2 0 0,0 12,20A2,2 0 0,0 14,18C14,17.1 13.5,16.4 12.7,16.1L12.3,14C14.1,14.2 15,16 15,16L22,9C22,9 19,4 12,4M15.1,13.1C14.3,12.5 13.3,12 12,12L11,6.1C11.3,6 11.7,6 12,6C15.7,6 18.1,7.7 19.3,8.9L15.1,13.1M8.9,13.1L4.7,8.9C5.5,8 7,7 9,6.4L10,12.4C9.6,12.6 9.2,12.8 8.9,13.1Z" />
+            </Canvas>
+
+            <Canvas x:Key="icons_exit"  Width="24" Height="24">
+                <Path Fill="Black" Data="M22 12L18 8V11H10V13H18V16M20 18A10 10 0 1 1 20 6H17.27A8 8 0 1 0 17.27 18Z" />
+            </Canvas>
+
+            <Canvas x:Key="icons_shutdown"  Width="24" Height="24">
+                <Path Fill="Black" Data="M16.56,5.44L15.11,6.89C16.84,7.94 18,9.83 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,9.83 7.16,7.94 8.88,6.88L7.44,5.44C5.36,6.88 4,9.28 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,9.28 18.64,6.88 16.56,5.44M13,3H11V13H13" />
+            </Canvas>
+
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Setter Property="FontWeight" Value="Light" />
+                <Setter Property="Background" Value="Transparent"/>
+            </Style>
+
+            <Style x:Key="ButtonLightGrayRounded" TargetType="{x:Type Button}">
+                <Setter Property="Background" Value="LightGray" />
+                <Setter Property="Foreground" Value="Black" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="Button.Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="Black" BlurRadius="5" Opacity="0.1" />
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button" >
+
+                            <Border Name="border"
+                    BorderThickness="1"
+                    Padding="4,2"
+                    BorderBrush="DarkGray"
+                    CornerRadius="5,0,5,0"
+                    Background="#FFE8EDF9">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    TextBlock.TextAlignment="Center"
+                                    />
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#012456" />
+                                    <Setter TargetName="border" Property="BorderThickness" Value="2" />
+                                </Trigger>
+
+                                <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="DarkGray" />
+                                </Trigger>
+
+                                <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="DarkGray"/>
+                                </Trigger>
+
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+
+        <StackPanel x:Name="stackButtons" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+            <Button x:Name="btnWipeDisk" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
+                <StackPanel Width="91" Height="44">
+                    <Label x:Name="lblWipeDisk" Content="Wipe Disks" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                    <Rectangle Width="24" Height="20" Fill="Black" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_wipe}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnOpenDisk" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
+                <StackPanel Width="91" Height="44">
+                    <Label x:Name="lblOpenDisk" Content="Show Disks" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                    <Rectangle Width="20" Height="20" Fill="DarkGoldenrod" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_disk}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnOpenPSDLog" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
+                <StackPanel Width="91" Height="44">
+                    <Label x:Name="lblOpenPSDLog" Content="Open PSD log" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                    <Rectangle Width="26" Height="18" Fill="BlueViolet" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_searchlog}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnOpenPSWindow" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
+                <StackPanel Width="91" Height="44">
+                    <Label x:Name="lblOpenPSWindow" Content="Launch PowerShell" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                    <Rectangle Width="20" Height="20" Fill="Blue" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_ps}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnDartPE" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
+                <StackPanel Width="91" Height="44">
+                    <Label x:Name="lblDartPE" Content="Launch Dart PE" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                    <Rectangle Width="20" Height="20" Fill="Green" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_target}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnAddStaticIP" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
+                <StackPanel Width="91" Height="44">
+                    <Label x:Name="lblAddStaticIP" Content="Configure Static IP" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                    <Rectangle Width="20" Height="20" Fill="Black" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_cog}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnShutdown" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
+                <StackPanel Width="91" Height="44">
+                    <Label x:Name="lblShutdown" Content="Shutdown PE" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                    <Rectangle Width="20" Height="20" Fill="Red" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_shutdown}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnExit" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
+                <StackPanel Width="91" Height="44">
+                    <Label x:Name="lblExit" Content="Continue" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                    <Rectangle Width="20" Height="20" Fill="Green" HorizontalAlignment="Center">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_exit}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
+
+        </StackPanel>
+    </Grid>
+</Window>
+"@
+
+        #Load assembies to display UI
+        [void][System.Reflection.Assembly]::LoadWithPartialName('PresentationFramework')
+
+        [xml]$xaml = $xaml -replace 'mc:Ignorable="d"','' -replace "x:N",'N' -replace '^<Win.*', '<Window'
+        $reader=(New-Object System.Xml.XmlNodeReader $xaml)
+        $syncHash.Window=[Windows.Markup.XamlReader]::Load( $reader )
+        #===========================================================================
+        # Store Form Objects In PowerShell
+        #===========================================================================
+        $xaml.SelectNodes("//*[@Name]") | %{ $syncHash."$($_.Name)" = $syncHash.Window.FindName($_.Name)}
+
+        # INNER  FUNCTIONS
+        #Closes UI objects and exits (within runspace)
+        Function Close-PSDStartLoaderDebugMenu
+        {
+            if ($syncHash.hadCritError) { Write-Host -Message "Background thread had a critical error" -ForegroundColor red }
+            #if runspace has not errored Dispose the UI
+            if (!($syncHash.isClosing)) { $syncHash.Window.Close() | Out-Null }
+        }
+
+        Function Set-MenuPosition{
+            Param(
+                $Runspace,
+                [string]$Location = 'Right'
+            )
+
+            Switch ($Location) {
+                "Up"
+                {
+                    $syncHash.MenuPosition = 'HorizontalTop'
+                    $Runspace.stackButtons.Orientation = "Horizontal"
+                    $Runspace.Window.Height = 60
+                    $Runspace.Window.Width = 880
+                    $Runspace.Window.Left = $([System.Windows.SystemParameters]::WorkArea.Width-$Runspace.Window.Width)/2
+                    $Runspace.Window.Top = 10
+                }
+                "Left"
+                {
+                    $syncHash.MenuPosition = 'VerticalLeft'
+                    $Runspace.stackButtons.Orientation = "Vertical"
+                    $Runspace.Window.Height = 480
+                    $Runspace.Window.Width = 120
+                    $Runspace.Window.Left = 20
+                    $Runspace.Window.Top = $([System.Windows.SystemParameters]::WorkArea.Height-$Runspace.Window.Height)/2
+                }
+                "Right"
+                {
+                    $syncHash.MenuPosition = 'VerticalRight'
+                    $Runspace.stackButtons.Orientation = "Vertical"
+                    $Runspace.Window.Height = 480
+                    $Runspace.Window.Width = 120
+                    $Runspace.Window.Left = $([System.Windows.SystemParameters]::WorkArea.Width-$Runspace.Window.Width)-20
+                    $Runspace.Window.Top = $([System.Windows.SystemParameters]::WorkArea.Height-$Runspace.Window.Height)/2
+                }
+                "Down"
+                {
+                    $syncHash.MenuPosition = 'HorizontalBottom'
+                    $Runspace.stackButtons.Orientation = "Horizontal"
+                    $Runspace.Window.Height = 60
+                    $Runspace.Window.Width = 880
+                    $Runspace.Window.Left = $([System.Windows.SystemParameters]::WorkArea.Width-$Runspace.Window.Width)/2
+                    $Runspace.Window.Top = $([System.Windows.SystemParameters]::WorkArea.Height-$Runspace.Window.Height)-15
+                }
+            }
+        }
+
+        #put menu in correct position on load
+        Switch ($syncHash.Position)
+        {
+            "HorizontalTop" { Set-MenuPosition -Runspace $syncHash -Location Up}
+            "VerticalLeft" { Set-MenuPosition -Runspace $syncHash -Location Left}
+            "VerticalRight" { Set-MenuPosition -Runspace $syncHash -Location Right }
+            "HorizontalBottom" { Set-MenuPosition -Runspace $syncHash -Location Down}
+        }
+
+        If(-Not($syncHash.Test) )
+        {
+            #hide options not allowed in Windows
+            If(-Not($syncHash.InPE) ){
+                $syncHash.btnDartPE.Visibility = 'Collapsed'
+                $syncHash.btnWipeDisk.Visibility = 'Collapsed'
+                $syncHash.btnAddStaticIP.Visibility = 'Collapsed'
+            }
+
+            If(-Not($syncHash.DartTools)){
+                $syncHash.btnDartPE.Visibility = 'Collapsed'
+            }
+
+            #check to see if cmtrace exists
+            If(-Not($syncHash.CmtracePath)){
+                $syncHash.btnOpenPSDLog.Visibility = 'Collapsed'
+            }
+        }
+
+        #change label of shutdown based on environment
+        If($syncHash.InPE){
+            $syncHash.lblShutdown.Content = 'Shutdown PE'
+        }Else{
+            $syncHash.lblShutdown.Content = 'Shutdown Windows'
+        }
+
+        $syncHash.btnWipeDisk.Add_Click({
+            # Temporarily disable this button to prevent re-entry.
+            $this.IsEnabled = $false
+            #$syncHash.Window.Dispatcher.Invoke([action]{ 
+                $syncHash.WipeDiskMenu = Invoke-Command -ScriptBlock $syncHash.CleanWindow 
+            #},'Normal')
+            $this.IsEnabled = $syncHash.WipeDiskMenu.isClosed
+        })
+
+        $syncHash.btnOpenDisk.Add_Click({
+            # Temporarily disable this button to prevent re-entry.
+            $this.IsEnabled = $false
+            #$syncHash.btnOpenDisk.Dispatcher.Invoke([action]{
+                $syncHash.DiskViewerMenu = Invoke-Command -ScriptBlock $syncHash.DiskWindow
+            #},'Normal')
+            $this.IsEnabled = $syncHash.DiskViewerMenu.isClosed
+        })
+
+        #action for poshwindow button
+        $syncHash.btnOpenPSDLog.Add_Click({
+            #check to see if psd.log exists
+            If(Test-Path $syncHash.LogPath){
+                $StartArg = @{
+                    ArgumentList=$syncHash.LogPath
+                    WindowStyle='Normal'
+                    PassThru=$true
+                }
+            }
+            Else{
+                $StartArg = @{
+                    WindowStyle='Normal'
+                    PassThru=$true
+                }
+            }
+
+            #run cmtrace is found
+            If($LogTool = $syncHash.CmtracePath){
+                $syncHash.OpenPSDLog = Start-Process $LogTool @StartArg
+            }
+        })
+
+        #action for poshwindow button
+        $syncHash.btnOpenPSWindow.Add_Click({
+            If($syncHash.InPE){
+                $syncHash.OpenPoSH = Start-Process 'powershell.exe' -WorkingDirectory 'X:\' -PassThru
+            }
+            Else{
+                $syncHash.OpenPoSH = Start-Process 'powershell.exe' -WorkingDirectory $env:windir -PassThru
+            }
+        })
+
+        $syncHash.btnDartPE.Add_Click({
+            # Temporarily disable this button to prevent re-entry.
+            $this.IsEnabled = $false
+            If($syncHash.DartTools){
+                $syncHash.OpenDaRT = Start-Process 'X:\Sources\Recovery\Tools\MsDartTools.exe' -Wait -PassThru
+            }
+            #hide incase this button shows back up and its clicked but no Dart is installed
+            Else{
+                $syncHash.btnDartPE.Visibility = 'Collapsed'
+                $syncHash.OpenDaRT = $false
+            }
+            $this.IsEnabled = $true
+        })
+
+        $syncHash.btnAddStaticIP.Add_Click({
+            #$syncHash.btnAddStaticIP.Dispatcher.Invoke([action]{
+                # Temporarily disable this button to prevent re-entry.
+                $this.IsEnabled = $false
+                $syncHash.NicConfigMenu = Invoke-Command -ScriptBlock $syncHash.NicWindow
+                $this.IsEnabled = $syncHash.NicConfigMenu.isClosed
+            #},'Normal')
+        })
+
+        #action for exit button
+        $syncHash.btnShutdown.Add_Click({
+            # Temporarily disable this button to prevent re-entry.
+            $this.IsEnabled = $false
+            If($syncHash.InPE){
+                $syncHash.ConfirmWindow = Invoke-Command -ScriptBlock $syncHash.PEShutdownConfirm
+            }Else{
+                $syncHash.ConfirmWindow = Invoke-Command -ScriptBlock $syncHash.OSShutdownConfirm
+            }
+            $this.IsEnabled = $syncHash.ConfirmWindow
+        })
+
+        #action for exit button
+        $syncHash.btnExit.Add_Click({
+            Close-PSDStartLoaderDebugMenu
+        })
+
+        #change position of menu based on arrow keys
+        $syncHash.Window.Add_KeyDown( {
+            Set-MenuPosition -Runspace $syncHash -Location $_.Key
+        })
+
+        #Add smooth closing for Window
+        $syncHash.Window.Add_Loaded({ $syncHash.isLoaded = $True })
+    	$syncHash.Window.Add_Closing({ $syncHash.isClosing = $True; Close-PSDStartLoaderDebugMenu })
+    	$syncHash.Window.Add_Closed({ $syncHash.isClosed = $True })
+
+        #make sure this display on top of every window
+        $syncHash.Window.Topmost = $syncHash.TopMost
+
+        $syncHash.Window.ShowDialog()
+        #$PSDRunspace.Close()
+        #$PSDRunspace.Dispose()
+        $syncHash.Error = $Error
+    }) # end scriptblock
+
+    #collect data from runspace
+    $Data = $syncHash
+
+    #invoke scriptblock in runspace
+    $PowerShellCommand.Runspace = $PSDRunSpace
+    $AsyncHandle = $PowerShellCommand.BeginInvoke()
+
+    If($Wait){
+        #wait until runspace is completed before ending
+        do {
+            Start-sleep -m 100
+        }
+        while (!$AsyncHandle.IsCompleted)
+        #end invoked process
+        $null = $PowerShellCommand.EndInvoke($AsyncHandle)
+    }
+    #cleanup registered object
+    Register-ObjectEvent -InputObject $syncHash.Runspace `
+            -EventName 'AvailabilityChanged' `
+            -Action {
+
+                    if($Sender.RunspaceAvailability -eq "Available")
+                    {
+                        $Sender.Closeasync()
+                        $Sender.Dispose()
+                        # Speed up resource release by calling the garbage collector explicitly.
+                        # Note that this will pause *all* threads briefly.
+                        [GC]::Collect()
+                    }
+
+                } | Out-Null
+
+    If($Data.Error){Write-PSDLog -Message ("{0}: Debug Menu errored: {1}" -f ${CmdletName}, $Data.Error) -LogLevel 3}
+    Else{Write-PSDLog -Message ("{0}: Debug Menu closed" -f ${CmdletName})}
+    return $Data
+
+}#end runspacce
+#endregion
+
+#region FUNCTION: Loader for main start UI
+Function New-PSDStartLoader
+{
+    <#
+        .SYNOPSIS
+        Present PSDLoader like interface with status
+
+        .LINK
+        https://tiberriver256.github.io/powershell/PowerShellProgress-Pt3/
+    #>
+    [CmdletBinding()]
+    Param(
+        [string]$LogoImgPath,
+        [ValidateSet('HorizontalTop','HorizontalBottom','VerticalLeft','VerticalRight')]
+        [string]$MenuPosition = 'VerticalRight',
+        [switch]$Preload,
+        [switch]$FullScreen
+    )
+    [string]${CmdletName} = $MyInvocation.MyCommand
+    Write-PSDLog -Message ("{0}: PSDStartLoader started" -f ${CmdletName})
+
+    #build runspace
+    $syncHash = [hashtable]::Synchronized(@{})
+    $PSDRunSpace =[runspacefactory]::CreateRunspace()
+    $syncHash.Runspace = $PSDRunSpace
+    $syncHash.Test = Test-PSDStartLoaderVSCode
+    $syncHash.InPE = Test-PSDStartLoaderInWinPE
+    $syncHash.PreloadInfo = $Preload
+    $syncHash.DebugMode = $False
+    $syncHash.SyncTSProgress = $False
+    $syncHash.HideTSProgress = $False
+    #$syncHash.TSProgressStatus = {Get-PSDStartTSProgress}
+    $syncHash.DartTools = Test-PSDStartLoaderHasDartPE
+    $syncHash.MenuPosition = $MenuPosition
+    $syncHash.ShowPrestartMenu = {New-PSDStartLoaderPrestartMenu -Position $args[0] -OnTop}
+    $syncHash.CheckboxStyle = Add-PSDStartLoaderCheckboxStyle
+    $syncHash.DeviceInfoCommand = {Get-PSDLocalInfo -PassThru}
+    $syncHash.NetworkInfoCommand  = {Get-PSDStartLoaderInterfaceDetails}
+    $syncHash.LogoImg = $LogoImgPath
+    $syncHash.OrgName = "PowerShell Deployment"
+    $syncHash.Fullscreen = $FullScreen
+    $syncHash.PrestartCounter = 0
+    $PSDRunSpace.ApartmentState = "STA"
+    $PSDRunSpace.ThreadOptions = "ReuseThread"
+    $PSDRunSpace.Open() | Out-Null
+    $PSDRunSpace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+    $PowerShellCommand = [PowerShell]::Create().AddScript({
+
+        [string]$xaml = @"
+        <Window
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            Title="PSDLoader"
+            Width="1024"
+            Height="768"
+            WindowStartupLocation="CenterScreen"
+            mc:Ignorable="d">
+            <Window.Resources>
+                <ResourceDictionary>
+                    <Canvas x:Key="icons_menu" Width="24" Height="24">
+                        <Path Stretch="Fill" Fill="White" Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M6,7H18V9H6V7M6,11H18V13H6V11M6,15H18V17H6V15Z" />
+                    </Canvas>
+
+                    <Style TargetType="{x:Type Window}">
+                        <Setter Property="FontFamily" Value="Segoe UI" />
+                        <Setter Property="FontWeight" Value="Light" />
+                        <Setter Property="Background" Value="#012456" />
+                        <Setter Property="Foreground" Value="white" />
+                    </Style>
+
+                    $($syncHash.CheckboxStyle)
+
+                    <Style x:Key="ButtonBlueRounded" TargetType="{x:Type Button}">
+                        <Setter Property="Background" Value="#012456" />
+                        <Setter Property="Foreground" Value="White" />
+                        <Setter Property="FontSize" Value="15" />
+                        <Setter Property="SnapsToDevicePixels" Value="True" />
+                        <Setter Property="Button.Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="Gray" BlurRadius="20" Direction="-90" RenderingBias="Quality" ShadowDepth="4"/>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button" >
+
+                                    <Border Name="border"
+                            BorderThickness="1"
+                            Padding="4,2"
+                            BorderBrush="#012456"
+                            CornerRadius="5,5,5,5"
+                            Background="#2e5894">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            TextBlock.TextAlignment="Center"
+                                            />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="border" Property="BorderBrush" Value="#00308f" />
+                                        </Trigger>
+
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="border" Property="BorderBrush" Value="#72a0c1" />
+                                            <Setter TargetName="border" Property="Background" Value="#2e5894" />
+                                        </Trigger>
+
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="border" Property="BorderBrush" Value="LightGray" />
+                                            <Setter TargetName="border" Property="Background" Value="#bcd4e6" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+
+                </ResourceDictionary>
+            </Window.Resources>
+            <Grid x:Name="background" Height="768" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                <Grid Width="1024" Height="614" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FFFFFFFF" Margin="0,50,0,0" >
+                    <StackPanel Margin="20,0,192,0">
+                        <Label Content="Progress:" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" VerticalAlignment="Top" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Left"/>
+                        <TextBlock x:Name="txtStatus" Text="Loading PSD status messages..." Foreground="Black" FontSize="18" HorizontalAlignment="Left" Margin="10,0,0,0" TextWrapping="Wrap" />
+
+                        <Label Content="Computer Info:" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" Margin="0,20,0,0" VerticalAlignment="Top" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Left"/>
+                        <Grid Height="109" Width="323" HorizontalAlignment="Left" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" MinWidth="121"></ColumnDefinition>
+                                <ColumnDefinition Width="189*"/>
+                                <ColumnDefinition Width="auto"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Label Content="Manufacturer:" HorizontalAlignment="Center" FontSize="12"  VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right"/>
+                            <TextBox x:Name="txtManufacturer" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,5,0,5" Width="202" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0" Grid.ColumnSpan="2"/>
+                            <Label Content="Model:" Grid.Row="1" HorizontalAlignment="Center" FontSize="12" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
+                            <TextBox x:Name="txtModel" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,5,0,6" Width="202" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0" Grid.ColumnSpan="2"/>
+                            <Label Content="Serial Number:" Grid.Row="2" HorizontalAlignment="Center" FontSize="12" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right"/>
+                            <TextBox x:Name="txtSerialNumber" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,4,0,5" Width="202" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0" Grid.ColumnSpan="2"/>
+                            <Label Content="Asset Tag:" Grid.Row="3" HorizontalAlignment="Center" FontSize="12" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right"/>
+                            <TextBox x:Name="txtAssetTag" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,5,0,5" Width="202" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0" Grid.ColumnSpan="2"/>
+                        </Grid>
+                        <Label Content="Network Info:" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Left"/>
+
+                        <Grid Height="126" Width="314" HorizontalAlignment="Left" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" MinWidth="121"></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="auto"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Label Content="Mac Address:" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontSize="12" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
+                            <TextBox x:Name="txtMac" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
+                            <Label Content="IP Address:" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontSize="12" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
+                            <TextBox x:Name="txtIP" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
+                            <Label Content="Subnet:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" FontSize="12" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
+                            <TextBox x:Name="txtSubnet" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
+                            <Label Content="Default Gateway:" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" FontSize="12" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right"/>
+                            <TextBox x:Name="txtGateway" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
+                            <Label Content="DHCP Server:" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" FontSize="12" VerticalAlignment="Center" Foreground="Black" Height="31" Width="121" HorizontalContentAlignment="Right" />
+                            <TextBox x:Name="txtDHCP" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="12" IsReadOnly="True" Margin="0,5,0,5" Width="189" VerticalContentAlignment="Center" Padding="2,0,0,0" BorderThickness="0"/>
+                        </Grid>
+
+                    </StackPanel>
+
+                    <TextBlock x:Name="txtPercentage" HorizontalAlignment="Center" VerticalAlignment="Top" Foreground="#012456" Margin="0,543,0,0" />
+                    <ProgressBar x:Name="ProgressBar" Width="724" Height="4" Margin="0,564,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Background="White" Foreground="LightGreen" />
+                    <TextBlock x:Name="txtTSStatus" HorizontalAlignment="Center" VerticalAlignment="Top" Foreground="#012456" Margin="0,571,0,0" />
+                    <ProgressBar x:Name="TSProgressBar" Width="724" Height="4" Margin="0,592,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Background="White" Foreground="LightGreen" />
+
+                    <StackPanel HorizontalAlignment="Center" Width="1024" VerticalAlignment="Center" Height="614">
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                            <TextBlock x:Name="txtDebug" Text="Debug Mode" Foreground="Black" VerticalAlignment="Center" Margin="10" FontSize="18"/>
+                            <CheckBox x:Name="chkDebug" Style="{DynamicResource ModernCircleSlider}" Margin="0,10,20,10" Width="58" HorizontalAlignment="Right" />
+                        </StackPanel>
+
+
+                        <Button x:Name="btnPrestart" Style="{DynamicResource ButtonBlueRounded}" Width="197" Margin="0,100,0,0" Height="112">
+                            <StackPanel Width="187" Height="91">
+                                <Label x:Name="lblPrestart" Content="Launch Prestart" BorderThickness="0" HorizontalAlignment="Center" FontSize="24" VerticalContentAlignment="Center" Foreground="#f0f8ff" Height="46" />
+                                <Rectangle Width="40" Height="40" Fill="#f0f8ff" HorizontalAlignment="Center">
+                                    <Rectangle.OpacityMask>
+                                        <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_menu}"/>
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock x:Name="txtCountdown" HorizontalAlignment="Center" FontSize="18" Height="96" Foreground="#012456" Margin="10" />
+
+                    </StackPanel>
+                </Grid>
+                <Image x:Name="imgLogo" Width="72" Height="66" Margin="20,0,0,18" HorizontalAlignment="Left" VerticalAlignment="Bottom"  />
+                <Label x:Name="lblOrg" Width="882" Margin="0,0,20,18" HorizontalAlignment="Right" VerticalAlignment="Bottom" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" FontSize="36" Foreground="White" Height="70" />
+            </Grid>
+        </Window>
+"@
+
+        #Load assembies to display UI
+        [void][System.Reflection.Assembly]::LoadWithPartialName('PresentationFramework')
+
+        [xml]$xaml = $xaml -replace 'mc:Ignorable="d"','' -replace "x:N",'N' -replace '^<Win.*', '<Window'
+        $reader=(New-Object System.Xml.XmlNodeReader $xaml)
+        $syncHash.Window=[Windows.Markup.XamlReader]::Load( $reader )
+        #===========================================================================
+        # Store Form Objects In PowerShell
+        #===========================================================================
+        $xaml.SelectNodes("//*[@Name]") | %{ $syncHash."$($_.Name)" = $syncHash.Window.FindName($_.Name)}
+
+        #close caller window if debugging or testing mode in not enabled
+        If ( ($syncHash.DebugMode -eq $false) -or ($syncHash.Test -eq $false) ) {
+            # Make PowerShell Disappear
+            $windowcode = '[DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);'
+            $asyncwindow = Add-Type -MemberDefinition $windowcode -name Win32ShowWindowAsync -namespace Win32Functions -PassThru
+            $null = $asyncwindow::ShowWindowAsync((Get-Process -PID $pid).MainWindowHandle, 0)
+        }
+
+        # INNER  FUNCTIONS
+        #Closes UI objects and exits (within runspace)
+        Function Close-PSDStartLoader
+        {
+            if ($syncHash.hadCritError) { Write-Host -Message "Background thread had a critical error" -ForegroundColor red }
+            #if runspace has not errored Dispose the UI
+            if (!($syncHash.isClosing)) { $syncHash.Window.Close() | Out-Null }
+        }
+
+        #add elements that you want to update often
+        #the value must also be added to top of function as synchash property
+        #then it can be called by the timer to update
+        $updateBlock = {
+            #monitor menu close status
+            If($syncHash.PrestartMenu.isClosed){
+                $syncHash.btnPrestart.IsEnabled = $True
+            }
+
+            #Update Label
+            $syncHash.lblOrg.Content = $syncHash.OrgName
+            
+            #Update Debug Checkbox
+            $syncHash.chkDebug.IsChecked = $syncHash.DebugMode
+
+            if($syncHash.LogoImg){
+                $syncHash.imgLogo.Source = $syncHash.LogoImg
+            }
+
+            #syncronize with TS progress and display results in Loader
+            If($syncHash.SyncTSProgress -eq $true)
+            {
+                #check if tsenvrionemt is loaded in runspace
+                If(!$tsenv){
+                    $tsenv = New-Object -ComObject Microsoft.SMS.TSEnvironment -ErrorAction SilentlyContinue
+                }
+                #check if tsprogreessui is loaded in runspace
+                If(!$TSProgressUI){
+                    $TSProgressUI = New-Object -ComObject Microsoft.SMS.TSProgressUI -ErrorAction SilentlyContinue
+                    If($syncHash.HideTSProgress -eq $true){
+                        $TSProgressUI.CloseProgressDialog()
+                    }
+                }
+                #attempt to update progressbar with TS values
+                Try{
+                    $syncHash.txtPercentage.Text = $tsenv.Value("_SMSTSCurrentActionName")
+                    $syncHash.ProgressBar.Value = ( ([Convert]::ToUInt32($tsenv.Value("_SMSTSNextInstructionPointer")) / [Convert]::ToUInt32($tsenv.Value("_SMSTSInstructionTableSize"))) * 100)
+                }Catch{}
+            }
+
+            #refesh window
+            #[Windows.Input.InputEventHandler]{ $syncHash.Window.UpdateLayout() }
+        }
+
+        #update devcie details
+        If($syncHash.PreloadInfo -eq $true){
+            $syncHash.DeviceInfo = Invoke-Command -ScriptBlock $syncHash.DeviceInfoCommand
+            $syncHash.NetworkInfo = Invoke-Command -ScriptBlock $syncHash.NetworkInfoCommand
+            $syncHash.txtManufacturer.text = ($syncHash.DeviceInfo).Manufacturer
+            $syncHash.txtModel.text = ($syncHash.DeviceInfo).Model
+            $syncHash.txtSerialNumber.text = ($syncHash.DeviceInfo).SerialNumber
+            $syncHash.txtAssetTag.text = ($syncHash.DeviceInfo).assettag
+            $syncHash.txtMac.text = ($syncHash.NetworkInfo).MacAddress
+            $syncHash.txtIP.text = ($syncHash.NetworkInfo).IPAddress
+            $syncHash.txtSubnet.text = ($syncHash.NetworkInfo).SubnetMask
+            $syncHash.txtGateway.text = ($syncHash.NetworkInfo).GatewayAddresses
+            $syncHash.txtDHCP.text = ($syncHash.NetworkInfo).DhcpServer
+        }
+
+        $syncHash.btnPrestart.Visibility = 'Hidden'
+        $syncHash.txtCountdown.Visibility = 'Hidden'
+        #Currently hide second progressbar
+        $syncHash.txtTSStatus.Visibility = 'Hidden'
+        $syncHash.TSProgressBar.Visibility = 'Hidden'
+
+        #monitor checkbox event
+        [System.Windows.RoutedEventHandler]$Script:CheckedEventHandler = {
+            $syncHash.DebugMode = $true
+        }
+
+        #Do Debug actions when checked
+        $syncHash.chkDebug.AddHandler([System.Windows.Controls.CheckBox]::CheckedEvent, $CheckedEventHandler)
+
+        [System.Windows.RoutedEventHandler]$Script:UnCheckedEventHandler = {
+            $syncHash.DebugMode = $false
+        }
+
+        #Do Debug action when unchecked
+        $syncHash.chkDebug.AddHandler([System.Windows.Controls.CheckBox]::UncheckedEvent, $UnCheckedEventHandler)
+
+        #action for exit button
+        $syncHash.btnPrestart.Add_Click({
+            # Temporarily disable this button to prevent re-entry.
+            $this.IsEnabled = $false
+
+            $syncHash.Window.Dispatcher.Invoke([action]{
+                $syncHash.PrestartMenu = Invoke-Command -ScriptBlock $syncHash.ShowPrestartMenu -ArgumentList $syncHash.MenuPosition
+            },'Normal')
+            #$this.IsEnabled = $syncHash.PrestartMenu.isClosed
+        })
+
+        If(-Not($syncHash.Test) )
+        {
+            #maximze window if called
+            If($syncHash.Fullscreen){
+                $syncHash.Window.WindowState = "Maximized"
+                $syncHash.Window.WindowStyle = "None"
+            }
+        }
+
+        #Allow space to hide start wizard
+        $syncHash.Window.Add_KeyDown( {
+            if ($_.Key -match 'F9') {
+                If($syncHash.Window.WindowState -eq "Maximized"){
+                    #$syncHash.Window.ShowInTaskbar = $true
+                    $syncHash.Window.WindowState = 'Normal'
+                    $syncHash.Window.WindowStyle = 'SingleBorderWindow'
+                }
+                Else{
+                    $syncHash.Window.WindowState = "Maximized"
+                    $syncHash.Window.WindowStyle = "None"
+                }
+            }
+        })
+
+
+        # Before the UI is displayed
+        # Create a timer dispatcher to watch for value change externally on regular interval
+        # update those values when found using scriptblock ($updateblock)
+        $syncHash.Window.Add_SourceInitialized({
+            ## create a timer
+            $timer = new-object System.Windows.Threading.DispatcherTimer
+            ## set to fire 4 times every second
+            $timer.Interval = [TimeSpan]"0:0:0.01"
+            ## invoke the $updateBlock after each fire
+            $timer.Add_Tick( $updateBlock )
+            ## start the timer
+            $timer.Start()
+
+            if( -Not($timer.IsEnabled) ) {
+               $syncHash.Error = "Timer didn't start"
+            }
+        })
+
+        #Add smooth closing for Window
+        $syncHash.Window.Add_Loaded({ $syncHash.isLoaded = $True })
+    	$syncHash.Window.Add_Closing({ $syncHash.isClosing = $True; Close-PSDStartLoader })
+    	$syncHash.Window.Add_Closed({ $syncHash.isClosed = $True })
+
+        #always force windows on bottom
+        $syncHash.Window.Topmost = $False
+
+        $syncHash.Window.ShowDialog()
+        #$PSDRunspace.Close()
+        #$PSDRunspace.Dispose()
+        $syncHash.Error = $Error
+    }) # end scriptblock
+
+    #collect data from runspace
+    $Data = $syncHash
+
+    #invoke scriptblock in runspace
+    $PowerShellCommand.Runspace = $PSDRunSpace
+    $AsyncHandle = $PowerShellCommand.BeginInvoke()
+
+    #cleanup registered object
+    Register-ObjectEvent -InputObject $syncHash.Runspace `
+            -EventName 'AvailabilityChanged' `
+            -Action {
+
+                    if($Sender.RunspaceAvailability -eq "Available")
+                    {
+                        $Sender.Closeasync()
+                        $Sender.Dispose()
+                        # Speed up resource release by calling the garbage collector explicitly.
+                        # Note that this will pause *all* threads briefly.
+                        [GC]::Collect()
+                    }
+
+                } | Out-Null
+
+    If($Data.Error){Write-PSDLog -Message ("{0}: PSDStartLoader errored: {1}" -f ${CmdletName}, $Data.Error) -LogLevel 3}
+    Else{Write-PSDLog -Message ("{0}: PSDStartLoader closed" -f ${CmdletName})}
+    Return $Data
+}
+#endregion
+
+#region FUNCTION: Initiate countdown for main loader
+Function Invoke-PSDStartLoaderCountdown
+{
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true, Position=1)]
+        [Parameter(Mandatory=$true)]
         $Runspace,
-
-        [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
-        [String]$ElementName,
-
+        [Parameter(Mandatory=$true)]
+        [String]$Element,
+        [Parameter(Mandatory=$true)]
+        [int]$StartCount,
         [Parameter(Mandatory=$false)]
-        [ValidateSet('Visibility','Text','Content','Foreground','Background','IsReadOnly','IsChecked','IsEnabled','Fill','BorderThickness','BorderBrush')]
-        [String]$Property
+        [String]$CustomOutput,
+        [Parameter(Mandatory=$false)]
+        [int]$WarnCount,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet('Small','Medium','Large')]
+        [String]$Size = 'Small',
+        [scriptblock]$EndAction,
+        [string[]]$Arguments
     )
 
-    If($Property){
-        Return $Runspace.$ElementName.$Property
-    }
-    Else{
-        Return $Runspace.$ElementName
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
+    Switch($Size){
+        'Small' {$FontSize = '18'}
+        'Medium' {$FontSize = '32'}
+        'Large' {$FontSize = '48'}
     }
 
+    #detemine supported elements and the property to update
+    Switch($Runspace.$Element.GetType().Name){
+        'Button' {$property = 'Content'}
+        'Label' {$property = 'Content'}
+        'TextBox' {$property = 'Text'}
+        'TextBlock' {$property = 'Text'}
+        default {$property = 'Text'}
+    }
+
+    #ensure TS progress is hidden
+    Set-PSDStartLoaderProperty -Runspace $Runspace -PropertyName SyncTSProgress -Value $false
+
+    Write-PSDLog -Message ("{0}: Started count down from {1} seconds" -f ${CmdletName},$StartCount)
+
+    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName txtCountdown -Property FontSize -Value $FontSize
+
+    #ensure element is visable
+    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName $Element -Property Visibility -Value 'Visible'
+
+    while ($StartCount -ge 0)
+    {
+        #update the elements countdown value
+        If($CustomOutput){
+            $CounterOutput = $CustomOutput.replace('{0}',$StartCount)
+            Set-PSDStartLoaderElement -Runspace $Runspace -ElementName $Element -Property $property -Value $CounterOutput
+        }Else{
+            Set-PSDStartLoaderElement -Runspace $Runspace -ElementName $Element -Property $property -Value $StartCount
+        }
+
+        If($StartCount -le $WarnCount){
+            Set-PSDStartLoaderElement -Runspace $Runspace -ElementName txtCountdown -Property Foreground -Value "Red"
+        }
+
+        start-sleep 1
+        $StartCount -= 1
+    }
+    Write-PSDLog -Message ("{0}: Completed count down" -f ${CmdletName})
+
+    #ensure element is visable
+    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName $Element -Property Visibility -Value 'Hidden'
+    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName txtCountdown -Property Foreground -Value "Black"
+
+    #invoke an action if specified
+    If($EndAction){
+        If($Arguments.Count -gt 0){
+            $invokeparam = @{
+                ScriptBlock=$EndAction
+                ArgumentList=$arguments
+            }
+        }Else{
+            $invokeparam = @{
+                ScriptBlock=$EndAction
+            }
+        }
+        Invoke-Command @invokeparam
+    }
 }
+#endregion
 
 
-Function Set-PSDStartLoaderElement{
+#region FUNCTION: Initiate countdown for prestart menu
+Function Invoke-PSDStartPrestartButton
+{
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        $Runspace,
+        [Parameter(Mandatory=$true)]
+        [int]$HideCountdown,
+        [switch]$Wait
+    )
+
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
+    #ensure TS progress is hidden
+    Set-PSDStartLoaderProperty -Runspace $Runspace -PropertyName SyncTSProgress -Value $false
+
+    #Show counter and button
+    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName btnPrestart -Property Visibility -Value 'Visible'
+    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName txtCountdown -Property Visibility -Value 'Visible'
+
+    Invoke-PSDStartLoaderCountdown -Runspace $PSDStartLoader -Element 'txtCountdown' -StartCount '10' -CustomOutput '[ Hiding in {0} ]' -WarnCount 3
+
+    #Hide button and counter
+    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName txtCountdown -Property Visibility -Value 'Hidden'
+    Set-PSDStartLoaderElement -Runspace $Runspace -ElementName btnPrestart -Property Visibility -Value 'Hidden'
+
+
+    If($Runspace.PrestartMenu.isLoaded -and $Wait)
+    {
+        Set-PSDStartLoaderElement -Runspace $Runspace -ElementName txtStatus -Property Text -Value 'Prestart menu shown, click Continue to proceed.'
+        #wait until runspace is completed before continuing preloader
+        do {
+            Start-sleep -m 100
+        }
+        until ($Runspace.PrestartMenu.isClosed)
+        Set-PSDStartLoaderElement -Runspace $Runspace -ElementName txtStatus -Property Text -Value 'Prestart menu has closed, proceeding.'
+    }
+
+    Write-PSDLog -Message ("{0}: Completed count down; hiding Prestart menu button" -f ${CmdletName})
+    #ensure element is visable
+}
+#endregion
+
+
+#region TESTING A more incremental progress bar
+function Update-PSDStartLoaderProgressBar
+{
+    [CmdletBinding(DefaultParameterSetName='percent')]
+    Param (
+        [Parameter(Mandatory=$true)]
+        $Runspace,
+        [parameter(Mandatory=$true, ParameterSetName="percent")]
+        [int]$PercentComplete,
+        [parameter(Mandatory=$true, ParameterSetName="steps")]
+        [int]$Step,
+        [parameter(Mandatory=$true, ParameterSetName="steps")]
+        [int]$MaxSteps,
+        [parameter(Mandatory=$false, ParameterSetName="steps")]
+        [int]$Timespan = 1,
+        [parameter(Mandatory=$true, ParameterSetName="indeterminate")]
+        [switch]$Indeterminate,
+        [String]$Status = $Null,
+        [ValidateSet("LightGreen", "Yellow", "Red", "Blue")]
+        [string]$Color = 'LightGreen'
+    )
+
+    [string]${CmdletName} = $MyInvocation.MyCommand
+
+    #ensure TS progress is hidden
+    Set-PSDStartLoaderProperty -Runspace $Runspace -PropertyName SyncTSProgress -Value $false
+
+    Try{
+        #build field object from name
+        If ($PSCmdlet.ParameterSetName -eq "steps")
+        {
+            #calculate percentage
+            $PercentComplete = (($Step / $MaxSteps) * 100)
+            #determine where increment will start
+            If($Step -eq 1){
+                $IncrementFrom = 1
+            }Else{
+                $IncrementFrom = ((($Step-1) / $MaxSteps) * 100)
+            }
+            $IncrementBy = ($PercentComplete-$IncrementFrom)/$Timespan
+        }
+
+        if($PSCmdlet.ParameterSetName -eq "indeterminate"){
+            Write-PSDLog -Message ("{0}: Setting progress bar to indeterminate with status: {1}" -f ${CmdletName},$Status)
+            #default to blue when scrolling unless specified otherwise
+            if(!$PSBoundParameters.ContainsKey('Color')){$Color = "Blue"}
+
+            $Runspace.ProgressBar.Dispatcher.Invoke([action]{
+                $Runspace.ProgressBar.IsIndeterminate = $True
+                $Runspace.ProgressBar.Foreground = $Color
+
+                $Runspace.txtPercentage.Visibility = 'Hidden'
+                $Runspace.txtPercentage.Text = ' '
+
+                $Runspace.txtStatus.Text = $Status
+            },'Normal')
+
+        }
+        else
+        {
+            if(($PercentComplete -gt 0) -and ($PercentComplete -lt 100))
+            {
+                If($Timespan -gt 1){
+                    $Runspace.ProgressBar.Dispatcher.Invoke([action]{
+                        $t=1
+                        #Determine the incement to go by based on timespan and difference
+                        Do{
+                            $IncrementTo = $IncrementFrom + ($IncrementBy * $t)
+                            Runspace.ProgressBar.IsIndeterminate = $False
+                            $Runspace.ProgressBar.Value = $IncrementTo
+                            $Runspace.ProgressBar.Foreground = $Color
+
+                            $Runspace.txtPercentage.Visibility = 'Visible'
+                            $Runspace.txtPercentage.Text = ('' + $IncrementTo + '%')
+
+                            $Runspace.txtStatus.Text = $Status
+
+                            $t++
+                            Start-Sleep 1
+
+                        } Until ($IncrementTo -ge $PercentComplete -or $t -gt $Timespan)
+                    },'Normal')
+                }
+                Else{
+                    Write-PSDLog -Message ("{0}: Setting progress bar to {1}% with status: {2}" -f ${CmdletName},$PercentComplete,$Status)
+                    $Runspace.ProgressBar.Dispatcher.Invoke([action]{
+                        $Runspace.ProgressBar.IsIndeterminate = $False
+                        $Runspace.ProgressBar.Value = $PercentComplete
+                        $Runspace.ProgressBar.Foreground = $Color
+
+                        $Runspace.txtPercentage.Visibility = 'Visible'
+                        $Runspace.txtPercentage.Text = ('' + $PercentComplete + '%')
+
+                        $Runspace.txtStatus.Text = $Status
+                    },'Normal')
+                }
+            }
+            elseif($PercentComplete -eq 100)
+            {
+                Write-PSDLog -Message ("{0}: Setting progress bar to complete with status: {1}" -f ${CmdletName},$Status)
+                $Runspace.ProgressBar.Dispatcher.Invoke([action]{
+                        $Runspace.ProgressBar.IsIndeterminate = $False
+                        $Runspace.ProgressBar.Value = $PercentComplete
+                        $Runspace.ProgressBar.Foreground = $Color
+
+                        $Runspace.txtPercentage.Visibility = 'Visible'
+                        $Runspace.txtPercentage.Text = ('' + $PercentComplete + '%')
+
+                        $Runspace.txtStatus.Text = $Status
+                },'Normal')
+            }
+            else{
+                Write-PSDLog ("{0}: progress bar is out of range" -f ${CmdletName}) -LogLevel 3
+            }
+        }
+    }Catch{}
+}
+#endregion
+
+#region FUNCTION: retrieve element within runspace
+Function Get-PSDStartLoaderElement{
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
@@ -1223,65 +3079,154 @@ Function Set-PSDStartLoaderElement{
         [String]$ElementName,
 
         [Parameter(Mandatory=$true)]
-        [ValidateSet('Visibility','Text','Content','Foreground','Background','IsReadOnly','IsChecked','IsEnabled','Fill','BorderThickness','BorderBrush')]
-        [String]$Property,
-
-        [Parameter(Mandatory=$true)]
-        [String]$Value
+        [String]$Property
     )
-    Begin{}
-    Process{
-        Try{
-            $Runspace.Window.Dispatcher.invoke([action]{
-                $Runspace.$ElementName.$Property=$Value
-            },'Normal')
-        }Catch{}
+    Begin{
+        [string]${CmdletName} = $MyInvocation.MyCommand
     }
-    End{}
+    Process{
+        If($Value)
+        {
+            Write-PSDLog -Message ("{0}: Getting element [{1}] property [{2}]" -f ${CmdletName}, $ElementName,$Property)
+            Try{
+                ($Runspace.GetEnumerator() | Where Name -eq $ElementName | Select -ExpandProperty Value).$Property
+            }Catch{
+                Write-PSDLog -Message ("{0}: Failed to get element: {1} " -f ${CmdletName}, $_.Exception.Message) -LogLevel 3
+            }
+        }
+    }
 }
+#endregion
 
-Function Set-PSDStartLoaderButtonAction{
+#region FUNCTION: control element within main loader
+Function Set-PSDStartLoaderElement{
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         $Runspace,
 
-        [Parameter(Mandatory=$true)]
-        [String]$Button,
+        [Parameter(Mandatory=$true, Position=1,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)]
+        [String]$ElementName,
 
-        [Parameter(,Mandatory=$true)]
-        [scriptblock]$Action
+        [Parameter(Mandatory=$False)]
+        [ValidateSet('Visibility','Text','Content','Foreground','Background','IsReadOnly','IsChecked','IsEnabled','Fill','BorderThickness','BorderBrush','FontSize')]
+        [String]$Property = 'Text',
+
+        [Parameter(Mandatory=$False)]
+        [String]$Value
     )
-    
-    Try{
-        $Runspace.$Button.Dispatcher.Invoke([action]{
-            $Runspace.$Button.Add_Click({
-                $Runspace.Window.Dispatcher.Invoke([action]{ 
-                    Invoke-Command $Action
-                })
-            })
-        },'Normal')
-    }Catch{}
+    Begin{
+        [string]${CmdletName} = $MyInvocation.MyCommand
+    }
+    Process{
+        If($Value)
+        {
+            Write-PSDLog -Message ("{0}: Setting element [{1}] property [{2}] to [{3}]" -f ${CmdletName}, $ElementName,$Property,$Value)
+            Try{
+                $Runspace.Window.Dispatcher.invoke([action]{
+                    $Runspace.$ElementName.$Property = $Value
+                },'Normal')
+            }Catch{
+                Write-PSDLog -Message ("{0}: Failed to set element: {1} " -f ${CmdletName}, $_.Exception.Message) -LogLevel 3
+            }
+        }
+    }
 }
+#endregion
 
+#region FUNCTION: Get runspace properties
+Function Get-PSDStartLoaderProperty{
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        $Runspace,
+
+        [Parameter(Mandatory=$true, Position=1,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)]
+        [String]$PropertyName
+    )
+    Begin{
+        [string]${CmdletName} = $MyInvocation.MyCommand
+    }
+    Process{
+        Write-PSDLog -Message ("{0}: Getting property [{1}]" -f ${CmdletName}, $PropertyName)
+        Try{
+            ($Runspace.GetEnumerator() | Where Name -eq $PropertyName).Value
+        }Catch{
+            Write-PSDLog -Message ("{0}: Failed to get property: {1} " -f ${CmdletName}, $_.Exception.Message) -LogLevel 3
+        }
+    }
+}
+#endregion
+
+#region FUNCTION: control properties in runspace
+Function Set-PSDStartLoaderProperty{
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        $Runspace,
+
+        [Parameter(Mandatory=$true, Position=1,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)]
+        [String]$PropertyName,
+
+        [Parameter(Mandatory=$true)]
+        [String]$Value
+    )
+    Begin{
+        [string]${CmdletName} = $MyInvocation.MyCommand
+    }
+    Process{
+        Write-PSDLog -Message ("{0}: Setting property [{1}] to [{2}]" -f ${CmdletName}, $PropertyName,$Value)
+        Try{
+            $Runspace.Window.Dispatcher.invoke([action]{
+                $Runspace.$PropertyName = $Value
+            },'Normal')
+        }Catch{
+            Write-PSDLog -Message ("{0}: Failed to set property: {1} " -f ${CmdletName}, $_.Exception.Message) -LogLevel 3
+        }
+    }
+}
+#endregion
+
+
+#region FUNCTION: close main loader
 function Close-PSDStartLoader
 {
     Param (
-        [Parameter(Mandatory=$true)]
-        [System.Object[]]$Runspace
+        [Parameter(Mandatory=$true, Position=1,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)]
+        $Runspace,
+        $Dispatcher = 'Window'
     )
+    [string]${CmdletName} = $MyInvocation.MyCommand
 
+    Write-PSDLog -Message ("{0}: Closing PSDStartLoader" -f ${CmdletName})
     $Runspace.Window.Dispatcher.Invoke([action]{
-      $Runspace.Window.close()
-    }, "Normal")
+      $Runspace.$Dispatcher.close()
+    },'Normal')
 
+}
+#endregion
+
+$exportModuleMemberParams = @{
+    Function = @(
+        'Get-PSDStartLoaderPlatformInfo'
+        'Get-PSDStartLoaderInterfaceDetails'
+        'Get-PSDStartLoaderProperty'
+        'Set-PSDStartLoaderProperty'
+        'Get-PSDStartLoaderElement'
+        'Set-PSDStartLoaderElement' 
+        'Update-PSDStartLoaderProgressBar'
+        'Update-PSDStartLoaderProgressStatus'
+        'Invoke-PSDStartLoaderCountdown'
+        'Invoke-PSDStartPrestartButton'
+        'New-PSDStartLoader'
+        'New-PSDStartLoaderPrestartMenu'
+        'Show-PSDStartLoaderConfirmWindow'
+        'Show-PSDStartLoaderDiskViewerWindow'
+        'Show-PSDStartLoaderDiskCleanWindow'
+        'Show-PSDStartLoaderNetCfgWindow'
+        'Close-PSDStartLoader'
+    )
 }
 
 #Expose cmdlets needed
-Export-ModuleMember -Function New-PSDStartLoader,Close-PSDStartLoader,
-                            Update-PSDStartLoaderProgressBar,Update-PSDStartLoaderProgressStatus,
-                            Get-PlatformInfo,Get-InterfaceDetails,
-                            Get-PSDStartLoaderElement,Set-PSDStartLoaderElement,
-                            Set-PSDStartLoaderButtonAction,
-                            Set-PSDStartLoaderWindow,
-                            Invoke-PSDStartLoaderCountdown
+Export-ModuleMember @exportModuleMemberParams

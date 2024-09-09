@@ -12,12 +12,12 @@
         <ResourceDictionary>
 
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Icons.xaml" />
-                <ResourceDictionary Source="Resources/TabControl_LeftSideStyle.xaml" />
-                <ResourceDictionary Source="Resources/TreeViewItem_StandardStyle.xaml" />
-                <ResourceDictionary Source="Resources/TabItem_WhiteStyle.xaml" />
                 <ResourceDictionary Source="Resources/Button_DarkBlueSquareStyle.xaml" />
                 <ResourceDictionary Source="Resources/Button_LightBlueRoundStyle.xaml" />
+                <ResourceDictionary Source="Resources/Icons.xaml" />
+                <ResourceDictionary Source="Resources/TabControl_LeftSideStyle.xaml" />
+                <ResourceDictionary Source="Resources/TabItem_WhiteStyle.xaml" />
+                <ResourceDictionary Source="Resources/TreeViewItem_StandardStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <Style TargetType="{x:Type Window}">
@@ -54,6 +54,6 @@
         <Button x:Name="_wizBack" Content="Back" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,260,6.5" />
         <Button x:Name="_wizNext" Content="Next" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,155,6.5" />
         <Button x:Name="_wizCancel" Content="Cancel" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,10,6.5" />
-        <Button x:Name="_wizDebugConsole" Content="Debug Console" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,534,6" Visibility="Hidden" />
+        <Button x:Name="_wizDebugConsole" Content="Debug Console" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,534,6" />
     </Grid>
 </Window>

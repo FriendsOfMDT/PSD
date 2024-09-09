@@ -1,0 +1,41 @@
+<Grid x:Name="_locTabLayout" Margin="0" Grid.ColumnSpan="2">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_locTabMainTitle" Content="@MainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22"/>
+    <Rectangle Grid.Column="0" Fill="DarkViolet" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_webclock}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+    <Label x:Name="_locTabSubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top" Content="@SubTitle" />
+
+    <Label Content="Language Settings" FontSize="18" HorizontalAlignment="Center" Margin="0,101,0,0" VerticalAlignment="Top" Width="470"/>
+
+    <Label Content="Language to Install:" FontSize="12" Margin="44,140,332,365"/>
+    <ComboBox x:Name="_locTabLanguage" HorizontalAlignment="Left" Margin="46,165,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18"/>
+
+    <Label Content="Time and current format:" FontSize="12" Margin="44,206,302,299"/>
+    <ComboBox x:Name="_locTabSystemLocale" HorizontalAlignment="Left" Margin="46,231,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18"/>
+
+    <Label Content="Keyboard layout:" FontSize="12" Margin="46,274,330,231"/>
+    <ComboBox x:Name="_locTabKeyboardLocale" HorizontalAlignment="Left" Margin="46,299,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18"/>
+
+    <Label Content="Time Settings" FontSize="18" HorizontalAlignment="Center" Margin="0,349,0,0" VerticalAlignment="Top" Width="470"/>
+
+    <Label Content="Time zone:" FontSize="12" Margin="44,385,332,120"/>
+    <ComboBox  x:Name="_locTabTimeZoneName" HorizontalAlignment="Left" Margin="46,410,0,0" VerticalAlignment="Top" Width="329" Height="28" FontSize="18"/>
+
+    <TextBox x:Name="TS_UILanguage" Text="" Margin="380,165,10,357" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}" />
+    <TextBox x:Name="TS_SystemLocale" Text="" Margin="380,232,10,290" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}" />
+    <TextBox x:Name="TS_UserLocale" Text="" Margin="380,263,10,259" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}" />
+    <TextBox x:Name="TS_KeyboardLocale" Text="" Margin="380,299,10,223" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}" />
+    <TextBox x:Name="TS_TimeZoneName" Text="" Margin="380,410,10,112" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}" />
+    <TextBox x:Name="TS_TimeZone" Text="" Margin="380,444,10,78" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}" />
+
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_localeTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+</Grid>

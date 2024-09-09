@@ -22,7 +22,7 @@
         <TextBox x:Name="TS_OSDComputerName" Grid.Column="1" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="NoWrap" VerticalContentAlignment="Center" Height="30"/>
 
         <Canvas x:Name="_detTabValidation"  Grid.Column="0" Margin="0,40,0,-57" Background="LightGreen" Grid.ColumnSpan="2" Visibility="Hidden" >
-            <TextBox x:Name="_detTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" Canvas.Top="10" />
+            <TextBox x:Name="_detTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Height="30" />
             <Rectangle x:Name="_detTabValidation_Alert" Width="30" Height="30" Fill="Red" Canvas.Left="429" Canvas.Top="8" Visibility="Hidden">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
@@ -68,7 +68,8 @@
             <Label Content="Domain to Join:" FontSize="14" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
             <TextBox x:Name="TS_JoinDomain" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,2,0,5"/>
             <Label Content="Org Unit:" FontSize="14" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-            <TextBox x:Name="TS_JoinDomainOU" Grid.Column="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2"/>
+            <TextBox x:Name="TS_MachineObjectOU" Grid.Column="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2"/>
+            <ComboBox x:Name="_DomainOUs" Grid.Column="1" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2" Visibility="Hidden"/>
             <Label Content="Domain Admin:" FontSize="14" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
             <TextBox x:Name="TS_DomainAdmin" Grid.Column="1" Grid.Row="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,33,0,5" Grid.RowSpan="2"/>
             <Label Content="Password:" FontSize="14" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>

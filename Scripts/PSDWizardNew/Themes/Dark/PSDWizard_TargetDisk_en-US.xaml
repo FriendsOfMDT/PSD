@@ -1,0 +1,58 @@
+<Grid x:Name="_dskTabLayout" Margin="0" Grid.ColumnSpan="2">
+	<Grid.ColumnDefinitions>
+		<ColumnDefinition Width="490"></ColumnDefinition>
+		<ColumnDefinition Width="150"></ColumnDefinition>
+	</Grid.ColumnDefinitions>
+	<Label x:Name="_dskTabMainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" Content="@MainTitle" />
+	<Rectangle Grid.Column="0" Fill="#EBEBEB" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+		<Rectangle.OpacityMask>
+			<VisualBrush Stretch="Fill" Visual="{DynamicResource icons_harddisk}"/>
+		</Rectangle.OpacityMask>
+	</Rectangle>
+
+	<StackPanel Grid.Column="0">
+		<Label x:Name="_dskTabSubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top" Content="@SubTitle"  />
+
+		<Label Content="Disk viewer" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" Height="31" HorizontalContentAlignment="Left" />
+		<ListView x:Name="_lstDisks" HorizontalAlignment="Left" Height="104" Width="477" Margin="5,0,0,0" SelectionMode="Single">
+			<ListView.View>
+				<GridView>
+					<GridViewColumn Header="Index" DisplayMemberBinding="{Binding Number}" />
+					<GridViewColumn Header="Drive Name" DisplayMemberBinding="{Binding FriendlyName}" />
+					<GridViewColumn Header="Bus" DisplayMemberBinding="{Binding Bus}" />
+					<GridViewColumn Header="Media" DisplayMemberBinding="{Binding Media}" />
+					<GridViewColumn Header="Partition Table" DisplayMemberBinding="{Binding PartitionStyle}" />
+					<GridViewColumn Header="Total Size" DisplayMemberBinding="{Binding Size}" />
+					<GridViewColumn Header="Model" DisplayMemberBinding="{Binding Model}" />
+				</GridView>
+			</ListView.View>
+		</ListView>
+
+		<Label Content="Volume viewer" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" Height="31" HorizontalContentAlignment="Left" />
+
+		<ListView x:Name="_lstVolumes" Height="113" Width="477" SelectionMode="Single" Margin="5,0,0,0" HorizontalAlignment="Left" >
+			<ListView.View>
+				<GridView>
+					<GridViewColumn Header="Disk" DisplayMemberBinding="{Binding Disk}" />
+					<GridViewColumn Header="DriveLetter" DisplayMemberBinding="{Binding DriveLetter}" />
+					<GridViewColumn Header="Partition Name" DisplayMemberBinding="{Binding FileSystemLabel}" />
+					<GridViewColumn Header="Format" DisplayMemberBinding="{Binding FileSystem}" />
+					<GridViewColumn Header="Drive Type" DisplayMemberBinding="{Binding DriveType}" />
+					<GridViewColumn Header="Partition Size" DisplayMemberBinding="{Binding Size}" />
+					<GridViewColumn Header="Remaining Size" DisplayMemberBinding="{Binding SizeRemaining}" />
+				</GridView>
+			</ListView.View>
+		</ListView>
+		<Image x:Name="_imgPieChart" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="200" Height="160" Margin="10" />
+
+	</StackPanel>
+	<Label Content="@Context" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16"  Height="31" HorizontalContentAlignment="Left" Margin="3,378,0,141" />
+	<ComboBox x:Name="_cmbTargetDisk" HorizontalAlignment="Left" Margin="10,414,0,0" VerticalAlignment="Top" Width="87" Height="28" FontSize="18"/>
+	<TextBox x:Name="TS_OSDDiskIndex" Margin="10,447,393,75" FontSize="18" IsEnabled="False" />
+
+	<Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+
+	<TextBlock x:Name="_dskTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+		<Run Text="@Help"/>
+	</TextBlock>
+</Grid>

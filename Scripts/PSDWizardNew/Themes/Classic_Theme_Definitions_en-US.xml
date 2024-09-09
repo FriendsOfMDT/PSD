@@ -20,14 +20,20 @@
 	@TabItemContent
 	</TabItem>
 	]]></PanesTemplate>
+		<PaneStartingMargin><![CDATA[0,70,0,0]]></PaneStartingMargin>
 		<!--
 		#EXAMPLE
 		<Pane id="Readiness" reference="PSDWizard_DeployReadiness_en-US.xaml" margin="0,0,0,0" Width='180' Style="pillTabItemLeft" />
 		-->
-		<Pane id="Readiness" reference="Classic\PSDWizard_DeployReadiness_en-US.xaml" margin="0,70,0,0" />
+		<Pane id="Readiness" reference="Classic\PSDWizard_DeployReadiness_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="TaskSequence" reference="Classic\PSDWizard_TaskSequence_en-US.xaml" margin="0,0,0,0" />
-		<Pane id="DeviceDetails" reference="Classic\PSDWizard_DeviceDetails_en-US.xaml" margin="0,0,0,0"/>	
-		<Pane id="AdminAccount" reference="Classic\PSDWizard_AdminCreds_en-US.xaml" margin="0,0,0,0"/>	
+		<Pane id="TargetDisk" reference="Classic\PSDWizard_TargetDisk_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="DeviceDetails" reference="Classic\PSDWizard_DeviceDetails_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="CustomPane_DeviceName" reference="Classic\PSDWizard_DeviceName_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="DeviceRole" reference="Classic\PSDWizard_DeviceRole_en-US.xaml" margin="0,0,0,0" />	
+		<Pane id="IntuneGroup" reference="Classic\PSDWizard_IntuneGroup_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="CustomPane_IntuneCategory" reference="Classic\PSDWizard_IntuneCategory_en-US.xaml" margin="0,0,0,0" />
+		<Pane id="AdminAccount" reference="Classic\PSDWizard_AdminCreds_en-US.xaml" margin="0,0,0,0"/>
 		<Pane id="LocaleTime" reference="Classic\PSDWizard_Locale_en-US.xaml" margin="0,0,0,0"/>
 		<Pane id="Applications" reference="Classic\PSDWizard_Applications_en-US.xaml" margin="0,0,0,0"/>
 		<Pane id="Ready" reference="Classic\PSDWizard_Ready_en-US.xaml" margin="0,0,0,0" />

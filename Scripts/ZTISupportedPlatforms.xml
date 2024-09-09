@@ -1,0 +1,115 @@
+<SupportedPlatforms>
+	<SupportedPlatform name="All x86 NT">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSType=18]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_Processor WHERE Architecture=0]]></Expression>
+	</SupportedPlatform>
+
+  <!-- x86 -->
+
+	<SupportedPlatform name="All x86 Windows 7 Client">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.1%' AND OSType=18 AND ProductType=1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '32%']]></Expression>
+	</SupportedPlatform>
+
+	<SupportedPlatform name="All x86 Windows 8 Client">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.2%' AND OSType=18 AND ProductType=1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '32%']]></Expression>
+	</SupportedPlatform>
+
+	<SupportedPlatform name="All x86 Windows 8.1 Client">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.3%' AND OSType=18 AND ProductType=1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '32%']]></Expression>
+	</SupportedPlatform>
+
+        <SupportedPlatform name="All x86 Windows 10 Client">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '10.0%' AND OSType=18 AND ProductType=1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '32%']]></Expression>
+	</SupportedPlatform>
+
+	<!-- x64 -->
+
+	<SupportedPlatform name="All x64 Windows 7 Client">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.1%' AND OSType=18 AND ProductType=1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2008 R2">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.1%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2008 R2 - Full OS (Non-Core)">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.1%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OperatingSystemSKU < 12 OR OperatingSystemSKU > 14]]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2008 R2- Core OS">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.1%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OperatingSystemSKU > 11 AND OperatingSystemSKU < 15]]></Expression>
+	</SupportedPlatform>
+
+	<SupportedPlatform name="All x64 Windows 8 Client">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.2%' AND OSType=18 AND ProductType=1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2012">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.2%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2012 - Full OS (Non-Core)">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.2%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OperatingSystemSKU < 12 OR OperatingSystemSKU > 14]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2012 - Core OS">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.2%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OperatingSystemSKU > 11 AND OperatingSystemSKU < 15]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+
+	<SupportedPlatform name="All x64 Windows 8.1 Client">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.3%' AND OSType=18 AND ProductType=1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2012 R2">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.3%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2012 R2 - Full OS (Non-Core)">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.3%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OperatingSystemSKU < 12 OR OperatingSystemSKU > 14]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 2012 R2 - Core OS">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '6.3%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OperatingSystemSKU > 11 AND OperatingSystemSKU < 15]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+
+        <SupportedPlatform name="All x64 Windows 10 Client">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '10.0%' AND OSType=18 AND ProductType=1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 10">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '10.0%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 10 - Full OS (Non-Core)">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '10.0%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OperatingSystemSKU < 12 OR OperatingSystemSKU > 14]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows Server 10 - Core OS">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE Version like '10.0%' AND OSType=18 AND ProductType>1]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OperatingSystemSKU > 11 AND OperatingSystemSKU < 15]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+	
+	<SupportedPlatform name="All x86 Windows 7 and Newer">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE ( Version like '6.%' AND Version <> '6.0' ) OR ( Version like '10.%' ) AND OSType=18]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '32%']]></Expression>
+	</SupportedPlatform>
+	<SupportedPlatform name="All x64 Windows 7 and Newer">
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE ( Version like '6.%' AND Version <> '6.0' ) OR ( Version like '10.%' ) AND OSType=18]]></Expression>
+		<Expression><![CDATA[SELECT * FROM Win32_OperatingSystem WHERE OSArchitecture like '64%']]></Expression>
+	</SupportedPlatform>
+</SupportedPlatforms>

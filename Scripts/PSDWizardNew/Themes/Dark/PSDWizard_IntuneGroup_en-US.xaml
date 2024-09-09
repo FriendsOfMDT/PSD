@@ -1,0 +1,24 @@
+<Grid x:Name="_groupTabLayout" Margin="0" Grid.ColumnSpan="2">
+	<Grid.ColumnDefinitions>
+		<ColumnDefinition Width="490"></ColumnDefinition>
+		<ColumnDefinition Width="150"></ColumnDefinition>
+	</Grid.ColumnDefinitions>
+	<Label x:Name="_groupTabMainTitle" Content="@MainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" />
+
+	<Rectangle Grid.Column="0" Fill="#EBEBEB" HorizontalAlignment="Right" Height="40" Width="60" Margin="0,20,13.5,0" VerticalAlignment="Top">
+		<Rectangle.OpacityMask>
+			<VisualBrush Stretch="Fill" Visual="{DynamicResource icons_group}"/>
+		</Rectangle.OpacityMask>
+	</Rectangle>
+
+	<Label x:Name="_groupTabSubTitle" Content="@SubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top"  />
+
+	<ComboBox x:Name="_cmbIntuneGroup" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="436" Height="28" FontSize="18"/>
+	<TextBox x:Name="TS_IntuneGroup" Margin="10,145,44,377" FontSize="18" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}"/>
+
+	<Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+
+	<TextBlock x:Name="_groupTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+		<Run Text="@Help"/>
+	</TextBlock>
+</Grid>
