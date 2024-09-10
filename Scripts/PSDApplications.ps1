@@ -13,8 +13,10 @@
           Primary: @jarwidmark 
           Created: 
           Modified: 2019-05-17
+	  	    2024-09-10
 
           Version - 0.0.1 - () - Finalized functional version 1.
+	  Version - 0.0.2 - () - Return code Application installation
 
           TODO:
 
@@ -172,6 +174,7 @@ function Install-PSDApplication
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to run: $cmd"
         if ($workingDir -eq "")
         {
+
             $result = Start-Process -FilePath "$toolRoot\bddrun.exe" -ArgumentList $cmd -Wait -Passthru
         }
         else
@@ -204,7 +207,8 @@ function Install-PSDApplication
     }
     else
     {
-        return 0
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Return code is $($result.ExitCode)"
+        return $($result.ExitCode)
     }
 }
 
@@ -220,14 +224,14 @@ $toolRoot = Get-PSDContent "Tools\$($tsenv:Architecture)"
 
 
 # Single application install initiated by a Task Sequence action
-# Note: The ApplicationGUID variable isn’t set globally. It’s set only within the scope of the Install Application action/step. One of the hidden mysteries of the task sequence engine :)
+# Note: The ApplicationGUID variable isnâ€™t set globally. Itâ€™s set only within the scope of the Install Application action/step. One of the hidden mysteries of the task sequence engine :)
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking for single application install step"
 If ($tsenv:ApplicationGUID -ne "") {
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Mandatory Single Application install indicated. Guid is $($tsenv:ApplicationGUID)"
-    Install-PSDApplication $tsenv:ApplicationGUID
+    $return = Install-PSDApplication $tsenv:ApplicationGUID
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Mandatory Single Application installed, exiting application step"
-    Exit
+    Exit $return
 }
 else
 {
