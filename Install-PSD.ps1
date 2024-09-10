@@ -408,9 +408,9 @@ foreach ($providerTemplate in $providerTemplates) {
     Copy-Item "$($mdtDir)Templates\$providerTemplate" -Destination "$psDeploymentFolder\Templates"     
 }
 
-# Add ZTIGather.XML to correct folder (The file is missing after install) (added by admminy)
+# Copy ZTIGather.XML to correct folder
 Write-PSDInstallLog -Message "Adding ZTIGather.XML to correct folder"
-Copy-Item "$($mdtDir)Templates\Distribution\Scripts\ZTIGather.xml" -Destination "$psDeploymentFolder\Tools\Modules\PSDGather"
+Move-Item -Path "$PSScriptRoot\Scripts\ZTIGather.xml" -Destination "$psDeploymentFolder\Tools\Modules\PSDGather" -Force
 
 # Verify/Correct missing UNC path in BootStrap.ini (TBA)
 
@@ -428,6 +428,7 @@ $FoldersToCreate = @(
     "Plugins"
     "Prestart"
     "UserExitScripts"
+    "Readiness"
 )
 foreach ($FolderToCreate in $FoldersToCreate) {
     Write-PSDInstallLog -Message "Creating $FolderToCreate folder in $psdeploymentshare\PSDResources"
@@ -449,6 +450,9 @@ Copy-PSDFolder -source $PSScriptRoot\PSDResources\Prestart -destination $psDeplo
 
 # Plugins
 Copy-PSDFolder -source $PSScriptRoot\Plugins -destination $psDeploymentFolder\PSDResources\Plugins
+
+# Readiness
+Copy-PSDFolder -source $PSScriptRoot\PSDResources\Readiness -destination $psDeploymentFolder\PSDResources\Readiness
 
 
 if (!($Upgrade)) {

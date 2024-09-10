@@ -18,7 +18,7 @@
     <PasswordBox x:Name="_ConfirmAdminPassword"  Margin="164,177,14,340" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center"/>
 
     <Canvas x:Name="_admTabValidation" Margin="10,215,14,286" Visibility="Hidden">
-        <TextBox x:Name="_admTabValidation_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" Canvas.Top="10" Width="376" Height="30" />
+        <TextBox x:Name="_admTabValidation_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Height="30" />
         <Rectangle x:Name="_admTabValidation_Alert" Width="30" Height="30" Fill="Red" Canvas.Left="426" Canvas.Top="10" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>

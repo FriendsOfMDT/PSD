@@ -1,6 +1,50 @@
 # Change log for PSDWizardNew
 
-## 2.2.7 Aug 27, 2023
+
+## 2.3.3 - May 1, 2024
+
+- (PC) Fixed null TSenv properties; cause PSDWizard to not load
+- (PC) Removed unused themes: Modern, Tabular and Refresh
+- (PC) Updates PSD Wizard guide
+- (PC) Optimized keydown handlers and add debug console option
+
+## 2.3.2 - April 27, 2024
+
+- (PC) Added Dark theme
+- (PC) Updated PSDWizard Documentation
+- (PC) Fixed OS language selection; support multilanguage
+
+## 2.3.1 - April 19, 2024
+
+- (PC) Added additional pages to classic theme: roles, intunegroup, target disk
+- (PC) Added additional PSDDebug logging for selection
+- (PC) Added Slashscreen loader to show wizard starting
+
+## 2.3.0 - April 6, 2024
+
+- (PC) Added custom pane control by external scripts. Allows dynamic pages
+- (PC) Cleaned up theme fonts and readiness fonts. 
+- (PC) Renamed PSDWizard.Initialize.ps1 to PSDWizard.Helper.ps1
+- (PC) Add PSDWizardCollapseTSList to collapse large TS list (https://github.com/FriendsOfMDT/PSD/issues/127)
+- (PC) Fixed change log version check n PSDWizard
+
+## 2.2.9 - Feb 24, 2024
+
+- (PC) Fixed issue with workgroup and domain join value conflict (https://github.com/FriendsOfMDT/PSD/issues/117)
+- (PC) Fixed issue with language not showing up in ui (https://github.com/FriendsOfMDT/PSD/issues/123)
+- (PC) Fixed issue with Domain Join OU not working; used wrong variable DomainJoinOU instead of MachineObjectOU
+- (PC) Added DomainOUs1 list option (https://github.com/FriendsOfMDT/PSD/issues/135)
+- (PC) Moved all PSDWizard functions from PSDWizard.Initialize.ps1 to module
+- (PC) Added troubleshooting function in PSDWizard.Initialize.ps1
+
+## 2.2.8 - Jan 21, 2024
+
+- (PC) Fixed miss-spelled Where-Object-Object. (Thanks @Tenster)
+- (PC) Expanded all alias to cmdlets (eg % --> Foreach-Object)
+- (PC) Fixed pre-selected Task sequence
+- (PC) Moved PSDWizard functions from Initializer script to PSDWizardNew module.
+
+## 2.2.7 - Aug 27, 2023
 
 - (PC) - Changed test functions to reflect module for PSDWizard; ensure no conflict
 - (PC) - Added more PSD debug logging; fixed cmdlet entry.
@@ -43,7 +87,7 @@
 - (PC) - Updated computer name validation to accept 1 character instead of minimum of 5
 - (PC) - Hid features still in testing: OSDAddAdmin, Profile Selection, App bundle selection
 - (PC) - Updated keyboard locale to check for culture value as well as keyboard layout; ensure all locale are defaulted to English if not found
-- (PC) - Removed Timezone from UI export; not needed after Windows XP
+- (PC) - Removed Time zone from UI export; not needed after Windows XP
 - (PC) - Fixed theme control from CS.ini
 
 ## 2.2.1b - Mar 03, 2022

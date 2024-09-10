@@ -1,0 +1,42 @@
+<Grid x:Name="_admTabLayout" Margin="0" Grid.ColumnSpan="2">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_admTabMainTitle" Content="@SubTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22"/>
+    <Rectangle Grid.Column="0" Fill="DarkGoldenrod" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_key}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Label Content="Local administrator password" FontSize="18" HorizontalAlignment="Left" Margin="10,98,0,0" VerticalAlignment="Top" Width="466"/>
+
+    <Label Content="Password:" HorizontalAlignment="Right" FontSize="14" Margin="0,138,332,378"/>
+    <PasswordBox x:Name="TS_AdminPassword" Margin="164,138,14,378" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center" Style="{DynamicResource PasswordDarkTheme}"/>
+    <Label Content="Confirm Password:" FontSize="14" Margin="35,177,324,340"/>
+    <PasswordBox x:Name="_ConfirmAdminPassword"  Margin="164,177,14,340" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center"  Style="{DynamicResource PasswordDarkTheme}"/>
+
+    <Canvas x:Name="_admTabValidation" Margin="10,215,14,286" Background="LightGreen" Visibility="Visible">
+        <TextBox x:Name="_admTabValidation_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Width="376" Height="30" Text="test" />
+        <Rectangle x:Name="_admTabValidation_Alert" Width="30" Height="30" Fill="Red" Canvas.Left="426" Canvas.Top="10" Visibility="Visible">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+        <Rectangle x:Name="_admTabValidation_Check" Width="30" Height="30" Fill="Green" Canvas.Left="426" Canvas.Top="10" Visibility="Visible">
+            <Rectangle.OpacityMask>
+                <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
+            </Rectangle.OpacityMask>
+        </Rectangle>
+    </Canvas>
+
+    <Label x:Name="_admOSDAddAdminText" Content="Administrator user accounts" FontSize="18" HorizontalAlignment="Left" Margin="10,326,0,0" VerticalAlignment="Top" Width="466"/>
+    <Label x:Name="_admOSDAddAdminLabel" Content="Admin Accounts(s)" HorizontalAlignment="Right" FontSize="14" Margin="0,364,330,152" Width="126"/>
+    <TextBox x:Name="TS_OSDAddAdmin" Margin="165,364,14,152" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" IsEnabled="False" Style="{DynamicResource TextBoxDarkTheme}"/>
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray"/>
+    <TextBlock x:Name="_admTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+
+</Grid>

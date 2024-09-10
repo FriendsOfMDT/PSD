@@ -1,8 +1,15 @@
 # README - PowerShell Deployment Extension Kit
+Sep 2024 (ver 0.2.3.0)
+- Updated Deployemnt wizard with new panes for Intune and device role
+- Improved task sequence templates
+- Updated installer
+- Customized ZTIGather.xml
+- Updated Prestart menu
+
 Feb 2024 (ver 0.2.2.9)
 - Changed ModelAlis for WMware, all VMware models are no defined as "VMware"
 
-Sept 2022 (ver 0.2.2.8)
+Sep 2022 (ver 0.2.2.8)
 
 - New Wizard (enabled via PSDWizard and PSDWizardTheme variables)
 - Better disk handling

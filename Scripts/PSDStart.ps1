@@ -31,7 +31,8 @@
           version - 0.9.8 - Added support for Windows Core Server
           version - 0.9.9 - Fixed for SMSTSlogging, plus lots of minor stuff
           version - 0.1.0 - Minor change, removing Write-PSDLog entries
-          
+          version - 0.1.1 - (PC) Fixed PSDStartLoader and added beta support PSDWizardRS
+
           TODO:
 
 .Example
@@ -378,27 +379,83 @@ else{
                 else{
                     $Mode = $tsenv:PSDPrestartMode
                     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDPrestart is in Mode: $tsenv:PSDPrestartMode"
+                    
+                    #check for position variable if set
+                    #only supports: VerticalLeft, VerticalRight, HorizontalTop, HorizontalBottom
+                    If($tsenv:PSDPrestartPosition){
+                        $Position = $tsenv:PSDPrestartPosition
+                    }
+                    else{
+                        $Position = "VerticalRight"
+                    }
                 }
+
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to start X:\Deploy\Scripts\PSDPrestart.ps1 -Mode $Mode"
 
                 switch ($Mode)
                 {
-                    'ClassicFullScreen' {
+                    'FullScreen' {
                         Import-Module PSDStartLoader.psm1 -Global -Force -Verbose:$False
-                        $PSDStartLoader = New-PSDStartLoader -FullScreen
+                        ##* BEGIN LOADER
+                        $PSDStartLoader = New-PSDStartLoader -LogoImgPath "$deployRoot\scripts\powershell.png" -MenuPosition $Position -FullScreen
 
-                        # Start by hiding all non functioning buttons
-                        'btnWipeDisk','btnOpenDisk','btnAddStaticIP' | Set-PSDStartLoaderElement -Runspace $PSDStartLoader -Property Visibility -Value Hidden
+                        #wait for UI to loaded on screen
+                        Do{
+                            Start-Sleep -Milliseconds 300
+                        }
+                        Until($PSDStartLoader.isLoaded)
+
+                        #start the progress bar scrolling
+                        Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Gathering device details..." -Indeterminate
+
+                        $DeviceInfo = Get-PSDLocalInfo -Passthru
+                        $primaryinterface = Get-PSDStartLoaderInterfaceDetails
+
+                        Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Populating device details..." -PercentComplete 10
+                        #Update UI with device details
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtManufacturer -Value $DeviceInfo.Manufacturer
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtModel -Value $DeviceInfo.Model
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtSerialNumber -Value $DeviceInfo.SerialNumber
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtAssetTag -Value $DeviceInfo.assettag
+
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtMac -Value $primaryinterface.MacAddress
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtIP -Value $primaryinterface.IPAddress
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtSubnet -Value $primaryinterface.SubnetMask
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtGateway -Value $primaryinterface.GatewayAddresses
+                        Set-PSDStartLoaderElement -Runspace $PSDStartLoader -ElementName txtDHCP -Value $primaryinterface.DhcpServer
+
+                        #update image
+                        If($tsenv:PSDLoaderLogo){
+                            If(Test-Path $tsenv:PSDLoaderLogo){
+                                Set-PSDStartLoaderProperty -Runspace $PSDStartLoader -PropertyName LogoImg -Value $tsenv:PSDLoaderLogo
+                            }
+                        }
+                        #update org
+                        If($tsenv:PSDOrgName){
+                            Set-PSDStartLoaderProperty -Runspace $PSDStartLoader -PropertyName OrgName -Value $tsenv:PSDOrgName
+                        }
+                        
+                        Update-PSDStartLoaderProgressBar -Status "Providing option to open Prestart menu" -Runspace $PSDStartLoader -PercentComplete 20
+                        # $PSDStartLoader = Invoke-PSDStartPrestartButton -Runspace $PSDStartLoader -HideCountdown 10 -wait
+                        # $PSDPreStartLoader = New-PSDStartLoaderPrestartMenu -Position $Position -OnTop
+                        $PSDPreStartMenu = Invoke-PSDStartPrestartButton -Runspace $PSDStartLoader -HideCountdown 10 -Wait
+                        # $PSDPreStartLoader = New-PSDStartLoaderPrestartMenu -Position $Position -OnTop
+
+                        # Hide all non functioning buttons
+                        #'btnWipeDisk','btnOpenDisk','btnAddStaticIP' | Set-PSDStartLoaderElement -Runspace $PSDStartLoader -Property Visibility -Value Hidden
+                        Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Continuing" -PercentComplete 30
                     }
-                    'ClassicWindowed' {
+                    'PrestartMenu' {
+                        #load the PSDStartLoader module
                         Import-Module PSDStartLoader.psm1 -Global -Force -Verbose:$False
-                        # Put a Start-Sleep back in if you actually want to see the progress bar up.
-                        $PSDStartLoader = New-PSDStartLoader -FullScreen
 
-                        # Start by hiding all non functioning buttons
-                        'btnWipeDisk','btnOpenDisk','btnAddStaticIP' | Set-PSDStartLoaderElement -Runspace $PSDStartLoader -Property Visibility -Value Hidden
+                        #only initialize the prestart menu (not the loader)
+                        $PSDStartLoader = New-PSDStartLoaderPrestartMenu -Position $Position -OnTop
+
+                        # Hide all non functioning buttons
+                        #'btnWipeDisk','btnOpenDisk','btnAddStaticIP' | Set-PSDStartLoaderElement -Runspace $PSDStartLoader -Property Visibility -Value Hidden
                     }
                     Default {
-                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): About to start X:\Deploy\Scripts\PSDPrestart.ps1 -Mode $Mode"
                         PowerShell.exe -noprofile -file X:\Deploy\Scripts\PSDPrestart.ps1 -Mode $Mode
                     }
                 }
@@ -444,6 +501,10 @@ else{
             
             # Check Network
             Write-PSDBootInfo -SleepSec 1 -Message "Checking for a valid network configuration"
+            if($tsenv:PSDPrestartMode -eq "FullScreen"){
+                Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Checking for a valid network configuration..." -PercentComplete 40
+            }
+            
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Invoking DHCP refresh..."    
             $Null = Invoke-PSDexe -Executable ipconfig.exe -Arguments "/renew"
 
@@ -460,7 +521,7 @@ else{
                 $_.DefaultIPGateway | % {$gwList += $_ }
                 }
             }
-            $ipListv4 = $ipList | Where-Object Length -EQ 15
+            $ipListv4 = $ipList | Where-Object { $_.Length -EQ 15 }
             
             foreach($IPv4 in $ipListv4){
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found IP address $IPv4"
@@ -488,6 +549,7 @@ else{
     }
 
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Looking for PSDeployRoots in the usual places..."
+    if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Looking for PSDeployRoots in the usual places..." -PercentComplete 50}
     if($tsenv:PSDDeployRoots -ne ""){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property PSDeployRoots exists."
         $items = $tsenv:PSDDeployRoots.Split(",")
@@ -534,6 +596,7 @@ else{
 
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Validating network access to $tsenv:DeployRoot"
     Write-PSDBootInfo -SleepSec 2 -Message "Validating network access to $tsenv:DeployRoot"
+    if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Validating network access to $tsenv:DeployRoot" -PercentComplete 60}
 
     if(!($tsenv:DeployRoot -notlike $null -or "")){
         $Message = "Since we are deploying from network, we should be able to access the deploymentshare, but we can't, please check your network."
@@ -596,11 +659,13 @@ else{
     }
 
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): New deploy root is $deployRoot."
+    if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "New deploy root is $deployRoot." -PercentComplete 70}
     Get-PSDConnection -DeployRoot $tsenv:DeployRoot -Username "$tsenv:UserDomain\$tsenv:UserID" -Password $tsenv:UserPassword
 
     # Set time on client
     $Time = Get-Date
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Current time on computer is: $Time"
+    if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Current time on computer is: $Time" -PercentComplete 80}
     If($tsenv:DeploymentMethod -ne "MEDIA"){
         if ($deployRoot -like "\\*"){
             $Null = & net time \\$ServerName /set /y
@@ -641,6 +706,7 @@ else{
     }
     
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing CustomSettings.ini"
+    if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Processing CustomSettings.ini" -PercentComplete 90}
     Invoke-PSDRules -FilePath "$control\CustomSettings.ini" -MappingFile $mappingFile
 
     # Get full scripts location
@@ -660,6 +726,7 @@ else{
         Import-Module PSDWizard -ErrorAction Stop -Force -Verbose:$False
 
         Write-PSDBootInfo -SleepSec 1 -Message "Loading the PSD Deployment Wizard"
+        if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Loading the PSD Deployment Wizard" -PercentComplete 100}
         # $tsenv:TaskSequenceID = ""
         if ($tsenv:SkipWizard -ine "YES"){
         
@@ -1187,7 +1254,8 @@ else{
     }
     else{
         $PSDWizard = $tsenv:PSDWizard
-    
+        Write-PSDBootInfo -SleepSec 1 -Message "Loading the PSD Deployment Wizard"
+        if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Loading the PSD Deployment Wizard" -PercentComplete 100}
         switch ($PSDWizard)
         {
             'PSDWizardNew' {
@@ -1197,23 +1265,30 @@ else{
                         [string]$PSDWizardPath = Join-Path -Path $scripts -ChildPath $($PSDWizard)
 
                         # Set a name if it is empty
-                        if($tsenv:OSDComputername -eq $Null -or $tsenv:OSDComputername -eq ""){
+                        if([string]::IsNullOrEmpty($tsenv:OSDComputername)){
                             $tsenv:OSDComputername = $env:COMPUTERNAME
                         }
 
-
                         # Set theme
-                        if($tsenv:PSDWizardTheme -eq $null -or $tsenv:PSDWizardTheme -eq ""){
+                        if([string]::IsNullOrEmpty($tsenv:PSDWizardTheme)){
                             $PSDWizardTheme = "Classic"
                         }
                         else{
                             $PSDWizardTheme = $tsenv:PSDWizardTheme
                         }
 
+                        # determine splash screen (defaults to YES)
+                        if($tsenv:SkipPSDWizardSplashScreen -eq 'YES'){
+                            $PSDWizardNoSplashScreen = $true
+                        }
+                        else{
+                            $PSDWizardNoSplashScreen = $false
+                        }
+
                         # Start the wizard
-                        Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Show-PSDWizard -ResourcePath {0} -AsAsyncJob:{1} -Passthru -Debug:{2}]" -f $PSDWizardPath,(!$Global:BootfromWinPE),$PSDDebug)
+                        Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Show-PSDWizard -ResourcePath {0} -AsAsyncJob:{1} -Theme {2} -NoSplashScreen:{3} -Passthru -Debug:{4}]" -f $PSDWizardPath,(!$Global:BootfromWinPE),$PSDWizardTheme,$PSDWizardNoSplashScreen,$PSDDebug)
                         # $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Passthru -Debug:$PSDDebug
-                        $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Passthru -Debug:$PSDDebug -Theme $PSDWizardTheme
+                        $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Theme $PSDWizardTheme -NoSplashScreen:$PSDWizardNoSplashScreen -Passthru -Debug:$PSDDebug 
         
                         # Noting was selected...
                         if ($result -eq $false){
@@ -1225,8 +1300,45 @@ else{
                             Exit 0
                         }
                     }
-            Default {
-            }
+
+            'PSDWizardRS' {
+                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running the command Import-Module $PSDWizard -ErrorAction Stop -Force -Verbose:`$False"
+                        Import-Module $PSDWizard -ErrorAction Stop -Force -Verbose:$False
+
+                        #uses same resources as PSDWizardNew
+                        [string]$PSDWizardPath = Join-Path -Path $scripts -ChildPath PSDWizardNew
+
+                        # Set a name if it is empty
+                        if([string]::IsNullOrEmpty($tsenv:OSDComputername)){
+                            $tsenv:OSDComputername = $env:COMPUTERNAME
+                        }
+
+
+                        # Set theme
+                        if([string]::IsNullOrEmpty($tsenv:PSDWizardTheme)){
+                            $PSDWizardTheme = "Classic"
+                        }
+                        else{
+                            $PSDWizardTheme = $tsenv:PSDWizardTheme
+                        }
+
+                        # Start the wizard
+                        Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Show-PSDWizardRS -ResourcePath {0} -Passthru -Debug:{1}]" -f $PSDWizardPath,$PSDDebug)
+                        # $result = Show-PSDWizardRS -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Passthru -Debug:$PSDDebug
+                        $result = Show-PSDWizardRS -ResourcePath $PSDWizardPath -Passthru -Debug:$PSDDebug -Theme $PSDWizardTheme
+        
+                        # Noting was selected...
+                        if ($result -eq $false){
+                            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cancelling, aborting..."
+                            Show-PSDInfo -Message "Cancelling, aborting..." -Severity Information -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
+                            Stop-PSDLogging
+                            Clear-PSDInformationgp
+                            Start-Process PowerShell -Wait
+                            Exit 0
+                        }
+                    }
+
+            Default {}
         }
     }
 
@@ -1293,13 +1405,26 @@ else{
         Show-PSDInfo -Message "Unable to access $tsEngine\TSMBootstrap.exe" -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
     }
 
-    Write-PSDEvent -MessageID 41016 -severity 4 -Message "PSD beginning deployment"
+    If(Test-Path "$env:systemdrive\Windows\System32\RemoteRecovery.exe"){
+        Write-PSDEvent -MessageID 41016 -severity 4 -Message "PSD beginning deployment with DaRT" -Dart
+    }Else{
+        Write-PSDEvent -MessageID 41016 -severity 4 -Message "PSD beginning deployment"
+    }
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Done in PSDStart for now, handing over to Task Sequence by running $tsEngine\TSMBootstrap.exe /env:SAStart"
     Write-PSDBootInfo -SleepSec 0 -Message "Running Task Sequence"
+    if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Running Task Sequence" -PercentComplete 100}
+
+    # close PSDStartLoaderDebugMenu
+    Close-PSDStartLoaderDebugMenu
 
     Stop-PSDLogging
     $result = Start-Process -FilePath "$tsEngine\TSMBootstrap.exe" -ArgumentList "/env:SAStart" -Wait -Passthru
     
+    #close prestart loader if found
+    If($PSDStartLoader.isLoaded){
+        Close-PSDStartLoader -Runspace $PSDStartLoader
+        Close-PSDStartLoaderDebugMenu
+    }
 }
 
 # Set PSDDirty since we are
@@ -1310,7 +1435,7 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property PSDDirty is now
 if($BootfromWinPE -eq $True){
     
     # Assuming that the first Volume having mspaint.exe is the correct OS volume
-    $Drives = Get-PSDrive | Where-Object {$_.Provider -like "*filesystem*"}
+    $Drives = Get-PSDrive | Where-Object { $_.Provider -like "*filesystem*" }
     Foreach ($Drive in $Drives){
         # TODO: Need to find a better file for detection of running OS
         #If (Test-Path -Path "$($Drive.Name):\Windows\System32\mspaint.exe"){
@@ -1323,6 +1448,10 @@ if($BootfromWinPE -eq $True){
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property PSDDirty is now = $tsenv:PSDDirty"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Task Sequence is done, PSDStart.ps1 is now in charge.."
+
+
+
+
 
 # Make sure variables.dat is in the current local directory
 if (Test-Path -Path "$(Get-PSDLocalDataPath)\Variables.dat"){
@@ -1369,6 +1498,12 @@ Switch ($result.ExitCode){
         # Prep to run PSDFinal.ps1
         Copy-Item -Path $env:SystemDrive\MININT\Cache\Scripts\PSDFinal.ps1 -Destination "$env:TEMP"
         Clear-PSDInformation
+
+        #close prestart loader if found
+        If($PSDStartLoader.isLoaded){
+            Close-PSDStartLoader -Runspace $PSDStartLoader
+            Close-PSDStartLoaderDebugMenu
+        }
                 
         #Checking for FinalSummary
         if(!($tsenv:SkipFinalSummary -eq "YES")){
@@ -1416,7 +1551,7 @@ Switch ($result.ExitCode){
             # Exit with a zero return code and let Windows PE reboot
 
             # Assuming that the first Volume having mspaint.exe is the correct OS volume
-            $Drives = Get-PSDrive | Where-Object {$_.Provider -like "*filesystem*"}
+            $Drives = Get-PSDrive | Where-Object { $_.Provider -like "*filesystem*" }
             Foreach ($Drive in $Drives){
                 # TODO: Need to find a better file for detection of running OS
                 # If (Test-Path -Path "$($Drive.Name):\Windows\System32\mspaint.exe"){

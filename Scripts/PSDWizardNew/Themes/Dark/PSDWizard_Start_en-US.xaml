@@ -1,0 +1,36 @@
+<Canvas x:Name="_startPage" HorizontalAlignment="Left" Height="600" Width="800" VerticalAlignment="Top" Background="#2D2D2F" Panel.ZIndex="300">
+    <Grid x:Name="_startPageLayout" Margin="0" Height="572">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="140*"></RowDefinition>
+            <RowDefinition Height="56*"></RowDefinition>
+            <RowDefinition Height="50*"></RowDefinition>
+            <RowDefinition Height="37*"></RowDefinition>
+            <RowDefinition Height="105*"></RowDefinition>
+            <RowDefinition Height="124*"></RowDefinition>
+            <RowDefinition Height="61*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="120" Width="120">
+            <Image x:Name="_wizBeginLogo" Height="120" Width="120" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="@ORG" VerticalAlignment="Center" FontSize="24" Width="800" TextAlignment="Center" FontFamily="Segoe UI Light" Height="64" />
+        <TextBlock Grid.Row="2" HorizontalAlignment="Center" Text="@MainTitle" VerticalAlignment="Center" FontSize="36" Width="800" TextAlignment="Center" FontFamily="Segoe UI Light" Height="64" />
+        <TextBlock Grid.Row="3" HorizontalAlignment="Center" Text="@SubTitle" VerticalAlignment="Top" FontSize="16" FontFamily="Segoe UI Light" Width="800" TextAlignment="Center" Height="26" />
+
+        <Button Grid.Row="4" x:Name="_start" Style="{DynamicResource ButtonDarkThemeSquare}" Width="380" Height="68" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Lets get started" FontSize="24" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
+        </Button>
+
+        <Button Grid.Row="5" x:Name="_startPageOpenPS" Style="{DynamicResource ButtonDarkThemeSquare}" Width="100" HorizontalAlignment="Right" Margin="0,124,20,10" Grid.RowSpan="2">
+            <StackPanel Width="91" Height="44">
+                <Label Content="Open PowerShell" Foreground="White" BorderThickness="0" HorizontalAlignment="Center" FontSize="10" VerticalContentAlignment="Center" />
+                <Rectangle Width="20" Height="20" Fill="White" HorizontalAlignment="Center">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_console}"/>
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </StackPanel>
+        </Button>
+    </Grid>
+</Canvas>

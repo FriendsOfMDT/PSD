@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Policies>
+    <ErrorControl>
+      <fileError>
+        <nonFatal errorCode="32">* [*]</nonFatal>
+        <nonFatal errorCode="33">* [*]</nonFatal>
+        <fatal errorCode="any">%PROFILESFOLDER%\* [*]</fatal>
+      </fileError>
+      <registryError>
+        <nonFatal errorCode="5">* [*]</nonFatal>
+      </registryError>
+    </ErrorControl>
+    <HardLinkStoreControl>
+      <fileLocked>
+        <createHardLink>%PROFILESFOLDER%\* [*]</createHardLink>
+      </fileLocked>
+    </HardLinkStoreControl>
+  </Policies>
+  <ProfileControl>
+    <!--   Example:
+
+          <localGroups>
+            <mappings>
+              <changeGroup from="Administrators" to="Users" appliesTo="MigratedUsers">
+                <include>
+                  <pattern>DomainName1\Username</pattern>
+                </include>
+                <exclude>
+                  <pattern>DomainName2\Username</pattern>
+                </exclude>
+              </changeGroup>
+            </mappings>
+          </localGroups>
+          
+      -->
+  </ProfileControl>
+</Configuration>

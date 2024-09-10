@@ -1,8 +1,8 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
-	<Style x:Key="TreeViewItemStandard" TargetType="TreeViewItem">
-		<Setter Property="IsExpanded" Value="True" />
+
+    <Style x:Key="TreeViewItemStandard" TargetType="{x:Type TreeViewItem}">
+        <Setter Property="IsExpanded" Value="True" />
 		<Setter Property="IsSelected" Value="{Binding IsInitiallySelected, Mode=OneTime}" />
 		<Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
 		<Setter Property="HeaderTemplate">
@@ -50,4 +50,5 @@
 			</Style>
 		</Style.Resources>
 	</Style>
+    
 </ResourceDictionary>

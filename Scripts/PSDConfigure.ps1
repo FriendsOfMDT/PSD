@@ -51,8 +51,14 @@ Write-PSDEvent -MessageID 41000 -severity 1 -Message "Starting: $($MyInvocation.
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Load core modules"
 
 # Fix issue if Domainjoin value is blank as well as joinworkgroup
-if($tsenv:JoinDomain -eq "" -or $tsenv:JoinDomain -eq $null){
-    $tsenv:JoinWorkgroup = "WORKGROUP"
+if ([string]::IsNullOrEmpty($tsenv:JoinDomain) -and
+    [string]::IsNullOrEmpty($tsenv:DomainAdmin) -and
+    [string]::IsNullOrEmpty($tsenv:DomainAdminDomain) -and
+    [string]::IsNullOrEmpty($tsenv:DomainAdminPassword)) {
+    # If $tsenv:JoinWorkGroup is not null or empty, set it to WORKGROUP
+    if ([string]::IsNullOrEmpty($tsenv:JoinWorkGroup)) {
+        $tsenv:JoinWorkGroup = "WORKGROUP"
+    }
 }
 
 # Load the unattend.xml

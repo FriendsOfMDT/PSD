@@ -110,39 +110,42 @@
       </defaultVarList>
       <action>cscript.exe "%SCRIPTROOT%\ZTIDiskpart.wsf"</action>
     </step>
-    <step type="SMS_TaskSequence_SetVariableAction" name="Set DriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
-      <defaultVarList>
-        <variable name="VariableName" property="VariableName">DriverPath</variable>
-        <variable name="VariableValue" property="VariableValue">Windows 10 x64\%model%</variable>
-      </defaultVarList>
-      <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
-    </step>
-    <step type="SMS_TaskSequence_SetVariableAction" name="Set GenericDriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
-      <defaultVarList>
-        <variable name="VariableName" property="VariableName">GenericDriverPath</variable>
-        <variable name="VariableValue" property="VariableValue">Windows 10 x64\Generic</variable>
-      </defaultVarList>
-      <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
-    </step>
-    <step type="SMS_TaskSequence_SetVariableAction" name="Set FallBackDriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
-      <defaultVarList>
-        <variable name="VariableName" property="VariableName">FallBackDriverPath</variable>
-        <variable name="VariableValue" property="VariableValue">Windows 10 x64\FallBack</variable>
-      </defaultVarList>
-      <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
-    </step>
-    <step type="BDD_InjectDrivers" name="Inject Drivers" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
-      <defaultVarList>
-        <variable name="DriverSelectionProfile" property="DriverSelectionProfile">Nothing</variable>
-        <variable name="DriverInjectionMode" property="DriverInjectionMode">ALL</variable>
-      </defaultVarList>
-      <action>cscript.exe "%SCRIPTROOT%\ZTIDrivers.wsf"</action>
-    </step>
+    <group expand="true" name="Drivers" description="" disable="false" continueOnError="false">
+      <action />
+      <step type="SMS_TaskSequence_SetVariableAction" name="Set DriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
+        <defaultVarList>
+          <variable name="VariableName" property="VariableName">DriverPath</variable>
+          <variable name="VariableValue" property="VariableValue">Windows 11\%ModelAlias%</variable>
+        </defaultVarList>
+        <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+      </step>
+      <step type="SMS_TaskSequence_SetVariableAction" name="Set GenericDriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
+        <defaultVarList>
+          <variable name="VariableName" property="VariableName">GenericDriverPath</variable>
+          <variable name="VariableValue" property="VariableValue">Windows 11\Generic</variable>
+        </defaultVarList>
+        <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+      </step>
+      <step type="SMS_TaskSequence_SetVariableAction" name="Set FallBackDriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
+        <defaultVarList>
+          <variable name="VariableName" property="VariableName">FallBackDriverPath</variable>
+          <variable name="VariableValue" property="VariableValue">Windows 11\FallBack\%MakeAlias%</variable>
+        </defaultVarList>
+        <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
+      </step>
+      <step type="BDD_InjectDrivers" name="Inject Drivers" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
+        <defaultVarList>
+          <variable name="DriverSelectionProfile" property="DriverSelectionProfile">Nothing</variable>
+          <variable name="DriverInjectionMode" property="DriverInjectionMode">ALL</variable>
+        </defaultVarList>
+        <action>cscript.exe "%SCRIPTROOT%\ZTIDrivers.wsf"</action>
+      </step>
+    </group>
     <action />
     <condition></condition>
     <step type="BDD_InstallOS" name="Install Operating System" description="" disable="false" continueOnError="false" runIn="WinPEandFullOS" successCodeList="0 3010">
       <defaultVarList>
-        <variable name="OSGUID" property="OSGUID">{fa7f3aa1-ee42-4845-bbaa-cc26736d66c6}</variable>
+        <variable name="OSGUID" property="OSGUID">{89be5792-2f40-4f08-a753-7ece315f273c}</variable>
         <variable name="DestinationDisk" property="DestinationDisk">0</variable>
         <variable name="DestinationPartition" property="DestinationPartition">1</variable>
         <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
@@ -190,7 +193,7 @@
       </defaultVarList>
       <action>PowerShell.exe -file %SCRIPTROOT%\PSDTattoo.ps1</action>
     </step>
-    <step name="Windows Update Pass 1" disable="false" continueOnError="true" successCodeList="0 3010" description="" startIn="">
+    <step name="Windows Update Pass 1" disable="true" continueOnError="true" successCodeList="0 3010" description="" startIn="">
       <action>powershell.exe -file %SCRIPTROOT%\PSDWindowsUpdate.ps1</action>
       <defaultVarList>
         <variable name="RunAsUser" property="RunAsUser">false</variable>
@@ -206,7 +209,7 @@
         <variable name="ApplicationSuccessCodes" property="ApplicationSuccessCodes">0 3010</variable>
       </defaultVarList>
     </step>
-    <step name="Windows Update Pass 2" disable="false" continueOnError="true" successCodeList="0 3010" description="" startIn="">
+    <step name="Windows Update Pass 2" disable="true" continueOnError="true" successCodeList="0 3010" description="" startIn="">
       <action>powershell.exe -file %SCRIPTROOT%\PSDWindowsUpdate.ps1</action>
       <defaultVarList>
         <variable name="RunAsUser" property="RunAsUser">false</variable>
@@ -218,14 +221,14 @@
     <condition></condition>
   </group>
   <globalVarList>
-    <variable name="OSGUID" property="OSGUID">{fa7f3aa1-ee42-4845-bbaa-cc26736d66c6}</variable>
+    <variable name="OSGUID" property="OSGUID">{89be5792-2f40-4f08-a753-7ece315f273c}</variable>
     <variable name="DestinationDisk" property="DestinationDisk">0</variable>
     <variable name="DestinationPartition" property="DestinationPartition">1</variable>
     <variable name="DestinationOSVariable" property="DestinationOSVariable"></variable>
     <variable name="DestinationOSRefresh" property="DestinationOSRefresh"></variable>
     <variable name="DestinationOSDriveLetter" property="DestinationOSDriveLetter"></variable>
     <variable name="DestinationOSInstallType" property="DestinationOSInstallType">NextPartition</variable>
-    <variable name="OSGUID" property="OSGUID">{fa7f3aa1-ee42-4845-bbaa-cc26736d66c6}</variable>
+    <variable name="OSGUID" property="OSGUID">{89be5792-2f40-4f08-a753-7ece315f273c}</variable>
   </globalVarList>
   <group expand="true" name="Custom Tasks" description="" disable="false" continueOnError="false">
     <action />

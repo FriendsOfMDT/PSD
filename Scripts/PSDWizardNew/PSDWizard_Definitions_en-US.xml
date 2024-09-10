@@ -38,6 +38,15 @@
 		<Help><![CDATA[ "Select a Task sequence to execute on this device.&#xa;&#xa;Use the filter buttons to drill to a specific task sequence.
 		&#xa;&#xa;WARNING: The Task Sequence may format the disk drive and all data will be lost.&#xa;&#xa;TIP: Press F5 to refresh list!" ]]></Help>
 	</Pane>
+	
+	<Pane id="TargetDisk" title="Target Disk">
+		<Condition><![CDATA[UCase(Property("SkipDiskSelection")) <> "YES"]]></Condition>
+		<Condition><![CDATA[Property("DeploymentType") <> "REPLACE" and Property("DeploymentType") <> "CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType") <> "UPGRADE" ]]></Condition>
+		<MainTitle><![CDATA[ "Target OS Disk" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Operating System target install" ]]></SubTitle>
+		<Context><![CDATA[ "What drive index would you like the OS to install to?" ]]></Context>
+		<Help><![CDATA[ "Select the appropiate disk.&#xa;&#xa;Use the viewer to display disks and volumes" ]]></Help>
+	</Pane>
 
 	<Pane id="DeviceDetails" title="Device Details">
 		<Condition><![CDATA[UCase(Property("SkipDomainMembership")) <> "YES" and UCase(Property("SkipComputerName")) <> "YES"]]></Condition>
@@ -48,12 +57,18 @@
 		<Help><![CDATA[ "Fill in all available fields.&#xa;&#xa;The device name must meet certain criteria's&#xa;&#xa;Select whether you want the device to join a domain or a workgroup" ]]></Help>
 	</Pane>
 
-	<Pane id="ComputerName" title="Computer Name">
-		<Condition><![CDATA[UCase(Property("SkipComputerName")) <> "YES"]]></Condition>
-		<Condition><![CDATA[Property("DeploymentType") <> "REPLACE" and Property("DeploymentType") <> "CUSTOM" and Property("DeploymentType") <> "StateRestore" and Property("DeploymentType") <> "UPGRADE" ]]></Condition>
-		<MainTitle><![CDATA[ "Fill in Device Details" ]]></MainTitle>
-		<SubTitle><![CDATA[ "Let's get the basic things out of the way" ]]></SubTitle>
-		<Help><![CDATA[ "Fill in all available fields.&#xa;&#xa;The device name must meet certain criteria's&#xa;&#xa;Select whether you want the device to join a domain or a workgroup" ]]></Help>
+	<Pane id="DeviceRole" title="Device Role">
+		<Condition><![CDATA[UCase(Property("SkipRoleSelection")) == "NO"]]></Condition>
+		<MainTitle><![CDATA[ "Select a Role" ]]></MainTitle>
+		<SubTitle><![CDATA[ "You must select a role from the dropdown" ]]></SubTitle>
+		<Help><![CDATA[ "Selecting an Role will only set the TSEnv property [Role].&#xa;&#xa;A custom action must be taken within the Task Sequence" ]]></Help>
+	</Pane>
+
+	<Pane id="IntuneGroup" title="Intune Group">
+		<Condition><![CDATA[UCase(Property("SkipIntuneGroup")) == "NO"]]></Condition>
+		<MainTitle><![CDATA[ "Select an Intune Group" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Select an Intune Group from the dropdown" ]]></SubTitle>
+		<Help><![CDATA[ "Selecting an Intune Group will only set the TSEnv property [IntuneGroup].&#xa;&#xa;A custom action must be taken within the Task Sequence" ]]></Help>
 	</Pane>
 
 	<Pane id="DomainSettings" title="Join Domain">

@@ -1,0 +1,45 @@
+<Grid x:Name="_appTabLayout" Margin="0" Grid.ColumnSpan="2">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="490"></ColumnDefinition>
+        <ColumnDefinition Width="150"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Label x:Name="_appTabMainTitle" Content="@MainTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontSize="22" />
+    <Rectangle Grid.Column="0" Fill="LightBlue" HorizontalAlignment="Right" Height="40" Width="40" Margin="0,20,13.5,0" VerticalAlignment="Top">
+        <Rectangle.OpacityMask>
+            <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_apps}"/>
+        </Rectangle.OpacityMask>
+    </Rectangle>
+
+    <Label x:Name="_appTabSubTitle" Content="@SubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top"  />
+    <TextBox x:Name="_appTabSearch" HorizontalAlignment="Left" Height="31" Margin="10,103,0,0" TextWrapping="Wrap" Text="Search..." VerticalAlignment="Top" Width="331" VerticalContentAlignment="Center" FontSize="18" Style="{DynamicResource TextBoxDarkTheme}"/>
+    <Button x:Name="_appTabSearchClear" Content="Clear" Height="31" Width="62" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="414,0,0,416" Style="{DynamicResource ButtonDarkThemeSquare}"/>
+    <Button x:Name="_appTabSearchEnter" Content="Search" Height="31" Width="63" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="346,0,0,416" Style="{DynamicResource ButtonDarkThemeSquare}"/>
+
+    <Label x:Name="_appBundleslabel" Content="Application Bundles:" FontSize="14" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" />
+    <ComboBox x:Name="_appBundlesCmb" HorizontalAlignment="Left" Margin="151,142,0,0" VerticalAlignment="Top" Width="326" />
+
+    <Button x:Name="_appTabSelectAll" Content="Expand All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="12,0,0,353" Style="{DynamicResource ButtonDarkThemeSquare}"/>
+    <Button x:Name="_appTabSelectNone" Content="Select None" Height="25" Width="114" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="130,0,0,353" Style="{DynamicResource ButtonDarkThemeSquare}"/>
+
+    <TextBox x:Name="TS_Applications" Margin="341,129,13.5,379" IsEnabled="False" Visibility="Hidden"/>
+
+    <ListBox x:Name="_appTabList" HorizontalAlignment="Left" Height="338" Margin="10,202,0,0" VerticalAlignment="Top" Width="466" SelectionMode="Multiple">
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+                <Setter Property="IsSelected" Value="{Binding Selected}" />
+            </Style>
+        </ListBox.ItemContainerStyle>
+        <!--<ListBox.ItemTemplate>
+            <DataTemplate>
+                <ListBoxItem>
+                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ListBoxItem, Mode=FindAncestor}}"/>
+                </ListBoxItem>
+            </DataTemplate>
+        </ListBox.ItemTemplate>-->
+    </ListBox>
+
+    <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
+    <TextBlock x:Name="_appTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">
+        <Run Text="@Help"/>
+    </TextBlock>
+</Grid>
