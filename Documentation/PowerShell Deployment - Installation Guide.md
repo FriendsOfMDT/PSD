@@ -68,8 +68,10 @@ Please review, validate and/or obtain following installation checklist items:
     - Join Domain Account for joining computers to Active Directory (currently requires line of sight to domain controller)
 
 # Installing PSD
+
 PSD installation requires the following:
 - Existing installation of MDT and Windows ADK
+  - Follow this guide if you are new to ADK and MDT
 - Administrative rights on the MDT Server
 - The PSD solution downloaded
 
@@ -82,10 +84,28 @@ PSD installation requires the following:
 > NOTE: If downloading the Zip archive, ensure to unblock the file before extracting the content.
 1) Open an elevated Powershell command prompt, run one of the following commands
     - For **NEW** installations of PSD run:
-        - .\Install-PSD.ps1 -psDeploymentFolder \<your absolute folder path including drive letter> -psDeploymentShare \<your share name>
+    
+    ```powershell
+    .\Install-PSD.ps1 -psDeploymentFolder "<your absolute folder path including drive letter>" -psDeploymentShare "<your share name>"
+
+    <#
+    .EXAMPLE
+    .\Install-PSD.ps1 -psDeploymentFolder "D:\PSD" -psDeploymentShare "dep-psd$"
+    #>
+    ```
     - To **UPGRADE** an existing MDT/PSD installation run: 
-        - .\Install-PSD.ps1 -psDeploymentFolder \<your absolute folder path including drive letter> -psDeploymentShare \<your share name> **-upgrade**
+    ```powershell
+    .\Install-PSD.ps1 -psDeploymentFolder "<your absolute folder path including drive letter>" -psDeploymentShare "<your share name>" -upgrade
+
+    <#
+    .EXAMPLE
+    .\Install-PSD.ps1 -psDeploymentFolder "D:\PSD" -psDeploymentShare "dep-psd$" -upgrade
+    #>
+    ```
+
 1) Review the PSD Installation log for errors
+
+1) Review the [Latest Release Guide](./PowerShell%20Deployment%20-%20Latest%20Release%20Setup%20Guide.md) to ensure its setup correctly
 
 # Next steps
 After the initial setup, you need to install IIS to enable HTTPS deployments, follow the steps in the "PowerShell Deployment - IIS Configuration Guide"

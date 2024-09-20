@@ -76,7 +76,6 @@ DeploymentShare
 Here are standard properties that can be set:
 
 - **SkipBDDWelcome**: YES or NO. Toggles the Welcome splash screen.
-- **SkipWelcome**: YES or NO. Toggles the Welcome splash screen (same as _SkipBDDWelcome_).
 - **SkipTaskSequence**: YES or NO. Toggles the Task sequence page.
 - **SkipDomainMembership**: YES or NO. Toggles the Computer name section in the device details page.
 - **SkipComputerName**: YES or NO. Toggles the Computer name section in the device details page.
@@ -87,14 +86,15 @@ Here are standard properties that can be set:
 - **SkipApplications**: YES or NO. Toggles the Application page (see known issue).
 - **SkipSummary**: YES or NO. Toggles the summary page (shows what was selected in the UI).
 
-The main PSD variable definitions do not include the items listed below; they will need to be added to the Property section in the _CustomSettings.ini_:
+In the lastest release of PSD, the PSD variable definitions are now included without declaring them first
 
 - **PSDWizard**: Native or PSDWizardNew. Native is the original wizard (not new).
-- **PSDWizardTheme**: Classic, Modern, Refresh, Tabular (see theme section for details and screenshots).
+- **PSDWizardTheme**: Classic, Dark (see theme section for details and screenshots). For more theme go here: [PSDWizardNew_CustomThemes](https://github.com/PowerShellCrack/PSDWizardNew_CustomThemes)
 - **PSDWizardLogo**: Adds a logo to the top left corner of the wizard and the Welcome page (e.g., PSDWizardLogo=%SCRIPTROOT%\powershell.png).
 - **SkipPSDWelcome**: YES or NO. Toggles the Welcome splash screen.
 - **SkipDeployReadiness**: YES or NO. Toggles the deployment readiness page.
 - **SkipReadinessCheck**: YES or NO. Skips any readiness checks. This option is ignored if SkipDeployReadiness is NO, and the readiness check will not run.
+- **SkipPSDWizardSplashScreen**: YES or NO. Toggles the splash screen before launching the wizard. If ZeroTouch deployment is performed, be sure to disable this too. 
 - **PSDReadinessAllowBypass**: YES or NO. Allows the PSD Wizard to continue even if the readiness check returns false.
 - **PSDReadinessScript**: Place PowerShell script in %DEPLOYROOT%\PSDResources\Readiness folder.
 - **PSDReadinessCheck001**: Invokes command or function from the readiness script.
@@ -103,6 +103,7 @@ The main PSD variable definitions do not include the items listed below; they wi
 - **PSDReadinessCheck004**: Invokes command or function from the readiness script.
 - **PSDWizardCustomPaneAllowBypass**: YES or NO. If custom pages are added to the wizard and no script is provided, the next button will be disabled. This will override that.
 - **PSDWizardCollapseTSList**: YES or NO. Collapses the Task Sequences folder list. By default, they are all expanded. This can be handy when there are a lot of folders.
+
 
 > Review the _Readiness Additional requirements_ section for more details
 
@@ -231,7 +232,7 @@ If done correctly you should get this:
 
 8. Mount the ISO and boot the device and it should show up:
 
-![screenshot7](.images\image7.png)
+![screenshot7](.images/image7.png)
 
 The ready page will also see the Task sequence variable. This will get exported when wizard complete for additional steps to take action
 
@@ -259,7 +260,10 @@ The _FullScreen_ option is still in BETA; it replaces the bginfo background with
 
 ## Known issues
 
-- Fixed in 2.2.7: Applications that have not ben toggled as disabled then reenabled, will not show in UI. Workaround is to use * in search.
-- Fixed in 2.2.7: _SkipApplications=NO_ must exist in CustomSettings.ini if you want the application page to show
-- Fixed in 2.2.9: OU was not populating in TS variable properly. Now provides multiple OU options like MDT did. 
-- Fixed in 2.3.0: Custom pages can use scripts to populate pages for dynamic content
+ - Applications will not install even if selected in UI, This is because the code is nulled if no applications are listed in CustomSettings.ini. The workaround is to set a real or dummy application in CustomSettings.ini. 
+ 
+ Example:
+
+ ```ini
+ APPLICATIONS001={d7f2f50a-e85f-425e-a2f7-68392b1f31a6}
+ ```

@@ -78,7 +78,7 @@ Q: What files and or components are copied or injected into the PSD-enabled Boot
     <td>SCRIPTS</td>
   </tr>
   <tr>
-    <td>PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
+    <td>PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><br>PSDWizardNew.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
     <td>PSDStart.ps1<br>PSDHelper.ps1<br></td>
   </tr>
 </table>
