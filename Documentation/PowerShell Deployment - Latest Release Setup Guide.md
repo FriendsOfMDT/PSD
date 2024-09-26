@@ -1,18 +1,19 @@
 # Setting Up PSD 2.30
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Prerequisites](#prerequisites)
 3. [Upgrade Process](#upgrade-process)
     - [Backup Existing Configuration](#backup-existing-configuration)
-    - [Download PSD 2.30]
-    - [Install PSD 2.30]
-4. [Editing Configuration Files]
-    - [CustomSettings.ini]
-    - [Bootstrap.ini]
-    - [PSDUpdateExit.ps1]
-5. [Final Steps]
-6. [Troubleshooting]
+    - [Download PSD 2.30](#download-psd-230)
+    - [Install PSD 2.30](#install-psd-230)
+4. [Editing Configuration Files](#editing-configuration-files)
+    - [CustomSettings.ini](#customsettingsini)
+    - [Bootstrap.ini](#bootstrapini)
+    - [PSDUpdateExit.ps1](#psdupdateexitps1)
+5. [Final Steps](#final-steps)
+6. [Troubleshooting](#troubleshooting)
 
 ## Introduction
 
