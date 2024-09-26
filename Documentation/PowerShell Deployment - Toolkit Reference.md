@@ -30,12 +30,12 @@ The following PowerShell modules and scripts are provided with PSD:
 | PSDDrivers.ps1       	| Copies drivers to PSD cache on target systems. | ZTIDrivers.wsf|
 | PSDGather.ps1        	| Runs PSDGather from PSDGather.psm1 and gathers environment and target device information and details | ZTIGather.wsf
 | PSDPartition.ps1     	| Partitions and configured disks. Disk partitioning details are hardcoded inside this script. Do NOT change. | ZTIDiskpart.wsf   |
-| PSDSetVariable.ps1   	| Script to set variables | ZTISetVariable.wsf | 
+| PSDSetVariable.ps1   	| Script to set variables | ZTISetVariable.wsf |
 | PSDStart.ps1         	| Starts or continues a PSD-enabled task sequence.| LiteTouch.wsf |
 | PSDTBA.ps1           	| Placeholder script for scripts not yet converted | Varies |
 | PSDTemplate.ps1      	| Sample PowerShell template for PSD development | template | N/A
 | PSDValidate.ps1      	| Checks for system requirements            	| ZTIValidate.wsf |
-| PSDWindowsUpdate.ps1 	| Script that runs Windows Update            	| ZTIWindowsUpdate.wsf         |   
+| PSDWindowsUpdate.ps1 	| Script that runs Windows Update            	| ZTIWindowsUpdate.wsf         |
 
 ## PSD Modules
 

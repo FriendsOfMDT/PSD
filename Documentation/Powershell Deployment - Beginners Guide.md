@@ -30,7 +30,7 @@ Welcome to the beginner's guide for installing ADK (Assessment and Deployment Ki
 
 1. **Download WinPE Add-on:**
    - Go to the WinPE Add-on download page here: [Download and install the Windows ADK](https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install)
-   - Download the WinPE add-on installer. 
+   - Download the WinPE add-on installer.
    > HINT: Look for a link like: _Download the Windows PE add-on for the Windows ADK \<version\> (\<Date\>)_
 
 2. **Run the WinPE Add-on Installer:**
@@ -63,8 +63,8 @@ Mkdir "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Wind
 ```
 - Download the necessary drivers need to support your models
 - Download a Operating System ISO. These can be pull from MSDN or from the official link: [Download Windows 11 Disk Image (ISO) for x64 devices](https://www.microsoft.com/en-us/software-download/windows11?ISO&msockid=1a583ca89d6d67bd32e8289a9c446670)
-- Download Applications needed. 
->NOTE: Application setup is not provided with this documentation, however there are several guides online to show how it done. 
+- Download Applications needed.
+>NOTE: Application setup is not provided with this documentation, however there are several guides online to show how it done.
 
 ## Conclusion
 

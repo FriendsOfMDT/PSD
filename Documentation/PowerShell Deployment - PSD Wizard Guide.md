@@ -20,11 +20,12 @@ This new wizard includes two primary themes, both reminiscent of the MDT interfa
 ![psdwizardnewdark](.images/psdwizardnew_dark.png)
 
 > Addtional themes can be found [here](https://github.com/PowerShellCrack/PSDWizardNew_CustomThemes)
+
 ## The underlying structure
 
 The wizard's structure is designed to be modular and includes controllable features similar to the original MDT wizard. While it uses the same XML definitions as the original, there are additional XML files for themes, languages, and pages. For more details, see the structure section.
 
-```
+```txt
 DeploymentShare
     |-Tools
         |-Modules
@@ -98,7 +99,7 @@ The added PSDwizard properties are as follows:
 - **SkipPSDWelcome**: YES or NO. Toggles the Welcome splash screen.
 - **SkipDeployReadiness**: YES or NO. Toggles the deployment readiness page.
 - **SkipReadinessCheck**: YES or NO. Skips any readiness checks. This option is ignored if SkipDeployReadiness is NO, and the readiness check will not run.
-- **SkipPSDWizardSplashScreen**: YES or NO. Toggles the splash screen before launching the wizard. If ZeroTouch deployment is performed, be sure to disable this too. 
+- **SkipPSDWizardSplashScreen**: YES or NO. Toggles the splash screen before launching the wizard. If ZeroTouch deployment is performed, be sure to disable this too.
 - **PSDReadinessAllowBypass**: YES or NO. Allows the PSD Wizard to continue even if the readiness check returns false.
 - **PSDReadinessScript**: Place PowerShell script in %DEPLOYROOT%\PSDResources\Readiness folder.
 - **PSDReadinessCheck001**: Invokes command or function from the readiness script.
@@ -110,9 +111,9 @@ The added PSDwizard properties are as follows:
 
 Other supported properties
 
-- **DomainOUs**: List. If more than one is found, the UI will toggle a drop down for the selction instead an input box. Start with DomainOUs001 and use full distinguish name. 
+- **DomainOUs**: List. If more than one is found, the UI will toggle a drop down for the selction instead an input box. Start with DomainOUs001 and use full distinguish name.
 
-EXAMPLE: 
+EXAMPLE:
 ```ini
 DomainOUs001=OU=Workstations,OU=MYOU,DC=MYDOMAIN,DC=LOCAL
 DomainOUs002=OU=Servers,OU=MYOU,DC=MYDOMAIN,DC=LOCAL
@@ -164,7 +165,7 @@ The output would look like this:
 - **Shift Tab** : will navigate menu reverse
 - **F5**: will refresh Task sequence list
 - **F9**: minimizes the wizard
-- **F11**: activates a debug window of PSDWizard (this is still in testing). 
+- **F11**: activates a debug window of PSDWizard (this is still in testing).
 > **WARNING**: if windows is closed it will close the PSDWizard as well
 - **Arrows**: Controls location of prestart menu if shows. Default to right
 
@@ -191,7 +192,7 @@ While the menu is loaded; you can use the keyboard's arrow keys to control the p
 The menu does have some hidden features as well:
 
 - **CMTrace support**: if the menu finds cmtrace within WinPE's system32 folder, it will add an additional button for to launch PSDlogs with cmtrace.
-- **DaRT support**: if dart is added to WinPE, the menu will add an additional button to launch the menu. 
+- **DaRT support**: if dart is added to WinPE, the menu will add an additional button to launch the menu.
 
 
 ![menuonly](.images/prestartmenuloader_menuonly.png)
@@ -202,8 +203,8 @@ The changelog can be found here: [CHANGELOG.MD](../Scripts/PSDWizardNew/CHANGELO
 
 ## Known issues
 
- - Applications will not install even if selected in UI, This is because the code is nulled if no applications are listed in CustomSettings.ini. The workaround is to set a real or dummy application in CustomSettings.ini. 
- 
+ - Applications will not install even if selected in UI, This is because the code is nulled if no applications are listed in CustomSettings.ini. The workaround is to set a real or dummy application in CustomSettings.ini.
+
  Example:
 
  ```ini

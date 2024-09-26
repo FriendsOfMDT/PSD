@@ -15,7 +15,7 @@ Security for PSD-enabled MDT solutions is essentially and effectively identical 
 Operation of PSD-enabled task sequences requires the following:
     - PSD Share (optionally hidden) configured in workbench
     - Account specified in BS/CS.ini
-        - UserID, UserPassword, UserDomain 
+        - UserID, UserPassword, UserDomain
     - Share Permissions (READ)
     - File Permissions (READ)
 
@@ -25,7 +25,7 @@ Recording log and event information is done via log files
 - Account specified in BS/CS.ini
     - UserID, UserPassword, UserDomain
  - SLSHARE value for log files
- 
+
 ### Active Directory
 
 - Accounts specified in BS/CS.ini
@@ -38,7 +38,7 @@ Recording log and event information is done via log files
 
 ## Firewall Ports
 
-In addition to the IIS setup and configuration the following firewall ports needs to open: 
+In addition to the IIS setup and configuration the following firewall ports needs to open:
 
     * Port 80 for HTTP (not recommended)
     * Port 443 for HTTPS

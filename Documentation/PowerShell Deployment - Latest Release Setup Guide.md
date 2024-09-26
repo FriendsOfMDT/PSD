@@ -49,7 +49,7 @@ This guide provides step-by-step instructions for setting up the new release of 
 
 ## Review PSD Install
 
-One of the common things skipped is reviewing the `Install-PSD.log` file. This is important as some files may not have ben overwritten. 
+One of the common things skipped is reviewing the `Install-PSD.log` file. This is important as some files may not have ben overwritten.
 
 Here are a few checks to be sure you have the latest release installed:
 
@@ -82,7 +82,7 @@ If this is a new installation, all the items are setup for you and ready to go. 
 
 2. Open `Control\CustomSettings.ini` in a text editor.
 
-3. Overwrite `[Settings]` and `[Default]` sections with this one: [INIFiles/CustomSettings.ini](https://github.com/FriendsOfMDT/PSD/blob/master/INIFiles/CustomSettings.ini) 
+3. Overwrite `[Settings]` and `[Default]` sections with this one: [INIFiles/CustomSettings.ini](https://github.com/FriendsOfMDT/PSD/blob/master/INIFiles/CustomSettings.ini)
 
 > **WHY?** There are several new items added and we want to make sure you get the best experience. Also if a PSD variable exists, it won't be processed
 

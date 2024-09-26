@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Ensure you have followed the PSD installation guides. 
+Ensure you have followed the PSD installation guides.
 
 ## ZeroTouch
 
@@ -44,11 +44,11 @@ However the PSD wizard will get bypassed and continue the task sequence.
 
 ## Known Issues
 
-Currently there is no property to set a default value for the two new pages: _IntuneGroup_ and _DeviceRole_. You must use the wizard to set it for now. 
+Currently there is no property to set a default value for the two new pages: _IntuneGroup_ and _DeviceRole_. You must use the wizard to set it for now.
 
 oh and BTW, in the PSDWizardGuide, it mentions _SkipWelcome_ which is a typo and shouldn't be in there.
 
-When writing all this, I did do a dispart clean and tested these settings, and it worked. Send me feedback on this. 
+When writing all this, I did do a dispart clean and tested these settings, and it worked. Send me feedback on this.
 
 ## Troubleshooting
 

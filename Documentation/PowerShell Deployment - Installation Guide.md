@@ -3,9 +3,10 @@
 ## PSD Installation Overview
 The PSD installation script is used to either create a new, or extend an existing MDT deployment share. It is also possible to use the Hydration script on a new server to setup a PSD lab environment. For the Hydration scenario, check out the Hydration Kit Installation document.
 
-> WARNING: We strongly recommend that you create a new deployment share for PSD, and copy an existing resources (applications, driversr, images) to it. Once a de ployment share is extended with MDT, standard MDT task sequences will no longer work!
+> WARNING: We strongly recommend that you create a new deployment share for PSD, and copy an existing resources (applications, drivers, images) to it. Once a deployment share is extended with MDT, standard MDT task sequences will no longer work!
 
 ## PSD Installer Supported Configurations
+
 The PSD installer has been tested on the following:
 
 Server operating systems
@@ -14,18 +15,18 @@ Server operating systems
        Windows Server 2019
        Windows Server 2022
 
-Windows ADK 10 
+Windows ADK 10
 
         Windows ADK 10 2004
 
-Windows ADK 11 
+Windows ADK 11
 
         Windows ADK for Windows 11 21H2 (10.1.22000.1)
 
 
 Microsoft Deployment Kit (MDT)
 
-        MDT 8456 
+        MDT 8456
 
 ## PSD Supported Deployments
 The following operating systems have been tested for deployment via PSD:
@@ -38,7 +39,7 @@ Server operating systems Long-Term Servicing Channel (LTSC) releases
 
 
 Client Operating Systems
-        
+
         Windows 10 1909 Pro, Education and Enterprise x64 (English)
         Windows 10 2004 Pro, Education and Enterprise x64 (English)
         Windows 10 20H2 Pro, Education and Enterprise x64 (English)
@@ -51,7 +52,7 @@ Client Operating Systems
 ## PSD Installation Checklist
 Please review, validate and/or obtain following installation checklist items:
 
-* **Windows ADK** - Download and install a supported Microsoft Windows ADK version on a computer to be used to host the MDT Deployment workbench. 
+* **Windows ADK** - Download and install a supported Microsoft Windows ADK version on a computer to be used to host the MDT Deployment workbench.
 
 * **MDT** -  Download and install Microsoft MDT on a computer to be used to host the MDT Deployment workbench. Also install the KB4564442 HotFix for MDT 8456.
 
@@ -84,7 +85,7 @@ PSD installation requires the following:
 > NOTE: If downloading the Zip archive, ensure to unblock the file before extracting the content.
 1) Open an elevated Powershell command prompt, run one of the following commands
     - For **NEW** installations of PSD run:
-    
+
     ```powershell
     .\Install-PSD.ps1 -psDeploymentFolder "<your absolute folder path including drive letter>" -psDeploymentShare "<your share name>"
 
@@ -93,7 +94,7 @@ PSD installation requires the following:
     .\Install-PSD.ps1 -psDeploymentFolder "D:\PSD" -psDeploymentShare "dep-psd$"
     #>
     ```
-    - To **UPGRADE** an existing MDT/PSD installation run: 
+    - To **UPGRADE** an existing MDT/PSD installation run:
     ```powershell
     .\Install-PSD.ps1 -psDeploymentFolder "<your absolute folder path including drive letter>" -psDeploymentShare "<your share name>" -upgrade
 
