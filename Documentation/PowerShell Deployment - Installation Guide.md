@@ -3,9 +3,10 @@
 ## PSD Installation Overview
 The PSD installation script is used to either create a new, or extend an existing MDT deployment share. It is also possible to use the Hydration script on a new server to setup a PSD lab environment. For the Hydration scenario, check out the Hydration Kit Installation document.
 
-> WARNING: We strongly recommend that you create a new deployment share for PSD, and copy an existing resources (applications, driversr, images) to it. Once a de ployment share is extended with MDT, standard MDT task sequences will no longer work!
+> WARNING: We strongly recommend that you create a new deployment share for PSD, and copy an existing resources (applications, drivers, images) to it. Once a deployment share is extended with MDT, standard MDT task sequences will no longer work!
 
 ## PSD Installer Supported Configurations
+
 The PSD installer has been tested on the following:
 
 Server operating systems
@@ -14,18 +15,18 @@ Server operating systems
        Windows Server 2019
        Windows Server 2022
 
-Windows ADK 10 
+Windows ADK 10
 
         Windows ADK 10 2004
 
-Windows ADK 11 
+Windows ADK 11
 
         Windows ADK for Windows 11 21H2 (10.1.22000.1)
 
 
 Microsoft Deployment Kit (MDT)
 
-        MDT 8456 
+        MDT 8456
 
 ## PSD Supported Deployments
 The following operating systems have been tested for deployment via PSD:
@@ -38,7 +39,7 @@ Server operating systems Long-Term Servicing Channel (LTSC) releases
 
 
 Client Operating Systems
-        
+
         Windows 10 1909 Pro, Education and Enterprise x64 (English)
         Windows 10 2004 Pro, Education and Enterprise x64 (English)
         Windows 10 20H2 Pro, Education and Enterprise x64 (English)
@@ -51,7 +52,7 @@ Client Operating Systems
 ## PSD Installation Checklist
 Please review, validate and/or obtain following installation checklist items:
 
-* **Windows ADK** - Download and install a supported Microsoft Windows ADK version on a computer to be used to host the MDT Deployment workbench. 
+* **Windows ADK** - Download and install a supported Microsoft Windows ADK version on a computer to be used to host the MDT Deployment workbench.
 
 * **MDT** -  Download and install Microsoft MDT on a computer to be used to host the MDT Deployment workbench. Also install the KB4564442 HotFix for MDT 8456.
 
@@ -68,8 +69,10 @@ Please review, validate and/or obtain following installation checklist items:
     - Join Domain Account for joining computers to Active Directory (currently requires line of sight to domain controller)
 
 # Installing PSD
+
 PSD installation requires the following:
 - Existing installation of MDT and Windows ADK
+  - Follow this guide if you are new to ADK and MDT
 - Administrative rights on the MDT Server
 - The PSD solution downloaded
 
@@ -82,10 +85,28 @@ PSD installation requires the following:
 > NOTE: If downloading the Zip archive, ensure to unblock the file before extracting the content.
 1) Open an elevated Powershell command prompt, run one of the following commands
     - For **NEW** installations of PSD run:
-        - .\Install-PSD.ps1 -psDeploymentFolder \<your absolute folder path including drive letter> -psDeploymentShare \<your share name>
-    - To **UPGRADE** an existing MDT/PSD installation run: 
-        - .\Install-PSD.ps1 -psDeploymentFolder \<your absolute folder path including drive letter> -psDeploymentShare \<your share name> **-upgrade**
+
+    ```powershell
+    .\Install-PSD.ps1 -psDeploymentFolder "<your absolute folder path including drive letter>" -psDeploymentShare "<your share name>"
+
+    <#
+    .EXAMPLE
+    .\Install-PSD.ps1 -psDeploymentFolder "D:\PSD" -psDeploymentShare "dep-psd$"
+    #>
+    ```
+    - To **UPGRADE** an existing MDT/PSD installation run:
+    ```powershell
+    .\Install-PSD.ps1 -psDeploymentFolder "<your absolute folder path including drive letter>" -psDeploymentShare "<your share name>" -upgrade
+
+    <#
+    .EXAMPLE
+    .\Install-PSD.ps1 -psDeploymentFolder "D:\PSD" -psDeploymentShare "dep-psd$" -upgrade
+    #>
+    ```
+
 1) Review the PSD Installation log for errors
+
+1) Review the [Latest Release Guide](./PowerShell%20Deployment%20-%20Latest%20Release%20Setup%20Guide.md) to ensure its setup correctly
 
 # Next steps
 After the initial setup, you need to install IIS to enable HTTPS deployments, follow the steps in the "PowerShell Deployment - IIS Configuration Guide"

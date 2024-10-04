@@ -1,8 +1,9 @@
 # Hydration Kit Installation Guide
 
-While the native PSD installation script is used to either create a new, or extend an existing MDT deployment share. It is also possible to use the Hydration script on a new server to setup a complete PSD lab environment from scratch, fully automated. 
+While the native PSD installation script is used to either create a new, or extend an existing MDT deployment share. It is also possible to use the Hydration script on a new server to setup a complete PSD lab environment from scratch, fully automated.
 
 ## PSD Installation Checklist
+
 Please review, validate and/or obtain following installation checklist items:
 
 * [ ] **Windows ADK 10** - Download and install Microsoft Windows ADK 10 on a computer to be used to host the MDT workbench. Ensure Microsoft ADK is installed and operational
@@ -27,7 +28,9 @@ Please review, validate and/or obtain following installation checklist items:
     - Joining computers to Active Directory
 
 # Installing PSD
+
 PSD installation requires the following:
+
 - Existing installation of MDT Workbench and ADK
 - Administrative rights on the workbench computer
 - Downloaded or local copy of the PSD solution and it's installer.
@@ -37,7 +40,7 @@ PSD installation requires the following:
 1) Open an elevated Powershell command prompt, run one of the following commands
     - For **NEW** installations of PSD run:
         - ./PSD_Install.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name>
-    - To **UPGRADE** an existing MDT/PSD installation run: 
+    - To **UPGRADE** an existing MDT/PSD installation run:
         - ./PSD_Install.ps1 -psDeploymentFolder \<your folder path> -psDeploymentShare \<your share name> **-upgrade**
 1) Review the command window and PSD Installation log (future) for errors
 1) You should see PSD folders ./SCRIPTS and ./TOOLS in your MDT workbench.
@@ -50,7 +53,7 @@ The following actions should be completed as part of PSD installation:
 
 * [ ] **Open PSD share in MDT** - Following installation of PSD, navigate to and open the newly created PSD deployment share in the MDT workbench
 
-* [ ] **Import Operating Systems** - Within MDT workbench, on the newly created PSD Deployment share, import/create/copy any desired Operating Systems. Follow MDT-provided instructions and techniques. 
+* [ ] **Import Operating Systems** - Within MDT workbench, on the newly created PSD Deployment share, import/create/copy any desired Operating Systems. Follow MDT-provided instructions and techniques.
     >PRO TIP: You can copy Operating Systems from other MDT deployment shares.
 
 * [ ] **Create Applications** - Within MDT workbench, on the newly created PSD Deployment share, import/create/copy any desired Applications. Follow MDT-provided instructions and techniques. Make note of application's unique GUIDs for use automating application installation with CustomSettings.ini.
@@ -62,12 +65,12 @@ The following actions should be completed as part of PSD installation:
 * [ ] **Import/Add Language Packs** - Within MDT workbench, on the newly created PSD Deployment share, import any desired LANGUAGE PACKS. Follow MDT-provided instructions and techniques. Make note of their unique GUIDs for use automating Language Packs installation using CustomSettings.ini.
     >PRO TIP: You can copy Language entries from other MDT deployment shares.
 
-* [ ] **Check Deployment Share Permissions** - By default, the PSD installer creates an MDT folder structure for PSD. PSD-specific files , scripts and templates are added and a new SMB share is created if specified. Ensure that the necessary domain and/or local computer user accounts have access to the PSD Share. 
+* [ ] **Check Deployment Share Permissions** - By default, the PSD installer creates an MDT folder structure for PSD. PSD-specific files , scripts and templates are added and a new SMB share is created if specified. Ensure that the necessary domain and/or local computer user accounts have access to the PSD Share.
 
-    >PRO TIP: Only grant the *minimum necessary rights* to write logs in the PSD share. Only **READ** rights are required for the 
+    >PRO TIP: Only grant the *minimum necessary rights* to write logs in the PSD share. Only **READ** rights are required for the
     PSD/MDT share.
 
-* [ ] **Enable MDT/PSD Logging** - By default, the PSD installer pre-creates folders for LOGS and DYNAMIC LOGS in the root of the PSD deployment share along with configuring an SMB share if specified. (You may wish to point PSD logs somewhere else.) Ensure that the necessary domain and/or local computer user accounts have read and write access to the **LOGS** folders. 
+* [ ] **Enable MDT/PSD Logging** - By default, the PSD installer pre-creates folders for LOGS and DYNAMIC LOGS in the root of the PSD deployment share along with configuring an SMB share if specified. (You may wish to point PSD logs somewhere else.) Ensure that the necessary domain and/or local computer user accounts have read and write access to the **LOGS** folders.
 
     >PRO TIP: Only grant the *minimum necessary permissions and access* to write logs in your location
 
