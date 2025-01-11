@@ -13,8 +13,8 @@
     Contact: Dick Tracy (@PowershellCrack)
     Primary: Dick Tracy (@PowershellCrack)
     Created: 2020-01-12
-    Modified: 2024-05-10
-    Version: 2.3.5
+    Modified: 2024-12-29
+    Version: 2.3.6
 
     SEE CHANGELOG.MD
 
@@ -577,7 +577,7 @@ function Export-PSDWizardResult {
                     Write-PSDLog -Message ("{0}: TaskSequenceID is empty!!!" -f ${CmdletName})
                     Write-PSDLog -Message ("{0}: Re-Running Wizard, TaskSequenceID must not be empty..." -f ${CmdletName})
                     Show-PSDSimpleNotify -Message ("{0}: No Task Sequence selected, restarting wizard..." -f ${CmdletName})
-                    Show-PSDWizard
+                    Show-PSDWizard -ResourcePath "$(Get-PSDContent -Content "scripts")\PSDWizardNew"
                 }
                 Else {
                     Write-PSDLog -Message ("{0}: TaskSequenceID is now: {1}" -f ${CmdletName}, $value)
@@ -3215,6 +3215,7 @@ Function Show-PSDWizard {
     $ChangeLogPath = Join-Path $ResourcePath 'CHANGELOG.MD'
     If (Test-Path $ChangeLogPath)
     {
+        Write-PSDLog -Message ("{0}: ChangeLog found at [{1}]" -f ${CmdletName}, $ChangeLogPath)
         $ChangeLog = Get-Content $ChangeLogPath
         $Changedetails = (($ChangeLog -match '##')[0].TrimStart('##') -split '-').Trim()
         [string]$MenuVersion = [string]$Changedetails[0]
@@ -4330,49 +4331,55 @@ Function Confirm-PSDWizardUserName {
 function Set-PSDWizardStringLength {
     <#
     .SYNOPSIS
-        Changes character length
+        Adjusts the string to the specified length by trimming or padding, preserving leading zeros.
     .EXAMPLE
-        00123456 | Set-PSDWizardStringLength -Length 7 -TrimOff Right
+        "00123456" | Set-PSDWizardStringLength -Length 4 -TrimDirection Right
     .EXAMPLE
-        00123456 | Set-PSDWizardStringLength -Length 7 -TrimOff Left
+        "00123456" | Set-PSDWizardStringLength -Length 4 -TrimDirection Left
+    .EXAMPLE
+        "0012" | Set-PSDWizardStringLength -Length 7 -TrimDirection Left
     #>
     param (
         [parameter(Mandatory = $True, Position = 0, ValueFromPipeline = $True)]
-        [string]$Str,
+        [string]$InputString,
 
-        [parameter(Mandatory = $False, Position = 1)]
-        $Length,
+        [parameter(Mandatory = $True, Position = 1)]
+        [int]$Length,
 
         [parameter(Mandatory = $False, Position = 2)]
         [ValidateSet('Left', 'Right')]
-        [string]$TrimOff
+        [Alias('TrimOff')]
+        [string]$TrimDirection = 'Right'
     )
-    Begin{}
-    Process{
-        Try{
-            If ([string]::IsNullOrEmpty($length) -or ($length -eq 0)) {
-                [int]$length = $Str.length
-            }
-            ElseIf ($length -match '\d') {
-                [int]$length = $length
-            }
-            Else {
-                [int]$length = $Str.length
-                #length is not a integer
-            }
 
-            #$Str[0..($Length-1)] -join ""
-            If ($TrimOff -eq 'Left') {
-                [string]$Str.Substring($length + 1)
+    Begin {}
+    Process {
+        Try {
+            if ($InputString.Length -gt $Length) {
+                # Trim the string if it's longer than the desired length
+                if ($TrimDirection -eq 'Right') {
+                    $InputString = $InputString.Substring(0, $Length)
+                } elseif ($TrimDirection -eq 'Left') {
+                    $InputString = $InputString.Substring($InputString.Length - $Length)
+                }
+            } elseif ($InputString.Length -lt $Length) {
+                # Pad the string with leading or trailing zeros if it's shorter
+                if ($TrimDirection -eq 'Right') {
+                    $InputString = $InputString.PadRight($Length, '0')
+                } elseif ($TrimDirection -eq 'Left') {
+                    $InputString = $InputString.PadLeft($Length, '0')
+                }
             }
-            Else {
-                [string]$Str.Substring(0, $length)
-            }
+        } Catch {
+            Write-Error "An error occurred: $_"
         }
-        Catch{}
+    }
+    End {
+        return $InputString
     }
 }
 #endregion
+
 
 #region FUNCTION: Get-PSDWizardComputerName
 Function Get-PSDWizardComputerName {
@@ -4381,30 +4388,71 @@ Function Get-PSDWizardComputerName {
         Convert known wariable based comptuer name into a valid TS name
 
     .EXAMPLE
+        "PSD-DTOLAB01" | Set-PSDWizardStringWithVariables
+        Output: "PSD-DTOLAB01"
 
-        Get-PSDWizardComputerName "PSD-%SERIAL%"
-        Get-PSDWizardComputerName "PSD-%SERIAL:8%"
-        Get-PSDWizardComputerName "PSD-%PREFIX%-%SERIAL:8%"
-        Get-PSDWizardComputerName "PSD-%PREFIX%-%8:SERIAL%"
-        Get-PSDWizardComputerName "%PREFIX%-%RAND:2%-%8:SERIAL%"
-        Get-PSDWizardComputerName "%PREFIX%-%RAND:2%-%SERIAL:8%"
-        Get-PSDWizardComputerName "PSD%SERIAL%"
-        Get-PSDWizardComputerName "PSD%SERIAL%PSD"
-        Get-PSDWizardComputerName "%PREFIX%-%SERIAL%"
-        Get-PSDWizardComputerName "%PREFIX%%SERIAL%"
-        Get-PSDWizardComputerName "%PREFIX%%PREFIX%"
-        Get-PSDWizardComputerName "%SERIAL%-%SERIAL%"
-        Get-PSDWizardComputerName "%PREFIX%-%RAND:6%"
-        Get-PSDWizardComputerName "%PREFIX%-%SERIAL:7%"
-        Get-PSDWizardComputerName "%PREFIX%-%RAND:6%"
-        Get-PSDWizardComputerName "%PREFIX%-%SERIAL:7%"
-        Get-PSDWizardComputerName "%PREFIX%-%7:SERIAL%"
-        Get-PSDWizardComputerName "%PREFIX%-%SERIALNUMBER%"
+    .EXAMPLE
+        "%PREFIX%-DTOLAB01" | Set-PSDWizardStringWithVariables
+        Where %PREFIX% is a value of: DTO
+        Output: "DTO-DTOLAB01"
+
+    .EXAMPLE
+        "PSD-%SERIAL:5%" | Set-PSDWizardStringWithVariables
+        Output: "PSD-56789" (using the actual serial number)
+    .EXAMPLE
+        "PSD-%RAND:7%" | Set-PSDWizardStringWithVariables
+        Output: "PSD-A3DF321" (randomized output)
+
+    .EXAMPLE
+        "PSD-%SERIAL%" | Set-PSDWizardStringWithVariables
+        Output: "PSD-WHKL456789" (using the actual serial number)
+
+    .EXAMPLE
+        "PSD-%SITE%-%SERIAL:7%" | Set-PSDWizardStringWithVariables
+        Where %SITE% is a value of: LAB
+        Output: "PSD-LAB-L456789" (using the actual serial number)
+
+    .EXAMPLE
+        "%PREFIX%-%8:SERIAL%" | Set-PSDWizardStringWithVariables
+        Where %PREFIX% is a value of: DTO
+        Output: "DTO-WHKL4567" (using the actual serial number)
+
+    .EXAMPLE
+        "%PREFIX%-%RAND:2%-%6:SERIAL%" | Set-PSDWizardStringWithVariables
+        Where %PREFIX% is a value of: DTO
+        Output: "DTO-A3-WHKL45" (using the actual serial number)
+
+    .EXAMPLE
+        "%PREFIX%-%SITE%-%RAND:6%" | Set-PSDWizardStringWithVariables
+        Where %PREFIX% is a value of: DTO
+        Where %SITE% is a value of: LAB
+        Output: "DTO-LAB-A3DF32" (randomized output)
+
+    .EXAMPLE
+        "PSD-%ASSETTAG%" | Set-PSDWizardStringWithVariables
+        Where %ASSETTAG% is a value of: 3757-0958-4574-7040-8653-1408-52
+        Output: "PSD-3757-0958-4574-7040-8653-1408-52" (using the actual asset tag)
+
+    .EXAMPLE
+        "PSD-%ASSETTAG:9%" | Set-PSDWizardStringWithVariables
+        Where %ASSETTAG% is a value of: 3757-0958-4574-7040-8653-1408-52
+        Output: "PSD-3757-0958" (using the actual asset tag)
+
+    .EXAMPLE
+        "PSD-%MACADDRESS%" | Set-PSDWizardStringWithVariables
+        Where %MACADDRESS% is a value of: 00:15:5D:00:00:01
+        Output: "PSD-00155D000001" (using the actual MAC address)
+
+    .EXAMPLE
+        "PSD-%MACADDRESS:6%" | Set-PSDWizardStringWithVariables
+        Where %MACADDRESS% is a value of: 00:15:5D:00:00:01
+        Output: "PSD-00155D" (using the actual MAC address)
+
     #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true, Position = 0)]
-        $Value
+        $InputString
     )
     ## Get the name of this function
     [string]${CmdletName} = $MyInvocation.MyCommand
@@ -4412,17 +4460,17 @@ Function Get-PSDWizardComputerName {
     #set new name array
     $NewNameParts = @()
 
-    If($Value -match '%'){
-
+    If($InputString -match '%')
+    {
         #Split Up based on variables
-        $Parts = $Value.Split('%')
+        $Parts = $InputString.Split('%')
         #TEST $Part = $Parts[0]
+        #TEST $Part = $Parts[-2]
         Foreach ($Part in $Parts) {
             If ( -Not[string]::IsNullOrEmpty($Part) ) {
                 Switch -regex ($Part) {
                     'SERIAL' {
 
-                        #write-host 'Replaced: Serial'
                         $SerialValue = Get-PSDWizardTSEnvProperty 'SerialNumber' -ValueOnly
                         If ([string]::IsNullOrEmpty($SerialValue) ) {
                             if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Paring Computername portion [{1}]; SERIAL expression has no value" -f ${CmdletName}, $Part, $SerialValue) }
@@ -4432,11 +4480,11 @@ Function Get-PSDWizardComputerName {
                             #check if serial is truncated with colon (eg. %SERIAL:6%)
                             If ($Part -match '(?<=\:).*?(?=\d{1,2})') {
                                 $Length = $Part.split(':')[1]
-                                [string]$SerialValue = $SerialValue | Set-PSDWizardStringLength -Length $Length -TrimOff Right
+                                [string]$SerialValue = $SerialValue | Set-PSDWizardStringLength -Length $Length -TrimDirection Right
                             }
                             ElseIf ($Part -match '(?<=^\d{1,2}:)') {
                                 $Length = $Part.split(':')[0]
-                                [string]$SerialValue = $SerialValue | Set-PSDWizardStringLength -Length $Length -TrimOff Left
+                                [string]$SerialValue = $SerialValue | Set-PSDWizardStringLength -Length $Length -TrimDirection Left
                             }
 
                             if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Parsing Computername portion [{1}]; Using SERIAL expression with value [{2}]" -f ${CmdletName}, $Part, $SerialValue) }
@@ -4447,21 +4495,64 @@ Function Get-PSDWizardComputerName {
                     }
 
                     'RAND' {
-                        #write-host 'Replaced: Random'
+
                         #check if serial is truncated with colon (eg. %SERIAL:6%)
                         If ($Part -match '(?<=\:).*?(?=\d)') {
                             $Length = $Part.split(':')[1]
-                            [string]$RandValue = Get-PSDWizardRandomAlphanumericString -length $Length
                         }
                         Else {
-                            [string]$RandValue = Get-PSDWizardRandomAlphanumericString
+                            #grab string length not inclusing the %RAND% to determine length
+                            $Length = 15 - ($InputString -replace '%.*?RAND%', '').Length
                         }
+                        
+                        [string]$RandValue = Get-PSDWizardRandomAlphanumericString -Length $Length
                         if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Parsing Computername portion [{1}]; Using RAND expression with value [{2}]" -f ${CmdletName}, $Part, $RandValue) }
 
                         #replace part with random name
-                        $Part = $RandValue
+                        [string]$Part = $RandValue
                     }
 
+                    'MACADDRESS' {
+
+                        #$MacValue = Get-CimInstance Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -eq $true } | Select-Object -ExpandProperty MACAddress
+                        $MacValue = Get-PSDWizardTSEnvProperty 'MacAddress' -ValueOnly
+                        $MacValue = ($MacValue -split ":") -join ""
+                        
+                        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Parsing Computername portion [{1}]; Using MACADDRESS expression with value [{2}]" -f ${CmdletName}, $Part, $MacValue) }
+                        #check if mac address is truncated with colon (eg. %MACADDRESS:6%)
+                        
+                        If ($Part -match '(?<=\:).*?(?=\d{1,2})') {
+                            $Length = $Part.split(':')[1]
+                            [string]$MacValue = $MacValue | Set-PSDWizardStringLength -Length $Length -TrimDirection Right
+                        }
+                        ElseIf ($Part -match '(?<=^\d{1,2}:)') {
+                            $Length = $Part.split(':')[0]
+                            [string]$MacValue = $MacValue | Set-PSDWizardStringLength -Length $Length -TrimDirection Left
+                        }
+
+                        [string]$Part = $MacValue
+                    }
+
+                    'ASSETTAG' {
+
+                        #write-host 'Replaced: ASSETTAG'
+                        $AssetValue = Get-PSDWizardTSEnvProperty 'AssetTag' -ValueOnly
+                        #$AssetTag = Get-CimInstance Win32_SystemEnclosure | Select-Object -ExpandProperty SMBIOSAssetTag
+                        if ($PSDDeBug -eq $true) { Write-PSDLog -Message ("{0}: Parsing Computername portion [{1}]; Using ASSETTAG expression with value [{2}]" -f ${CmdletName}, $Part, $AssetValue) }
+                        
+                        If ($Part -match '(?<=\:).*?(?=\d{1,2})') {
+                            $Length = $Part.split(':')[1]
+                            [string]$AssetValue = $AssetValue | Set-PSDWizardStringLength -Length $Length -TrimDirection Right
+                        }
+                        ElseIf ($Part -match '(?<=^\d{1,2}:)') {
+                            $Length = $Part.split(':')[0]
+                            [string]$AssetValue = $AssetValue | Set-PSDWizardStringLength -Length $Length -TrimDirection Left
+                        }
+                        
+                        [string]$Part = $AssetValue
+                    }
+
+                    
                     #if any value is - or a number, ignore
                     '-|\d+' {}
 
@@ -4484,7 +4575,7 @@ Function Get-PSDWizardComputerName {
 
         }
     }Else{
-        $NewNameParts += $Value
+        $NewNameParts += $InputString
     }
 
 
@@ -4495,6 +4586,7 @@ Function Get-PSDWizardComputerName {
     return $NewName.ToUpper()
 }
 #endregion
+
 
 #region FUNCTION: Confirm-PSDWizardComputerName
 Function Confirm-PSDWizardComputerName {

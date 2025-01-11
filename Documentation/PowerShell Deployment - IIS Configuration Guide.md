@@ -20,19 +20,23 @@ To install IIS and configure WebDAV for OSD you need to run two scripts, one for
 
 To run the IIS Setup, run the first script (New-PSDWebInstance.ps1) without any parameters, and after completion, reboot the server. The New-PSDWebInstance.ps1 script is found in the Tools folder of PSD.
 
+```powershell
 .\New-PSDWebInstance.ps1
+```
 
 > NOTE: The IIS Setup script does currently NOT support a server that already has IIS installed, it has to be run on a clean Windows Server installation.
 
 Then, to run the configuration, you run the second script (Set-PSDWebInstance.ps1), specifying your deployment folder, and the name of the virtual directory to create. The Set-PSDWebInstance.ps1 script is also located in the Tools folder of PSD. Sample syntax:
 
+```powershell
 .\Set-PSDWebInstance.ps1 -psDeploymentFolder E:\PSDProduction -psVirtualDirectory PSDProduction
+```
 
 ## HTTPS and Certificates
 
 To support imaging via HTTPS you need to install a proper web server certificate, and make sure the Root CA is added to WinPE. If you export your Root CA certificate to the PSDResources\Certificates folder, PSD will automatically add it to WinPE when updating the deployment share.
 
-For lab purposes, we provide two scripts to create a self-signed certificate for your deployment server. The first script (New-PSDRootCACert.ps1) creates a local Root CA and exports the Root CA to the PSDResources\Certificates folder. The second script (New-PSDServerCert.ps1) creates a self-signed certificate for the deployment server.
+For lab purposes, we provide two scripts to create a self-signed certificate for your deployment server. The first script (New-PSDRootCACert.ps1) creates a local Root CA and exports the Root CA to the PSDResources\Certificates folder. The second script (New-PSDServerCert.ps1) creates a self-signed certificate for the deployment server and binds it to the IIS's _Default Web Site_. 
 
 **Note:** These two scripts are replacing the New-PSDSelfSignedCert.ps1 script available in the original release of PSD.
 
@@ -53,7 +57,7 @@ Sample syntax for the New-PSDServerCert.ps1 script:
 To support server side logging via BITS Upload, IIS need to be configured to allow that. To create a BITS Upload folder and virtual directory, run the Set-PSDLogInstance.ps1 script. Sample syntax:
 
 ```powershell
-.\Set-PSDLogInstance.ps1 -psDeploymentFolder E:\PSDProductionLogs -psVirtualDirectory PSDProductionLogs
+.\Set-PSDLogInstance.ps1 -psLogFolder E:\PSDProductionLogs -psVirtualDirectory PSDProductionLogs
 ```
 
 In addition the following rules must be added to the CustomSettings.ini file, and the account specified has to be created in either the local SAM account database, or in Active Directory depending on your setup:

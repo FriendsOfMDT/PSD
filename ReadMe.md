@@ -55,12 +55,13 @@ Here are some additional documents for advanced setup
 - [BranchCache](./Documentation/PowerShell%20Deployment%20-%20BranchCache%20Installation%20Guide.md)
 - [Hydration Kit](./Documentation/PowerShell%20Deployment%20-%20Hydration%20Kit%20Installation%20Guide.md)
 - [PSD Wizard](./Documentation/PowerShell%20Deployment%20-%20PSD%20Wizard%20Guide.md)
-- [RestPS with PSD (coming Soon)](./Documentation/PowerShell%20Deployment%20-%20RestPS%20Guide%20with%20PSD.md)
+- [RestPS with PSD](./Documentation/PowerShell%20Deployment%20-%20RestPS%20Guide%20with%20PSD.md)
 - [ZeroTouch Deployment](./Documentation/Powershell%20Deployment%20-%20ZeroTouch%20Guide.md)
 
 If you need help understanding PSD or have questions, please refer to these documents first
 
 - [Toolkit Reference](./Documentation/PowerShell%20Deployment%20-%20Toolkit%20Reference.md)
+- [Support Matrix (MDT & PSD)](./Documentation/PowerShell%20Deployment%20-%20PSD%20vs%20MDT.md)
 - [FAQs](./Documentation/PowerShell%20Deployment%20-%20FAQ.md)
 
 
