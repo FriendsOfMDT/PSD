@@ -49,6 +49,7 @@ By default, the PSD installer creates an MDT folder structure for PSD. PSD-speci
 ### Update Windows PE settings
 
 Update the MDT WinPE configurations panels including the following settings:
+
 - WinPE Custom Wallpaper (see notes below)
 - WinPE Extra Directory (configured by default)
 - ISO File name and generation
@@ -79,6 +80,10 @@ By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provide
 Create and populate an ExtraFiles folder that contains anything you want to add to WinPE or images. Things like CMTRACE.EXE, wallpapers, etc.
 
 >PRO TIP: Create the same folder structure as where you want the files to land (e.g. \Windows\System32)
+
+### Readiness
+
+PSD now runs a default script _Computer_Readiness.ps1_ from PSDResources\Readiness folder. Edit this file with new functions or create a new readiness script. Be sure to update the property in CustomSetting.ini. If Deployment Readiness page is enabled, a valid file path **must** be used.
 
 ### Certificates
 

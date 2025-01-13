@@ -34,7 +34,7 @@ Precheck Readiness | x | | | New in PSD 2.30
 Prestart Menu (disk wipe, static IP, etc) | x | | | New in PSD 2.30
 BranchCache | x | x | |
 Custom Properties | x | x | 
-DriverGroups | |x | yes | Drivergroup001 are currently not supported, please use DriverPath, FallbackDriverPath and GenericDriverPath
+DriverGroups | |x | yes | Drivergroup001 are currently not supported, please use _New-MDTDriverPackage.ps1_ to create "driver packages"
 Packages | | x | no |
 Domain Join | x | x| | This must still be done via LAN; Offline Domain Join (ODJ) support is not supported yet
 Event Monitoring | x | x| | There is some limitations with this

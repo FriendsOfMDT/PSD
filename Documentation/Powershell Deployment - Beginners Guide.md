@@ -66,6 +66,10 @@ Mkdir "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Wind
 - Download Applications needed.
 >NOTE: Application setup is not provided with this documentation, however there are several guides online to show how it done.
 
+## Links
+
+- https://www.deploymentresearch.com/building-a-windows-11-24h2-reference-image-using-microsoft-deployment-toolkit-mdt/
+
 ## Conclusion
 
 You have now installed Windows ADK, the WinPE add-on, and the Microsoft Deployment Toolkit on your server. You can now use MDT to deploy Windows operating systems across your network.

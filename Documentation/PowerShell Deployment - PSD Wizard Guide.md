@@ -35,7 +35,7 @@ DeploymentShare
         |--PSDListOfLanguages.xml
         |--PSDListOfTimeZoneIndex.xml
         |-PSDWizardNew
-            |--PSDWizard.Initialize.ps1
+            |--PSDWizard.Helper.ps1
             |--PSDWizard.Definition_<Language>.xml
             |-Resources
                 |--<icons,colors,buttons,etc > in XAML format

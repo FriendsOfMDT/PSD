@@ -80,62 +80,63 @@ In addition to the IIS setup and configuration the following firewall ports need
 
 In this section you find a list of all components being added by the setup script as well as info on what the configuration script does.
 
+> The following IIS components are required to ensure that PSD functions as expected for imaging via HTTP/HTTPS. This components are all available in the web server role.
+
 * **IIS Components**
+  * Common HTTP Features
 
-The following IIS components are required to ensure that PSD functions as expected for imaging via HTTP/HTTPS. This components are all available in the web server role.
+    * Default Document
+    * Directory Browsing
+    * HTTP Errors
+    * Static Content
+    * HTTP Redirection
+    * WebDav Publishing
 
-* Common HTTP Features
+  * Health and Diagnostics
 
-  * Default Document
-  * Directory Browsing
-  * HTTP Errors
-  * Static Content
-  * HTTP Redirection
-  * WebDav Publishing
+    * HTTP Logging
+    * Custom Logging
+    * Logging Tools
+    * Request Monitor
+    * Tracing
 
-* Health and Diagnostics
+  * Performance
 
-  * HTTP Logging
-  * Custom Logging
-  * Logging Tools
-  * Request Monitor
-  * Tracing
+    * Static Content Compression
 
-* Performance
+  * Security
 
-  * Static Content Compression
+    * Request Filtering
+    * Basic Authentication
+    * Digest Authentication
+    * URL Authorization
+    * Windows Authentication
 
-* Security
+  * Management Tools
+    * IIS Management Compatability
+    * IIS 6 Management Compatibility
+      * IIS 6 Metabase Compatability
 
-  * Request Filtering
-  * Basic Authentication
-  * Digest Authentication
-  * URL Authorization
-  * Windows Authentication
-
-* Management Tools
-  * IIS Management Compatability
-  * IIS 6 Management Compatibility
-    * IIS 6 Metabase Compatability
+> For IIS, PSD requires some configuration changes in order to function. Most of these changes have to do with configuring IIS to work properly with WebDav. If you use the configuration script these will be automatically configured for you, but shorthand, the following needs to be done:
 
 * **Configure IIS**
+  * Create New Virtual Directory
+  * Enable Directory Browsing
+  * Disable Anonymous Authentication
+  * Enable Windows Authentication
+  * Create and add new MIME type
 
- For IIS, PSD requires some configuration changes in order to function. Most of these changes have to do with configuring IIS to work properly with WebDav. If you use the configuration script these will be automatically configured for you, but shorthand, the following needs to be done:
-
-* Create New Virtual Directory
-* Enable Directory Browsing
-* Disable Anonymous Authentication
-* Enable Windows Authentication
-* Create and add new MIME type
+> Finally, PSD requires some configuration changes to WebDAV, and again, if you use the configuration script these will be automatically configured for you. Shorthand, the following needs to be done:
 
 * **Configure WebDAV**
+  * Enable WebDAV
+  * Create new WebDav Authoring Rule
+  * Modify WebDAV Settings
+    * Allow File Extension Filtering
+    * Allow Hidden Segment Filtering
+    * Allow Verb Filtering
+  * Modify Default MIME type
 
-Finally, PSD requires some configuration changes to WebDAV, and again, if you use the configuration script these will be automatically configured for you. Shorthand, the following needs to be done:
+## Next steps
 
-* Enable WebDAV
-* Create new WebDav Authoring Rule
-* Modify WebDAV Settings
-  * Allow File Extension Filtering
-  * Allow Hidden Segment Filtering
-  * Allow Verb Filtering
-* Modify Default MIME type
+To enable BranchCache (P2P) support [optional]. Go here next [PowerShell Deployment - BranchCache Installation Guide](./PowerShell%20Deployment%20-%20BranchCache%20Installation%20Guide.md)
