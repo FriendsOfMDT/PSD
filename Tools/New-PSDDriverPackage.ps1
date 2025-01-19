@@ -1,44 +1,59 @@
 ﻿<#
-.Synopsis
-    This script creates driver packages from drivers imported in MDT. 
+    .SYNOPSIS
+        This script creates driver packages from drivers imported in MDT. 
+        
+    .DESCRIPTION
+        This script creates driver packages from drivers imported in MDT. The script will create a driver package for each driver class in the Out-Of-Box Drivers folder. 
+        The driver packages will be created in the DriverPackages folder. The script will also create a source folder for each driver package in the DriverSources folder. 
+        The source folder will contain the drivers for the package. The script will create the driver packages in either WIM or ZIP format. The default format is WIM.
+
+    .PARAMETER psDeploymentFolder
+        The path to the deployment folder. This is the root folder for the MDT deployment share.
+
+    .PARAMETER CompressionType
+        The compression type for the driver packages. The script supports WIM and ZIP. The default is WIM.
+
+    .EXAMPLE
+        .\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType WIM
     
-.Description
-    This script was written by Johan Arwidmark @jarwidmark and Mikael Nystrom @mikael_nystrom. This script is for the friends of MDT deployment tools 
-    and is responsible for creating a self-signed certificate.
+    .EXAMPLE
+        .\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType ZIP
 
-.LINK
-    https://github.com/FriendsOfMDT/PSD
+    .LINK
+        https://github.com/FriendsOfMDT/PSD
 
-.NOTES
-          FileName: New-MDTDriverPackage.ps1
-          Solution: PowerShell Deployment for MDT
-          Author: PSD Development Team
-          Contact: @Mikael_Nystrom , @jarwidmark
-          Primary: @Mikael_Nystrom 
-          Created: 2019-05-09
-          Modified: 2022-09-25
+    .NOTES
+        FileName: New-MDTDriverPackage.ps1
+        Solution: PowerShell Deployment for MDT
+        Author: PSD Development Team
+        Contact: @Mikael_Nystrom , @jarwidmark
+        Primary: @Mikael_Nystrom 
+        Created: 2019-05-09
+        Modified: 2025-01-19
 
-          Version - 0.0.0 - () - Finalized functional version 1
-          Version - 0.0.1 - () - Added support for WIM compression, and improved error handling
-
-.EXAMPLE
-	.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType WIM
-	.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType ZIP
+        Version - 0.0.0 - () - Finalized functional version 1
+        Version - 0.0.1 - () - Added support for WIM compression, and improved error handling
+        Version - 0.0.2 - (@PowerShellCrack) - Cleaned up Synopsys and made parameters mandatory instead of checks. Fixed missed spelled words and added blocks for cleaner code.
 #>
 
 #Requires -RunAsAdministrator
 
+## =========================================================================================
+## PARAMETER DECLARATION
+## =========================================================================================
 [CmdletBinding()]
 Param(
-    [string]$psDeploymentFolder = "NA",
+    [Parameter(Mandatory=$true,HelpMessage = "REQUIRED: Specify the path to the deployment folder")]
+    [string]$psDeploymentFolder,
+
+    [Parameter(Mandatory=$false,HelpMessage = "OPTIONAL: Specify the compression type for the driver packages. Default is WIM")]
 	[ValidateSet("ZIP", "WIM")]
-	[string]$CompressionType
+	[string]$CompressionType = "WIM"
 )
 
-$psDeploymentFolder = $psDeploymentFolder.TrimEnd("\")
-
-# Hard Coded Variables
-$PSDriveName = "PSD"
+## =========================================================================================
+## FUNCTION HELPERS
+## =========================================================================================
 
 function Start-PSDLog{
 	[CmdletBinding()]
@@ -108,7 +123,7 @@ function Write-PSDInstallLog{
         $result1.Items.Add("$Message")
     }
 }
-function set-PSDDefaultLogPath{
+function Set-PSDDefaultLogPath{
 	#Function to set the default log path if something is put in the field then it is sent somewhere else. 
 	[CmdletBinding()]
 	param
@@ -145,21 +160,20 @@ function Copy-PSDFolder{
     & xcopy $s $d /s /e /v /y /i | Out-Null
 }
 
+
+## =========================================================================================
+## MAIN LOGIC
+## =========================================================================================    
 # Set VerboseForegroundColor
 $host.PrivateData.VerboseForegroundColor = 'Cyan'
 
 # Start logging
-set-PSDDefaultLogPath
+Set-PSDDefaultLogPath
 
-if($psDeploymentFolder -eq "NA"){
-    Write-PSDInstallLog -Message "You need to specify a psDeploymentFolder" -LogLevel 2
-    $Fail = $True
-}
+$psDeploymentFolder = $psDeploymentFolder.TrimEnd("\")
 
-if($Fail -eq $True){
-    Write-PSDInstallLog -Message "Exiting" -LogLevel 2
-    Exit
-}
+# Hard Coded Variables
+$PSDriveName = "PSD"
 
 if((Test-Path -Path $psDeploymentFolder ) -eq $false){
     Write-PSDInstallLog -Message "Unable to access $psDeploymentFolder, exiting" -LogLevel 2
@@ -226,11 +240,6 @@ $TempArchives = Get-ChildItem -Path "$psDeploymentFolder\PSDResources\DriverPack
 foreach($Archive in $TempArchives){
     Write-PSDInstallLog -Message "Trying to remove $($Archive.fullname)"
     Remove-Item -Path $Archive.fullname -ErrorAction SilentlyContinue | Out-Null
-}
-
-# Set default compresion type to WIM if not specified on the command line
-If ([string]::IsNullOrEmpty($CompressionType)){
-    $CompressionType = "WIM"
 }
 
 # Creating the drivers packages. 

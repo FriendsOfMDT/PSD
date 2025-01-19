@@ -52,7 +52,7 @@ Welcome to the beginner's guide for installing ADK (Assessment and Deployment Ki
 
 **DO NOT** launch the Deployment Workbench. This will be done when the PSD portion is done; it build your deploymentshare for you.
 
->NOTE: MDT is no longer supported, by Microsoft, for x86 deployments or Windows 11. However, when adding PSD to it, it will allow you to continue deploying Windows 11 images.
+>NOTE: While MDT can work with Windows 11 with some modifications, it is no longer supported by Microsoft, nor are x86 deployments. However, integrating PSD modifies MDT to continue deployment of Windows 11 images.
 
 To ensure things run smoother:
 

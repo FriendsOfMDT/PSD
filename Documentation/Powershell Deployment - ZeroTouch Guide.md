@@ -27,11 +27,11 @@ To perform do a ZeroTouch deployment with latest PSD release, you must follow th
    SkipPSDWizardSplashScreen=YES
    ```
 
-   If you don't include `SkipPSDWizardSplashScreen=YES` you will get this
+   If you don't include `SkipPSDWizardSplashScreen=YES` you will get this:
 
    ![image](https://github.com/user-attachments/assets/9ef642ab-33df-4da3-9759-c404e134cb7e)
 
-However the PSD wizard will get bypassed and continue the task sequence.
+   However the PSD wizard will get bypassed and continue the task sequence.
 
 2. The next step, of course, is to make sure you set the correct items such as
 
@@ -44,11 +44,12 @@ However the PSD wizard will get bypassed and continue the task sequence.
 
 ## Known Issues
 
-Currently there is no property to set a default value for the two new pages: _IntuneGroup_ and _DeviceRole_. You must use the wizard to set it for now.
+- Currently there is no property to set a default value for the two new pages: _IntuneGroup_ and _DeviceRole_. You must use the wizard to set it for now.
+- In the PSDWizardGuide, it mentions _SkipWelcome_ which is a typo and shouldn't be in there.
 
-oh and BTW, in the PSDWizardGuide, it mentions _SkipWelcome_ which is a typo and shouldn't be in there.
+## TIP
 
-When writing all this, I did do a dispart clean and tested these settings, and it worked. Send me feedback on this.
+- Do a `diskpart clean` or use the new PrestartMenu to wipe the disk prior to testing these settings and it should work. Send us feedback on this.
 
 ## Troubleshooting
 

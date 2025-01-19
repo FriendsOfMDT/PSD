@@ -29,6 +29,7 @@ Microsoft Deployment Kit (MDT)
 - MDT 8456
 
 ## PSD Supported Deployments
+
 The following operating systems have been tested for deployment via PSD:
 
 Server operating systems Long-Term Servicing Channel (LTSC) releases
@@ -50,6 +51,7 @@ Client Operating Systems
 - Windows 11 22H2 Pro, Education and Enterprise x64 (English)
 
 ## PSD Installation Checklist
+
 Please review, validate and/or obtain following installation checklist items:
 
 * **Windows ADK** - Download and install a supported Microsoft Windows ADK version on a computer to be used to host the MDT Deployment workbench.
@@ -73,9 +75,10 @@ Please review, validate and/or obtain following installation checklist items:
     - Build Account for accessing PSD/MDT Share(s)
     - Join Domain Account for joining computers to Active Directory (currently requires line of sight to domain controller)
 
-# Installing PSD
+## Installing PSD
 
 PSD installation requires the following:
+
 - Existing installation of MDT and Windows ADK
   - Follow this guide if you are new to ADK and MDT
 - Administrative rights on the MDT Server
@@ -86,9 +89,12 @@ PSD installation requires the following:
 > NOTE: Existing MDT scripts are moved to a backup folder in the deployment share.
 
 1) If open, close the MDT Deployment Workbench.
-1) Download or clone the PSD content from the [PSD GitHub Home](https://github.com/FriendsOfMDT/PSD)
+
+2) Download or clone the PSD content from the [PSD GitHub Home](https://github.com/FriendsOfMDT/PSD)
+
 > NOTE: If downloading the Zip archive, ensure to unblock the file before extracting the content.
-1) Open an elevated Powershell command prompt, run one of the following commands
+
+3) Open an elevated Powershell command prompt, run one of the following commands
     - For **NEW** installations of PSD run:
 
     ```powershell
@@ -113,7 +119,8 @@ PSD installation requires the following:
 
 1) Review the [Latest Release Guide](./PowerShell%20Deployment%20-%20Latest%20Release%20Setup%20Guide.md) to ensure its setup correctly
 
-# Next steps
+## Next steps
+
 After the initial setup, you need to install IIS to enable HTTPS deployments, follow the steps in the "[PowerShell Deployment - IIS Configuration Guide](./PowerShell%20Deployment%20-%20IIS%20Configuration%20Guide.md)"
 
 To enable BranchCache (P2P) support [optional]. Follow these guides **in order**:

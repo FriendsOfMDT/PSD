@@ -34,9 +34,9 @@ Precheck Readiness | x | | | New in PSD 2.30
 Prestart Menu (disk wipe, static IP, etc) | x | | | New in PSD 2.30
 BranchCache | x | x | |
 Custom Properties | x | x | 
-DriverGroups | |x | yes | Drivergroup001 are currently not supported, please use _New-MDTDriverPackage.ps1_ to create "driver packages"
+DriverGroups | |x | yes | Drivergroup001 are not being developed on or working, please use _New-MDTDriverPackage.ps1_ to create "driver packages"
 Packages | | x | no |
-Domain Join | x | x| | This must still be done via LAN; Offline Domain Join (ODJ) support is not supported yet
+Domain Join | x | x| | This must still be done via LAN; Offline Domain Join (ODJ) support is not there yet
 Event Monitoring | x | x| | There is some limitations with this
 WinPE Dart Support | x | | | 
 Workbench Dart Remote Control |  | x | | https://github.com/FriendsOfMDT/PSD/issues/83
@@ -50,4 +50,4 @@ Reverse Proxy | | | maybe |
 PowerShell 7 or higher support | | | unknown | Since the native PowerShell in Windows and WinPE is 5.1, that is the one being used. Some testing has been done in PowerShell 7. 
 
 
-> NOTE: even though some of these items are on the roadmap, there are no estimated release dates as to when they weill be available. 
+> NOTE: even though some of these items are on the roadmap, there are no estimated release dates as to when they will be available. 

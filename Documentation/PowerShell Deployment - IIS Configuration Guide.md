@@ -2,7 +2,7 @@
 
 ## Introduction:
 
-In order to support OS deployments via HTTPS a series of configuration items must be completed. This document highlights and outlines the settings and steps known to work with PSD including steps for the server side logging feature (available in PSD version 0.2.2.8 and later).
+In order to enable OS deployments via HTTPS a series of configuration items must be completed. This document highlights and outlines the settings and steps known to work with PSD including steps for the server side logging feature (available in PSD version 0.2.2.8 and later).
 
 > NOTE: Your security team and environment may require additional settings or lock down.
 
@@ -29,21 +29,21 @@ To run the IIS Setup, run the first script (New-PSDWebInstance.ps1) without any 
 Then, to run the configuration, you run the second script (Set-PSDWebInstance.ps1), specifying your deployment folder, and the name of the virtual directory to create. The Set-PSDWebInstance.ps1 script is also located in the Tools folder of PSD. Sample syntax:
 
 ```powershell
-.\Set-PSDWebInstance.ps1 -psDeploymentFolder E:\PSDProduction -psVirtualDirectory PSDProduction
+.\Set-PSDWebInstance.ps1 -psDeploymentFolder "E:\PSDProduction" -psVirtualDirectory "PSDProduction"
 ```
 
 ## HTTPS and Certificates
 
-To support imaging via HTTPS you need to install a proper web server certificate, and make sure the Root CA is added to WinPE. If you export your Root CA certificate to the PSDResources\Certificates folder, PSD will automatically add it to WinPE when updating the deployment share.
+To enable communication via HTTPS you need to install a proper web server certificate, and make sure the Root CA is added to WinPE. If you export your Root CA certificate to the PSDResources\Certificates folder, PSD will automatically add it to WinPE when updating the deployment share.
 
 For lab purposes, we provide two scripts to create a self-signed certificate for your deployment server. The first script (New-PSDRootCACert.ps1) creates a local Root CA and exports the Root CA to the PSDResources\Certificates folder. The second script (New-PSDServerCert.ps1) creates a self-signed certificate for the deployment server and binds it to the IIS's _Default Web Site_. 
 
-**Note:** These two scripts are replacing the New-PSDSelfSignedCert.ps1 script available in the original release of PSD.
+**Note:** These two scripts have replaced the `New-PSDSelfSignedCert.ps1` script available in the original release of PSD.
 
 Sample syntax for New-PSDRootCACert.ps1 script:
 
 ```powershell
-.\New-PSDRootCACert.ps1 -RootCAName PSDRootCA -ValidityPeriod 20 -psDeploymentFolder E:\PSDProduction
+.\New-PSDRootCACert.ps1 -RootCAName PSDRootCA -ValidityPeriod 20 -psDeploymentFolder "E:\PSDProduction"
 ```
 
 Sample syntax for the New-PSDServerCert.ps1 script:
@@ -54,10 +54,10 @@ Sample syntax for the New-PSDServerCert.ps1 script:
 
 ## Server Side logging via BITS Upload
 
-To support server side logging via BITS Upload, IIS need to be configured to allow that. To create a BITS Upload folder and virtual directory, run the Set-PSDLogInstance.ps1 script. Sample syntax:
+To enable server side logging via BITS Upload, IIS need to be configured to allow that. To create a BITS Upload folder and virtual directory, run the Set-PSDLogInstance.ps1 script. Sample syntax:
 
 ```powershell
-.\Set-PSDLogInstance.ps1 -psLogFolder E:\PSDProductionLogs -psVirtualDirectory PSDProductionLogs
+.\Set-PSDLogInstance.ps1 -psLogFolder "E:\PSDProductionLogs" -psVirtualDirectory "PSDProductionLogs"
 ```
 
 In addition the following rules must be added to the CustomSettings.ini file, and the account specified has to be created in either the local SAM account database, or in Active Directory depending on your setup:

@@ -31,13 +31,13 @@ Within MDT Deployment workbench, on the newly created PSD Deployment share, impo
 
 Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired drivers. After adding new drivers to MDT using the "total control method" (OS/Make/Model, or OS/Model, etc. ), you need to run the New-PSDDriverPackage.ps1 to generate the ZIP or WIM archives. One ZIP or WIM archive is created for each OS and Model.
 
->PRO TIP: You can copy Drivers from other MDT deployment shares, and PSD also supports that you add any existing WIM or ZIP driver packages to the platform.
+>PRO TIP: You can copy drivers from other MDT deployment shares. PSD also supports adding existing WIM or ZIP driver packages to the platform for seamless integration.
 
 Sample syntax:
 ```powershell
-.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType WIM
+.\New-MDTDriverPackage.ps1 -psDeploymentFolder "E:\PSDProduction" -CompressionType WIM
 
-.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType ZIP
+.\New-MDTDriverPackage.ps1 -psDeploymentFolder "E:\PSDProduction" -CompressionType ZIP
 ```
 
 ### Check Deployment Share Permissions
