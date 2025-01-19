@@ -1,48 +1,60 @@
 <#
-.Synopsis
-    This script is designed to work with the PSD Toolkit to install and configure IIS as needed for the solution to deploy Windows over the internet. 
-    This script will install the IIS feature set and the components required for WEBDav
+    .SYNOPSIS
+        This script is responsible for configuring the IIS components for the PSD log files.
 
-.Description
-    This script was written by Jordan Benzing @JordanTheITGuy in partnership with TrueSec and 2Pint. This script is for the friends of MDT deployment tools 
-    and is responsible for making the required IIS components work for PSD
+    .DESCRIPTION
+        This script is responsible for configuring the IIS components for the PSD log files. This script will create a virtual directory in IIS and configure the security settings for the virtual directory.
 
+    .PARAMETER psLogFolder
+        The path to the folder where the logs will be stored.
 
-.LINK
-    https://github.com/FriendsOfMDT/PSD
+    .PARAMETER psVirtualLogDirectory
+        The name of the virtual directory that will be created in IIS.
 
-.NOTES
-    FileName:   New-PSDIISInstance.PS1
-    Created:    2019-04-15
-    Updated:    2019-04-18
+    .EXAMPLE
+        PS> .\Set-PSDLogInstance.ps1 -psLogFolder "E:\PSDProductionLogs" -psVirtualLogDirectory "PSDLogs"
 
+    .LINK
+        https://github.com/FriendsOfMDT/PSD
 
-.EXAMPLE
-	.\New-PSDWebInstance.Ps1 -PSvirtualDirectory "PSDExample01" -psDeploymentFolder "C:\MDT\MyDeploymentShare"
-	This will configure the needed webDAV components for the local server.
+    .NOTES
+        FileName:   Set-PSDLogInstance.ps1
+        Author:     Jordan Benzing
+        Contact:    @JordanTheITGuy
+        Created:    2019-04-15
+        Updated:    2025-01-19
+        
+        Version - 0.0.0 - () - Finalized functional version 1.
+        Version - 0.0.1 - (@PowerShellCrack) - Cleaned up Synopsis and update help on parameters for more clarity. Fixed missed spelled words and added blocks for cleaner code.
 
-    TODO: Disable Anonymous
-    TODO: Enable Windows Auth
-    TODO: Enable Dir Browse
+        TODO: 
+        Disable Anonymous
+        Enable Windows Auth
+        Enable Dir Browse
 
-#>
+    #>
 
 #Requires -RunAsAdministrator
+
+## =========================================================================================
+## PARAMETER DECLARATION
+## =========================================================================================
 [CmdletBinding()]
 param(
-	[Parameter(HelpMessage = "Use this flag to specify the MDT Share Path - Note if you do not provide one the script WILL Error OUT.",Mandatory=$True)]
-	[string]$psLogFolder,
+	[Parameter(Mandatory=$True,HelpMessage = "REQUIRED: Specify the MDT Share Path. This is the path used in the IIS virtual directory")]
+	[Alias("psDeploymentFolder")]
+    [string]$psLogFolder,
 
-	[parameter(HelpMessage = "Use this flag to specifiy the NAME of the PSD - NOTE - if you do not provide one the defualt value will be used.",Mandatory=$True)]
-	[string]$psVirtualLogDirectory,
-    [switch]$StartedFromHydration
+	[parameter(Mandatory=$True,HelpMessage = "REQUIRED: Specify the NAME of the PSD. This will create a IIS virtual directory")]
+	[Alias("psVirtualDirectory")]
+    [string]$psVirtualLogDirectory
 )
-begin
-{
 
-############################################
+
+## =========================================================================================
+## FUNCTION HELPERS
+## =========================================================================================
 #region HelperFunctions
-
 function Test-PSDRoleInstalled{
         [CmdletBinding()]
         param
@@ -67,55 +79,55 @@ function Test-PSDRoleInstalled{
         }
         Catch
         {
-            throw [System.IO.DriveNotFoundException] "An Error occured with detecting the roles installation state"
+            throw [System.IO.DriveNotFoundException] "An Error occurred with detecting the roles installation state"
         }
 }
 function Start-PSDLog{
-	[CmdletBinding()]
+    [CmdletBinding()]
     param (
     #[ValidateScript({ Split-Path $_ -Parent | Test-Path })]
-	[string]$FilePath
- 	)
+    [string]$FilePath
+    )
     try
-    	{
-			if(!(Split-Path $FilePath -Parent | Test-Path))
-			{
-				New-Item (Split-Path $FilePath -Parent) -Type Directory | Out-Null
-			}
-			#Confirm the provided destination for logging exists if it doesn't then create it.
-			if (!(Test-Path $FilePath))
-				{
-	    			## Create the log file destination if it doesn't exist.
-	    			New-Item $FilePath -Type File | Out-Null
-				}
-				## Set the global variable to be used as the FilePath for all subsequent write-PSDInstallLog
-				## calls in this session
-				$global:ScriptLogFilePath = $FilePath
-    	}
+        {
+            if(!(Split-Path $FilePath -Parent | Test-Path))
+            {
+                New-Item (Split-Path $FilePath -Parent) -Type Directory | Out-Null
+            }
+            #Confirm the provided destination for logging exists if it doesn't then create it.
+            if (!(Test-Path $FilePath))
+                {
+                    ## Create the log file destination if it doesn't exist.
+                    New-Item $FilePath -Type File | Out-Null
+                }
+                ## Set the global variable to be used as the FilePath for all subsequent write-PSDInstallLog
+                ## calls in this session
+                $global:ScriptLogFilePath = $FilePath
+        }
     catch
     {
-		#In event of an error write an exception
+        #In event of an error write an exception
         Write-Error $_.Exception.Message
     }
 }
 function Write-PSDInstallLog{
-	param (
-    [Parameter(Mandatory = $true)]
-    [string]$Message,
-    [Parameter()]
-    [ValidateSet(1, 2, 3)]
-	[string]$LogLevel=1,
-	[Parameter(Mandatory = $false)]
-    [bool]$writetoscreen = $true   
-   )
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Message,
+        [Parameter()]
+        [ValidateSet(1, 2, 3)]
+        [string]$LogLevel=1,
+        [Parameter(Mandatory = $false)]
+        [bool]$writetoscreen = $true   
+    )
     $TimeGenerated = "$(Get-Date -Format HH:mm:ss).$((Get-Date).Millisecond)+000"
     $Line = '<![LOG[{0}]LOG]!><time="{1}" date="{2}" component="{3}" context="" type="{4}" thread="" file="">'
     $LineFormat = $Message, $TimeGenerated, (Get-Date -Format MM-dd-yyyy), "$($MyInvocation.ScriptName | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)", $LogLevel
-	$Line = $Line -f $LineFormat
-	[system.GC]::Collect()
+    $Line = $Line -f $LineFormat
+    [system.GC]::Collect()
     Add-Content -Value $Line -Path $global:ScriptLogFilePath
-	if($writetoscreen)
-	{
+    if($writetoscreen)
+    {
         switch ($LogLevel)
         {
             '1'{
@@ -131,33 +143,33 @@ function Write-PSDInstallLog{
             }
         }
     }
-	if($writetolistbox -eq $true)
-	{
+    if($writetolistbox -eq $true)
+    {
         $result1.Items.Add("$Message")
     }
 }
-function set-PSDDefaultLogPath{
-	#Function to set the default log path if something is put in the field then it is sent somewhere else. 
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $false)]
-		[bool]$defaultLogLocation = $true,
-		[parameter(Mandatory = $false)]
-		[string]$LogLocation
-	)
-	if($defaultLogLocation)
-	{
-		$LogPath = Split-Path $script:MyInvocation.MyCommand.Path
-		$LogFile = "$($($script:MyInvocation.MyCommand.Name).Substring(0,$($script:MyInvocation.MyCommand.Name).Length-4)).log"		
-		Start-PSDLog -FilePath $($LogPath + "\" + $LogFile)
-	}
-	else 
-	{
-		$LogPath = $LogLocation
-		$LogFile = "$($($script:MyInvocation.MyCommand.Name).Substring(0,$($script:MyInvocation.MyCommand.Name).Length-4)).log"		
-		Start-PSDLog -FilePath $($LogPath + "\" + $LogFile)
-	}
+function Set-PSDDefaultLogPath{
+    #Function to set the default log path if something is put in the field then it is sent somewhere else. 
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $false)]
+        [bool]$defaultLogLocation = $true,
+        [parameter(Mandatory = $false)]
+        [string]$LogLocation
+    )
+    if($defaultLogLocation)
+    {
+        $LogPath = Split-Path $script:MyInvocation.MyCommand.Path
+        $LogFile = "$($($script:MyInvocation.MyCommand.Name).Substring(0,$($script:MyInvocation.MyCommand.Name).Length-4)).log"		
+        Start-PSDLog -FilePath $($LogPath + "\" + $LogFile)
+    }
+    else 
+    {
+        $LogPath = $LogLocation
+        $LogFile = "$($($script:MyInvocation.MyCommand.Name).Substring(0,$($script:MyInvocation.MyCommand.Name).Length-4)).log"		
+        Start-PSDLog -FilePath $($LogPath + "\" + $LogFile)
+    }
 }
 
 #endregion HelperFunctions
@@ -192,60 +204,60 @@ Function New-PSDLogWeb {
 
 #Endregion ConfigurationFunctions
 ############################################
-}
 
-process
-{
+##=========================================================================================
+## MAIN LOGIC
+##=========================================================================================
 
-    # Set VerboseForegroundColor
-    $host.PrivateData.VerboseForegroundColor = 'Cyan'
+# Set VerboseForegroundColor
+$host.PrivateData.VerboseForegroundColor = 'Cyan'
 
-	############################################
-	#region StartUpChecks
-	set-PSDDefaultLogPath
+############################################
+#region StartUpChecks
+Set-PSDDefaultLogPath
 
-	#Start Time Calculation
-	$StartTime = Get-Date
+#Start Time Calculation
+$StartTime = Get-Date
 
-	#endregion StartUpChecks
-	############################################
-    
-    
-	############################################
-	#region GatherActions
-	Write-PSDInstallLog -Message "The Script was executed with commands: $($MyInvocation.Line)"
-	Write-PSDInstallLog -Message "The Current running computer is: $($ENV:COMPUTERNAME.ToUpper())"
-	Write-PSDInstallLog -Message "The Current user is $($ENV:USERNAME) and is an administrator"
-
-	#endregion GatherActions
-	############################################
-
-	############################################
-	#region ConfigureActions
-
-    $null = New-Item -Path $psLogFolder -ItemType Directory -Force
-
-    Write-PSDInstallLog -Message "Now configuring the IIS for the MDT Logs at $($psLogFolder) with $($PSWebsite)"
-	New-PSDLogWeb -Path $psLogFolder -Name $psVirtualLogDirectory
+#endregion StartUpChecks
+############################################
 
 
-	#Written using ScriptGenerator from IIS
-	Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "False"
+############################################
+#region GatherActions
+Write-PSDInstallLog -Message "The Script was executed with commands: $($MyInvocation.Line)"
+Write-PSDInstallLog -Message "The Current running computer is: $($ENV:COMPUTERNAME.ToUpper())"
+Write-PSDInstallLog -Message "The Current user is $($ENV:USERNAME) and is an administrator"
 
-	#Written Using Script Generator from IIS
-	Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/authentication/windowsAuthentication" -name "enabled" -value "True"
+#endregion GatherActions
+############################################
+
+############################################
+#region ConfigureActions
+
+$null = New-Item -Path $psLogFolder -ItemType Directory -Force
+
+Write-PSDInstallLog -Message "Now configuring the IIS for the MDT Logs at $($psLogFolder) with $($PSWebsite)"
+New-PSDLogWeb -Path $psLogFolder -Name $psVirtualLogDirectory
 
 
-	#endregion ConfigureActions
-	############################################
+#Written using ScriptGenerator from IIS
+Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "False"
 
-	############################################
-	#region ShutdownChecks
-	$EndTime = Get-Date
-	$Duration = New-TimeSpan -Start $StartTime -End $EndTime
-	Write-PSDInstallLog -Message "The script has completed running and took $($Duration.Hours) Hours and $($Duration.Minutes) Minutes and $($Duration.Seconds) seconds"
-	#endregion ShutdownChecks
-	############################################
+#Written Using Script Generator from IIS
+Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/authentication/windowsAuthentication" -name "enabled" -value "True"
 
-    Write-Verbose -Verbose -Message "The script has completed"
-}
+
+#endregion ConfigureActions
+############################################
+
+############################################
+#region ShutdownChecks
+$EndTime = Get-Date
+$Duration = New-TimeSpan -Start $StartTime -End $EndTime
+Write-PSDInstallLog -Message "The script has completed running and took $($Duration.Hours) Hours and $($Duration.Minutes) Minutes and $($Duration.Seconds) seconds"
+#endregion ShutdownChecks
+############################################
+
+Write-Verbose -Verbose -Message "The script has completed"
+

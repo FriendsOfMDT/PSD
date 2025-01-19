@@ -129,9 +129,6 @@ Try{
         Write-PSDLog -Message ("{0}: ScriptRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDScriptRoot) -LogLevel 1
         Write-PSDLog -Message ("{0}: ContentRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDContentPath) -LogLevel 1
     }
-    Write-Verbose ("{0}: PSDWizard path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDWizardPath)
-    Write-Verbose ("{0}: ScriptRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDScriptRoot)
-    Write-Verbose ("{0}: ContentRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDContentPath)
 }
 Catch{
     If($Caller){
@@ -165,64 +162,6 @@ Function Export-DepShareContent {
     
     $DepShareContent = Get-childItem "Deploymentshare:\" -Recurse
     $DepShareContent | Select Name,comments,guid,enable,hide,NodeType,Dependency,Definition,ImageFile,ImageName,Version,Build,PSPath,PSParentPath,PSIsContainer,TaskSequenceTemplate | Export-Clixml -Path $ExportPath
-}
-
-# Function to simulate the PSDrive
-Function Import-DummyContent {
-    function Get-DummyDriveData {
-        param (
-            [string]$Path
-        )
-
-        # Sample data structure
-        $data = @(
-            @{
-                PSPath        = "DummyDrive:\Applications"
-                PSParentPath  = "DummyDrive:"
-                PSChildName   = "Applications"
-                PSIsContainer = $true
-            },
-            @{
-                PSPath        = "DummyDrive:\Applications\Bundles"
-                PSParentPath  = "DummyDrive:\Applications"
-                PSChildName   = "Bundles"
-                PSIsContainer = $true
-            },
-            @{
-                PSPath        = "DummyDrive:\Applications\Bundles\Baseline Apps"
-                PSParentPath  = "DummyDrive:\Applications\Bundles"
-                PSChildName   = "Baseline Apps"
-                PSIsContainer = $false
-            },
-            @{
-                PSPath        = "DummyDrive:\Applications\Adobe Acrobat Reader DC"
-                PSParentPath  = "DummyDrive:\Applications"
-                PSChildName   = "Adobe Acrobat Reader DC"
-                PSIsContainer = $false
-            }
-        )
-
-        $Path = $Path -replace '^DummyDrive:', '' # Remove the dummy drive prefix
-        $results = $data | Where-Object { $_.PSParentPath -eq "DummyDrive:$Path" }
-
-        foreach ($item in $results) {
-            [PSCustomObject]@{
-                Name         = $item.PSChildName
-                PSIsContainer = $item.PSIsContainer
-            }
-        }
-    }
-     
-    # Create a dummy PSDrive with the Function provider
-    New-PSDrive -Name "DummyDrive" -PSProvider Function -Root "Get-DummyDriveData"
-
-    # Verify the new PSDrive
-    Get-PSDrive -Name "DummyDrive"
-
-    # Example usage
-    Set-location DummyDrive:                # Navigate to the drive
-    #dir Applications              # List contents of the Applications folder
-    #dir Applications\Bundles      # List contents of the Bundles folder
 }
 
 Function Invoke-PSDLiteTouchEnvBeta{

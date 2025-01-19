@@ -2,11 +2,23 @@
 
 You can find the full instructions here: https://github.com/jpsider/RestPS
 
-## Install
+## Scripted Install
+
+A script is provided under the tools to install and setup RestPS. There are some requirements
+
+- a valid certificate
+- download nssm executable (https://nssm.cc/download)
+
+```powershell
+ .\New-PSDRestPS.ps1 -RestPSRootPath "D:\RestPS" -PathtoNSSMexe "D:\NSSM\nssm.exe" -RestPSListenerPort 8080 -SecretKey "SuperSecret" -CertificateFriendlyName "RestPS" -Test
+```
+
+## Manual Install
 
 Perform the steps on the PSD server or another server accessible by the client being deployed. Run these commands first to install and setup RestPS
 
 Install the module
+
 ```powershell
 Install-Module RestPS -Force
 ```

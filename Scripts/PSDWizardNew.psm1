@@ -553,7 +553,10 @@ function Export-PSDWizardResult {
                 If ($value) { Set-PSDWizardTSEnvProperty 'OSDComputerName' -Value $value }
             }
             elseif ($name -eq 'Applications') {
+                #get apps listed in the tsenv
                 $apps = Get-PSDWizardTSEnvProperty $name -WildCard
+                #if no apps, generate a fake app object that contains name, guid
+
                 $AppGuids = Set-PSDWizardSelectedApplications -InputObject $apps -FieldObject $_appTabList -Passthru
                 $value = $AppGuids
                 #Set-PSDWizardTSEnvProperty $name -Value $value
@@ -5745,7 +5748,7 @@ Function Set-PSDWizardSelectedApplications {
     Param(
         [Parameter(Mandatory = $true)]
         $FieldObject,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         $InputObject,
         [Parameter(Mandatory = $false)]
         [switch]$Passthru
@@ -5758,9 +5761,13 @@ Function Set-PSDWizardSelectedApplications {
 
     $SelectedApps = $FieldObject.SelectedItems
 
-    #Get current applist
-    $CurrentAppList = $InputObject | Where-Object { ($_.Name -notlike 'Skip*') -and ($_.Name -notlike '*Codes') -and -not([string]::IsNullOrEmpty($_.Value)) }
-    #TODO: remove apps from list and rebuild
+    #Get current applist from tsenv if exists
+    # Handle cases where InputObject is null
+    $CurrentAppList = if ($InputObject) {
+        $InputObject | Where-Object { ($_.Name -notlike 'Skip*') -and ($_.Name -notlike '*Codes') -and -not([string]::IsNullOrEmpty($_.Value)) }
+    } else {
+        @()
+    }
 
     $i = 1
     $SelectedGuids = @()
