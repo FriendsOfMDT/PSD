@@ -27,5 +27,3 @@ The team behind PSD is:
 * Richard "Dick" Tracy (@PowerShellCrack)
 * George Simos (@GSimos)
 * Elias Markelius (@emarkelis)
-
-

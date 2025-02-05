@@ -31,13 +31,13 @@ Within MDT Deployment workbench, on the newly created PSD Deployment share, impo
 
 Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired drivers. After adding new drivers to MDT using the "total control method" (OS/Make/Model, or OS/Model, etc. ), you need to run the New-PSDDriverPackage.ps1 to generate the ZIP or WIM archives. One ZIP or WIM archive is created for each OS and Model.
 
->PRO TIP: You can copy Drivers from other MDT deployment shares, and PSD also supports that you add any existing WIM or ZIP driver packages to the platform.
+>PRO TIP: You can copy drivers from other MDT deployment shares. PSD also supports adding existing WIM or ZIP driver packages to the platform for seamless integration.
 
 Sample syntax:
 ```powershell
-.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType WIM
+.\New-MDTDriverPackage.ps1 -psDeploymentFolder "E:\PSDProduction" -CompressionType WIM
 
-.\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType ZIP
+.\New-MDTDriverPackage.ps1 -psDeploymentFolder "E:\PSDProduction" -CompressionType ZIP
 ```
 
 ### Check Deployment Share Permissions
@@ -49,6 +49,7 @@ By default, the PSD installer creates an MDT folder structure for PSD. PSD-speci
 ### Update Windows PE settings
 
 Update the MDT WinPE configurations panels including the following settings:
+
 - WinPE Custom Wallpaper (see notes below)
 - WinPE Extra Directory (configured by default)
 - ISO File name and generation
@@ -79,6 +80,10 @@ By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provide
 Create and populate an ExtraFiles folder that contains anything you want to add to WinPE or images. Things like CMTRACE.EXE, wallpapers, etc.
 
 >PRO TIP: Create the same folder structure as where you want the files to land (e.g. \Windows\System32)
+
+### Readiness
+
+PSD now runs a default script _Computer_Readiness.ps1_ from PSDResources\Readiness folder. Edit this file with new functions or create a new readiness script. Be sure to update the property in CustomSetting.ini. If Deployment Readiness page is enabled, a valid file path **must** be used.
 
 ### Certificates
 

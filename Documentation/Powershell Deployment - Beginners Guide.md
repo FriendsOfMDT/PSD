@@ -52,7 +52,7 @@ Welcome to the beginner's guide for installing ADK (Assessment and Deployment Ki
 
 **DO NOT** launch the Deployment Workbench. This will be done when the PSD portion is done; it build your deploymentshare for you.
 
->NOTE: MDT is no longer supported, by Microsoft, for x86 deployments or Windows 11. However, when adding PSD to it, it will allow you to continue deploying Windows 11 images.
+>NOTE: While MDT can work with Windows 11 with some modifications, it is no longer supported by Microsoft, nor are x86 deployments. However, integrating PSD modifies MDT to continue deployment of Windows 11 images.
 
 To ensure things run smoother:
 
@@ -65,6 +65,10 @@ Mkdir "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Wind
 - Download a Operating System ISO. These can be pull from MSDN or from the official link: [Download Windows 11 Disk Image (ISO) for x64 devices](https://www.microsoft.com/en-us/software-download/windows11?ISO&msockid=1a583ca89d6d67bd32e8289a9c446670)
 - Download Applications needed.
 >NOTE: Application setup is not provided with this documentation, however there are several guides online to show how it done.
+
+## Links
+
+- https://www.deploymentresearch.com/building-a-windows-11-24h2-reference-image-using-microsoft-deployment-toolkit-mdt/
 
 ## Conclusion
 

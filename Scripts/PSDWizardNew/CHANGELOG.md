@@ -1,5 +1,10 @@
 # Change log for PSDWizardNew
 
+# 2.3.6 - Dec 29, 2024
+
+- Fixed issue with trimming off serial (https://github.com/FriendsOfMDT/PSD/issues/196)
+- Added native MACADDRESS and ASSETTAG support in computername (https://github.com/FriendsOfMDT/PSD/issues/167)
+
 
 ## 2.3.3 - May 1, 2024
 

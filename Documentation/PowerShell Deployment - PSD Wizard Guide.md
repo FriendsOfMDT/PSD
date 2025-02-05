@@ -35,7 +35,7 @@ DeploymentShare
         |--PSDListOfLanguages.xml
         |--PSDListOfTimeZoneIndex.xml
         |-PSDWizardNew
-            |--PSDWizard.Initialize.ps1
+            |--PSDWizard.Helper.ps1
             |--PSDWizard.Definition_<Language>.xml
             |-Resources
                 |--<icons,colors,buttons,etc > in XAML format
@@ -49,7 +49,7 @@ DeploymentShare
 
 ```
 
-> Currently, only **en-US** is supported, but there is potential for additional languages in the future.
+> NOTE: Currently, only **en-US** has been tested and coded, but there is potential for additional languages in the future.
 
 ## File explanations
 
@@ -74,9 +74,9 @@ DeploymentShare
   - **_%\<NUM\>:SERIAL%_**: Replaced with the first **num**bers of the serial number (e.g., %7:SERIAL%).
   - **_%RAND:\<NUM\>%_**: Replaced with an alphanumeric character of **num**bers (e.g., %RAND:7%).
 
-> NOTE: **AssetTag** property is not supported currently
+> NOTE: **AssetTag** property is be developed on
 
-Here are skip properties that can be set:
+### Skip properties
 
 - **SkipBDDWelcome**: YES or NO. Toggles the Welcome splash screen.
 - **SkipTaskSequence**: YES or NO. Toggles the Task sequence page.
@@ -91,7 +91,7 @@ Here are skip properties that can be set:
 
 > IMPORTANT: In the latest release of PSD, the PSD variable definitions are now included without declaring them in the properties section
 
-The added PSDwizard properties are as follows:
+### PSDwizard properties:
 
 - **PSDWizard**: Native or PSDWizardNew. Native is the original wizard (not new).
 - **PSDWizardTheme**: Classic, Dark (see theme section for details and screenshots). For more theme go here: [PSDWizardNew_CustomThemes](https://github.com/PowerShellCrack/PSDWizardNew_CustomThemes)
@@ -109,7 +109,7 @@ The added PSDwizard properties are as follows:
 - **PSDWizardCustomPaneAllowBypass**: YES or NO. If custom pages are added to the wizard and no script is found, the next button will be disabled. This will override that.
 - **PSDWizardCollapseTSList**: YES or NO. Collapses the Task Sequences folder list. By default, they are all expanded. This can be handy when there are a lot of folders.
 
-Other supported properties
+### Other properties
 
 - **DomainOUs**: List. If more than one is found, the UI will toggle a drop down for the selction instead an input box. Start with DomainOUs001 and use full distinguish name.
 
@@ -189,13 +189,12 @@ The PSDStartLoader is a UI driven prestart menu (replaces the CLI prestart menu)
 
 While the menu is loaded; you can use the keyboard's arrow keys to control the position of the menu. It defaults to the right side of screen. To preset the position, set the variable **PSDPrestartPosition** with one of these values: _VerticalLeft_, _VerticalRight_, _HorizontalTop_, _HorizontalBottom_
 
-The menu does have some hidden features as well:
+![menuonly](.images/prestartmenuloader_menuonly.png)
+
+### Hidden Features
 
 - **CMTrace support**: if the menu finds cmtrace within WinPE's system32 folder, it will add an additional button for to launch PSDlogs with cmtrace.
 - **DaRT support**: if dart is added to WinPE, the menu will add an additional button to launch the menu.
-
-
-![menuonly](.images/prestartmenuloader_menuonly.png)
 
 # CHANGELOG
 
