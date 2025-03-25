@@ -1,37 +1,66 @@
 ﻿<#
-.Synopsis
-    This script creates a self-signed certificate for PSD
-    
-.Description
-    This script was written by Johan Arwidmark @jarwidmark and Mikael Nystrom @mikael_nystrom. This script is for the friends of MDT deployment tools 
-    and is responsible for creating a self-signed certificate.
+    .SYNOPSIS
+        This script creates a self-signed web certificate for PSD
+        
+    .DESCRIPTION
+        This script creates a self-signed web certificate for PSD
 
-.LINK
-    https://github.com/FriendsOfMDT/PSD
+    .PARAMETER DNSName
+        The DNS name for the certificate.
 
-.NOTES
-          FileName: New-PSDSelfSignedCert.ps1
-          Solution: PowerShell Deployment for MDT
-          Author: PSD Development Team
-          Created: 2019-05-09
-          Modified: 2020-07-03
+    .PARAMETER FriendlyName
+        The friendly name for the certificate.
 
-          Version - 0.0.0 - () - Finalized functional version 1.
+    .PARAMETER ValidityPeriod
+        The validity period for the certificate.
 
-.EXAMPLE
-	.\New-PSDServerCert.ps1 -DNSName psddev.network.local -FriendlyName psddev.network.local -ValidityPeriod 10 -RootCACertFriendlyName PSDRootCA
-#>
+    .PARAMETER RootCACertFriendlyName
+        The friendly name of the root CA certificate.
+
+    .EXAMPLE
+        .\New-PSDServerCert.ps1 -DNSName psddev.network.local -FriendlyName psddev.network.local -ValidityPeriod 15 -RootCACertFriendlyName PSDRootCA
+
+    .EXAMPLE
+        .\New-PSDServerCert.ps1 -DNSName psddev.network.local -FriendlyName psddev.network.local -RootCACertFriendlyName PSDRootCA
+
+    .LINK
+        https://github.com/FriendsOfMDT/PSD
+
+    .NOTES
+            FileName: New-PSDSelfSignedCert.ps1
+            Solution: PowerShell Deployment for MDT
+            Author: PSD Development Team
+            Created: 2019-05-09
+            Modified: 2025-01-19
+
+            Version - 0.0.0 - () - Finalized functional version 1.
+            Version - 0.0.1 - (@PowerShellCrack) - Cleaned up Synopsis and made parameters mandatory instead of N/A checks. Fixed missed spelled words and added blocks for cleaner code.
+
+    #>
 
 #Requires -RunAsAdministrator
 
+## =========================================================================================
+## PARAMETER DECLARATION
+## =========================================================================================
 [CmdletBinding()]
 Param(
-    [string]$DNSName = "NA",
-    [string]$FriendlyName = "NA",
-    [int]$ValidityPeriod = "NA",
-    [string]$RootCACertFriendlyName = "NA"
+    [Parameter(Mandatory=$True,HelpMessage = "REQUIRED: Specify the DNS name for the certificate")]
+    [string]$DNSName,
+
+    [Parameter(Mandatory=$True,HelpMessage = "REQUIRED: Specify the Friendly name for the certificate")]
+    [string]$FriendlyName,
+
+    [Parameter(Mandatory=$False,HelpMessage = "OPTIONAL: Specify the validity period for the certificate. default is 10 years")]
+    [int]$ValidityPeriod = 10,
+
+    [Parameter(Mandatory=$True,HelpMessage = "REQUIRED: Specify the friendly name of the root CA certificate. Run New-PSDRootCACert.ps1 first to create a root CA certificate")]
+    [string]$RootCACertFriendlyName
 )
 
+## =========================================================================================
+## FUNCTION HELPERS
+## =========================================================================================
 function Start-PSDLog{
 	[CmdletBinding()]
     param (
@@ -100,7 +129,7 @@ function Write-PSDInstallLog{
         $result1.Items.Add("$Message")
     }
 }
-function set-PSDDefaultLogPath{
+function Set-PSDDefaultLogPath{
 	#Function to set the default log path if something is put in the field then it is sent somewhere else. 
 	[CmdletBinding()]
 	param
@@ -137,28 +166,16 @@ function Copy-PSDFolder{
     & xcopy $s $d /s /e /v /y /i | Out-Null
 }
 
+## =========================================================================================
+## MAIN LOGIC
+## =========================================================================================
 # Set VerboseForegroundColor
 $host.PrivateData.VerboseForegroundColor = 'Cyan'
 
 # Start logging
-set-PSDDefaultLogPath
+Set-PSDDefaultLogPath
 
-if($DNSName -eq "NA"){
-    Write-PSDInstallLog -Message "You need to specify a DNSName" -LogLevel 2
-    $Fail = $True
-}
-
-if($FriendlyName -eq "NA"){
-    Write-PSDInstallLog -Message "You need to specify a FriendlyName" -LogLevel 2
-    $Fail = $True
-}
-
-if($ValidityPeriod -eq "NA"){
-    Write-PSDInstallLog -Message "You need to specify a ValidityPeriod" -LogLevel 2
-    $Fail = $True
-}
-
-# Get the PSD reeot CA Certitificate
+# Get the PSD root CA Certificate
 $PSDRootCACert = Get-ChildItem -Path Cert:\LocalMachine\Root | Where-Object {$_.FriendlyName -eq $RootCACertFriendlyName}
 
 # Create self-signed certificate

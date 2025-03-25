@@ -1,38 +1,50 @@
 ﻿<#
-.Synopsis
-    This script creates a self-signed certificate for PSD
-    
-.Description
-    This script was written by Johan Arwidmark @jarwidmark and Mikael Nystrom @mikael_nystrom. This script is for the friends of MDT deployment tools 
-    and is responsible for creating a self-signed certificate.
+    .SYNOPSIS
+        This script creates a self-signed root certificate for PSD
+        
+    .DESCRIPTION
+        This script creates a self-signed root certificate for PSD
 
-.LINK
-    https://github.com/FriendsOfMDT/PSD
+    .EXAMPLE
+        .\New-PSDRootCACert.ps1 -RootCAName PSDRootCA -ValidityPeriod 20 -psDeploymentFolder E:\PSDeploymentShare
 
-.NOTES
-          FileName: New-PSDSelfSignedCert.ps1
-          Solution: PowerShell Deployment for MDT
-          Author: PSD Development Team
-          Contact: @Mikael_Nystrom , @jarwidmark
-          Primary: @jarwidmark 
-          Created: 2019-05-09
-          Modified: 2020-07-03
+    .LINK
+        https://github.com/FriendsOfMDT/PSD
 
-          Version - 0.0.0 - () - Finalized functional version 1.
+    .NOTES
+        FileName: New-PSDSelfSignedCert.ps1
+        Solution: PowerShell Deployment for MDT
+        Author: PSD Development Team
+        Contact: @Mikael_Nystrom , @jarwidmark
+        Primary: @jarwidmark 
+        Created: 2019-05-09
+        Modified: 2025-01-19
 
-.EXAMPLE
-	.\New-PSDRootCACert.ps1 -RootCAName PSDRootCA -ValidityPeriod 20 -psDeploymentFolder E:\PSDeploymentShare
+        Version - 0.0.0 - () - Finalized functional version 1.
+        Version - 0.0.1 - (@PowerShellCrack) -Added Synopsis and gave parameters help messages. Fixed missed spelled words and added blocks for cleaner code.
 #>
 
 #Requires -RunAsAdministrator
 
+## =========================================================================================
+## PARAMETER DECLARATION
+## =========================================================================================
+
 [CmdletBinding()]
 Param(
-    [string]$RootCAName = "NA",
-    [int]$ValidityPeriod = "NA",
-    [string]$psDeploymentFolder = "NA"
+    [Parameter(Mandatory=$True,HelpMessage = "REQUIRED: Specify the name of the root CA certificate")]
+    [string]$RootCAName,
+
+    [Parameter(Mandatory=$False,HelpMessage = "OPTIONAL: Specify the validity period for the certificate. default is 20 years")]
+    [int]$ValidityPeriod = 20,
+
+    [Parameter(Mandatory=$True,HelpMessage = "REQUIRED: Specify the path to the deployment folder")]
+    [string]$psDeploymentFolder
 )
 
+## =========================================================================================
+## FUNCTION HELPERS
+## =========================================================================================
 function Start-PSDLog{
 	[CmdletBinding()]
     param (
@@ -101,7 +113,7 @@ function Write-PSDInstallLog{
         $result1.Items.Add("$Message")
     }
 }
-function set-PSDDefaultLogPath{
+function Set-PSDDefaultLogPath{
 	#Function to set the default log path if something is put in the field then it is sent somewhere else. 
 	[CmdletBinding()]
 	param
@@ -138,11 +150,14 @@ function Copy-PSDFolder{
     & xcopy $s $d /s /e /v /y /i | Out-Null
 }
 
+## =========================================================================================
+## MAIN LOGIC
+## =========================================================================================
 # Set VerboseForegroundColor
 $host.PrivateData.VerboseForegroundColor = 'Cyan'
 
 # Start logging
-set-PSDDefaultLogPath
+Set-PSDDefaultLogPath
 
 if((Test-Path -Path $psDeploymentFolder) -ne $true){
     Write-Warning "Unable to access $psDeploymentFolder"

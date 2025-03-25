@@ -129,9 +129,6 @@ Try{
         Write-PSDLog -Message ("{0}: ScriptRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDScriptRoot) -LogLevel 1
         Write-PSDLog -Message ("{0}: ContentRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDContentPath) -LogLevel 1
     }
-    Write-Verbose ("{0}: PSDWizard path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDWizardPath)
-    Write-Verbose ("{0}: ScriptRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDScriptRoot)
-    Write-Verbose ("{0}: ContentRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDContentPath)
 }
 Catch{
     If($Caller){
@@ -139,6 +136,127 @@ Catch{
     }Else{
         Write-Host ("{0}: Unable to load PSD path; PSD modules will load during [Invoke-PSDTestEnv]" -f $MyInvocation.MyCommand) -ForegroundColor Yellow
     }
+}
+
+
+##*========================================================================
+## HELPER FUNCTIONS
+##*========================================================================
+
+Function Export-DepShareContent {
+    <#
+    .SYNOPSIS
+        Export the content of the deployment share to a file
+    .DESCRIPTION
+        Export the content of the deployment share to a file
+    .EXAMPLE
+        Export-DepShareContent -Path "C:\Temp\DepShareContent.xml"
+    #>
+    [CmdletBinding()]
+    param(
+        [string]$ExportPath
+    )
+    
+    #If(-Not(Get-PSDrive DS001 -ErrorAction SilentlyContinue)){Write-Host "DS001 drive not found" -ForegroundColor Red; Break}
+    If(-Not(Get-PSDrive DeploymentShare -ErrorAction SilentlyContinue)){Write-Host "DeploymentShare drive not found" -ForegroundColor Red; Break}
+    
+    $DepShareContent = Get-childItem "Deploymentshare:\" -Recurse
+    $DepShareContent | Select Name,comments,guid,enable,hide,NodeType,Dependency,Definition,ImageFile,ImageName,Version,Build,PSPath,PSParentPath,PSIsContainer,TaskSequenceTemplate | Export-Clixml -Path $ExportPath
+}
+
+Function Invoke-PSDLiteTouchEnvBeta{
+    <#
+    .SYNOPSIS
+        Function to launch PSD in a Windows Environment
+
+    .DESCRIPTION
+        Function to launch PSD in a Windows Environment
+
+    .EXAMPLE
+        Invoke-PSDLiteTouchEnvBeta -DeploymentShare "\\10.30.3.10\dep-psdforked$" -LocalPath "C:\MININT\Cache"
+    #>
+    param(
+        [string]$DeploymentShare,
+        [string]$LocalPath = 'C:\MININT\Cache'
+    )
+
+    #create new folder recursively
+    $Folders = $LocalPath -split '\\'
+    Foreach($Folder in $Folders){
+        $Path = $Path + "\" + $Folder
+        If(-Not(Test-Path $Path)){
+            New-Item -Path $Path -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+        }
+    }
+    #Create local dest structure
+    New-Item -Path "$LocalPath\OSDLOGS" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path "$LocalPath\Tools\Modules" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path "$LocalPath\Tools\Modules\Microsoft.BDD.TaskSequenceModule" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path "$LocalPath\Tools\Modules\PSDDeploymentShare" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path "$LocalPath\Tools\Modules\PSDUtility" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path "$LocalPath\Tools\Modules\PSDGather" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path "$LocalPath\Tools\Modules\PSDWizard" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path "$LocalPath\Tools\Modules\PSDWizardNew" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path "$LocalPath\Tools\Modules\PSDStartLoader" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+
+    #Copy the files
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.dll" -Destination "$LocalPath\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.dll" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.psd1" -Destination "$LocalPath\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Microsoft.BDD.TaskSequenceModule.psd1" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Interop.TSCore.dll" -Destination "$LocalPath\Tools\Modules\Microsoft.BDD.TaskSequenceModule\Interop.TSCore.dll" -Force -ErrorAction SilentlyContinue
+
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\PSDDeploymentShare\PSDDeploymentShare.psm1" -Destination "$LocalPath\Tools\Modules\PSDDeploymentShare\PSDDeploymentShare.psm1" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\PSDUtility\PSDUtility.psm1" -Destination "$LocalPath\Tools\Modules\PSDUtility\PSDUtility.psm1" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\PSDGather\PSDGather.psm1" -Destination "$LocalPath\Tools\Modules\PSDGather\PSDGather.psm1" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\PSDGather\ZTIGather.xml" -Destination "$LocalPath\Tools\Modules\PSDGather\ZTIGather.xml" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\PSDWizard\PSDWizard.psm1" -Destination "$LocalPath\Tools\Modules\PSDWizard\PSDWizard.psm1" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\PSDWizardNew\PSDWizardNew.psm1" -Destination "$LocalPath\Tools\Modules\PSDWizardNew\PSDWizardNew.psm1" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Tools\Modules\PSDStartLoader\PSDStartLoader.psm1" -Destination "$LocalPath\Tools\Modules\PSDStartLoader\PSDStartLoader.psm1" -Force -ErrorAction SilentlyContinue
+    
+    #Copy the files
+
+    Copy-Item -Path "$DeploymentShare\Scripts\PSDStart.ps1" -Destination "$LocalPath\Scripts\PSDStart.ps1" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$DeploymentShare\Scripts\PSDHelper.ps1" -Destination "$LocalPath\Scripts\PSDHelper.ps1" -Force -ErrorAction SilentlyContinue
+
+    # Set the module path based on the current script path
+    $deployRoot = Split-Path -Path "$LocalPath"
+    $env:PSModulePath = $env:PSModulePath + ";$deployRoot\Tools\Modules"
+
+    Import-Module PSDUtility -Force -Verbose:$False
+    Import-Module Storage -Global -Force -Verbose:$False
+
+    $Global:BootfromWinPE = $false
+
+    Import-Module PSDDeploymentShare -ErrorAction Stop -Force -Verbose:$False
+    Import-Module PSDGather -ErrorAction Stop -Force -Verbose:$False
+    Get-PSDLocalInfo
+
+    $tsenv:PSDDirtyOS = $false
+
+    $mappingFile = "$LocalPath\Tools\Modules\PSDGather\ZTIGather.xml"
+    Invoke-PSDRules -FilePath "$DeploymentShare\Control\Bootstrap.ini" -MappingFile $mappingFile
+
+    #$ServerName = $item.Split("\\")[2]
+    #$Result = Test-PSDNetCon -Hostname $ServerName -Protocol SMB
+    # Process CustomSettings.ini
+    $control = Get-PSDContent -Content "Control"
+    Invoke-PSDRules -FilePath "$control\CustomSettings.ini" -MappingFile $mappingFile
+
+     # Get full scripts location
+     $scripts = Get-PSDContent -Content "Scripts"
+     $env:ScriptRoot = $scripts
+ 
+     # Set the PSModulePath
+     $modules = Get-PSDContent -Content "Tools\Modules"
+     $env:PSModulePath = $env:PSModulePath + ";$modules"
+
+     Import-Module "$LocalPath\Tools\Modules\PSDWizardNew\PSDWizardNew.psm1" -ErrorAction Stop -Force -Verbose:$False
+     [string]$PSDWizardPath = Join-Path -Path $scripts -ChildPath "PSDWizardNew"
+    
+     $PSDWizardTheme = "Classic"
+
+     $PSDWizardNoSplashScreen = $true
+
+     $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:$false -Theme $PSDWizardTheme -NoSplashScreen:$PSDWizardNoSplashScreen -Passthru -Debug:$true 
 }
 
 Function Reset-PSDEnv{
@@ -150,6 +268,11 @@ Function Reset-PSDEnv{
         Set-ItemProperty $MDTRegPath -Name "Install_Dir" -Value $OrginalMDTPath -Force
     }
 
+    #Reset the PSD environment
+    If(Test-Path "$env:TEMP\PSModulePath.xml"){
+        $env:PSModulePath = Import-Clixml -Path "$env:TEMP\PSModulePath.xml"
+    }
+    
     #Remove-PSDrive -Name TSEnv -ErrorAction SilentlyContinue
     #Remove-PSDrive -Name TSEnvList -ErrorAction SilentlyContinue
     Remove-PSDrive -Name DS001 -ErrorAction SilentlyContinue
@@ -162,7 +285,7 @@ Function Reset-PSDEnv{
     Get-Module PSD* -ListAvailable | Remove-Module -Force -ErrorAction SilentlyContinue
 }
 
-Function Invoke-PSDTestEnv{
+Function Invoke-PSDWinPEEnv{
     <#
     .SYNOPSIS
         Function to test the PSD environment
@@ -171,16 +294,16 @@ Function Invoke-PSDTestEnv{
         Function to test the PSD environment
 
     .EXAMPLE
-        Invoke-PSDTestEnv
+        Invoke-PSDWinPEEnv
     
     .EXAMPLE
-        Invoke-PSDTestEnv -DeploymentShare "\\10.30.3.10\dep-psddev$"
+        Invoke-PSDWinPEEnv -DeploymentShare "\\10.30.3.10\dep-psdforked$"
 
     .EXAMPLE
-        Invoke-PSDTestEnv -SimulatorScript 'C:\MDTSimulator\Start-MDTSimulator.ps1'
+        Invoke-PSDWinPEEnv -SimulatorScript 'C:\MDTSimulator\Start-MDTSimulator.ps1'
 
     .EXAMPLE
-        Invoke-PSDTestEnv -Passthru
+       Invoke-PSDWinPEEnv -Passthru
     #>
     [CmdletBinding()]
     param(
@@ -193,9 +316,13 @@ Function Invoke-PSDTestEnv{
         [switch]$Passthru
     )
 
+    #Export the current PSModulePath as a backup
+    If(-not (Test-Path "$env:TEMP\PSModulePath.xml")){
+        $env:PSModulePath | Export-Clixml -Path "$env:TEMP\PSModulePath.xml"
+    }
+
     If($DeploymentShare){
         $commands = @(
-            
             "`$Global:deployRoot = `"$DeploymentShare`""
         )
     }Else{
@@ -229,7 +356,7 @@ Function Invoke-PSDTestEnv{
         $commands += @(
             "`$MDTModule = `"C:\Program Files\Microsoft Deployment Toolkit\bin\MicrosoftDeploymentToolkit.psd1`""
             "Import-Module `$MDTModule -Verbose -Force"
-            "`$SimulatorPath = (Split-Path `$SimulatorScript -Parent)"
+            "`$SimulatorPath = (Split-Path `"$SimulatorScript`" -Parent)"
             ". `"$SimulatorScript`" -MDTSimulatorPath `"`$SimulatorPath`" -DeploymentShare `"`$Global:deployRoot`" -Mode PSD -Environment VSCode"
             "If(-Not(Get-PSDrive DS001 -ErrorAction SilentlyContinue)){`$Null = New-PSDrive -Name DS001 -PSProvider MDTProvider -Root `$Global:deployRoot -Scope Global -ErrorAction Stop}"
             "If(-Not(Get-PSDrive DeploymentShare -ErrorAction SilentlyContinue)){`$Null = New-PSDrive -Name DeploymentShare -PSProvider MDTProvider -Root `$Global:deployRoot -Scope Global -ErrorAction Stop}"

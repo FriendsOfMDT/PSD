@@ -1,8 +1,9 @@
 # Frequent Asked Questions - PowerShell Deployment Extension Kit
 
-This document highlights and captures some of the known issues and limitations of PSD (as of the published date above). 
+This document highlights and captures some of the known issues and limitations of PSD (as of the published date above).
 
 ## Frequently Asked Questions
+
 Q: Does the installer copy over my existing MDT Deployment Share content (e.g. applications, drivers, task sequences, etc) to a new PSD share?
 >A: No, users and administrators will need to copy/export any existing components to *new* PSD shares using in-built content management features of MDT. MDT Shares which have been PSD upgraded will continue to have access to any existing object and artifacts.
 
@@ -20,10 +21,10 @@ Q: What are the client/target hardware requirements for baremetal PSD deployment
 - At least one (1) XXX MHz processor (for New/BareMetal deployments)
 
 Q: Are system clocks synchronized?
-  >A: Yes, PSDStart.ps1 will attempt to synchronize the time are deployment target computers. Deployment Roots servers and or the HTTP/S target servers will be NTP synchronized.
+>A: Yes, PSDStart.ps1 will attempt to synchronize the time are deployment target computers. Deployment Roots servers and or the HTTP/S target servers will be NTP synchronized.
 
 Q: Does PSD work with 2Pint's OSD Toolkit?
-  >A: Yes: See the BranchCache installation guide
+>A: Yes: See the BranchCache installation guide
 
 Q: Why does the PowerShell window appear to flash and then change size?
 >A: The default window is resized by PSDStart by design. You should observe it to change from full screen to roughly one third the screen early in the boot/start process. This is again by design.
@@ -78,21 +79,21 @@ Q: What files and or components are copied or injected into the PSD-enabled Boot
     <td>SCRIPTS</td>
   </tr>
   <tr>
-    <td>PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
+    <td>PSDUtility.psm1<br>PSDGather.psm1<br>PSDWizard.psm1<br><br>PSDWizardNew.psm1<br><span style="font-weight:400;font-style:normal;text-decoration:none">PSDDeploymentShare.psm1</span><br>ZTIGather.xml<br><span style="font-weight:400;font-style:normal;text-decoration:none">Interop.TSCore.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.dll</span><br><span style="font-weight:400;font-style:normal;text-decoration:none">Microsoft.BDD.TaskSequenceModule.psd</span><br></td>
     <td>PSDStart.ps1<br>PSDHelper.ps1<br></td>
   </tr>
 </table>
 
 Q: What scripts or files can be safely deleted from my PSD Deployment Share?
->A: This is still being refined and defined. For now: 
-- Do NOT delete any PSD*.ps1 or PSD*.psm1 files. 
+>A: This is still being refined and defined. For now:
+- Do NOT delete any PSD*.ps1 or PSD*.psm1 files.
 - Do NOT delete ZTIGather.xml or ZTIConfigure.xml
 - If installing applications as part of the task sequence, do not delete ZTIUtility.vbs as it **might** be called during the deployment.
-- If desired, many of the legacy MDT .wsf scripts and Wizard files can be removed manually from the PSD Deployment Share scripts folder to thin out the environment. 
+- If desired, many of the legacy MDT .wsf scripts and Wizard files can be removed manually from the PSD Deployment Share scripts folder to thin out the environment.
 
 ## Documented Platforms and Scenarios
 Q: What operating systems and components has PSD been tested and or evaluated against?
->A: The following tables identifies tested and validated components, scenarios as well as testing and development status: 
+>A: The following tables identifies tested and validated components, scenarios as well as testing and development status:
 <table>
   <tr>
     <th>Component</th>
@@ -232,11 +233,9 @@ Q: What operating systems and components has PSD been tested and or evaluated ag
 - The PSD installer does **NOT** automatically copy over any existing MDT artifacts and components to a new PSD-created deployment share repositories. Users will need to manually copy over, re-import or instantiate applications, drivers, etc.
 
 ## Operational Observations
+
 Please review the  [PSD Installation Guide](https://github.com/soupman98/PSD/blob/master/Documentation/PowerShell%20Deployment%20-%20Installation%20Guide.md) for additional detailed post-installation configuration recommendations.
 
 - Applications specified in task sequences BootStrap.ini or CustomSettings.ini **MUST** have { } brackets around their GUID
 - New TS variables **must** be declared explicitly in BootStrap.ini or CustomSettings.ini
 - You many notice that during the Post OS install phases of the PSD Task Sequence (OOBE) that the screen briefly flashes a window and the PowerShell window appears to refresh. This is expected when a script is executed.
-
-
-
