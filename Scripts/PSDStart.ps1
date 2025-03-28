@@ -12,7 +12,7 @@
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus
           Primary: @Mikael_Nystrom 
           Created: 
-          Modified: 2022-09-19
+          Modified: 2025-03-28
 
           Version - 0.0.0 - () - Finalized functional version 1.
           Version - 0.9.1 - Added check for network access when doing network deployment
@@ -32,6 +32,8 @@
           version - 0.9.9 - Fixed for SMSTSlogging, plus lots of minor stuff
           version - 0.1.0 - Minor change, removing Write-PSDLog entries
           version - 0.1.1 - (PC) Fixed PSDStartLoader and added beta support PSDWizardRS
+          version - 0.1.2 - (mikael_nystrom) Added preflight checks for disk 0 and for network adapter before starting the wizard, if no network or no disk is found, it will not continue
+
 
           TODO:
 
@@ -183,8 +185,29 @@ if($Global:PSDDebug -ne $True){
 if($BootfromWinPE -eq $true){
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering WinPE block..."
 
+    # Preflight test for network adapter
+    Write-PSDBootInfo -Message "Checking for network adapter"
+    #' Are you kidding me? THis is the 21st century, what kind of computer doesn't have a networking adatper?
+     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking for network adapter (Test-PSDNetAdapter)"
+    if(!(Test-PSDNetAdapter)){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No network adapter found or driver missing, aborting..."
+        Show-PSDInfo -Message "No network adapter found or driver missing, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
+        Start-Process PowerShell -Wait
+        exit 1
+    }
+
+    # Preflight test for disk 0
+    Write-PSDBootInfo -Message "Checking for storage"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking for storage (Test-PSDLocalDisk)"
+    if(!(Test-PSDLocalDisk)){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No storage found or driver missing, aborting..."
+        Show-PSDInfo -Message "No storage found or driver missing, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
+        Start-Process PowerShell -Wait
+        exit 1
+    }
+    
     # We need more than 1.5 GB (Testing for at least 1499MB of RAM)
-    Write-PSDBootInfo -SleepSec 2 -Message "Checking that we have at least 1.5 GB of RAM"
+    Write-PSDBootInfo -Message "Checking that we have at least 1.5 GB of RAM"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking that we have at least 1.5 GB of RAM"
     if ((Get-CimInstance -ClassName Win32_computersystem).TotalPhysicalMemory -le 1499MB){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Not enough memory to run PSD, aborting..."
@@ -193,7 +216,7 @@ if($BootfromWinPE -eq $true){
         exit 1
     }
 
-    # Create SMSTS.ini (TESTING)
+    # Create SMSTS.ini
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating SMSTS.INI for WinPE"
     function New-PSDSMSTSinifile {
         param(
@@ -372,7 +395,7 @@ else{
         if($BootfromWinPE -eq $true){
             if((Test-Path -Path X:\Deploy\Scripts\PSDPrestart.ps1) -eq $true){
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): We should run PSDPrestart"
-                if(($tsenv:PSDPrestartMode -eq $null) -or ($tsenv:PSDPrestartMode -eq "") -or ($tsenv:PSDPrestartMode -eq "Native")){
+                if(($null -eq $tsenv:PSDPrestartMode) -or ($tsenv:PSDPrestartMode -eq "") -or ($tsenv:PSDPrestartMode -eq "Native")){
                     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDPrestart is in Mode: Native"
                     $Mode = "Native"
                 }
@@ -721,7 +744,7 @@ else{
     # Check if we should run the native wizard or not
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Determine which PSDWizard to use"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property PSDWizard is now = $tsenv:PSDWizard"
-    if(($tsenv:PSDWizard -eq $null) -or ($tsenv:PSDWizard -eq "") -or ($tsenv:PSDWizard -eq "Native")){
+    if(($null -eq $tsenv:PSDWizard) -or ($tsenv:PSDWizard -eq "") -or ($tsenv:PSDWizard -eq "Native")){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running the command Import-Module PSDWizard -ErrorAction Stop -Force -Verbose:`$False"
         Import-Module PSDWizard -ErrorAction Stop -Force -Verbose:$False
 
@@ -910,7 +933,7 @@ else{
             'Korean (Korea)'{$tsenv:UILanguage = "ko-KR"}
             'Latvian (Latvia)'{$tsenv:UILanguage = "lv-LV"}
             'Lithuanian (Lithuania)'{$tsenv:UILanguage = "lt-LT"}
-            'Norwegian, Bokm�l (Norway)'{$tsenv:UILanguage = "nb-NO"}
+            'Norwegian, Bokm l (Norway)'{$tsenv:UILanguage = "nb-NO"}
             'Polish (Poland)'{$tsenv:UILanguage = "pl-PL"}
             'Portuguese (Brazil)'{$tsenv:UILanguage = "pt-BR"}
             'Portuguese (Portugal)'{$tsenv:UILanguage = "pt-PT"}
@@ -1023,7 +1046,7 @@ else{
                 $TSENV:SystemLocale = "lt-LT"
                 $TSENV:UserLocale = "lt-LT"
             }
-            'Norwegian, Bokm�l (Norway)'{
+            'Norwegian, Bokm l (Norway)'{
                 $TSENV:SystemLocale = "nb-NO"
                 $TSENV:UserLocale = "nb-NO"
             }
@@ -1181,7 +1204,7 @@ else{
                 $tsenv:InputLocale = "lt-LT"
                 $tsenv:KeyboardLocale = "lt-LT"
             }
-            'Norwegian, Bokm�l (Norway)'{
+            'Norwegian, Bokm l (Norway)'{
                 $tsenv:InputLocale = "nb-NO"
                 $tsenv:KeyboardLocale = "nb-NO"
             }
