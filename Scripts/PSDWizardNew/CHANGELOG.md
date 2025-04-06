@@ -1,6 +1,11 @@
 # Change log for PSDWizardNew
 
-# 2.3.6 - Dec 29, 2024
+## 2.3.7 - Feb 8, 2025
+
+- Updated helper with root path variables. Changed PSDWizard to use variables instead of Get-PSDContent; faster load and dynamic control for testing
+- Fixed issue with PSDWizard computername input parameter
+
+## 2.3.6 - Dec 29, 2024
 
 - Fixed issue with trimming off serial (https://github.com/FriendsOfMDT/PSD/issues/196)
 - Added native MACADDRESS and ASSETTAG support in computername (https://github.com/FriendsOfMDT/PSD/issues/167)
