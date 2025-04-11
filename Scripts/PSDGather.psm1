@@ -144,12 +144,42 @@ Function Get-PSDLocalInfo {
 			}
 		}
 
+		# Lookup Processor
+  		$LocalInfo['SupportsX86'] = $false
+		$LocalInfo['SupportsX64'] = $false
 		Get-CimInstance -ClassName Win32_Processor | ForEach-Object {
 			$LocalInfo['ProcessorSpeed'] = $_.MaxClockSpeed
 			$LocalInfo['SupportsSLAT'] = $_.SecondLevelAddressTranslationExtensions
+   			Switch ($_.Architecture) {
+				0 {
+					If ($_.DataWidth -eq 64) {
+						$LocalInfo['SupportsX86'] = $true
+						$LocalInfo['SupportsX64'] = $true
+						$LocalInfo['CapableArchitecture'] = "AMD64 X64 X86"
+					}
+					Else {
+						$LocalInfo['SupportsX86'] = $true
+						$LocalInfo['CapableArchitecture'] = "X86"
+					}
+				}
+				6 {
+					$LocalInfo['CapableArchitecture'] = "IA64"
+				}
+				9 {
+					$LocalInfo['SupportsX86'] = $true
+					$LocalInfo['SupportsX64'] = $true
+					$LocalInfo['CapableArchitecture'] = "AMD64 X64 X86"
+				}
+				12 {
+					$LocalInfo['SupportsX86'] = $true
+					$LocalInfo['SupportsX64'] = $true
+					$LocalInfo['CapableArchitecture'] = "AMD64 X64 X86 ARM"
+				}
+				Default {
+					$LocalInfo['CapableArchitecture'] = "Unknown"
+				}
+			}
 		}
-
-		# TODO: Capable architecture
 
 		Get-CimInstance -ClassName Win32_ComputerSystem | ForEach-Object {
 			$LocalInfo['Manufacturer'] = $_.Manufacturer.Trim()
@@ -252,9 +282,61 @@ Function Get-PSDLocalInfo {
 			default {$LocalInfo['OSSku']="Not Supported";break}
 		}
 
-		# TODO: GetCurrentOSInfo
-
-		# TODO: BitLocker
+		# Get Current OS Info
+		$OSReg = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+	        Switch ([Int]$OSReg.CurrentBuildNumber) {
+	            1381 { $LocalInfo['OSVersion'] = "NT"; break }
+	            2195 { $LocalInfo['OSVersion'] = "Srv2000"; break }
+	            2600 { $LocalInfo['OSVersion'] = "XP"; break }
+	            3790 { $LocalInfo['OSVersion'] = "Srv2003"; break }
+	            6000 { $LocalInfo['OSVersion'] = "Vista"; break }
+	            6001 {
+	                If ($LocalInfo['IsServerOS'] -eq $true) { $LocalInfo['OSVersion'] = "Srv2008" }
+	                Else { $LocalInfo['OSVersion'] = "Vista" }
+			break
+	            }
+	            7000 { $LocalInfo['OSVersion'] = "Win7"; break }
+	            7001 {
+	                If ($LocalInfo['IsServerOS'] -eq $true) { $LocalInfo['OSVersion'] = "Srv2008R2" }
+	                Else { $LocalInfo['OSVersion'] = "Win7SP1" }
+			break
+	            }
+	            9200 {
+	                If ($LocalInfo['IsServerOS'] -eq $true) { $LocalInfo['OSVersion'] = "Srv2012" }
+	                Else { $LocalInfo['OSVersion'] = "Win8" }
+			break
+	            }
+	            9600 {
+	                If ($LocalInfo['IsServerOS'] -eq $true) { $LocalInfo['OSVersion'] = "Srv2012R2" }
+	                Else { $LocalInfo['OSVersion'] = "Win8.1" }
+			break
+	            }
+	            {(($_ -ge 10000) -and ($_ -lt 22000))} {
+	                If ($LocalInfo['IsServerOS'] -eq $true) { $LocalInfo['OSVersion'] = "Srv$(($CimOS.Caption -split " ")[3])" }
+	                Else { $LocalInfo['OSVersion'] = "Win$(($CimOS.Caption -split " ")[2]).$($OSReg.ReleaseId)" }
+			break
+	            }
+	            {$_ -ge 22000} {
+	                If ($LocalInfo['IsServerOS'] -eq $true) { $LocalInfo['OSVersion'] = "Srv$(($CimOS.Caption -split " ")[3])" }
+	                Else { $LocalInfo['OSVersion'] = "Win$(($CimOS.Caption -split " ")[2]).$($OSReg.DisplayVersion)" }
+			break
+	            }
+	        }
+	 
+		# BitLocker
+  		$bIsBDE = $false
+		If ([Int]$LocalInfo['OSCurrentBuild'] -ge 6000) {
+			$BitLockerVolumes = Get-CimInstance -Namespace "Root\CIMv2\Security\MicrosoftVolumeEncryption" -ClassName "Win32_EncryptableVolume" -ErrorAction SilentlyContinue
+			ForEach ($BitLockerVolume in $BitLockerVolumes) {
+				If ($BitLockerVolume.ConversionStatus -ne 0) {
+					If ([String]::IsNullOrEmpty($BitLockerVolume.DriveLetter)) { Write-Log "Encrypted drive found: $($BitLockerVolume.DeviceID), status = $($BitLockerVolume.ConversionStatus)" }
+					Else { Write-Log "Encrypted drive found: $($BitLockerVolume.DriveLetter), status = $($BitLockerVolume.ConversionStatus)" }
+					$bIsBDE = $true
+				}
+			}
+			If (-not $bIsBDE) { Write-Log "There is no encrypted drives" }
+		}
+		$LocalInfo['IsBDE'] = $bIsBDE
 
 		# Generate ModelAlias, MakeAlias and SystemAlias
 		$LocalInfo['IsVM'] = "False"
@@ -271,7 +353,7 @@ Function Get-PSDLocalInfo {
 			}
 			"*HP*" {
 				$LocalInfo['MakeAlias'] = "HP"
-				$LocalInfo['ModelAlias'] = (Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()
+				$LocalInfo['ModelAlias'] = ((Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty Model).Trim()).replace("Notebook PC",'')
 				$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName MS_SystemInformation -NameSpace root\wmi).BaseBoardProduct.Trim()
 			}
 			"*VMWare*" {
