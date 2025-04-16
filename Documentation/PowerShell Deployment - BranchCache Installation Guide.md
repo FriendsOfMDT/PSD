@@ -16,7 +16,7 @@ Install-WindowsFeature BranchCache
 
 For BranchCache to work during OS deployment, BITS and BranchCache components needs to be added to the PSD boot image.
 
-1) Download the OSD Toolkit from 2Pint Software: https://2pintsoftware.com/products/osd-toolkit1/, and unpack to the PSDResources\Plugins\OSDToolkit folder in your PSD deployment share.
+1) Download the OSD Toolkit from 2Pint Software: https://2pintsoftware.com/products/osd-toolkit/, and unpack to the PSDResources\Plugins\OSDToolkit folder in your PSD deployment share.
 2) Import a Windows 10 operating system that is matching your boot image version. For example, if your deployment server is using Windows ADK 10 2004, import the install.wim from a Windows 10 2004 x64 ISO (Business Edition).
 3) Update the CustomSettings.ini with the following:
 
