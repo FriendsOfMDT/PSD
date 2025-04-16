@@ -740,6 +740,16 @@ else{
     $modules = Get-PSDContent -Content "Tools\Modules"
     $env:PSModulePath = $env:PSModulePath + ";$modules"
 
+    # Process UserExitScripts
+    Write-PSDBootInfo -SleepSec 1 -Message "Processing UserExitScripts (if exists)"
+    $UserExitScriptFolder = Get-PSDContent -Content "PSDResources\UserExitScripts" -Filter *.ps1
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing UserExitScripts (if exists)"
+    $UserExitScripts = Get-ChildItem -Path $UserExitScriptFolder
+    foreach($UserExitScript in $UserExitScripts){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing $UserExitScript"
+        & $UserExitScript.FullName
+    }
+
     # Process wizard
     $PSDWizard = "PSDWizardNew"
     Write-PSDBootInfo -SleepSec 1 -Message "Loading the PSD Deployment Wizard"
@@ -883,7 +893,12 @@ if($BootfromWinPE -eq $True){
         # TODO: Need to find a better file for detection of running OS
         #If (Test-Path -Path "$($Drive.Name):\Windows\System32\mspaint.exe"){
         If (Test-Path -Path "$($Drive.Name):\marker.psd"){
+            
+            Write-PSDLog -Message "Setting logs to "$($Drive.Name):\MININT\SMSOSD\OSDLOGS""
             Start-PSDLogging -Logpath "$($Drive.Name):\MININT\SMSOSD\OSDLOGS"
+            
+            Write-PSDLog -Message "Setting logpath to "$($Drive.Name):\MININT\SMSOSD\OSDLOGS""
+            $tsenv:LogPath = "$($Drive.Name):\MININT\SMSOSD\OSDLOGS"
             Break
         }
     }
