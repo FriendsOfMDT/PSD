@@ -34,6 +34,7 @@
           version - 0.1.1 - (PC) Fixed PSDStartLoader and added beta support PSDWizardRS
           version - 0.1.2 - (mikael_nystrom) Added preflight checks for disk 0 and for network adapter before starting the wizard, if no network or no disk is found, it will not continue
           version - 0.1.3 - (mikael_nystrom) Removed legacy Wizared code and logic, fixed some typos
+          version - 0.1.4 - (mikael_nystrom) Added support for UserExitScripts, you can extend the processing of PSDStart by adding a PowerShell script (or more) to the UserExit Scripts folder
 
 
           TODO:
