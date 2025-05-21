@@ -71,6 +71,110 @@ Edit and customize `bootstrap.ini` for your any necessary and desired configurat
 
 > PRO TIP: Recommend using the latest `bootstrap.ini` provided in repo. If using the new PSDDeployRoots property, remove *all* reference to DeployRoot from BootStrap.ini.
 
+## Configuration Backup and Restore
+
+For managing the critical configuration files of your PSD/MDT deployment share, such as `Bootstrap.ini` and `CustomSettings.ini`, a PowerShell module named `PSDConfigManager.psm1` is provided in the `Tools` directory of your deployment share. This module offers functions to easily export (backup) and import (restore) these configurations.
+
+This is particularly useful for:
+- Creating backups before making significant changes to `Bootstrap.ini` or `CustomSettings.ini`.
+- Migrating configurations between different deployment shares.
+- Restoring a last known good configuration in case of issues.
+
+To use the module, you'll first need to import it into your PowerShell session:
+```powershell
+Import-Module -Name "D:\DeploymentShareRoot\Tools\PSDConfigManager.psm1" # Adjust path as necessary
+```
+
+### Exporting Configuration (`Export-PSDConfiguration`)
+
+The `Export-PSDConfiguration` function backs up your `Bootstrap.ini` and `CustomSettings.ini` files from the `Control` directory of your deployment share to a specified backup location.
+
+**Parameters:**
+
+*   `-Path <String>`: (Mandatory) Specifies the directory where the configuration files will be backed up. The files will be stored in a subdirectory named `PSDConfigBackup` within this path.
+*   `-DeploymentShare <String>`: (Optional) Specifies the root of the MDT/PSD deployment share. If not provided, the function assumes the parent directory of the `Tools` folder (where the module resides) is the deployment share root.
+
+**Example:**
+
+To back up the configuration files from `D:\DeploymentShareRoot` to `D:\Backups\PSDConfigs`:
+
+```powershell
+Export-PSDConfiguration -Path "D:\Backups\PSDConfigs" -DeploymentShare "D:\DeploymentShareRoot"
+```
+
+This will create `D:\Backups\PSDConfigs\PSDConfigBackup` and copy `Bootstrap.ini` and `CustomSettings.ini` into it.
+
+### Importing Configuration (`Import-PSDConfiguration`)
+
+The `Import-PSDConfiguration` function restores `Bootstrap.ini` and `CustomSettings.ini` from a backup location (created by `Export-PSDConfiguration`) to the `Control` directory of your deployment share.
+
+**Important:** This function will overwrite the existing `Bootstrap.ini` and `CustomSettings.ini` files in the target `Control` directory.
+
+**Parameters:**
+
+*   `-Path <String>`: (Mandatory) Specifies the directory containing the `PSDConfigBackup` subdirectory from which the configuration files will be restored.
+*   `-DeploymentShare <String>`: (Optional) Specifies the root of the MDT/PSD deployment share where the files will be restored. If not provided, the function assumes the parent directory of the `Tools` folder is the deployment share root.
+
+**Example:**
+
+To restore configuration files to `D:\DeploymentShareRoot` from a backup located at `D:\Backups\PSDConfigs`:
+
+```powershell
+Import-PSDConfiguration -Path "D:\Backups\PSDConfigs" -DeploymentShare "D:\DeploymentShareRoot"
+```
+
+This will copy `Bootstrap.ini` and `CustomSettings.ini` from `D:\Backups\PSDConfigs\PSDConfigBackup` to `D:\DeploymentShareRoot\Control`.
+
+### Verbose Logging
+
+Both functions use `Write-Verbose` to output detailed information about their operations. To see this detailed logging, use the `-Verbose` common parameter when running the functions:
+
+```powershell
+Export-PSDConfiguration -Path "D:\Backups\PSDConfigs" -Verbose
+Import-PSDConfiguration -Path "D:\Backups\PSDConfigs" -Verbose
+```
+
+## Using the PSD Environment Configuration Tool (`PSDEnvironmentConfigurator.ps1`)
+
+To simplify common setup and maintenance tasks for your PowerShell Deployment environment, a menu-driven PowerShell script named `PSDEnvironmentConfigurator.ps1` is provided.
+
+**Location:** This script is located in the `Tools` directory of your PSD deployment share (e.g., `X:\DeploymentShare\Tools\PSDEnvironmentConfigurator.ps1`).
+
+**How to Launch:**
+To run the tool, open a PowerShell console, navigate to your deployment share's `Tools` directory, and execute the script:
+```powershell
+cd X:\DeploymentShare\Tools
+.\PSDEnvironmentConfigurator.ps1
+```
+Ensure you run this script with appropriate permissions for the tasks you intend to perform (some options may require Administrator rights).
+
+**Menu Options Overview:**
+
+The configurator provides the following options:
+
+1.  **Validate PSD Prerequisites:**
+    *   *Purpose:* Intended to check your environment for necessary roles, features, and settings required for PSD to function correctly.
+    *   *Current Status:* This is currently a placeholder. The underlying checks are yet to be implemented.
+
+2.  **Guided IIS Setup for PSD:**
+    *   *Purpose:* Designed to walk you through the configuration of Internet Information Services (IIS) if you plan to use HTTP or HTTPS for your deployments.
+    *   *Current Status:* This is currently a placeholder.
+
+3.  **Guided BranchCache Setup for PSD:**
+    *   *Purpose:* Intended to assist in setting up BranchCache for peer-to-peer content distribution, which can significantly reduce WAN traffic in distributed environments.
+    *   *Current Status:* This is currently a placeholder.
+
+4.  **Backup Deployment Share Configuration:**
+    *   *Purpose:* Provides an interactive way to back up your critical deployment share configuration files (`Bootstrap.ini` and `CustomSettings.ini`).
+    *   *Functionality:* This option utilizes the `Export-PSDConfiguration` function from the `PSDConfigManager.psm1` module (also located in the `Tools` directory). You will be prompted for a backup path.
+
+5.  **Restore Deployment Share Configuration:**
+    *   *Purpose:* Allows you to restore `Bootstrap.ini` and `CustomSettings.ini` from a previous backup.
+    *   *Functionality:* This option uses the `Import-PSDConfiguration` function from the `PSDConfigManager.psm1` module. You will be prompted for the path containing the `PSDConfigBackup` folder.
+
+**Note on Development Status:**
+Please be aware that the `PSDEnvironmentConfigurator.ps1` tool is currently under development. While the configuration backup and restore functionalities are operational (leveraging `PSDConfigManager.psm1`), several other menu options are placeholders for future enhancements.
+
 ### Update Background wallpaper
 
 By default, a new PSD themed background wallpaper (PSDBackground.bmp) is provided. It can be found at Samples folder of the MDT installation. Adjust the MDT WinPE Customizations tab to reflect this new bmp (or use your own).
