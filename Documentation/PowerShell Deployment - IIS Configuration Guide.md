@@ -137,6 +137,36 @@ In this section you find a list of all components being added by the setup scrip
     * Allow Verb Filtering
   * Modify Default MIME type
 
+### Verify WebDAV Functionality
+
+After running the `Set-PSDWebInstance.ps1` script or manually configuring IIS and WebDAV, it's important to verify that WebDAV is functioning correctly and that your deployment share content is accessible.
+
+Here are a couple of ways to test:
+
+1.  **Using a Web Browser (for read access):**
+    *   Open a web browser from a client machine (or the server itself).
+    *   Try to access a known file within your deployment share's virtual directory, for example, `CustomSettings.ini` located in the `Control` folder. The URL would look something like:
+        `http://yourpsdserver.yourdomain.com/YourVirtualDirectory/Control/CustomSettings.ini`
+        (Replace `yourpsdserver.yourdomain.com` with your server's FQDN and `YourVirtualDirectory` with the name of the IIS virtual directory you created for your deployment share).
+    *   If you are using Windows Authentication, you might be prompted for credentials. Use the account that has read access to your deployment share.
+    *   **Expected Result:** You should be able to view the content of the file or be prompted to download it.
+    *   **Troubleshooting:** If you receive HTTP errors like 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), or 405 (Method Not Allowed), it indicates a problem with your IIS or WebDAV configuration. Review the following:
+        *   IIS Authentication settings for the virtual directory (Anonymous, Windows Auth).
+        *   WebDAV Authoring Rules (ensure rules exist for the correct users/groups with read access).
+        *   File system NTFS permissions on your deployment share folders.
+        *   Ensure the "WebDAV Publishing" feature is enabled in IIS and configured for the site.
+        *   Check IIS logs for more detailed error information.
+
+2.  **Mapping a Network Drive (more comprehensive test):**
+    *   On a Windows client machine, you can try to map a network drive to the WebDAV share.
+    *   Open File Explorer, right-click on "This PC" or "Computer," and select "Map network drive...".
+    *   For the folder, enter the WebDAV URL to your deployment share's virtual directory (e.g., `http://yourpsdserver.yourdomain.com/YourVirtualDirectory`).
+    *   If prompted, enter credentials for an account with read access.
+    *   **Expected Result:** The drive should map successfully, and you should be able to browse the folders (like `Control`, `Scripts`, etc.) within your deployment share.
+    *   **Troubleshooting:** If mapping fails, it often points to issues with WebDAV authoring rules, authentication, or the WebClient service on the client machine (ensure it's running).
+
+Verifying WebDAV access is a crucial step to ensure that PSD clients can download necessary files (like `CustomSettings.ini`, scripts, and images) when using HTTP or HTTPS deployment roots.
+
 ## Next steps
 
 To enable BranchCache (P2P) support [optional]. Go here next [PowerShell Deployment - BranchCache Installation Guide](./PowerShell%20Deployment%20-%20BranchCache%20Installation%20Guide.md)
