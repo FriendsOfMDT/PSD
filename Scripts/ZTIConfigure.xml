@@ -214,4 +214,7 @@
 	<mapping id="DestinationPartition" type="xml">
                 <xpath><![CDATA[//unattend:settings[@pass="windowsPE"]/unattend:component[@name="Microsoft-Windows-Setup"]/unattend:ImageInstall/unattend:OSImage/unattend:InstallTo/unattend:PartitionID]]></xpath>
 	</mapping>
+	<mapping id="DOUserPassword" type="xml">
+		<xpath><![CDATA[//unattend:settings[@pass='oobeSystem']/unattend:component[@name='Microsoft-Windows-Shell-Setup']/unattend:UserAccounts/unattend:LocalAccounts/unattend:LocalAccount[unattend:Name='DOuser']/unattend:Password/unattend:Value]]></xpath>
+	</mapping>
 </mappings>

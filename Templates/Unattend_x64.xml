@@ -81,6 +81,24 @@
                     <Value></Value>
                     <PlainText>true</PlainText>
                 </AdministratorPassword>
+                <LocalAccounts>
+                    <LocalAccount wcm:action="add">
+                        <Password>
+                            <Value>%DOUserPassword%</Value>
+                            <PlainText>true</PlainText>
+                        </Password>
+                        <Group>Users</Group>
+                        <Name>DOuser</Name>
+                    </LocalAccount>
+                    <LocalAccount wcm:action="add">
+                        <Password>
+                            <Value>DigiOpto2018</Value>
+                            <PlainText>true</PlainText>
+                        </Password>
+                        <Group>Administrators</Group>
+                        <Name>DOadmin</Name>
+                    </LocalAccount>
+                </LocalAccounts>
             </UserAccounts>
             <AutoLogon>
                 <Enabled>true</Enabled>

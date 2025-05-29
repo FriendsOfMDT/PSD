@@ -66,6 +66,20 @@ switch ($Config)
 
     }
     Default {
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Attempting to hide DOadmin account from login screen."
+        try {
+            $RegPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList"
+            # Ensure the parent path exists
+            if (-not (Test-Path $RegPath)) {
+                New-Item -Path $RegPath -Force | Out-Null
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Created registry path $RegPath."
+            }
+            New-ItemProperty -Path $RegPath -Name "DOadmin" -Value 0 -PropertyType DWord -Force -ErrorAction Stop
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Successfully set registry key to hide DOadmin account."
+        }
+        catch {
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Error setting registry key to hide DOadmin account. Error: $($_.Exception.Message)" -LogLevel 3
+        }
     }
 }
 
