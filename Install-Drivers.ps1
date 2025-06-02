@@ -1,15 +1,23 @@
 # Install-Drivers.ps1
 # This script provides a framework for installing multiple drivers from .inf files
 # located in a specified directory.
+# It is designed for use in MDT/PSD task sequences where the driver source path can be supplied.
 #
 # How to Use:
-# 1. Create a directory (e.g., "Drivers" in the same location as this script).
-# 2. Place all your driver packages (containing .inf files and associated driver files)
-#    into subdirectories within this main "Drivers" directory.
-# 3. Run this script as Administrator.
+# 1. If running standalone, ensure driver packages are in the default path (.\Drivers)
+#    or provide the -DriverSourcePath parameter.
+# 2. In an MDT Task Sequence, the DriverSourcePath can be set using a Task Sequence variable
+#    or by passing it as a parameter. For example:
+#    -Parameters "-DriverSourcePath '%DeployRoot%\Out-of-Box Drivers\MyModel'"
+#    MDT also often sets the %OSDDriverPath% variable, which could be used.
+# 3. Place all your driver packages (containing .inf files and associated driver files)
+#    into subdirectories within the specified DriverSourcePath.
+# 4. Run this script as Administrator.
 
-# --- Configuration ---
-$driverSourcePath = ".\Drivers" # Relative path to the directory containing driver INF files and their packages.
+param(
+    # Relative or absolute path to the directory containing driver INF files and their packages.
+    [string]$DriverSourcePath = ".\Drivers"
+)
 
 # --- Administrator Privileges Check ---
 Write-Host "Checking for Administrator privileges..."
@@ -22,22 +30,31 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 Write-Host "Administrator privileges confirmed."
 
 # --- Check if Driver Source Path Exists ---
-Write-Host "Checking for driver source directory: $driverSourcePath"
-if (-not (Test-Path $driverSourcePath -PathType Container)) {
-    Write-Error "Driver source directory '$driverSourcePath' not found."
-    Write-Error "Please create this directory and place your driver packages (containing .inf files) into it."
+# Resolve the path in case a relative path like ".\Drivers" is used.
+$ResolvedDriverSourcePath = Resolve-Path -Path $DriverSourcePath -ErrorAction SilentlyContinue
+if (-not $ResolvedDriverSourcePath) {
+    Write-Warning "Could not resolve DriverSourcePath: '$DriverSourcePath'. This might be an issue if it's not a standard path."
+    # Attempt to use the path as given if Resolve-Path fails (e.g. if it's on a PSDrive not yet mapped)
+    $ResolvedDriverSourcePath = $DriverSourcePath
+}
+
+
+Write-Host "Checking for driver source directory: $ResolvedDriverSourcePath"
+if (-not (Test-Path $ResolvedDriverSourcePath -PathType Container)) {
+    Write-Error "Driver source directory '$ResolvedDriverSourcePath' not found."
+    Write-Error "Please create this directory and place your driver packages (containing .inf files) into it, or provide the correct -DriverSourcePath parameter."
     Write-Error "Script will now exit."
     Start-Sleep -Seconds 5
     exit 1
 }
-Write-Host "Driver source directory found: $driverSourcePath"
+Write-Host "Driver source directory found: $ResolvedDriverSourcePath"
 
 # --- Find and Install Drivers ---
-Write-Host "Searching for driver INF files in '$driverSourcePath'..."
-$infFiles = Get-ChildItem -Path $driverSourcePath -Filter "*.inf" -Recurse -File
+Write-Host "Searching for driver INF files in '$ResolvedDriverSourcePath'..."
+$infFiles = Get-ChildItem -Path $ResolvedDriverSourcePath -Filter "*.inf" -Recurse -File
 
 if ($infFiles.Count -eq 0) {
-    Write-Warning "No .inf files found in '$driverSourcePath' or its subdirectories."
+    Write-Warning "No .inf files found in '$ResolvedDriverSourcePath' or its subdirectories."
     Write-Host "Script completed. No drivers to install."
     exit 0
 }
@@ -57,16 +74,9 @@ foreach ($infFile in $infFiles) {
         # The /add-driver flag stages the driver in the driver store.
         $pnpArgs = "/add-driver `"$infFilePath`" /install"
         Write-Host "Executing: pnputil.exe $pnpArgs"
-        
-        # Start-Process can be used, but directly calling and checking $LASTEXITCODE is often simpler for pnputil
+
         pnputil.exe /add-driver "$infFilePath" /install
-        
-        # PnPUtil Exit Codes:
-        # 0: Success.
-        # 3010 (ERROR_SUCCESS_REBOOT_REQUIRED): Success, but a reboot is required.
-        # Other non-zero values typically indicate failure.
-        # For simplicity, we'll treat 0 and 3010 as success.
-        
+
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Successfully added and initiated install for driver: $infFilePath"
             $installedCount++
@@ -75,13 +85,10 @@ foreach ($infFile in $infFiles) {
             $installedCount++
         } else {
             Write-Error "Failed to install driver '$infFilePath'. PnPUtil exit code: $LASTEXITCODE"
-            # You might want to log more details from pnputil if possible, but its output redirection can be tricky.
             $failedCount++
         }
     }
     catch {
-        # This catch block might catch exceptions from the PowerShell script itself,
-        # not necessarily from pnputil.exe if it runs but fails.
         Write-Error "An unexpected error occurred while processing driver '$infFilePath': $($_.Exception.Message)"
         $failedCount++
     }

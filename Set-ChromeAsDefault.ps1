@@ -78,7 +78,7 @@ foreach ($protocol in $protocols) {
             continue
         }
     }
-    
+
     # Attempt to set the UserChoice ProgId
     try {
         # Ensure UserChoice key exists or create it
@@ -86,10 +86,10 @@ foreach ($protocol in $protocols) {
             New-Item -Path $userChoicePath -Force -ErrorAction Stop | Out-Null
             Write-Host "Created registry key: $userChoicePath"
         }
-        
+
         Set-ItemProperty -Path $userChoicePath -Name "ProgId" -Value $chromeProgId -Type String -Force -ErrorAction Stop
         Write-Host "Successfully set ProgId for $protocol to $chromeProgId."
-        
+
         # Comment: Regarding the 'Hash' value:
         # Windows uses a hash value in UserChoice to verify the user's selection.
         # Programmatically generating a valid hash that Windows accepts is complex and unreliable.

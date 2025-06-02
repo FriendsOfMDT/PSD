@@ -4,6 +4,15 @@
 #
 # It requires Administrator privileges to run, as many of the sub-scripts
 # perform actions that need elevation (e.g., registry modification, driver installation).
+#
+# MDT/PSD Integration Notes:
+# - This script can be used as a general sequencer.
+# - However, for MDT/PSD, it's often more flexible to call each sub-script
+#   as an individual Task Sequence step. This allows MDT/PSD to directly pass
+#   Task Sequence variables as parameters to each script (e.g., wallpaper path, source folders).
+# - If this orchestrator calls scripts that have mandatory parameters without defaults,
+#   those scripts will error out if not provided, and this script will log that error.
+#   For example, Set-DesktopWallpaper.ps1 requires -WallpaperPath.
 
 # --- Administrator Privileges Check ---
 Write-Host "---------------------------------------------------------------------"
@@ -20,13 +29,18 @@ Write-Host "--------------------------------------------------------------------
 
 # --- Define the sequence of scripts to execute ---
 # Ensure these script files are located in the same directory as this main script.
+# Some scripts have parameters; if run via this orchestrator without specifying them,
+# their internal defaults will be used, or they will error if a mandatory parameter is missing.
 $scriptsToExecute = @(
-    "Hide-DOAdmin.ps1",
-    "Install-Applications.ps1",
-    "Enable-TipbandVisibility.ps1",
-    "Set-ChromeAsDefault.ps1",
-    "Install-Drivers.ps1",
-    "Copy-DOTempFolder.ps1"
+    "Hide-DOAdmin.ps1",             # Parameter: -UserNameToHide (default: DOAdmin)
+    "Install-Applications.ps1",     # No specific parameters for this orchestrator to pass; manages its own list.
+    "Enable-TipbandVisibility.ps1", # No parameters.
+    "Set-ChromeAsDefault.ps1",      # No parameters.
+    "Set-DesktopWallpaper.ps1",     # MANDATORY parameter: -WallpaperPath. Will error if not supplied.
+                                    # This script expects -WallpaperPath. If not provided, it will fail and be logged.
+                                    # For MDT, call this script directly with the path as a parameter.
+    "Install-Drivers.ps1",          # Parameter: -DriverSourcePath (default: .\Drivers)
+    "Copy-DOTempFolder.ps1"         # Parameters: -SourcePath (default), -DestinationPath (default)
 )
 
 # Get the directory where this script is located. Sub-scripts are expected to be here.
@@ -34,6 +48,7 @@ $basePath = $PSScriptRoot
 
 Write-Host "Starting Task Sequence..."
 Write-Host "Base path for scripts: $basePath"
+Write-Host "Review MDT/PSD Integration Notes at the top of this script regarding parameter handling."
 Write-Host "---------------------------------------------------------------------"
 
 $totalScripts = $scriptsToExecute.Count
@@ -45,7 +60,7 @@ $skippedCount = 0
 for ($i = 0; $i -lt $totalScripts; $i++) {
     $scriptName = $scriptsToExecute[$i]
     $scriptPath = Join-Path -Path $basePath -ChildPath $scriptName
-    
+
     Write-Host ""
     Write-Host "($($i+1)/$totalScripts) Processing script: $scriptName"
     Write-Host "---------------------------------------------------------------------"
@@ -59,22 +74,22 @@ for ($i = 0; $i -lt $totalScripts; $i++) {
     }
 
     Write-Host "Starting execution of '$scriptName'..."
+    if ($scriptName -eq "Set-DesktopWallpaper.ps1") {
+        Write-Warning "Executing '$scriptName'. This script requires the '-WallpaperPath' parameter."
+        Write-Warning "If called directly by this orchestrator without a mechanism to provide this parameter,"
+        Write-Warning "it will fail and log an error, which is expected in this generic execution context."
+        Write-Warning "For proper use, call '$scriptName' as a separate step in MDT with the parameter specified,"
+        Write-Warning "or modify this orchestrator to provide the parameter if used standalone."
+    }
+
     try {
         # Execute the script.
         # Using '&' (call operator) to execute the script in the current scope/session.
-        # Errors from the called script (if they are terminating) will be caught here.
+        # If the called script has mandatory parameters, they must be provided or it will throw an error.
         & $scriptPath -ErrorAction Stop # Ensure terminating errors are caught
 
-        # Note: $LASTEXITCODE is generally for external executables.
-        # For .ps1 scripts, success is usually determined by the absence of terminating errors.
-        # If a sub-script uses "exit $number", that $LASTEXITCODE might be available,
-        # but standard PowerShell error handling relies on try/catch for terminating errors.
-        
-        # Check if the script produced any non-terminating errors that were written to the error stream
-        # This is a basic check. More sophisticated check might involve inspecting $Error variable count before/after.
         if ($Error.Count -gt 0 -and $Error[0].TargetObject -match $scriptName) {
              Write-Warning "Script '$scriptName' completed, but may have produced non-terminating errors. Review logs from the script itself."
-             # Depending on policy, you might consider this a partial success or flag for review.
         }
 
         Write-Host "Successfully completed execution of '$scriptName'."
@@ -83,16 +98,13 @@ for ($i = 0; $i -lt $totalScripts; $i++) {
     catch {
         Write-Error "An error occurred during the execution of script '$scriptName'."
         Write-Error "Error details: $($_.Exception.Message)"
-        # If the script itself wrote an error, that might be more specific.
-        # This catches exceptions from the execution of the script itself (e.g., if it couldn't be parsed or a terminating error occurred).
+        # This will catch errors, including missing mandatory parameters from called scripts.
         $failureCount++
     }
     finally {
         Write-Host "Finished processing '$scriptName'."
         Write-Host "---------------------------------------------------------------------"
-        # Clear errors that might have been generated by the executed script to avoid confusion with the next one.
-        # This is a simple clear; more complex scenarios might involve scoping $Error.
-        $Error.Clear() 
+        $Error.Clear()
     }
 }
 
@@ -112,7 +124,3 @@ if ($failureCount -gt 0 -or $skippedCount -gt 0) {
 } else {
     Write-Host "All scripts in the sequence executed successfully."
 }
-
-# End of script
-# Consider adding a pause if run by double-clicking, so the window doesn't close immediately.
-# Read-Host -Prompt "Press Enter to exit"
