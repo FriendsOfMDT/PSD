@@ -2,6 +2,19 @@
 # This script sets the desktop wallpaper for the current user and attempts
 # to set it for the Default User profile (affecting new user accounts).
 #
+# How to Use in an MDT/PSD Task Sequence:
+# Add a "Run PowerShell Script" step.
+#
+# Example 1: Setting a wallpaper from the Deployment Share
+#   -Parameters "-WallpaperPath '%DEPLOYROOT%\Branding\CorporateWallpaper.jpg' -WallpaperStyle '10'"
+#
+# Example 2: Setting a wallpaper that might have been copied locally by a previous step
+#   -Parameters "-WallpaperPath 'C:\Windows\Temp\MyWallpaper.png' -WallpaperStyle '2'"
+#
+# Example 3: Using a Task Sequence variable for the wallpaper path
+#   # (Ensure TS variable %CustomWallpaperPath% is set, e.g., by Gather or custom script)
+#   -Parameters "-WallpaperPath '%CustomWallpaperPath%' -WallpaperStyle '6'"
+#
 # PARAMETERS:
 #   -WallpaperPath (Mandatory): The full path to the wallpaper image file.
 #   -WallpaperStyle (Optional): Defines how the wallpaper is displayed. Default is '2' (Stretch).
@@ -21,105 +34,120 @@ param(
     [string]$TileWallpaper = "0" # Default to No Tile
 )
 
+# --- Function to Write Log Messages ---
+function Write-Log {
+    param([string]$Message, [string]$Severity = "INFO")
+    Write-Host "[$Severity] $Message" # Output to console for SMSTS.log visibility
+}
+
+Write-Log "Starting script: Set-DesktopWallpaper.ps1"
+Write-Log "Parameters: WallpaperPath='$WallpaperPath', WallpaperStyle='$WallpaperStyle', TileWallpaper='$TileWallpaper'"
+
 # --- Administrator Privileges Check ---
-Write-Host "Checking for Administrator privileges..."
+Write-Log "Checking for Administrator privileges..."
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error "Administrator privileges are required, especially for modifying the Default User profile. Please re-run this script as Administrator."
+    Write-Log -Message "Administrator privileges are required to run this script, especially for Default User Profile modification. Please re-run this script as an Administrator." -Severity "ERROR"
     Start-Sleep -Seconds 5
     exit 1
 }
-Write-Host "Administrator privileges confirmed."
+Write-Log "Administrator privileges confirmed."
 
 # --- Validate Wallpaper Path ---
-Write-Host "Validating wallpaper path: '$WallpaperPath'..."
+Write-Log "Validating wallpaper path: '$WallpaperPath'..."
 if (-not (Test-Path $WallpaperPath -PathType Leaf)) {
-    Write-Error "Wallpaper file '$WallpaperPath' not found or is not a file. Please provide a valid path."
+    Write-Log -Message "Wallpaper file '$WallpaperPath' not found. Aborting." -Severity "ERROR"
     exit 1
 }
-# Resolve to absolute path for registry consistency
-$AbsoluteWallpaperPath = Resolve-Path -Path $WallpaperPath -ErrorAction Stop
-Write-Host "Wallpaper found: '$AbsoluteWallpaperPath'."
+Write-Log "Wallpaper file found: '$WallpaperPath'"
 
-# --- Define Registry Settings ---
-$regPathCurrentUser = "HKCU:\Control Panel\Desktop"
-$regPathDefaultUserHiveLoaded = "HKLM:\DefaultUserHive\Control Panel\Desktop" # Path within the loaded hive
-$defaultUserHivePath = "C:\Users\Default\NTUSER.DAT"
-$tempHiveName = "DefaultUserHive"
+# --- Define Registry Paths and Values ---
+$regControlPanelDesktop = "Control Panel\Desktop" # For HKCU
+$regValueWallpaper = "Wallpaper"
+$regValueWallpaperStyle = "WallpaperStyle"
+$regValueTileWallpaper = "TileWallpaper"
 
-# --- Set Wallpaper for Current User ---
-Write-Host "Attempting to set wallpaper for the current user..."
-try {
-    if (-not (Test-Path $regPathCurrentUser)) {
-        New-Item -Path $regPathCurrentUser -Force -ErrorAction Stop | Out-Null
-        Write-Host "Created registry path: $regPathCurrentUser"
-    }
-    Set-ItemProperty -Path $regPathCurrentUser -Name "Wallpaper" -Value $AbsoluteWallpaperPath -Type String -Force -ErrorAction Stop
-    Set-ItemProperty -Path $regPathCurrentUser -Name "WallpaperStyle" -Value $WallpaperStyle -Type String -Force -ErrorAction Stop
-    Set-ItemProperty -Path $regPathCurrentUser -Name "TileWallpaper" -Value $TileWallpaper -Type String -Force -ErrorAction Stop
-    Write-Host "Successfully set wallpaper for the current user."
-}
-catch {
-    Write-Error "Failed to set wallpaper for the current user. Error: $($_.Exception.Message)"
-    # Continue to attempt Default User, as this part might be run for a system account where HKCU is less relevant.
-}
+# --- Function to Apply Wallpaper Settings to a Registry Hive/Path ---
+function Set-WallpaperForRegistryPath {
+    param(
+        [string]$RegistryPathBase, # e.g., "HKCU:\Control Panel\Desktop" or "HKLM:\TempDefaultUser\Control Panel\Desktop"
+        [string]$ContextDescription # e.g., "Current User" or "Default User Profile"
+    )
 
-# --- Attempt to Set Wallpaper for Default User Profile ---
-Write-Host "Attempting to set wallpaper for the Default User profile..."
-$hiveLoaded = $false
-if (-not (Test-Path $defaultUserHivePath -PathType Leaf)) {
-    Write-Warning "Default User profile hive '$defaultUserHivePath' not found. Skipping Default User wallpaper configuration."
-} else {
-    Write-Host "Loading Default User hive from '$defaultUserHivePath' into 'HKLM\$tempHiveName'..."
+    Write-Log "Attempting to set wallpaper for $ContextDescription at $RegistryPathBase."
     try {
-        # Ensure hive isn't already loaded from a failed previous run by trying to unload first (ignore error if not loaded)
-        reg.exe unload "HKLM\$tempHiveName" # >$null 2>&1
-
-        reg.exe load "HKLM\$tempHiveName" "$defaultUserHivePath"
-        if ($LASTEXITCODE -ne 0) {
-            Throw "reg.exe load command failed with exit code $LASTEXITCODE."
+        if (-not (Test-Path $RegistryPathBase)) {
+             Write-Log "Registry path $RegistryPathBase does not exist. Creating it..." -Severity "WARN"
+             New-Item -Path $RegistryPathBase -Force -ErrorAction Stop | Out-Null
         }
-        $hiveLoaded = $true
-        Write-Host "Default User hive loaded successfully."
-
-        Write-Host "Setting wallpaper properties in the loaded Default User hive..."
-        if (-not (Test-Path $regPathDefaultUserHiveLoaded)) {
-             # The "Control Panel" key should exist, but "Desktop" might not if it's a very clean/new default hive.
-            New-Item -Path $regPathDefaultUserHiveLoaded -Force -ErrorAction Stop | Out-Null
-            Write-Host "Created registry path: $regPathDefaultUserHiveLoaded"
-        }
-        Set-ItemProperty -Path $regPathDefaultUserHiveLoaded -Name "Wallpaper" -Value $AbsoluteWallpaperPath -Type String -Force -ErrorAction Stop
-        Set-ItemProperty -Path $regPathDefaultUserHiveLoaded -Name "WallpaperStyle" -Value $WallpaperStyle -Type String -Force -ErrorAction Stop
-        Set-ItemProperty -Path $regPathDefaultUserHiveLoaded -Name "TileWallpaper" -Value $TileWallpaper -Type String -Force -ErrorAction Stop
-        Write-Host "Successfully set wallpaper properties in the loaded Default User hive."
+        Set-ItemProperty -Path $RegistryPathBase -Name $regValueWallpaper -Value $WallpaperPath -Type String -Force -ErrorAction Stop
+        Set-ItemProperty -Path $RegistryPathBase -Name $regValueWallpaperStyle -Value $WallpaperStyle -Type String -Force -ErrorAction Stop
+        Set-ItemProperty -Path $RegistryPathBase -Name $regValueTileWallpaper -Value $TileWallpaper -Type String -Force -ErrorAction Stop
+        Write-Log "Successfully set wallpaper properties for $ContextDescription."
     }
     catch {
-        Write-Warning "Failed to set wallpaper for the Default User profile. Error: $($_.Exception.Message)"
+        Write-Log -Message "Error setting wallpaper properties for $ContextDescription at $RegistryPathBase. Error: $($_.Exception.Message)" -Severity "ERROR"
+    }
+}
+
+# --- Apply to Current User (primarily for testing, may not be visible in TS SYSTEM context) ---
+# Set-WallpaperForRegistryPath -RegistryPathBase "HKCU:\$regControlPanelDesktop" -ContextDescription "Current User (HKCU)"
+
+# --- Apply to Default User Profile ---
+$defaultUserHive = "C:\Users\Default\NTUSER.DAT"
+$tempHiveKey = "TempDefaultUser_Wallpaper" # Unique temporary key name for loading hive
+$defaultUserDesktopRegPathLoaded = "HKLM:\$tempHiveKey\$regControlPanelDesktop"
+
+Write-Log "Validating Default User hive path: '$defaultUserHive'..."
+if (-not (Test-Path $defaultUserHive -PathType Leaf)) {
+    Write-Log -Message "Default User profile hive '$defaultUserHive' not found. Cannot apply to Default User. Skipping Default User." -Severity "WARN"
+} else {
+    Write-Log "Default User hive found. Attempting to load and modify."
+    $hiveLoaded = $false
+    try {
+        # Ensure hive isn't already loaded from a failed previous run
+        reg.exe unload "HKLM\$tempHiveKey" >$null 2>&1
+
+        reg.exe load "HKLM\$tempHiveKey" "$defaultUserHive"
+        if ($LASTEXITCODE -ne 0) {
+            Throw "reg.exe load command failed with exit code $LASTEXITCODE for HKLM\$tempHiveKey and $defaultUserHive."
+        }
+        $hiveLoaded = $true
+        Write-Log "Default User hive loaded successfully into HKLM\$tempHiveKey."
+
+        Set-WallpaperForRegistryPath -RegistryPathBase $defaultUserDesktopRegPathLoaded -ContextDescription "Default User Profile (loaded hive)"
+    }
+    catch {
+        Write-Log -Message "Error during Default User hive operations: $($_.Exception.Message)" -Severity "ERROR"
         if ($_.Exception.Message -like "*reg.exe load*") {
-            Write-Warning "This often happens if the hive is in use or permissions are insufficient even for an Administrator."
+            Write-Log "This often happens if the hive is in use or permissions are insufficient." "WARN"
         }
     }
     finally {
         if ($hiveLoaded) {
-            Write-Host "Unloading Default User hive ('HKLM\$tempHiveName')..."
-            reg.exe unload "HKLM\$tempHiveName"
+            Write-Log "Unloading Default User hive ('HKLM\$tempHiveKey')..."
+            [System.GC]::Collect() # Trigger garbage collection to release file locks
+            Start-Sleep -Milliseconds 200 # Brief pause
+            reg.exe unload "HKLM\$tempHiveKey"
             if ($LASTEXITCODE -eq 0) {
-                Write-Host "Default User hive unloaded successfully."
+                Write-Log "Default User hive unloaded successfully."
             } else {
-                Write-Warning "Failed to unload Default User hive. Exit code: $LASTEXITCODE. Manual check of 'regedit' under HKLM might be needed to ensure '$tempHiveName' is not present."
+                Write-Log -Message "Failed to unload Default User hive (HKLM\$tempHiveKey). Exit code: $LASTEXITCODE. Manual check of 'regedit' might be needed." -Severity "WARN"
             }
         }
     }
 }
 
-# --- Apply Changes by Refreshing Desktop for Current User ---
-Write-Host "Attempting to refresh desktop settings for the current user..."
+# --- Refresh Desktop (for current interactive user, if any) ---
+# This part may not have a visible effect when run as SYSTEM in a TS.
+Write-Log "Attempting to refresh desktop settings for the current session..."
 try {
-    Start-Process -FilePath "RUNDLL32.EXE" -ArgumentList "user32.dll,UpdatePerUserSystemParameters ,1 ,True" -Wait -NoNewWindow
-    Write-Host "Desktop refresh command executed. Changes should be visible for the current user shortly."
+    # This command is typically used to make explorer.exe re-read settings.
+    RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters 1, True
+    Write-Log "Desktop refresh command sent."
 }
 catch {
-    Write-Warning "Failed to execute desktop refresh command. Error: $($_.Exception.Message)"
-    Write-Warning "A logoff/logon or restart might be required for the current user to see changes."
+    Write-Log -Message "Exception during desktop refresh: $($_.Exception.Message)" -Severity "WARN"
 }
 
-Write-Host "Script 'Set-DesktopWallpaper.ps1' completed."
+Write-Log "Script Set-DesktopWallpaper.ps1 finished."
+exit 0

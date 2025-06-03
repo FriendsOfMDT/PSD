@@ -706,3 +706,145 @@ While `Invoke-PSDScript.ps1` can be called directly from a task sequence step, i
     *   **PowerShell execution policy:** `Bypass`.
 
 This script primarily serves as an educational tool within this repository to demonstrate script invocation patterns.
+
+
+
+# Detailed Task Sequence Placement Guide for PowerShell Scripts
+
+This guide provides recommendations for placing the PowerShell scripts (discussed in the appendix) into your PSD/MDT Task Sequence. Proper placement ensures scripts run at the appropriate time with necessary prerequisites met.
+
+**General Configuration for "Run PowerShell Script" Steps:**
+
+*   **PowerShell script:** Specify the script name (e.g., `MyScript.ps1`). Use `%SCRIPTROOT%\MyScript.ps1` if your scripts are in the default Scripts folder, or adjust the path if they are in subfolders or a package.
+*   **Parameters:** As required by each script. Use Task Sequence Variables (e.g., `%DEPLOYROOT%`, `%OSDComputerName%`) for dynamic values.
+*   **PowerShell execution policy:** Recommended: `Bypass`.
+*   **Success codes:** Default `0 3010` is usually fine.
+
+---
+
+## 1. `Copy-DOTempFolder.ps1`
+
+*   **Purpose:** Copies a folder from a source to a local destination on the target machine.
+*   **Recommended Phase(s):**
+    *   **State Restore (Early - "Pre-Applications" or similar group):** If copying files needed for application installations or configurations that happen before user logon.
+    *   **System Preparation (Late - "Post-Applications" or "Custom Tasks" group):** If copying tools or files for final cleanup or setup that occurs late in the TS.
+*   **Rationale:** Placement depends on when the copied files are needed. Ensure network access to the source path is available.
+*   **Example TS Step Configuration:**
+    *   **Name:** "Copy MyCompany Tools to C:\Temp"
+    *   **PowerShell script:** `%SCRIPTROOT%\Copy-DOTempFolder.ps1`
+    *   **Parameters:** `-SourcePath "%DEPLOYROOT%\Applications\MyCompanyTools" -DestinationPath "C:\Temp\MyCompanyTools"`
+
+---
+
+## 2. `Enable-TipbandVisibility.ps1` (Modified for Default User)
+
+*   **Purpose:** Sets taskbar button grouping for all new users by modifying the Default User Profile.
+*   **Recommended Phase(s):**
+    *   **State Restore (Post OS Install, Pre User Creation - "Windows Update" or "Custom Tasks" group):** After the OS is stable and before any user profiles (other than Default) are heavily modified or created.
+*   **Rationale:** Modifies the Default User hive, so it must run before new user accounts are created and log on for the first time to inherit the setting.
+*   **Example TS Step Configuration:**
+    *   **Name:** "Set Default Taskbar Grouping for New Users"
+    *   **PowerShell script:** `%SCRIPTROOT%\Enable-TipbandVisibility.ps1`
+    *   **Parameters:** (None)
+
+---
+
+## 3. `Hide-DOAdmin.ps1`
+
+*   **Purpose:** Hides a specified user account (default "DOAdmin") from the login screen.
+*   **Recommended Phase(s):**
+    *   **State Restore (Late - "Final Configuration" or "Cleanup" group):** After all tasks requiring the admin account to be visible or active are completed.
+    *   **System Preparation (Very Late):** Just before the machine is finalized.
+*   **Rationale:** This should be one of the last actions to ensure the admin account used for deployment is hidden before the end-user sees the machine.
+*   **Example TS Step Configuration:**
+    *   **Name:** "Hide DOAdmin Account"
+    *   **PowerShell script:** `%SCRIPTROOT%\Hide-DOAdmin.ps1`
+    *   **Parameters:** `-UserNameToHide "DOAdmin"` (or your specific admin account name, possibly using a TS variable like `'%LocalAdminAccountName%'`)
+
+---
+
+## 4. Application Installation Scripts
+
+   Refer to "Script Guidance: Application Installation Scripts" in the appendix for details on `Install-App1.ps1`, `Install-Applications.ps1`, and `Scripts/PSDApplications.ps1`.
+
+*   **`Scripts/PSDApplications.ps1` (Recommended for MDT Apps):**
+    *   **Purpose:** Installs applications defined in MDT based on TS variables.
+    *   **Recommended Phase(s):** **State Restore ("Install Applications" group):** This is the standard phase for application installations.
+    *   **Rationale:** Runs after OS configuration and driver installation. Relies on variables typically populated by "Gather" and wizard choices.
+    *   **Example TS Step Configuration (if adding manually, usually part of default PSD TS):**
+        *   **Name:** "Install Applications via PSDApplications"
+        *   **PowerShell script:** `%SCRIPTROOT%\Scripts\PSDApplications.ps1`
+        *   **Parameters:** (None, relies on TS environment variables like `MandatoryApplications`, `Applications`)
+
+*   **`Install-Applications.ps1` (Simple Orchestrator):**
+    *   **Purpose:** Runs a predefined list of individual application install scripts.
+    *   **Recommended Phase(s):** **State Restore ("Install Applications" group):**
+    *   **Rationale:** Similar to above, but for a simpler, non-MDT integrated application list.
+    *   **Example TS Step Configuration:**
+        *   **Name:** "Install Core Set of Applications"
+        *   **PowerShell script:** `%SCRIPTROOT%\Install-Applications.ps1`
+        *   **Parameters:** (None, but ensure the scripts it calls, like `Install-App1.ps1`, are populated and in the same directory)
+
+---
+
+## 5. `Install-Drivers.ps1`
+
+*   **Purpose:** Installs drivers from .inf files in a specified source directory.
+*   **Recommended Phase(s):**
+    *   **Preinstall (Post OS Install, Pre OS Configuration):** If used as a primary method for injecting critical boot or system drivers not in the image.
+    *   **State Restore (Early - "Install Drivers" or "Custom Drivers" group):** For supplementary drivers after the OS is configured but before applications.
+*   **Rationale:** Drivers should be installed early to ensure hardware is correctly functioning before applications are installed or further configurations are made.
+*   **Example TS Step Configuration:**
+    *   **Name:** "Install MyCustom Model Drivers"
+    *   **PowerShell script:** `%SCRIPTROOT%\Install-Drivers.ps1`
+    *   **Parameters:** `-DriverSourcePath "%DEPLOYROOT%\Out-of-Box Drivers\MyCustomModel"` (or use `%OSDDriverPath%` if populated by MDT logic)
+
+---
+
+## 6. `Set-ChromeAsDefault.ps1` (Modified for Default User, with Caveats)
+
+*   **Purpose:** Attempts to set Chrome as the default browser for new users.
+*   **Recommended Phase(s):**
+    *   **State Restore (Post OS Install, Post Chrome Install, Pre User Creation):** Must run *after* Chrome is installed system-wide.
+*   **Rationale:** Modifies Default User Profile.
+*   **Example TS Step Configuration:**
+    *   **Name:** "Attempt to Set Chrome Default for New Users"
+    *   **PowerShell script:** `%SCRIPTROOT%\Set-ChromeAsDefault.ps1`
+    *   **Parameters:** (None)
+*   **CRITICAL NOTE:** As stated in its own documentation and script comments, this method is unreliable. Prioritize using the official XML-based App Association method for robust default browser settings. This script should be considered a "best effort" with low expectation of universal success.
+
+---
+
+## 7. `Set-DesktopWallpaper.ps1` (Modified for Default User)
+
+*   **Purpose:** Sets the desktop wallpaper for all new users by modifying the Default User Profile.
+*   **Recommended Phase(s):**
+    *   **State Restore (Post OS Install, Pre User Creation - "Branding" or "Custom Tasks" group):** After OS is stable, before new users log in.
+*   **Rationale:** Ensures new users see the specified wallpaper on first login.
+*   **Example TS Step Configuration:**
+    *   **Name:** "Set Corporate Desktop Wallpaper for New Users"
+    *   **PowerShell script:** `%SCRIPTROOT%\Set-DesktopWallpaper.ps1`
+    *   **Parameters:** `-WallpaperPath "%DEPLOYROOT%\Branding\MyCompanyWallpaper.jpg" -WallpaperStyle "10"`
+
+---
+
+## Orchestration Scripts (`Invoke-PSDScript.ps1`, `Run-TaskSequence.ps1`)
+
+*   **`Invoke-PSDScript.ps1`:**
+    *   This is a **wrapper/utility script**. It's not typically called directly as a primary task sequence step for its own sake, but rather used by an orchestrator (like `Run-TaskSequence.ps1`) or if you wanted to add its specific logging/parameter handling to a single script call.
+    *   If you *were* to call it directly to run another script:
+        *   **Phase:** Dependent on the target script it's calling.
+        *   **Example:** To run `Set-DesktopWallpaper.ps1` via the invoker:
+            *   **Name:** "Invoke: Set Wallpaper"
+            *   **PowerShell script:** `%SCRIPTROOT%\Invoke-PSDScript.ps1`
+            *   **Parameters:** `-TargetScriptPath "%SCRIPTROOT%\Set-DesktopWallpaper.ps1" -TargetScriptParameters @{ WallpaperPath = "%DEPLOYROOT%\Branding\wall.jpg"; WallpaperStyle = "2" }`
+
+*   **`Run-TaskSequence.ps1`:**
+    *   **Purpose:** Example orchestrator to run a sequence of other scripts (now using `Invoke-PSDScript.ps1`).
+    *   **Recommendation:** While this script is now more robust, for PSD/MDT task sequences, it's generally **preferable to create individual "Run PowerShell Script" steps for each distinct action** rather than using a single script to orchestrate many others. This provides better visibility, control, logging, and conditional execution within the TS environment.
+    *   **If Used:**
+        *   **Phase:** Its placement would depend on the *earliest* script in its internal sequence. Likely "State Restore".
+        *   **Parameters:** (None directly, but it now internally defines parameters for the scripts it calls).
+        *   **Note:** Using this script means all scripts within it run in the same overall step context. A failure in one (even if caught by `Invoke-PSDScript.ps1`) might be harder to diagnose in TS logs than separate, clearly named steps.
+
+Always test your task sequence thoroughly after adding or modifying script steps.
