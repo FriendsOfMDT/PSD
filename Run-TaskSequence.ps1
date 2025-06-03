@@ -1,126 +1,157 @@
 # Run-TaskSequence.ps1
 # This script orchestrates the execution of a sequence of PowerShell scripts
-# designed for system setup and configuration tasks.
+# using a wrapper script (Invoke-PSDScript.ps1) for enhanced logging and parameter handling.
 #
-# It requires Administrator privileges to run, as many of the sub-scripts
-# perform actions that need elevation (e.g., registry modification, driver installation).
+# It requires Administrator privileges to run.
 #
 # MDT/PSD Integration Notes:
-# - This script can be used as a general sequencer.
-# - However, for MDT/PSD, it's often more flexible to call each sub-script
-#   as an individual Task Sequence step. This allows MDT/PSD to directly pass
-#   Task Sequence variables as parameters to each script (e.g., wallpaper path, source folders).
-# - If this orchestrator calls scripts that have mandatory parameters without defaults,
-#   those scripts will error out if not provided, and this script will log that error.
-#   For example, Set-DesktopWallpaper.ps1 requires -WallpaperPath.
+# - This script now calls Invoke-PSDScript.ps1 for each actual task script.
+# - Invoke-PSDScript.ps1 handles its own logging.
+# - For actual MDT/PSD deployments, calling individual target scripts (or Invoke-PSDScript.ps1 per target)
+#   as separate Task Sequence steps is generally recommended. This allows for direct use of
+#   Task Sequence Variables (e.g., %DEPLOYROOT%) for parameters. This script serves as an
+#   example of how such an orchestrator *could* be structured if needed.
+
+# --- Function to Write Log Messages (for this script's own logging) ---
+function Write-OrchestratorLog {
+    param([string]$Message, [string]$Severity = "INFO")
+    Write-Host "[$Severity] [Run-TaskSequence] $Message"
+}
 
 # --- Administrator Privileges Check ---
-Write-Host "---------------------------------------------------------------------"
-Write-Host "Checking for Administrator privileges..."
+Write-OrchestratorLog "---------------------------------------------------------------------"
+Write-OrchestratorLog "Checking for Administrator privileges..."
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error "Administrator privileges are required to run this task sequence. Please re-run this script as Administrator."
-    Write-Host "Script will exit in 5 seconds."
+    Write-OrchestratorLog "Administrator privileges are required. Please re-run this script as Administrator." "ERROR"
+    Write-OrchestratorLog "Script will exit in 5 seconds."
     Start-Sleep -Seconds 5
     exit 1
 }
-Write-Host "Administrator privileges confirmed."
-Write-Host "---------------------------------------------------------------------"
+Write-OrchestratorLog "Administrator privileges confirmed."
+Write-OrchestratorLog "---------------------------------------------------------------------"
 
 
 # --- Define the sequence of scripts to execute ---
-# Ensure these script files are located in the same directory as this main script.
-# Some scripts have parameters; if run via this orchestrator without specifying them,
-# their internal defaults will be used, or they will error if a mandatory parameter is missing.
+# Each item is a hashtable: @{ Name = "ScriptName.ps1"; Parameters = @{...} }
+# Parameters provided here will be passed to Invoke-PSDScript.ps1's -TargetScriptParameters
+# For paths, in a real TS, you'd use variables like %DEPLOYROOT%. Here we use relative or example paths.
 $scriptsToExecute = @(
-    "Hide-DOAdmin.ps1",             # Parameter: -UserNameToHide (default: DOAdmin)
-    "Install-Applications.ps1",     # No specific parameters for this orchestrator to pass; manages its own list.
-    "Enable-TipbandVisibility.ps1", # No parameters.
-    "Set-ChromeAsDefault.ps1",      # No parameters.
-    "Set-DesktopWallpaper.ps1",     # MANDATORY parameter: -WallpaperPath. Will error if not supplied.
-                                    # This script expects -WallpaperPath. If not provided, it will fail and be logged.
-                                    # For MDT, call this script directly with the path as a parameter.
-    "Install-Drivers.ps1",          # Parameter: -DriverSourcePath (default: .\Drivers)
-    "Copy-DOTempFolder.ps1"         # Parameters: -SourcePath (default), -DestinationPath (default)
+    @{ Name = "Hide-DOAdmin.ps1"; Parameters = @{ UserNameToHide = "DOAdmin" } },
+    @{ Name = "Copy-DOTempFolder.ps1"; Parameters = @{ SourcePath = ".\Branding"; DestinationPath = "C:\Windows\Temp\Branding_Demo" } }, # Example source
+    @{ Name = "Install-Applications.ps1"; Parameters = @{} }, # This script calls others, assumes they are in same dir
+    @{ Name = "Enable-TipbandVisibility.ps1"; Parameters = @{} }, # Now targets Default User, no params needed from caller
+    @{ Name = "Set-ChromeAsDefault.ps1"; Parameters = @{} }, # Now targets Default User, no params needed from caller
+    @{ Name = "Set-DesktopWallpaper.ps1"; Parameters = @{ WallpaperPath = ".\Branding\PSDBackground.bmp"; WallpaperStyle = "2" } }, # MANDATORY WallpaperPath
+    @{ Name = "Install-Drivers.ps1"; Parameters = @{ DriverSourcePath = ".\Tools" } } # Example source, real path needed
 )
 
-# Get the directory where this script is located. Sub-scripts are expected to be here.
 $basePath = $PSScriptRoot
+$invokePSDScriptPath = Join-Path -Path $basePath -ChildPath "Invoke-PSDScript.ps1"
+$globalLogFile = "C:\Windows\Temp\InvokePSDScript.log" # Central log for all Invoke-PSDScript calls from here
 
-Write-Host "Starting Task Sequence..."
-Write-Host "Base path for scripts: $basePath"
-Write-Host "Review MDT/PSD Integration Notes at the top of this script regarding parameter handling."
-Write-Host "---------------------------------------------------------------------"
+Write-OrchestratorLog "Starting Task Sequence Orchestration..."
+Write-OrchestratorLog "Base path for scripts: $basePath"
+Write-OrchestratorLog "Wrapper script: $invokePSDScriptPath"
+Write-OrchestratorLog "Global log for Invoke-PSDScript calls: $globalLogFile"
+Write-OrchestratorLog "---------------------------------------------------------------------"
+
+# Check if Invoke-PSDScript.ps1 exists
+if (-not (Test-Path $invokePSDScriptPath -PathType Leaf)) {
+    Write-OrchestratorLog "CRITICAL: The wrapper script 'Invoke-PSDScript.ps1' was not found at '$invokePSDScriptPath'." "ERROR"
+    Write-OrchestratorLog "This script relies on Invoke-PSDScript.ps1 to execute target scripts." "ERROR"
+    Write-OrchestratorLog "Please ensure Invoke-PSDScript.ps1 is in the same directory as Run-TaskSequence.ps1." "ERROR"
+    Write-OrchestratorLog "Script will exit in 10 seconds."
+    Start-Sleep -Seconds 10
+    exit 1 # Critical failure
+}
 
 $totalScripts = $scriptsToExecute.Count
 $successCount = 0
 $failureCount = 0
 $skippedCount = 0
 
-# --- Loop through and execute each script ---
+# --- Loop through and execute each script using Invoke-PSDScript.ps1 ---
 for ($i = 0; $i -lt $totalScripts; $i++) {
-    $scriptName = $scriptsToExecute[$i]
-    $scriptPath = Join-Path -Path $basePath -ChildPath $scriptName
+    $scriptEntry = $scriptsToExecute[$i]
+    $scriptName = $scriptEntry.Name
+    $targetScriptParameters = $scriptEntry.Parameters
+    $targetScriptFullPath = Join-Path -Path $basePath -ChildPath $scriptName
 
-    Write-Host ""
-    Write-Host "($($i+1)/$totalScripts) Processing script: $scriptName"
-    Write-Host "---------------------------------------------------------------------"
+    Write-OrchestratorLog ""
+    Write-OrchestratorLog "($($i+1)/$totalScripts) Preparing to call Invoke-PSDScript.ps1 for target: '$scriptName'"
+    Write-OrchestratorLog "Target script path: '$targetScriptFullPath'"
+    Write-OrchestratorLog "---------------------------------------------------------------------"
 
-    if (-not (Test-Path $scriptPath -PathType Leaf)) {
-        Write-Error "Script '$scriptName' not found at '$scriptPath'. Skipping."
+    if (-not (Test-Path $targetScriptFullPath -PathType Leaf)) {
+        Write-OrchestratorLog "Target script '$scriptName' not found at '$targetScriptFullPath'. Skipping." "WARN"
         $skippedCount++
         $failureCount++ # Counting skipped as a failure for the sequence
-        Write-Host "---------------------------------------------------------------------"
+        Write-OrchestratorLog "---------------------------------------------------------------------"
         continue
     }
 
-    Write-Host "Starting execution of '$scriptName'..."
-    if ($scriptName -eq "Set-DesktopWallpaper.ps1") {
-        Write-Warning "Executing '$scriptName'. This script requires the '-WallpaperPath' parameter."
-        Write-Warning "If called directly by this orchestrator without a mechanism to provide this parameter,"
-        Write-Warning "it will fail and log an error, which is expected in this generic execution context."
-        Write-Warning "For proper use, call '$scriptName' as a separate step in MDT with the parameter specified,"
-        Write-Warning "or modify this orchestrator to provide the parameter if used standalone."
+    $paramsForInvoke = @{
+        TargetScriptPath = $targetScriptFullPath
+        TargetScriptParameters = $targetScriptParameters # Pass the defined parameters
+        LogFile = $globalLogFile # Use the same log file for all invocations from this orchestrator
     }
+
+    Write-OrchestratorLog "Calling Invoke-PSDScript.ps1 for '$scriptName'..."
 
     try {
-        # Execute the script.
-        # Using '&' (call operator) to execute the script in the current scope/session.
-        # If the called script has mandatory parameters, they must be provided or it will throw an error.
-        & $scriptPath -ErrorAction Stop # Ensure terminating errors are caught
+        # Using -File with powershell.exe ensures $LASTEXITCODE is from Invoke-PSDScript.ps1
+        # This is a more robust way to capture exit codes from external scripts.
+        # However, direct invocation & $invokePSDScriptPath @paramsForInvoke is cleaner if LASTEXITCODE behaves as expected.
+        # For this revision, revert to direct invocation for simplicity and better error object capture.
+        & $invokePSDScriptPath @paramsForInvoke -ErrorAction Stop
+        $lastExitCode = $LASTEXITCODE
 
-        if ($Error.Count -gt 0 -and $Error[0].TargetObject -match $scriptName) {
-             Write-Warning "Script '$scriptName' completed, but may have produced non-terminating errors. Review logs from the script itself."
+        if ($lastExitCode -eq 0) {
+            Write-OrchestratorLog "Invoke-PSDScript.ps1 successfully executed '$scriptName'."
+            $successCount++
+        } elseif ($lastExitCode -eq 3010) {
+            Write-OrchestratorLog "Invoke-PSDScript.ps1 successfully executed '$scriptName' and requested a reboot (3010)."
+            $successCount++
+            # Optionally, set a flag here if this orchestrator needs to signal a reboot upwards
+        } else {
+            Write-OrchestratorLog "Invoke-PSDScript.ps1 reported a non-zero exit code ($lastExitCode) for '$scriptName'. See logs from $globalLogFile for details." "ERROR"
+            $failureCount++
         }
-
-        Write-Host "Successfully completed execution of '$scriptName'."
-        $successCount++
     }
     catch {
-        Write-Error "An error occurred during the execution of script '$scriptName'."
-        Write-Error "Error details: $($_.Exception.Message)"
-        # This will catch errors, including missing mandatory parameters from called scripts.
+        Write-OrchestratorLog "A terminating error occurred in Run-TaskSequence.ps1 while attempting to execute '$scriptName' via Invoke-PSDScript.ps1." "ERROR"
+        Write-OrchestratorLog "Error details: $($_.Exception.Message)" "ERROR"
+        if ($_.Exception.InnerException) {
+            Write-OrchestratorLog "Inner Exception: $($_.Exception.InnerException.Message)" "ERROR"
+        }
         $failureCount++
     }
     finally {
-        Write-Host "Finished processing '$scriptName'."
-        Write-Host "---------------------------------------------------------------------"
-        $Error.Clear()
+        Write-OrchestratorLog "Finished processing call to Invoke-PSDScript.ps1 for '$scriptName'."
+        Write-OrchestratorLog "---------------------------------------------------------------------"
     }
 }
 
 # --- Task Sequence Summary ---
-Write-Host ""
-Write-Host "====================================================================="
-Write-Host "Task Sequence Completed."
-Write-Host "Summary:"
-Write-Host " - Total scripts in sequence: $totalScripts"
-Write-Host " - Successfully executed: $successCount"
-Write-Host " - Failed to execute (or error during execution): $failureCount"
-Write-Host " - Skipped (not found): $skippedCount"
-Write-Host "====================================================================="
+Write-OrchestratorLog ""
+Write-OrchestratorLog "====================================================================="
+Write-OrchestratorLog "Task Sequence Orchestration Completed."
+Write-OrchestratorLog "Summary:"
+Write-OrchestratorLog " - Total target scripts in sequence: $totalScripts"
+Write-OrchestratorLog " - Successfully orchestrated: $successCount"
+Write-OrchestratorLog " - Failed or reported errors: $failureCount"
+Write-OrchestratorLog " - Skipped (target script not found): $skippedCount"
+Write-OrchestratorLog "====================================================================="
 
 if ($failureCount -gt 0 -or $skippedCount -gt 0) {
-    Write-Warning "One or more scripts in the sequence reported errors or were skipped. Please review the logs above."
+    Write-OrchestratorLog "One or more scripts reported errors, failed, or were skipped. Please review this log and '$globalLogFile'." "WARN"
 } else {
-    Write-Host "All scripts in the sequence executed successfully."
+    Write-OrchestratorLog "All target scripts in the sequence were orchestrated successfully."
+}
+
+# Propagate overall status via exit code.
+if ($failureCount -gt 0 -or $skippedCount -gt 0) {
+    exit 1
+} else {
+    exit 0
 }

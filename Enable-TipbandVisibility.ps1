@@ -1,69 +1,94 @@
 # Enable-TipbandVisibility.ps1
-# This script modifies the registry to enable the "Tipband Visibility" feature,
-# which can affect how taskbar buttons are grouped or combined.
-# Specifically, it sets the TaskbarGlomLevel to 1.
+# This script modifies the registry to enable the "Tipband Visibility" feature
+# for the Default User Profile, affecting all new users.
+# Specifically, it sets TaskbarGlomLevel to 1.
 
-# Define the registry path and value name
-$registryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+# Define the registry path components and value
+$regSubPath = "Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 $valueName = "TaskbarGlomLevel"
 $valueData = 1 # DWORD value 1 typically means "Combine when taskbar is full"
 
-# Comment: Check if the script is running with Administrator privileges.
-# While HKCU modifications for the current user might not always strictly require admin,
-# it's good practice for registry modification scripts and essential if run under a different context.
+$defaultUserHivePath = "C:\Users\Default\NTUSER.DAT"
+$tempHiveKeyName = "TempDefaultUser_Tipband" # Unique temporary key name
+$regPathDefaultUserHiveLoaded = "HKLM:\$tempHiveKeyName\$regSubPath"
+
+# Function to write messages to host (visible in TS logs)
+function Write-Log {
+    param([string]$Message, [string]$Severity = "INFO")
+    Write-Host "[$Severity] $Message"
+}
+
+Write-Log "Starting Enable-TipbandVisibility.ps1 for Default User Profile."
+
+# --- Administrator Privileges Check ---
+Write-Log "Checking for Administrator privileges..."
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Warning "This script is not running with Administrator privileges. HKCU modifications for the current user might work, but issues can occur in restricted environments or if targeting other users."
-    # For HKCU, we might not want to exit, but rather warn.
-    # If strict admin rights are required for a specific scenario, uncomment the next two lines:
-    # Write-Error "This script must be run as Administrator for full reliability."
-    # exit 1
-}
-
-# Comment: Check if the registry path exists.
-# The path is split to check for 'Explorer' and then 'Advanced' separately
-# to handle cases where intermediate keys might be missing.
-$explorerPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer"
-
-if (-not (Test-Path $explorerPath)) {
-    Write-Warning "Registry path '$explorerPath' does not exist. This is unusual."
-    # Attempting to create the 'Explorer' key if it's missing. This is a fallback.
-    try {
-        New-Item -Path $explorerPath -Force -ErrorAction Stop | Out-Null
-        Write-Host "Registry key '$explorerPath' created successfully."
-    }
-    catch {
-        Write-Error "Error creating registry key '$explorerPath': $($_.Exception.Message)"
-        Write-Error "Cannot proceed without the '$explorerPath' key."
-        exit 1
-    }
-}
-
-if (-not (Test-Path $registryPath)) {
-    Write-Host "Registry path '$registryPath' does not exist. Creating it..."
-    try {
-        New-Item -Path $registryPath -Force -ErrorAction Stop | Out-Null
-        Write-Host "Registry key '$registryPath' created successfully."
-    }
-    catch {
-        Write-Error "Error creating registry key '$registryPath': $($_.Exception.Message)"
-        exit 1
-    }
-}
-else {
-    Write-Host "Registry path '$registryPath' already exists."
-}
-
-# Comment: Set the TaskbarGlomLevel DWORD value to 1.
-# This will create the value if it doesn't exist or overwrite it if it does.
-Write-Host "Setting '$valueName' to '$valueData' at '$registryPath'."
-try {
-    Set-ItemProperty -Path $registryPath -Name $valueName -Value $valueData -Type DWORD -Force -ErrorAction Stop
-    Write-Host "'$valueName' has been successfully set to '$valueData'."
-}
-catch {
-    Write-Error "Error setting registry value '$valueName': $($_.Exception.Message)"
+    Write-Log "Administrator privileges are required to modify the Default User profile. Aborting." "ERROR"
+    Start-Sleep -Seconds 5
     exit 1
 }
+Write-Log "Administrator privileges confirmed."
 
-Write-Host "Script 'Enable-TipbandVisibility.ps1' completed."
-Write-Host "A restart of Explorer.exe or a logoff/logon might be required for changes to take effect."
+# --- Validate Default User Hive Path ---
+Write-Log "Validating Default User hive path: '$defaultUserHivePath'..."
+if (-not (Test-Path $defaultUserHivePath -PathType Leaf)) {
+    Write-Log "Default User profile hive '$defaultUserHivePath' not found. Cannot apply settings. Aborting." "ERROR"
+    exit 1
+}
+Write-Log "Default User hive found."
+
+# --- Load Default User Hive, Modify, and Unload ---
+$hiveLoaded = $false
+Write-Log "Attempting to load Default User hive from '$defaultUserHivePath' into 'HKLM\$tempHiveKeyName'..."
+try {
+    # Ensure hive isn't already loaded from a failed previous run
+    # Suppress errors for unload if the key doesn't exist
+    reg.exe unload "HKLM\$tempHiveKeyName" >$null 2>&1
+
+    reg.exe load "HKLM\$tempHiveKeyName" "$defaultUserHivePath"
+    if ($LASTEXITCODE -ne 0) {
+        Throw "reg.exe load command failed with exit code $LASTEXITCODE for HKLM\$tempHiveKeyName and $defaultUserHivePath."
+    }
+    $hiveLoaded = $true
+    Write-Log "Default User hive loaded successfully into HKLM\$tempHiveKeyName."
+
+    # Check if the target registry path exists within the loaded hive, create if not
+    if (-not (Test-Path $regPathDefaultUserHiveLoaded)) {
+        Write-Log "Registry path '$regPathDefaultUserHiveLoaded' does not exist. Creating it..."
+        New-Item -Path $regPathDefaultUserHiveLoaded -Force -ErrorAction Stop | Out-Null
+        Write-Log "Registry path '$regPathDefaultUserHiveLoaded' created successfully."
+    } else {
+        Write-Log "Registry path '$regPathDefaultUserHiveLoaded' already exists."
+    }
+
+    # Set the TaskbarGlomLevel DWORD value
+    Write-Log "Setting '$valueName' to '$valueData' at '$regPathDefaultUserHiveLoaded'."
+    Set-ItemProperty -Path $regPathDefaultUserHiveLoaded -Name $valueName -Value $valueData -Type DWORD -Force -ErrorAction Stop
+    Write-Log "'$valueName' has been successfully set to '$valueData' in the loaded Default User hive."
+
+}
+catch {
+    Write-Log "Error during Default User hive operations: $($_.Exception.Message)" "ERROR"
+    if ($_.Exception.Message -like "*reg.exe load*") {
+        Write-Log "This often happens if the hive is in use or permissions are insufficient even for an Administrator." "WARN"
+    }
+    # We still want to try to unload the hive in the finally block
+}
+finally {
+    if ($hiveLoaded) {
+        Write-Log "Unloading Default User hive ('HKLM\$tempHiveKeyName')..."
+        # Flush changes before unloading
+        [GC]::Collect()
+        Start-Sleep -Milliseconds 200 # Brief pause to help ensure flush completes
+        reg.exe unload "HKLM\$tempHiveKeyName"
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Default User hive unloaded successfully."
+        } else {
+            Write-Log "Failed to unload Default User hive (HKLM\$tempHiveKeyName). Exit code: $LASTEXITCODE. Manual check of 'regedit' might be needed." "WARN"
+        }
+    }
+}
+
+Write-Log "Script 'Enable-TipbandVisibility.ps1' for Default User Profile completed."
+Write-Log "Changes will apply to new user accounts created on this system."
+# Note: No immediate effect on current users or existing profiles other than Default.
