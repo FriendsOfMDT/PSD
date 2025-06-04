@@ -63,7 +63,9 @@ Param(
     [Parameter(Mandatory = $true, Position = 1,  HelpMessage = "Specify the share name that this deployment's solution data will be accessible from the network.")]
     [string]$psDeploymentShare,
     [Parameter(Mandatory = $false, Position = 2,  HelpMessage = "Use this switch to upgrade an existing deployment share.")]
-    [Switch]$Upgrade
+    [Switch]$Upgrade,
+    [Parameter(Mandatory = $false, HelpMessage = "Use this switch to run the installation in silent mode, using defaults for Bootstrap.ini.")]
+    [switch]$Silent
 )
 $Script:DeploymentToolkitVersion = "2.2.8"
 
@@ -479,9 +481,93 @@ if (!($Upgrade)) {
     Grant-SmbShareAccess -Name $psDeploymentShare -AccountName "EVERYONE" -AccessRight Change -Force | Out-Null
     Revoke-SmbShareAccess -Name $psDeploymentShare -AccountName "CREATOR OWNER" -Force | Out-Null
 
-    # copy the INI Files
-    Copy-Item -Path "$PSScriptRoot\INIFiles\CustomSettings.ini" -Destination "$psDeploymentFolder\Control\CustomSettings.ini" -Force | Out-Null
-    Copy-Item -Path "$PSScriptRoot\INIFiles\BootStrap.ini" -Destination "$psDeploymentFolder\Control\BootStrap.ini" -Force | Out-Null
+    # Handle INI file creation
+    if (-not $Silent.IsPresent) {
+        Write-PSDInstallLog -Message "Running in interactive mode for INI file configuration."
+
+        # Bootstrap.ini Configuration
+        Write-Host "`n--- Bootstrap.ini Configuration ---" -ForegroundColor Yellow
+        $defaultDeployRoot = "\\$env:COMPUTERNAME\$psDeploymentShare"
+        if ($psDeploymentShare.StartsWith("\\") -or $psDeploymentShare.StartsWith("http")) {
+            $defaultDeployRoot = $psDeploymentShare
+        }
+        $DeployRootValue = Read-Host -Prompt "Enter DeployRoot (network path, e.g., \\SERVER\Share$. Default: $defaultDeployRoot)"
+        if ([string]::IsNullOrWhiteSpace($DeployRootValue)) { $DeployRootValue = $defaultDeployRoot }
+        $UserIDValue = Read-Host -Prompt "Enter UserID for MDT access (e.g., DOMAIN\User. Leave blank if not needed)"
+        $UserDomainValue = Read-Host -Prompt "Enter UserDomain (if UserID does not include it. Leave blank if not needed)"
+        $UserPasswordValue = ""
+        if (-not [string]::IsNullOrWhiteSpace($UserIDValue)) {
+            Write-Warning "Bootstrap.ini: Password will be stored in plaintext. Ensure share permissions are restrictive."
+            $UserPasswordValue = Read-Host -Prompt "Enter UserPassword for MDT access (will be stored in Bootstrap.ini)"
+        }
+        $SkipBootstrapValue = Read-Host -Prompt "SkipBootstrap (Yes/No - Determines MDT wizard prompt. Default: No)"
+        if ([string]::IsNullOrWhiteSpace($SkipBootstrapValue)) { $SkipBootstrapValue = "No" }
+
+        $bootstrapLines = @(
+            "[Settings]",
+            "Priority=Default",
+            "",
+            "[Default]",
+            "DeployRoot=$DeployRootValue"
+        )
+        if (-not [string]::IsNullOrWhiteSpace($UserIDValue)) { $bootstrapLines += "UserID=$UserIDValue" }
+        if (-not [string]::IsNullOrWhiteSpace($UserDomainValue)) { $bootstrapLines += "UserDomain=$UserDomainValue" }
+        if (-not [string]::IsNullOrWhiteSpace($UserPasswordValue)) { $bootstrapLines += "UserPassword=$UserPasswordValue" }
+        $bootstrapLines += "SkipBootstrap=$SkipBootstrapValue"
+        Write-PSDInstallLog -Message "Writing dynamically generated Bootstrap.ini to $($psDeploymentFolder)\Control\BootStrap.ini"
+        Set-Content -Path "$psDeploymentFolder\Control\BootStrap.ini" -Value $bootstrapLines -Force
+
+        # CustomSettings.ini Configuration
+        Write-Host "`n--- CustomSettings.ini Configuration ---" -ForegroundColor Yellow
+        $AdminPasswordValue = Read-Host -Prompt "Enter local Administrator password (will be stored in CustomSettings.ini. Leave blank for no change/manual setup)"
+        if (-not [string]::IsNullOrWhiteSpace($AdminPasswordValue)) {
+             Write-Warning "CustomSettings.ini: AdminPassword will be stored in plaintext. This is standard for MDT but a security risk."
+        }
+        $TimeZoneValue = Read-Host -Prompt "Enter TimeZone (e.g., 'Pacific Standard Time'. Default: 'Pacific Standard Time')"
+        if ([string]::IsNullOrWhiteSpace($TimeZoneValue)) { $TimeZoneValue = "Pacific Standard Time" }
+
+        $yesNoPrompts = @{
+            "SkipProductKey"     = "Yes";
+            "SkipComputerName"   = "No";
+            "SkipDomainMembership" = "Yes";
+            "SkipUserData"       = "Yes";
+            "SkipLocaleSelection"= "Yes";
+            "SkipTimeZone"       = "No"
+        }
+        $customSettingsValues = @{}
+
+        foreach ($key in $yesNoPrompts.Keys) {
+            $defaultValue = $yesNoPrompts[$key]
+            $promptMessage = "Configure $key (Default: $defaultValue) [Y/N]:"
+            $userInput = Read-Host -Prompt $promptMessage
+            if ($userInput -match '^[Yy]$') { $customSettingsValues[$key] = "YES" }
+            elseif ($userInput -match '^[Nn]$') { $customSettingsValues[$key] = "NO" }
+            else { $customSettingsValues[$key] = $defaultValue.ToUpper() }
+        }
+
+        $customSettingsLines = New-Object System.Collections.Generic.List[string]
+        $customSettingsLines.Add("[Settings]")
+        $customSettingsLines.Add("Priority=Default")
+        $customSettingsLines.Add("Properties=MyCustomProperty") # Example, can be removed or made dynamic
+        $customSettingsLines.Add("")
+        $customSettingsLines.Add("[Default]")
+        $customSettingsLines.Add("OSInstall=Y")
+        if (-not [string]::IsNullOrWhiteSpace($AdminPasswordValue)) { $customSettingsLines.Add("AdminPassword=$AdminPasswordValue") }
+        $customSettingsLines.Add("TimeZone=$TimeZoneValue")
+        foreach ($key in $customSettingsValues.Keys) {
+            $customSettingsLines.Add("$key=$($customSettingsValues[$key])")
+        }
+        $customSettingsLines.Add("_SMSTSORGNAME=PSD Deployment") # Default PSD branding
+
+        Write-PSDInstallLog -Message "Writing dynamically generated CustomSettings.ini to $($psDeploymentFolder)\Control\CustomSettings.ini"
+        Set-Content -Path "$psDeploymentFolder\Control\CustomSettings.ini" -Value $customSettingsLines -Force
+
+    }
+    else { # Silent mode
+        Write-PSDInstallLog -Message "Running in silent mode. Copying default INI files."
+        Copy-Item -Path "$PSScriptRoot\INIFiles\CustomSettings.ini" -Destination "$psDeploymentFolder\Control\CustomSettings.ini" -Force | Out-Null
+        Copy-Item -Path "$PSScriptRoot\INIFiles\BootStrap.ini" -Destination "$psDeploymentFolder\Control\BootStrap.ini" -Force | Out-Null
+    }
 }
 
 
