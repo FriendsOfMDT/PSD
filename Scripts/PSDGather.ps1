@@ -66,6 +66,27 @@ switch ($tsenv:GatherLocalOnly)
         $mappingFile = Find-PSDFile -FileName ZTIGather.xml
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing CustomSettings.ini"
         Invoke-PSDRules -FilePath "$control\CustomSettings.ini" -MappingFile $mappingFile
+
+        # Copy ZTIGather.xml to the LogPath for inclusion in copied logs
+        if ($null -ne $mappingFile -and (Test-Path $mappingFile)) {
+            # Ensure LogPath directory exists (it should have been created by PSDGather.ps1 already or by logger)
+            if (-not (Test-Path $TSEnv:LogPath)) {
+                New-Item -ItemType Directory -Path $TSEnv:LogPath -Force -ErrorAction SilentlyContinue | Out-Null
+            }
+
+            $destinationFile = Join-Path -Path $TSEnv:LogPath -ChildPath "ZTIGather.xml"
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Attempting to copy $mappingFile to $destinationFile"
+            try {
+                Copy-Item -Path $mappingFile -Destination $destinationFile -Force -ErrorAction Stop
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Successfully copied ZTIGather.xml from $mappingFile to $destinationFile"
+            }
+            catch {
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): ERROR - Failed to copy ZTIGather.xml from $mappingFile to $destinationFile. Error: $($_.Exception.Message)" -LogLevel 3
+            }
+        }
+        else {
+            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): ZTIGather.xml path ($mappingFile) is null or file does not exist. Skipping copy to LogPath." -LogLevel 2
+        }
     }
 }
 
