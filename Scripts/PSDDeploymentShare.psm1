@@ -413,7 +413,7 @@ function Get-PSDContentWeb {
             }
             # Do the download using BITS
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using BITS."
-            $bitsJob = Start-BitsTransfer -Authentication Ntlm -Credential $global:psddsCredential -Source $sourceUrl -Destination $destFile -TransferType Download -DisplayName "PSD Transfer" -Priority High
+            $bitsJob = Start-BitsTransfer -Authentication Negotiate -Credential $global:psddsCredential -Source $sourceUrl -Destination $destFile -TransferType Download -DisplayName "PSD Transfer" -Priority High
         }
     }
 }

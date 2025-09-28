@@ -60,7 +60,7 @@ if ($tsenv:SLShare -ilike "http*"){
             $SourceFolderToZIP = "$Folder"
             $SourceFile = "$env:TEMP\$FolderName.zip"
             Compress-Archive -Path $SourceFolderToZIP -DestinationPath $SourceFile -Verbose -Force
-            Start-BitsTransfer -Authentication Ntlm -Source $SourceFile -Destination $("$tsenv:SLshare/$env:COMPUTERNAME-" + "$LogName" + ".zip") -TransferType Upload -Verbose -Credential $Credentials
+            Start-BitsTransfer -Authentication Negotiate -Source $SourceFile -Destination $("$tsenv:SLshare/$env:COMPUTERNAME-" + "$LogName" + ".zip") -TransferType Upload -Verbose -Credential $Credentials
         }
     }
 }

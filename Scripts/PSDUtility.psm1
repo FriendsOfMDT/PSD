@@ -400,7 +400,7 @@ Function Copy-PSDLogs {
 
             $RemoteFileName = $($env:COMPUTERNAME) + "-" + $Name + ".zip"
             try {
-                Start-BitsTransfer -Authentication Ntlm -Source $LogArchive -Destination $("$tsenv:SLshare/$RemoteFileName") -TransferType Upload -Credential $Credentials -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+                Start-BitsTransfer -Authentication Negotiate -Source $LogArchive -Destination $("$tsenv:SLshare/$RemoteFileName") -TransferType Upload -Credential $Credentials -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
             }
             catch {
             }
