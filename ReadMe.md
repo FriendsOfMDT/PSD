@@ -2,6 +2,7 @@
 
 Dec 2025 (ver 0.2.3.1)
 - Added ZTIGather.xml (was missing for a long time)
+- Updated INI files
 
 Sep 2024 (ver 0.2.3.0)
 - Updated Deployemnt wizard with new panes for Intune and device role
