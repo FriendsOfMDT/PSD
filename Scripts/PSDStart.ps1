@@ -12,7 +12,7 @@
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus
           Primary: @Mikael_Nystrom 
           Created: 
-          Modified: 2022-09-19
+          Modified: 2025-03-28
 
           Version - 0.0.0 - () - Finalized functional version 1.
           Version - 0.9.1 - Added check for network access when doing network deployment
@@ -32,6 +32,10 @@
           version - 0.9.9 - Fixed for SMSTSlogging, plus lots of minor stuff
           version - 0.1.0 - Minor change, removing Write-PSDLog entries
           version - 0.1.1 - (PC) Fixed PSDStartLoader and added beta support PSDWizardRS
+          version - 0.1.2 - (mikael_nystrom) Added preflight checks for disk 0 and for network adapter before starting the wizard, if no network or no disk is found, it will not continue
+          version - 0.1.3 - (mikael_nystrom) Removed legacy Wizared code and logic, fixed some typos
+          version - 0.1.4 - (mikael_nystrom) Added support for UserExitScripts, you can extend the processing of PSDStart by adding a PowerShell script (or more) to the UserExit Scripts folder
+
 
           TODO:
 
@@ -103,7 +107,6 @@ $deployRoot = Split-Path -Path "$PSScriptRoot"
 $env:PSModulePath = $env:PSModulePath + ";$deployRoot\Tools\Modules"
 
 # Check for debug settings
-
 $Global:PSDDebug = $false
 if(Test-Path -Path "C:\MININT\PSDDebug.txt"){
     $DeBug = $true
@@ -134,7 +137,7 @@ if($PSDDeBug -eq $true){
 }
 
 # Load core modules
-Write-PSDBootInfo -SleepSec 1 -Message "Loading core PowerShell modules"
+Write-PSDBootInfo -Message "Loading core PowerShell modules"
 Import-Module PSDUtility -Force -Verbose:$False
 Import-Module Storage -Global -Force -Verbose:$False
 
@@ -180,11 +183,33 @@ if($Global:PSDDebug -ne $True){
     Set-PSDCommandWindowsSize -Width 99 -Height 15
 }
 
+ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking if we are running from WinPE"
 if($BootfromWinPE -eq $true){
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering WinPE block..."
 
+    # Preflight test for network adapter
+    Write-PSDBootInfo -Message "Checking for network adapter"
+    #' Are you kidding me? THis is the 21st century, what kind of computer doesn't have a networking adatper?
+     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking for network adapter (Test-PSDNetAdapter)"
+    if(!(Test-PSDNetAdapter)){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No network adapter found or driver missing, aborting..."
+        Show-PSDInfo -Message "No network adapter found or driver missing, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
+        Start-Process PowerShell -Wait
+        exit 1
+    }
+
+    # Preflight test for disk 0
+    Write-PSDBootInfo -Message "Checking for storage"
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking for storage (Test-PSDLocalDisk)"
+    if(!(Test-PSDLocalDisk)){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No storage found or driver missing, aborting..."
+        Show-PSDInfo -Message "No storage found or driver missing, aborting..." -Severity Error -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
+        Start-Process PowerShell -Wait
+        exit 1
+    }
+    
     # We need more than 1.5 GB (Testing for at least 1499MB of RAM)
-    Write-PSDBootInfo -SleepSec 2 -Message "Checking that we have at least 1.5 GB of RAM"
+    Write-PSDBootInfo -Message "Checking that we have at least 1.5 GB of RAM"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Checking that we have at least 1.5 GB of RAM"
     if ((Get-CimInstance -ClassName Win32_computersystem).TotalPhysicalMemory -le 1499MB){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Not enough memory to run PSD, aborting..."
@@ -193,7 +218,7 @@ if($BootfromWinPE -eq $true){
         exit 1
     }
 
-    # Create SMSTS.ini (TESTING)
+    # Create SMSTS.ini
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating SMSTS.INI for WinPE"
     function New-PSDSMSTSinifile {
         param(
@@ -277,7 +302,6 @@ Get-Volume | ? {-not [String]::IsNullOrWhiteSpace($_.DriveLetter) } | ? {$_.Driv
 # If running from RunOnce, create a startup folder item and then exit
 if ($start){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running with the /start switch, need to determine how to re-run PSDStart.ps1 after reboot"
-        
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running Get-PSDLocalInfo to determine what we are"
         Get-PSDLocalInfo
 
@@ -372,7 +396,7 @@ else{
         if($BootfromWinPE -eq $true){
             if((Test-Path -Path X:\Deploy\Scripts\PSDPrestart.ps1) -eq $true){
                 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): We should run PSDPrestart"
-                if(($tsenv:PSDPrestartMode -eq $null) -or ($tsenv:PSDPrestartMode -eq "") -or ($tsenv:PSDPrestartMode -eq "Native")){
+                if(($null -eq $tsenv:PSDPrestartMode) -or ($tsenv:PSDPrestartMode -eq "") -or ($tsenv:PSDPrestartMode -eq "Native")){
                     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDPrestart is in Mode: Native"
                     $Mode = "Native"
                 }
@@ -559,7 +583,7 @@ else{
                 $ServerName = $item.Replace("https://","") | Split-Path
                 $Result = Test-PSDNetCon -Hostname $ServerName -Protocol HTTPS
                 if(($Result) -ne $true){
-                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to access PSDDeployRoots value $item using HTTP"
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to access PSDDeployRoots value $item using HTTPS"
                 }
                 else{
                     $tsenv:DeployRoot = $item
@@ -570,7 +594,7 @@ else{
                 $ServerName = $item.Replace("http://","") | Split-Path
                 $Result = Test-PSDNetCon -Hostname $ServerName -Protocol HTTP
                 if(($Result) -ne $true){
-                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to access PSDDeployRoots value $item using HTTPS"
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Unable to access PSDDeployRoots value $item using HTTP"
                 }
                 else{
                     $tsenv:DeployRoot = $item
@@ -717,632 +741,62 @@ else{
     $modules = Get-PSDContent -Content "Tools\Modules"
     $env:PSModulePath = $env:PSModulePath + ";$modules"
 
+    # Process UserExitScripts
+    Write-PSDBootInfo -SleepSec 1 -Message "Processing UserExitScripts (if exists)"
+    $UserExitScriptFolder = Get-PSDContent -Content "PSDResources\UserExitScripts" -Filter *.ps1
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing UserExitScripts (if exists)"
+    $UserExitScripts = Get-ChildItem -Path $UserExitScriptFolder
+    foreach($UserExitScript in $UserExitScripts){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing $UserExitScript"
+        & $UserExitScript.FullName
+    }
+
     # Process wizard
-    # Check if we should run the native wizard or not
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Determine which PSDWizard to use"
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property PSDWizard is now = $tsenv:PSDWizard"
-    if(($tsenv:PSDWizard -eq $null) -or ($tsenv:PSDWizard -eq "") -or ($tsenv:PSDWizard -eq "Native")){
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running the command Import-Module PSDWizard -ErrorAction Stop -Force -Verbose:`$False"
-        Import-Module PSDWizard -ErrorAction Stop -Force -Verbose:$False
+    $PSDWizard = "PSDWizardNew"
+    Write-PSDBootInfo -SleepSec 1 -Message "Loading the PSD Deployment Wizard"
+    if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Loading the PSD Deployment Wizard" -PercentComplete 100}
+    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running the command Import-Module $PSDWizard -ErrorAction Stop -Force -Verbose:`$False"
+    Import-Module $PSDWizard -ErrorAction Stop -Force -Verbose:$False
 
-        Write-PSDBootInfo -SleepSec 1 -Message "Loading the PSD Deployment Wizard"
-        if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Loading the PSD Deployment Wizard" -PercentComplete 100}
-        # $tsenv:TaskSequenceID = ""
-        if ($tsenv:SkipWizard -ine "YES"){
-        
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property PSDDirty is now = true"
-            $tsenv:PSDDirty = $true
-        
-            $result = Show-PSDWizard "$scripts\PSDWizard.xaml"
-            if ($result.DialogResult -eq $false){
-                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cancelling, aborting..."
-                Show-PSDInfo -Message "Cancelling, aborting..." -Severity Information -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
-                Stop-PSDLogging
-                Clear-PSDInformation
-                Start-Process PowerShell -Wait
-                Exit 0
-            }
-        }
+    [string]$PSDWizardPath = Join-Path -Path $scripts -ChildPath $($PSDWizard)
 
-        If ($tsenv:TaskSequenceID -eq ""){
-            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No TaskSequence selected, aborting..."
-            Show-PSDInfo -Message "No TaskSequence selected, aborting..." -Severity Information -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
-            Stop-PSDLogging
-            Clear-PSDInformation
-            Start-Process PowerShell -Wait
-            Exit 0
-        }
+    # Set a name if it is empty
+    if([string]::IsNullOrEmpty($tsenv:OSDComputername)){
+        $tsenv:OSDComputername = $env:COMPUTERNAME
+    }
 
-        if ($tsenv:OSDComputerName -eq "") {
-            $tsenv:OSDComputerName = $env:COMPUTERNAME
-        }
-
-        # Translate PSDRole to TSENV:Role001
-        switch ($tsenv:PSDROLE){
-            'Configuration 001' {$tsenv:ROLE001 = "Config001"}
-            'Configuration 002' {$tsenv:ROLE001 = "Config002"}
-            'Configuration 003' {$tsenv:ROLE001 = "Config003"}
-            'Configuration 004' {$tsenv:ROLE001 = "Config004"}
-            'Configuration 005' {$tsenv:ROLE001 = "Config005"}
-            'Configuration 006' {$tsenv:ROLE001 = "Config006"}
-            'Configuration 007' {$tsenv:ROLE001 = "Config007"}
-            'Configuration 008' {$tsenv:ROLE001 = "Config008"}
-            'Configuration 009' {$tsenv:ROLE001 = "Config009"}
-            Default {}
-        }
-
-        # Translate PSDTIMEZONENAME to TSENV:TimeZoneName
-        switch ($tsenv:PSDTIMEZONENAME){
-            '(UTC) Casablanca' {$tsenv:TimeZoneName = "Morocco Standard Time"}
-            '(UTC) Coordinated Universal Time' {$tsenv:TimeZoneName = "Coordinated Universal Time"}
-            '(UTC) Dublin, Edinburgh, Lisbon, London' {$tsenv:TimeZoneName = "GMT Standard Time"}
-            '(UTC) Monrovia, Reykjavik' {$tsenv:TimeZoneName = "Greenwich Standard Time"}
-            '(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna' {$tsenv:TimeZoneName = "W. Europe Standard Time"}
-            '(UTC+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague' {$tsenv:TimeZoneName = "Central Europe Standard Time"}
-            '(UTC+01:00) Brussels, Copenhagen, Madrid, Paris' {$tsenv:TimeZoneName = "Romance Standard Time"}
-            '(UTC+01:00) Sarajevo, Skopje, Warsaw, Zagreb' {$tsenv:TimeZoneName = "Central European Standard Time"}
-            '(UTC+01:00) West Central Africa' {$tsenv:TimeZoneName = "W. Central Africa Standard Time"}
-            '(UTC+01:00) Windhoek' {$tsenv:TimeZoneName = "Namibia Standard Time"}
-            '(UTC+02:00) Amman' {$tsenv:TimeZoneName = "Jordan Standard Time"}
-            '(UTC+02:00) Athens, Bucharest' {$tsenv:TimeZoneName = "GTB Standard Time"}
-            '(UTC+02:00) Beirut' {$tsenv:TimeZoneName = "Middle East Standard Time"}
-            '(UTC+02:00) Cairo' {$tsenv:TimeZoneName = "Egypt Standard Time"}
-            '(UTC+02:00) Damascus' {$tsenv:TimeZoneName = "Syria Standard Time"}
-            '(UTC+02:00) E. Europe' {$tsenv:TimeZoneName = "E. Europe Standard Time"}
-            '(UTC+02:00) Harare, Pretoria' {$tsenv:TimeZoneName = "South Africa Standard Time"}
-            '(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius' {$tsenv:TimeZoneName = "FLE Standard Time"}
-            '(UTC+02:00) Istanbul' {$tsenv:TimeZoneName = "Turkey Standard Time"}
-            '(UTC+02:00) Jerusalem' {$tsenv:TimeZoneName = "Jerusalem Standard Time"}
-            '(UTC+02:00) Kaliningrad (RTZ 1)' {$tsenv:TimeZoneName = "Russia TZ 1 Standard Time"}
-            '(UTC+02:00) Tripoli' {$tsenv:TimeZoneName = "Libya Standard Time"}
-            '(UTC+03:00) Baghdad' {$tsenv:TimeZoneName = "Arabic Standard Time"}
-            '(UTC+03:00) Kuwait, Riyadh' {$tsenv:TimeZoneName = "Arab Standard Time"}
-            '(UTC+03:00) Minsk' {$tsenv:TimeZoneName = "Belarus Standard Time"}
-            '(UTC+03:00) Moscow, St. Petersburg, Volgograd (RTZ 2)' {$tsenv:TimeZoneName = "Russia TZ 2 Standard Time"}
-            '(UTC+03:00) Nairobi' {$tsenv:TimeZoneName = "E. Africa Standard Time"}
-            '(UTC+03:30) Tehran' {$tsenv:TimeZoneName = "Iran Standard Time"}
-            '(UTC+04:00) Abu Dhabi, Muscat' {$tsenv:TimeZoneName = "Arabian Standard Time"}
-            '(UTC+04:00) Baku' {$tsenv:TimeZoneName = "Azerbaijan Standard Time"}
-            '(UTC+04:00) Izhevsk, Samara (RTZ 3)' {$tsenv:TimeZoneName = "Russia TZ 3 Standard Time"}
-            '(UTC+04:00) Port Louis' {$tsenv:TimeZoneName = "Mauritius Standard Time"}
-            '(UTC+04:00) Tbilisi' {$tsenv:TimeZoneName = "Georgian Standard Time"}
-            '(UTC+04:00) Yerevan' {$tsenv:TimeZoneName = "Caucasus Standard Time"}
-            '(UTC+04:30) Kabul' {$tsenv:TimeZoneName = "Afghanistan Standard Time"}
-            '(UTC+05:00) Ashgabat, Tashkent' {$tsenv:TimeZoneName = "West Asia Standard Time"}
-            '(UTC+05:00) Ekaterinburg (RTZ 4)' {$tsenv:TimeZoneName = "Russia TZ 4 Standard Time"}
-            '(UTC+05:00) Islamabad, Karachi' {$tsenv:TimeZoneName = "Pakistan Standard Time"}
-            '(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi' {$tsenv:TimeZoneName = "India Standard Time"}
-            '(UTC+05:30) Sri Jayawardenepura' {$tsenv:TimeZoneName = "Sri Lanka Standard Time"}
-            '(UTC+05:45) Kathmandu' {$tsenv:TimeZoneName = "Nepal Standard Time"}
-            '(UTC+06:00) Astana' {$tsenv:TimeZoneName = "Central Asia Standard Time"}
-            '(UTC+06:00) Dhaka' {$tsenv:TimeZoneName = "Bangladesh Standard Time"}
-            '(UTC+06:00) Novosibirsk (RTZ 5)' {$tsenv:TimeZoneName = "Russia TZ 5 Standard Time"}
-            '(UTC+06:30) Yangon (Rangoon)' {$tsenv:TimeZoneName = "Myanmar Standard Time"}
-            '(UTC+07:00) Bangkok, Hanoi, Jakarta' {$tsenv:TimeZoneName = "SE Asia Standard Time"}
-            '(UTC+07:00) Krasnoyarsk (RTZ 6)' {$tsenv:TimeZoneName = "Russia TZ 6 Standard Time"}
-            '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi' {$tsenv:TimeZoneName = "China Standard Time"}
-            '(UTC+08:00) Irkutsk (RTZ 7)' {$tsenv:TimeZoneName = "Russia TZ 7 Standard Time"}
-            '(UTC+08:00) Kuala Lumpur, Singapore' {$tsenv:TimeZoneName = "Malay Peninsula Standard Time"}
-            '(UTC+08:00) Perth' {$tsenv:TimeZoneName = "W. Australia Standard Time"}
-            '(UTC+08:00) Taipei' {$tsenv:TimeZoneName = "Taipei Standard Time"}
-            '(UTC+08:00) Ulaanbaatar' {$tsenv:TimeZoneName = "Ulaanbaatar Standard Time"}
-            '(UTC+09:00) Osaka, Sapporo, Tokyo' {$tsenv:TimeZoneName = "Tokyo Standard Time"}
-            '(UTC+09:00) Seoul' {$tsenv:TimeZoneName = "Korea Standard Time"}
-            '(UTC+09:00) Yakutsk (RTZ 8)' {$tsenv:TimeZoneName = "Russia TZ 8 Standard Time"}
-            '(UTC+09:30) Adelaide' {$tsenv:TimeZoneName = "Cen. Australia Standard Time"}
-            '(UTC+09:30) Darwin' {$tsenv:TimeZoneName = "AUS Central Standard Time"}
-            '(UTC+10:00) Brisbane' {$tsenv:TimeZoneName = "E. Australia Standard Time"}
-            '(UTC+10:00) Canberra, Melbourne, Sydney' {$tsenv:TimeZoneName = "AUS Eastern Standard Time"}
-            '(UTC+10:00) Guam, Port Moresby' {$tsenv:TimeZoneName = "West Pacific Standard Time"}
-            '(UTC+10:00) Hobart' {$tsenv:TimeZoneName = "Tasmania Standard Time"}
-            '(UTC+10:00) Magadan' {$tsenv:TimeZoneName = "Magadan Standard Time"}
-            '(UTC+10:00) Vladivostok, Magadan (RTZ 9)' {$tsenv:TimeZoneName = "Russia TZ 9 Standard Time"}
-            '(UTC+11:00) Chokurdakh (RTZ 10)' {$tsenv:TimeZoneName = "Russia TZ 10 Standard Time"}
-            '(UTC+11:00) Solomon Is., New Caledonia' {$tsenv:TimeZoneName = "Central Pacific Standard Time"}
-            '(UTC+12:00) Anadyr, Petropavlovsk-Kamchatsky (RTZ 11)' {$tsenv:TimeZoneName = "Russia TZ 11 Standard Time"}
-            '(UTC+12:00) Auckland, Wellington' {$tsenv:TimeZoneName = "New Zealand Standard Time"}
-            '(UTC+12:00) Coordinated Universal Time+12' {$tsenv:TimeZoneName = "UTC+12"}
-            '(UTC+12:00) Fiji' {$tsenv:TimeZoneName = "Fiji Standard Time"}
-            '(UTC+12:00) Petropavlovsk-Kamchatsky - Old' {$tsenv:TimeZoneName = "Kamchatka Standard Time"}
-            '(UTC+13:00) Nuku alofa' {$tsenv:TimeZoneName = "Tonga Standard Time"}
-            '(UTC+13:00) Samoa' {$tsenv:TimeZoneName = "Samoa Standard Time"}
-            '(UTC+14:00) Kiritimati Island' {$tsenv:TimeZoneName = "Line Islands Standard Time"}
-            '(UTC-12:00) International Date Line West' {$tsenv:TimeZoneName = "Dateline Standard Time"}
-            '(UTC-11:00) Coordinated Universal Time-11' {$tsenv:TimeZoneName = "UTC-11"}
-            '(UTC-10:00) Hawaii' {$tsenv:TimeZoneName = "Hawaiian Standard Time"}
-            '(UTC-09:00) Alaska' {$tsenv:TimeZoneName = "Alaskan Standard Time"}
-            '(UTC-08:00) Baja California' {$tsenv:TimeZoneName = "Pacific Standard Time (Mexico)"}
-            '(UTC-08:00) Pacific Time (US + Canada)' {$tsenv:TimeZoneName = "Pacific Standard Time"}
-            '(UTC-07:00) Arizona' {$tsenv:TimeZoneName = "US Mountain Standard Time"}
-            '(UTC-07:00) Chihuahua, La Paz, Mazatlan' {$tsenv:TimeZoneName = "Mountain Standard Time (Mexico)"}
-            '(UTC-07:00) Mountain Time (US + Canada)' {$tsenv:TimeZoneName = "Mountain Standard Time"}
-            '(UTC-06:00) Central America' {$tsenv:TimeZoneName = "Central America Standard Time"}
-            '(UTC-06:00) Central Time (US + Canada)' {$tsenv:TimeZoneName = "Central Standard Time"}
-            '(UTC-06:00) Guadalajara, Mexico City, Monterrey' {$tsenv:TimeZoneName = "Central Standard Time (Mexico)"}
-            '(UTC-06:00) Saskatchewan' {$tsenv:TimeZoneName = "Canada Central Standard Time"}
-            '(UTC-05:00) Bogota, Lima, Quito, Rio Branco' {$tsenv:TimeZoneName = "SA Pacific Standard Time"}
-            '(UTC-05:00) Chetumal' {$tsenv:TimeZoneName = "Eastern Standard Time (Mexico)"}
-            '(UTC-05:00) Eastern Time (US + Canada)' {$tsenv:TimeZoneName = "Eastern Standard Time"}
-            '(UTC-05:00) Indiana (East)' {$tsenv:TimeZoneName = "US Eastern Standard Time"}
-            '(UTC-04:30) Caracas' {$tsenv:TimeZoneName = "Venezuela Standard Time"}
-            '(UTC-04:00) Asuncion' {$tsenv:TimeZoneName = "Paraguay Standard Time"}
-            '(UTC-04:00) Atlantic Time (Canada)' {$tsenv:TimeZoneName = "Atlantic Standard Time"}
-            '(UTC-04:00) Cuiaba' {$tsenv:TimeZoneName = "Central Brazilian Standard Time"}
-            '(UTC-04:00) Georgetown, La Paz, Manaus, San Juan' {$tsenv:TimeZoneName = "SA Western Standard Time"}
-            '(UTC-03:30) Newfoundland' {$tsenv:TimeZoneName = "Newfoundland Standard Time"}
-            '(UTC-03:00) Brasilia' {$tsenv:TimeZoneName = "E. South America Standard Time"}
-            '(UTC-03:00) Cayenne, Fortaleza' {$tsenv:TimeZoneName = "SA Eastern Standard Time"}
-            '(UTC-03:00) City of Buenos Aires' {$tsenv:TimeZoneName = "Argentina Standard Time"}
-            '(UTC-03:00) Greenland' {$tsenv:TimeZoneName = "Greenland Standard Time"}
-            '(UTC-03:00) Montevideo' {$tsenv:TimeZoneName = "Montevideo Standard Time"}
-            '(UTC-03:00) Salvador' {$tsenv:TimeZoneName = "Bahia Standard Time"}
-            '(UTC-03:00) Santiago' {$tsenv:TimeZoneName = "Pacific SA Standard Time"}
-            '(UTC-02:00) Coordinated Universal Time-02' {$tsenv:TimeZoneName = "UTC-02"}
-            '(UTC-02:00) Mid-Atlantic - Old' {$tsenv:TimeZoneName = "Mid-Atlantic Standard Time"}
-            '(UTC-01:00) Azores' {$tsenv:TimeZoneName = "Azores Standard Time"}
-            '(UTC-01:00) Cabo Verde Is.' {$tsenv:TimeZoneName = "Cabo Verde Standard Time"}
-            Default {}
-        }
-
-        # Translate PSDLanguage to TSENV:UILanguage
-        switch ($tsenv:PSDLanguage)
-        {
-            'Arabic (Saudi Arabia)'{$TSENV:UILanguage = "ar-SA"}
-            'Bulgarian (Bulgaria)'{$tsenv:UILanguage = "bg-BG"}
-            'Chinese (PRC)'{$tsenv:UILanguage = "zh-CN"}
-            'Chinese (Taiwan)'{$tsenv:UILanguage = "zh-TW"}
-            'Croatian (Croatia)'{$tsenv:UILanguage = "hr-HR"}
-            'Czech (Czech Republic)'{$tsenv:UILanguage = "cs-CZ"}
-            'Danish (Denmark)'{$tsenv:UILanguage = "da-DK"}
-            'Dutch (Netherlands)'{$tsenv:UILanguage = "nl-NL"}
-            'English (United States)'{$tsenv:UILanguage = "en-US"}
-            'English (United Kingdom)'{$tsenv:UILanguage = "en-GB"}
-            'Estonian (Estonia)'{$tsenv:UILanguage = "et-EE"}
-            'Finnish (Finland)'{$tsenv:UILanguage = "fi-FI"}
-            'French (Canada)'{$tsenv:UILanguage = "fr-CA"}
-            'French (France)'{$tsenv:UILanguage = "fr-FR"}
-            'German (Germany)'{$tsenv:UILanguage = "de-DE"}
-            'Greek (Greece)'{$tsenv:UILanguage = "el-GR"}
-            'Hebrew (Israel)'{$tsenv:UILanguage = "he-IL"}
-            'Hungarian (Hungary)'{$tsenv:UILanguage = "hu-HU"}
-            'Italian (Italy)'{$tsenv:UILanguage = "it-IT"}
-            'Japanese (Japan)'{$tsenv:UILanguage = "ja-JP"}
-            'Korean (Korea)'{$tsenv:UILanguage = "ko-KR"}
-            'Latvian (Latvia)'{$tsenv:UILanguage = "lv-LV"}
-            'Lithuanian (Lithuania)'{$tsenv:UILanguage = "lt-LT"}
-            'Norwegian, Bokm�l (Norway)'{$tsenv:UILanguage = "nb-NO"}
-            'Polish (Poland)'{$tsenv:UILanguage = "pl-PL"}
-            'Portuguese (Brazil)'{$tsenv:UILanguage = "pt-BR"}
-            'Portuguese (Portugal)'{$tsenv:UILanguage = "pt-PT"}
-            'Romanian (Romania)'{$tsenv:UILanguage = "ro-RO"}
-            'Russian (Russia)'{$tsenv:UILanguage = "ru-RU"}
-            'Serbian (Latin, Serbia)'{$tsenv:UILanguage = "sr-Latn-RS"}
-            'Slovak (Slovakia)'{$tsenv:UILanguage = "sk-SK"}
-            'Slovenian (Slovenia)'{$tsenv:UILanguage = "sl-SI"}
-            'Spanish (Mexico)'{$tsenv:UILanguage = "es-MX"}
-            'Spanish (Spain)'{$tsenv:UILanguage = "es-ES"}
-            'Swedish (Sweden)'{$tsenv:UILanguage = "sv-SE"}
-            'Thai (Thailand)'{$tsenv:UILanguage = "th-TH"}
-            'Turkish (Turkey)'{$tsenv:UILanguage = "tr-TR"}
-            'Ukrainian (Ukraine)'{$tsenv:UILanguage = "uk-UA"}
-            Default {}
-        }
-
-        # Translate PSDLocale to TSENV:SystemLocale and TSENV:UserLocale
-        switch ($tsenv:PSDLocale)
-        {
-            'Arabic (Saudi Arabia)'{
-                $TSENV:SystemLocale = "ar-SA"
-                $TSENV:UserLocale = "ar-SA"
-            }
-            'Bulgarian (Bulgaria)'{
-                $TSENV:SystemLocale = "bg-BG"
-                $TSENV:UserLocale = "bg-BG"
-            }
-            'Chinese (PRC)'{
-                $TSENV:SystemLocale = "zh-CN"
-                $TSENV:UserLocale = "zh-CN"
-            }
-            'Chinese (Taiwan)'{
-                $TSENV:SystemLocale = "zh-TW"
-                $TSENV:UserLocale = "zh-TW"
-            }
-            'Croatian (Croatia)'{
-                $TSENV:SystemLocale = "hr-HR"
-                $TSENV:UserLocale = "hr-HR"
-            }
-            'Czech (Czech Republic)'{
-                $TSENV:SystemLocale = "cs-CZ"
-                $TSENV:UserLocale = "cs-CZ"
-            }
-            'Danish (Denmark)'{
-                $TSENV:SystemLocale = "da-DK"
-                $TSENV:UserLocale = "da-DK"
-            }
-            'Dutch (Netherlands)'{
-                $TSENV:SystemLocale = "nl-NL"
-                $TSENV:UserLocale = "nl-NL"
-            }
-            'English (United States)'{
-                $TSENV:SystemLocale = "en-US"
-                $TSENV:UserLocale = "en-US"
-            }
-            'English (United Kingdom)'{
-                $TSENV:SystemLocale = "en-GB"
-                $TSENV:UserLocale = "en-GB"
-            }
-            'Estonian (Estonia)'{
-                $TSENV:SystemLocale = "et-EE"
-                $TSENV:UserLocale = "et-EE"
-            }
-            'Finnish (Finland)'{
-                $TSENV:SystemLocale = "fi-FI"
-                $TSENV:UserLocale = "fi-FI"
-            }
-            'French (Canada)'{
-                $TSENV:SystemLocale = "fr-CA"
-                $TSENV:UserLocale = "fr-CA"
-            }
-            'French (France)'{
-                $TSENV:SystemLocale = "fr-FR"
-                $TSENV:UserLocale = "fr-FR"
-            }
-            'German (Germany)'{
-                $TSENV:SystemLocale = "de-DE"
-                $TSENV:UserLocale = "de-DE"
-            }
-            'Greek (Greece)'{
-                $TSENV:SystemLocale = "el-GR"
-                $TSENV:UserLocale = "el-GR"
-            }
-            'Hebrew (Israel)'{
-                $TSENV:SystemLocale = "he-IL"
-                $TSENV:UserLocale = "he-IL"
-            }
-            'Hungarian (Hungary)'{
-                $TSENV:SystemLocale = "hu-HU"
-                $TSENV:UserLocale = "hu-HU"
-            }
-            'Italian (Italy)'{
-                $TSENV:SystemLocale = "it-IT"
-                $TSENV:UserLocale = "it-IT"
-            }
-            'Japanese (Japan)'{
-                $TSENV:SystemLocale = "ja-JP"
-                $TSENV:UserLocale = "ja-JP"
-            }
-            'Korean (Korea)'{
-                $TSENV:SystemLocale = "ko-KR"
-                $TSENV:UserLocale = "ko-KR"
-            }
-            'Latvian (Latvia)'{
-                $TSENV:SystemLocale = "lv-LV"
-                $TSENV:UserLocale = "lv-LV"
-            }
-            'Lithuanian (Lithuania)'{
-                $TSENV:SystemLocale = "lt-LT"
-                $TSENV:UserLocale = "lt-LT"
-            }
-            'Norwegian, Bokm�l (Norway)'{
-                $TSENV:SystemLocale = "nb-NO"
-                $TSENV:UserLocale = "nb-NO"
-            }
-            'Polish (Poland)'{
-                $TSENV:SystemLocale = "pl-PL"
-                $TSENV:UserLocale = "pl-PL"
-            }
-            'Portuguese (Brazil)'{
-                $TSENV:SystemLocale = "pt-BR"
-                $TSENV:UserLocale = "pt-BR"
-            }
-            'Portuguese (Portugal)'{
-                $TSENV:SystemLocale = "pt-PT"
-                $TSENV:UserLocale = "pt-PT"
-            }
-            'Romanian (Romania)'{
-                $TSENV:SystemLocale = "ro-RO"
-                $TSENV:UserLocale = "ro-RO"
-            }
-            'Russian (Russia)'{
-                $TSENV:SystemLocale = "ru-RU"
-                $TSENV:UserLocale = "ru-RU"
-            }
-            'Serbian (Latin, Serbia)'{
-                $TSENV:SystemLocale = "sr-Latn-RS"
-                $TSENV:UserLocale = "sr-Latn-RS"
-            }
-            'Slovak (Slovakia)'{
-                $TSENV:SystemLocale = "sk-SK"
-                $TSENV:UserLocale = "sk-SK"
-            }
-            'Slovenian (Slovenia)'{
-                $TSENV:SystemLocale = "sl-SI"
-                $TSENV:UserLocale = "sl-SI"
-            }
-            'Spanish (Mexico)'{
-                $TSENV:SystemLocale = "es-MX"
-                $TSENV:UserLocale = "es-MX"
-            }
-            'Spanish (Spain)'{
-                $TSENV:SystemLocale = "es-ES"
-                $TSENV:UserLocale = "es-ES"
-            }
-            'Swedish (Sweden)'{
-                $TSENV:SystemLocale = "sv-SE"
-                $TSENV:UserLocale = "sv-SE"
-            }
-            'Thai (Thailand)'{
-                $TSENV:SystemLocale = "th-TH"
-                $TSENV:UserLocale = "th-TH"
-            }
-            'Turkish (Turkey)'{
-                $TSENV:SystemLocale = "tr-TR"
-                $TSENV:UserLocale = "tr-TR"
-            }
-            'Ukrainian (Ukraine)'{
-                $TSENV:SystemLocale = "uk-UA"
-                $TSENV:UserLocale = "uk-UA"
-            }
-            Default {}
-        }
-
-        # Translate PSDKeyboard to TSENV:InputLocale
-        switch ($tsenv:PSDKeyboard)
-        {
-            'Arabic (Saudi Arabia)'{
-                $TSENV:InputLocale = "ar-SA"
-                $TSENV:KeyboardLocale = "ar-SA"
-            }
-            'Bulgarian (Bulgaria)'{
-                $tsenv:InputLocale = "bg-BG"
-                $tsenv:KeyboardLocale = "bg-BG"
-            }
-            'Chinese (PRC)'{
-                $tsenv:InputLocale = "zh-CN"
-                $tsenv:KeyboardLocale = "zh-CN"
-            }
-            'Chinese (Taiwan)'{
-                $tsenv:InputLocale = "zh-TW"
-                $tsenv:KeyboardLocale = "zh-TW"
-            }
-            'Croatian (Croatia)'{
-                $tsenv:InputLocale = "hr-HR"
-                $tsenv:KeyboardLocale = "hr-HR"
-            }
-            'Czech (Czech Republic)'{
-                $tsenv:InputLocale = "cs-CZ"
-                $tsenv:KeyboardLocale = "cs-CZ"
-            }
-            'Danish (Denmark)'{
-                $tsenv:InputLocale = "da-DK"
-                $tsenv:KeyboardLocale = "da-DK"
-            }
-            'Dutch (Netherlands)'{
-                $tsenv:InputLocale = "nl-NL"
-                $tsenv:KeyboardLocale = "nl-NL"
-            }
-            'English (United States)'{
-                $tsenv:InputLocale = "en-US"
-                $tsenv:KeyboardLocale = "en-US"
-            }
-            'English (United Kingdom)'{
-                $tsenv:InputLocale = "en-GB"
-                $tsenv:KeyboardLocale = "en-GB"
-            }
-            'Estonian (Estonia)'{
-                $tsenv:InputLocale = "et-EE"
-                $tsenv:KeyboardLocale = "et-EE"
-            }
-            'Finnish (Finland)'{
-                $tsenv:InputLocale = "fi-FI"
-                $tsenv:KeyboardLocale = "fi-FI"
-            }
-            'French (Canada)'{
-                $tsenv:InputLocale = "fr-CA"
-                $tsenv:KeyboardLocale = "fr-CA"
-            }
-            'French (France)'{
-                $tsenv:InputLocale = "fr-FR"
-                $tsenv:KeyboardLocale = "fr-FR"
-            }
-            'German (Germany)'{
-                $tsenv:InputLocale = "de-DE"
-                $tsenv:KeyboardLocale = "de-DE"
-            }
-            'Greek (Greece)'{
-                $tsenv:InputLocale = "el-GR"
-                $tsenv:KeyboardLocale = "el-GR"
-            }
-            'Hebrew (Israel)'{
-                $tsenv:InputLocale = "he-IL"
-                $tsenv:KeyboardLocale = "he-IL"
-            }
-            'Hungarian (Hungary)'{
-                $tsenv:InputLocale = "hu-HU"
-                $tsenv:KeyboardLocale = "hu-HU"
-            }
-            'Italian (Italy)'{
-                $tsenv:InputLocale = "it-IT"
-                $tsenv:KeyboardLocale = "it-IT"
-            }
-            'Japanese (Japan)'{
-                $tsenv:InputLocale = "ja-JP"
-                $tsenv:KeyboardLocale = "ja-JP"
-            }
-            'Korean (Korea)'{
-                $tsenv:InputLocale = "ko-KR"
-                $tsenv:KeyboardLocale = "ko-KR"
-            }
-            'Latvian (Latvia)'{
-                $tsenv:InputLocale = "lv-LV"
-                $tsenv:KeyboardLocale = "lv-LV"
-            }
-            'Lithuanian (Lithuania)'{
-                $tsenv:InputLocale = "lt-LT"
-                $tsenv:KeyboardLocale = "lt-LT"
-            }
-            'Norwegian, Bokm�l (Norway)'{
-                $tsenv:InputLocale = "nb-NO"
-                $tsenv:KeyboardLocale = "nb-NO"
-            }
-            'Polish (Poland)'{
-                $tsenv:InputLocale = "pl-PL"
-                $tsenv:KeyboardLocale = "pl-PL"
-            }
-            'Portuguese (Brazil)'{
-                $tsenv:InputLocale = "pt-BR"
-                $tsenv:KeyboardLocale = "pt-BR"
-            }
-            'Portuguese (Portugal)'{
-                $tsenv:InputLocale = "pt-PT"
-                $tsenv:KeyboardLocale = "pt-PT"
-            }
-            'Romanian (Romania)'{
-                $tsenv:InputLocale = "ro-RO"
-                $tsenv:KeyboardLocale = "ro-RO"
-            }
-            'Russian (Russia)'{
-                $tsenv:InputLocale = "ru-RU"
-                $tsenv:KeyboardLocale = "ru-RU"
-            }
-            'Serbian (Latin, Serbia)'{
-                $tsenv:InputLocale = "sr-Latn-RS"
-                $tsenv:KeyboardLocale = "sr-Latn-RS"
-            }
-            'Slovak (Slovakia)'{
-                $tsenv:InputLocale = "sk-SK"
-                $tsenv:KeyboardLocale = "sk-SK"
-            }
-            'Slovenian (Slovenia)'{
-                $tsenv:InputLocale = "sl-SI"
-                $tsenv:KeyboardLocale = "sl-SI"
-            }
-            'Spanish (Mexico)'{
-                $tsenv:InputLocale = "es-MX"
-                $tsenv:KeyboardLocale = "es-MX"
-            }
-            'Spanish (Spain)'{
-                $tsenv:InputLocale = "es-ES"
-                $tsenv:KeyboardLocale = "es-ES"
-            }
-            'Swedish (Sweden)'{
-                $tsenv:InputLocale = "sv-SE"
-                $tsenv:KeyboardLocale = "sv-SE"
-            }
-            'Thai (Thailand)'{
-                $tsenv:InputLocale = "th-TH"
-                $tsenv:KeyboardLocale = "th-TH"
-            }
-            'Turkish (Turkey)'{
-                $tsenv:InputLocale = "tr-TR"
-                $tsenv:KeyboardLocale = "tr-TR"
-            }
-            'Ukrainian (Ukraine)'{
-                $tsenv:InputLocale = "uk-UA"
-                $tsenv:KeyboardLocale = "uk-UA"
-            }
-            Default {}
-        }
-
-        # Set version for PSDToolkit in TSenv
-        $TSenv:DeploymentToolkitVersion = $DeploymentToolkitVersion
-
-        $variablesPath = Save-PSDVariables
-        #Get-ChildItem -Path tsenv:
-
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PSDWizard is done."
+    # Set theme
+    if([string]::IsNullOrEmpty($tsenv:PSDWizardTheme)){
+        $PSDWizardTheme = "Classic"
     }
     else{
-        $PSDWizard = $tsenv:PSDWizard
-        Write-PSDBootInfo -SleepSec 1 -Message "Loading the PSD Deployment Wizard"
-        if($tsenv:PSDPrestartMode -eq "FullScreen"){Update-PSDStartLoaderProgressBar -Runspace $PSDStartLoader -Status "Loading the PSD Deployment Wizard" -PercentComplete 100}
-        switch ($PSDWizard)
-        {
-            'PSDWizardNew' {
-                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running the command Import-Module $PSDWizard -ErrorAction Stop -Force -Verbose:`$False"
-                        Import-Module $PSDWizard -ErrorAction Stop -Force -Verbose:$False
-
-                        [string]$PSDWizardPath = Join-Path -Path $scripts -ChildPath $($PSDWizard)
-
-                        # Set a name if it is empty
-                        if([string]::IsNullOrEmpty($tsenv:OSDComputername)){
-                            $tsenv:OSDComputername = $env:COMPUTERNAME
-                        }
-
-                        # Set theme
-                        if([string]::IsNullOrEmpty($tsenv:PSDWizardTheme)){
-                            $PSDWizardTheme = "Classic"
-                        }
-                        else{
-                            $PSDWizardTheme = $tsenv:PSDWizardTheme
-                        }
-
-                        # determine splash screen (defaults to YES)
-                        if($tsenv:SkipPSDWizardSplashScreen -eq 'YES'){
-                            $PSDWizardNoSplashScreen = $true
-                        }
-                        else{
-                            $PSDWizardNoSplashScreen = $false
-                        }
-
-                        # Start the wizard
-                        Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Show-PSDWizard -ResourcePath {0} -AsAsyncJob:{1} -Theme {2} -NoSplashScreen:{3} -Passthru -Debug:{4}]" -f $PSDWizardPath,(!$Global:BootfromWinPE),$PSDWizardTheme,$PSDWizardNoSplashScreen,$PSDDebug)
-                        # $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Passthru -Debug:$PSDDebug
-                        $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Theme $PSDWizardTheme -NoSplashScreen:$PSDWizardNoSplashScreen -Passthru -Debug:$PSDDebug 
-        
-                        # Noting was selected...
-                        if ($result -eq $false){
-                            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cancelling, aborting..."
-                            Show-PSDInfo -Message "Cancelling, aborting..." -Severity Information -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
-                            Stop-PSDLogging
-                            Clear-PSDInformation
-                            Start-Process PowerShell -Wait
-                            Exit 0
-                        }
-                    }
-
-            'PSDWizardRS' {
-                        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Running the command Import-Module $PSDWizard -ErrorAction Stop -Force -Verbose:`$False"
-                        Import-Module $PSDWizard -ErrorAction Stop -Force -Verbose:$False
-
-                        #uses same resources as PSDWizardNew
-                        [string]$PSDWizardPath = Join-Path -Path $scripts -ChildPath PSDWizardNew
-
-                        # Set a name if it is empty
-                        if([string]::IsNullOrEmpty($tsenv:OSDComputername)){
-                            $tsenv:OSDComputername = $env:COMPUTERNAME
-                        }
-
-
-                        # Set theme
-                        if([string]::IsNullOrEmpty($tsenv:PSDWizardTheme)){
-                            $PSDWizardTheme = "Classic"
-                        }
-                        else{
-                            $PSDWizardTheme = $tsenv:PSDWizardTheme
-                        }
-
-                        # Start the wizard
-                        Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Show-PSDWizardRS -ResourcePath {0} -Passthru -Debug:{1}]" -f $PSDWizardPath,$PSDDebug)
-                        # $result = Show-PSDWizardRS -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Passthru -Debug:$PSDDebug
-                        $result = Show-PSDWizardRS -ResourcePath $PSDWizardPath -Passthru -Debug:$PSDDebug -Theme $PSDWizardTheme
-        
-                        # Noting was selected...
-                        if ($result -eq $false){
-                            Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cancelling, aborting..."
-                            Show-PSDInfo -Message "Cancelling, aborting..." -Severity Information -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
-                            Stop-PSDLogging
-                            Clear-PSDInformationgp
-                            Start-Process PowerShell -Wait
-                            Exit 0
-                        }
-                    }
-
-            Default {}
-        }
+        $PSDWizardTheme = $tsenv:PSDWizardTheme
     }
 
-    # Wizard should be done here, moving on to running the Task Sequence
+    # determine splash screen (defaults to YES)
+    if($tsenv:SkipPSDWizardSplashScreen -eq 'YES'){
+        $PSDWizardNoSplashScreen = $true
+    }
+    else{
+        $PSDWizardNoSplashScreen = $false
+    }
+
+    # Start the wizard
+    Write-PSDLog -Message ("$($MyInvocation.MyCommand.Name): Running [Show-PSDWizard -ResourcePath {0} -AsAsyncJob:{1} -Theme {2} -NoSplashScreen:{3} -Passthru -Debug:{4}]" -f $PSDWizardPath,(!$Global:BootfromWinPE),$PSDWizardTheme,$PSDWizardNoSplashScreen,$PSDDebug)
+    # $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Passthru -Debug:$PSDDebug
+    $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:(!$Global:BootfromWinPE) -Theme $PSDWizardTheme -NoSplashScreen:$PSDWizardNoSplashScreen -Passthru -Debug:$PSDDebug 
+
+    # Noting was selected...
+    if ($result -eq $false){
+        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Cancelling, aborting..."
+        Show-PSDInfo -Message "Cancelling, aborting..." -Severity Information -OSDComputername $OSDComputername -Deployroot $global:psddsDeployRoot
+        Stop-PSDLogging
+        Clear-PSDInformation
+        Start-Process PowerShell -Wait
+        Exit 0
+    }
+
+        # Wizard should be done here, moving on to running the Task Sequence
     # Find the task sequence engine
     if (Test-Path -Path "X:\Deploy\Tools\$($tsenv:Architecture)\tsmbootstrap.exe"){
         $tsEngine = "X:\Deploy\Tools\$($tsenv:Architecture)"
@@ -1440,7 +894,12 @@ if($BootfromWinPE -eq $True){
         # TODO: Need to find a better file for detection of running OS
         #If (Test-Path -Path "$($Drive.Name):\Windows\System32\mspaint.exe"){
         If (Test-Path -Path "$($Drive.Name):\marker.psd"){
+            
+            Write-PSDLog -Message "Setting logs to "$($Drive.Name):\MININT\SMSOSD\OSDLOGS""
             Start-PSDLogging -Logpath "$($Drive.Name):\MININT\SMSOSD\OSDLOGS"
+            
+            Write-PSDLog -Message "Setting logpath to "$($Drive.Name):\MININT\SMSOSD\OSDLOGS""
+            $tsenv:LogPath = "$($Drive.Name):\MININT\SMSOSD\OSDLOGS"
             Break
         }
     }
@@ -1448,10 +907,6 @@ if($BootfromWinPE -eq $True){
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property PSDDirty is now = $tsenv:PSDDirty"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Task Sequence is done, PSDStart.ps1 is now in charge.."
-
-
-
-
 
 # Make sure variables.dat is in the current local directory
 if (Test-Path -Path "$(Get-PSDLocalDataPath)\Variables.dat"){
@@ -1531,7 +986,6 @@ Switch ($result.ExitCode){
     }
     -2147021886 {
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Tasksequences has requested a reboot"
-        
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Property PSDDirty is now = false"
         $tsenv:PSDDirty = $false
         
@@ -1614,7 +1068,6 @@ Switch ($result.ExitCode){
         else{
             # In full OS, need to initiate a reboot
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): In full OS, need to initiate a reboot"
-
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Saving Variables"
             $variablesPath = Save-PSDVariables
 
@@ -1658,7 +1111,6 @@ Switch ($result.ExitCode){
     default {
         # Exit with a non-zero return code
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Task sequence failed, rc = $($result.ExitCode)"
-
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Reset HKLM:\Software\Microsoft\Deployment 4"
         Get-ItemProperty "HKLM:\Software\Microsoft\Deployment 4"  -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse
 

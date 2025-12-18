@@ -13,7 +13,7 @@
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @PowerShellCrack
           Primary: @Mikael_Nystrom
           Created:
-          Modified: 2022-09-18
+          Modified: 2025-03-28
 
           Version - 0.0.0 - () - Finalized functional version 1.
           Version - 0.0.1 - () - Added Import-PSDCertificate.
@@ -23,6 +23,7 @@
           Version - 0.0.5 - (PC) - Fixed caller output incase running outside of TS
           Version - 0.0.6 - (Mikael_Nystrom) - Added Clear-PSDDisk, Set-PSDEFIDiskpartition, Set-PSDRecoveryPartitionForMBR
           Version - 0.0.7 - (Mikael_Nystrom) - Removed a few Write-PSDLog
+	  Version - 0.0.8 - (Mikael_Nystrom) - Added new fuctions for testing preflights (Get-PSDNetworkInformation,Test-PSDLocalDisk,Test-PSDNameResolution,Test-PSDIPvAddress,Test-PSDNetAdapter)
 
           TODO:
           - Convert Forms into WPF and as separate runspace
@@ -677,7 +678,7 @@ Function Show-PSDInfoForm {
             $Deployroot
         )
 
-        #�Make�PowerShell�window disappear�while using GUI
+        # Make PowerShell window disappear while using GUI
         $windowcode = '[DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);'
         $asyncwindow = Add-Type -MemberDefinition $windowcode -name Win32ShowWindowAsync -namespace Win32Functions -PassThru
         $null = $asyncwindow::ShowWindowAsync((Get-Process -PID $pid).MainWindowHandle, 0)
@@ -1648,4 +1649,57 @@ Function Set-PSDRecoveryPartitionForMBR{
 
     Invoke-PSDEXE -Executable $Executable -Arguments $Arguments -Verbose
     Start-Sleep -Seconds 15
+}
+
+Function Test-PSDNetAdapter{
+    if(((Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1") | Measure-Object).count -ge 1){
+        Return $True
+    }
+    else{
+        Return $false
+    }
+}
+Function Test-PSDIPvAddress{
+    $Result = Get-PSDNetworkInformation
+    if(($Result.IPv4Address) -Like "169.*"){
+        Return $False
+    }
+    else{
+        Return $True
+    }
+}
+function Test-PSDNameResolution{
+    Param(
+        $hostname
+    )
+   
+    try{
+        $ips = [System.Net.Dns]::GetHostAddresses($hostname) | Where-Object AddressFamily -EQ InterNetwork | Select-Object IPAddressToString -ExpandProperty  IPAddressToString
+        if($ips.GetType().Name -eq "Object[]"){
+            $ips
+        }
+        Return $true
+    }
+    catch{
+        Return $false
+    }
+}
+Function Test-PSDLocalDisk{
+    $Disk0 = Get-PhysicalDisk -DeviceNumber 0
+
+    if($Disk0.Size -ge 30GB){
+        Return $true
+    }
+    else{
+        Return $false
+    }
+}
+Function Get-PSDNetworkInformation{
+    $Win32NetworkAdapterConfigurations = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1"
+    foreach($Win32NetworkAdapterConfiguration in $Win32NetworkAdapterConfigurations | Where-Object DefaultIPGateway -NE $null ){
+        $NetWork = New-Object -TypeName PSObject
+        $NetWork | Add-Member -MemberType NoteProperty -Name IPv4Address -Value $Win32NetworkAdapterConfiguration.IPAddress[0]
+        $NetWork | Add-Member -MemberType NoteProperty -Name DefaultGateway -Value $Win32NetworkAdapterConfiguration.DefaultIPGateway
+    }
+    Return $NetWork
 }
