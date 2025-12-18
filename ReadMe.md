@@ -1,5 +1,8 @@
 # README - PowerShell Deployment Extension Kit
 
+Dec 2025 (ver 0.2.3.1)
+- Added ZTIGather.xml (was missing for a long time)
+
 Sep 2024 (ver 0.2.3.0)
 - Updated Deployemnt wizard with new panes for Intune and device role
 - Improved task sequence templates
