@@ -1652,8 +1652,7 @@ Function Set-PSDRecoveryPartitionForMBR{
 }
 
 Function Test-PSDNetAdapter{
-    #if(((Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1").count -ge 1)){
-    if(((Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1") | Measure-Object).count -ge 1){
+    if(((Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1") | Measure-Object).count -ge 1){
         Return $True
     }
     else{
@@ -1696,7 +1695,7 @@ Function Test-PSDLocalDisk{
     }
 }
 Function Get-PSDNetworkInformation{
-    $Win32NetworkAdapterConfigurations = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1"
+    $Win32NetworkAdapterConfigurations = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = 1"
     foreach($Win32NetworkAdapterConfiguration in $Win32NetworkAdapterConfigurations | Where-Object DefaultIPGateway -NE $null ){
         $NetWork = New-Object -TypeName PSObject
         $NetWork | Add-Member -MemberType NoteProperty -Name IPv4Address -Value $Win32NetworkAdapterConfiguration.IPAddress[0]
