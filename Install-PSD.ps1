@@ -410,7 +410,7 @@ foreach ($providerTemplate in $providerTemplates) {
 
 # Copy ZTIGather.XML to correct folder
 Write-PSDInstallLog -Message "Adding ZTIGather.XML to correct folder"
-Move-Item -Path "$PSScriptRoot\Scripts\ZTIGather.xml" -Destination "$psDeploymentFolder\Tools\Modules\PSDGather" -Force
+Copy-Item -Path "$PSScriptRoot\Scripts\ZTIGather.xml" -Destination "$psDeploymentFolder\Tools\Modules\PSDGather" -Force
 
 # Verify/Correct missing UNC path in BootStrap.ini (TBA)
 
@@ -454,6 +454,8 @@ Copy-PSDFolder -source $PSScriptRoot\Plugins -destination $psDeploymentFolder\PS
 # Readiness
 Copy-PSDFolder -source $PSScriptRoot\PSDResources\Readiness -destination $psDeploymentFolder\PSDResources\Readiness
 
+# UserExitScripts
+Copy-PSDFolder -source $PSScriptRoot\PSDResources\UserExitScripts -destination $psDeploymentFolder\PSDResources\UserExitScripts
 
 if (!($Upgrade)) {
     # Update the DeploymentShare properties
