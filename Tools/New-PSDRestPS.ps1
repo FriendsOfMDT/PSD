@@ -12,7 +12,7 @@
         The path to the NSSM.exe
 
     .PARAMETER RestPSListenerPort
-        The port that RestPS will listen on. default is 8080
+        The port that RestPS will listen on
 
     .PARAMETER SecretKey
         The secret key for RestPS
@@ -52,31 +52,27 @@
 ## PARAMETER DECLARATION
 ## =========================================================================================
 
-[CmdLetBinding(DefaultParameterSetName='PreloadedCert')]
+[CmdLetBinding()]
 Param(
     [Parameter(Mandatory=$true,HelpMessage = "REQUIRED: Specify the path to the RestPS root folder")]
+    [ValidateNotNullOrEmpty()]
     $RestPSRootPath,
         
     [Parameter(Mandatory=$true,HelpMessage = "REQUIRED: Specify the path to the NSSM.exe")]
+    [ValidateNotNullOrEmpty()]
     $PathtoNSSMexe,
 
-    [Parameter(Mandatory=$false,HelpMessage = "OPTIONAL: Specify the port that RestPS will listen on. default is 8080")]
-    [int]$RestPSListenerPort = '8080',
+    [Parameter(Mandatory=$true,HelpMessage = "REQUIRED: Specify the port that RestPS will listen on")]
+    [ValidateNotNullOrEmpty()]
+    $RestPSListenerPort,
 
-    [Parameter(ParameterSetName='PreAuth',Mandatory=$true,HelpMessage = "REQUIRED: Specify the secret key for RestPS")]
+    [Parameter(Mandatory=$true,HelpMessage = "REQUIRED: Specify the secret key for RestPS")]
+    [ValidateNotNullOrEmpty()]
     $SecretKey,
 
-    [Parameter(ParameterSetName='PreloadedCert',Mandatory=$true,HelpMessage = "REQUIRED: Specify the friendly name of the server certificate")]
-    $ServerCertFriendlyName,
-
-    [Parameter(ParameterSetName='PreloadedCert',Mandatory=$true,HelpMessage = "REQUIRED: Specify the friendly name of the client certificate")]
-    $ClientCertFriendlyName,
-
-    [Parameter(ParameterSetName='GenSelfSignedCert',Mandatory=$false,HelpMessage = "OPTIONAL: Generate a self-signed certificate")]
-    [switch]$GenSelfSignedCert,
-
-    [Parameter(ParameterSetName='GenSelfSignedCert',Mandatory=$true,HelpMessage = "OPTIONAL: Test the RestPS service")]
-    $psDeploymentFolder,
+    [Parameter(Mandatory=$true,HelpMessage = "REQUIRED: Specify the friendly name of the certificate")]
+    [ValidateNotNullOrEmpty()]
+    $CertificateFriendlyName,
 
     [Parameter(Mandatory=$false,HelpMessage = "OPTIONAL: Test the RestPS service")]
     [Switch]$Test
@@ -163,17 +159,16 @@ Function Set-PSDRestPS{
     $ScriptPath = "$RestPSRootPath\Service\StartRestPS.ps1"
     Set-Content -Path $ScriptPath -Value "Start-Transcript -Path $RestPSRootPath\Service\Start.log"
     Add-Content -Path $ScriptPath -Value "`$ServerCert = Get-ChildItem Cert:\LocalMachine\My | Where-Object {`$_.FriendlyName -eq `"$CertificateFriendlyName`"}"
-    Add-Content -Path $ScriptPath -Value "Write-Output `"Certificate Thumbprint: `$(`$ServerCert.Thumbprint)`""
-    Add-Content -Path $ScriptPath -Value "Import-Module RestPS -Force"
+    Add-Content -Path $ScriptPath -Value "Import-Module RESTPS -Force"
     Add-Content -Path $ScriptPath -Value "`$ServerParams = @{"
-    Add-Content -Path $ScriptPath -Value "  RoutesFilePath = `"$RestPSRootPath\endpoints\RestPSRoutes.json`""
-    Add-Content -Path $ScriptPath -Value "  Port = `"$RestPSListenerPort`""
-    Add-Content -Path $ScriptPath -Value "  SSLThumbprint = `"`$(`$ServerCert.Thumbprint)`""
-    Add-Content -Path $ScriptPath -Value "  AppGuid = '$AppGuid'"
-    Add-Content -Path $ScriptPath -Value "  VerificationType = 'VerifyRootCA'"
-    Add-Content -Path $ScriptPath -Value "  Logfile = `"$RestPSRootPath\Service\RestPS.log`""
-    Add-Content -Path $ScriptPath -Value "  LogLevel = `"ALL`""
-    Add-Content -Path $ScriptPath -Value "  RestPSLocalRoot = `"$RestPSRootPath`""
+    Add-Content -Path $ScriptPath -Value "RoutesFilePath = `"$RestPSRootPath\endpoints\RestPSRoutes.json`""
+    Add-Content -Path $ScriptPath -Value "Port = `"$RestPSListenerPort`""
+    Add-Content -Path $ScriptPath -Value "SSLThumbprint = `"`$(`$ServerCert.Thumbprint)`""
+    Add-Content -Path $ScriptPath -Value "AppGuid = '$AppGuid'"
+    Add-Content -Path $ScriptPath -Value "VerificationType = 'VerifyUserAuth'"
+    Add-Content -Path $ScriptPath -Value "Logfile = `"$RestPSRootPath\Service\RestPS.log`""
+    Add-Content -Path $ScriptPath -Value "LogLevel = `"ALL`""
+    Add-Content -Path $ScriptPath -Value "RestPSLocalRoot = `"$RestPSRootPath`""
     Add-Content -Path $ScriptPath -Value "}"
     Add-Content -Path $ScriptPath -Value "Start-RestPSListener @ServerParams"
     Add-Content -Path $ScriptPath -Value "Stop-Transcript"
@@ -198,17 +193,9 @@ Function Set-PSDRestPS{
 
 Function Test-PSDRestPS{
     Param(
-        $ClientCert,
         $RestPSListenerPort
     )
-    If($ClientCert){
-        Disable-SSLValidation
-        $result = Invoke-RestMethod -Uri "https://localhost:$RestPSListenerPort/process?name=powershell" -Method Get -UseBasicParsing -Certificate $ClientCert
-    }
-    else{
-        $result = Invoke-RestMethod -Uri "http://localhost:$RestPSListenerPort/process?name=powershell" -Method Get -UseBasicParsing
-    }
-    
+    $result = Invoke-RestMethod -Uri "http://localhost:$RestPSListenerPort/process?name=powershell" -Method Get -UseBasicParsing
     if(($result.ProcessName) -eq "powershell"){
         Return $true
     }
@@ -251,80 +238,10 @@ Function New-PSDGetRestUserAuthFile{
 ## =========================================================================================
 ## MAIN LOGIC
 ## ========================================================================================
-If($GenSelfSignedCert){
-    #Create the root Certificate
-    $rootCAparams = @{
-        DnsName = 'RestPS.Root.local'
-        KeyLength = 2048
-        KeyAlgorithm = 'RSA'
-        HashAlgorithm = 'SHA256'
-        KeyExportPolicy = 'Exportable'
-        NotAfter = (Get-Date).AddYears(5)
-        CertStoreLocation = 'Cert:\LocalMachine\My'
-        KeyUsage = 'CertSign','CRLSign' #fixes invalid certificate error
-    }
-    $rootCA = New-SelfSignedCertificate @rootCAparams
 
-    #Add/Import the new RootCA to the ‘Root’ Certificate Store
-    $CertStore = New-Object -TypeName `
-    System.Security.Cryptography.X509Certificates.X509Store(
-    [System.Security.Cryptography.X509Certificates.StoreName]::Root,
-    'LocalMachine')
-    $CertStore.open('MaxAllowed')
-    $CertStore.add($rootCA)
-    $CertStore.close()
-
-
-    #Creating the Server certificate:
-    $params = @{
-        FriendlyName = 'RestPS Server Cert'
-        DnsName = 'Server.RestPS.local'
-        Signer = $rootCA # &amp;amp;amp;amp;amp;lt;------ Notice the Signer is the newly created RootCA
-        KeyLength = 2048
-        KeyAlgorithm = 'RSA'
-        HashAlgorithm = 'SHA256'
-        KeyExportPolicy = 'Exportable'
-        NotAfter = (Get-Date).AddYears(2)
-        CertStoreLocation = 'Cert:\LocalMachine\My'
-    }
-    $ServerCert = New-SelfSignedCertificate @params
-
-    #Creating the Client Certificate:
-    $params = @{
-        FriendlyName = 'RestPS Client Cert'
-        DnsName = 'Client.RestPS.local'
-        Signer = $rootCA # &amp;amp;amp;amp;lt;------ Notice the Signer is the newly created RootCA
-        KeyLength = 2048
-        KeyAlgorithm = 'RSA'
-        HashAlgorithm = 'SHA256'
-        KeyExportPolicy = 'Exportable'
-        NotAfter = (Get-Date).AddYears(2)
-        CertStoreLocation = 'Cert:\LocalMachine\My'
-    }
-    $ClientCert = New-SelfSignedCertificate @params
-
-    Get-item Cert:\LocalMachine\My\$($rootCA.Thumbprint) | Export-Certificate -Type CERT -FilePath $
-    #remove cert from my store
-    Get-item Cert:\LocalMachine\My\$($rootCA.Thumbprint) | Remove-Item -Force
-
-    #Build the RestPS start script
-    Set-PSDRestPS -RestPSRootPath $RestPSRootPath -PathtoNSSMexe $PathtoNSSMexe -RestPSListenerPort $RestPSListenerPort -CertificateFriendlyName "RestPS Server Cert"
-
-}Else{
-    #Build the RestPS start script
-    Set-PSDRestPS -RestPSRootPath $RestPSRootPath -PathtoNSSMexe $PathtoNSSMexe -RestPSListenerPort $RestPSListenerPort -CertificateFriendlyName $ServerCertFriendlyName
-}
-
-
-
+Set-PSDRestPS -RestPSRootPath $RestPSRootPath -PathtoNSSMexe $PathtoNSSMexe -RestPSListenerPort $RestPSListenerPort -CertificateFriendlyName $CertificateFriendlyName
 if($Test){
-    If($GenSelfSignedCert){
-        $ClientCert = Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.FriendlyName -eq "RestPS Client Cert"}
-    }
-    else{
-        $ClientCert = Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.FriendlyName -eq $ClientCertFriendlyName}
-    }
-    $result = Test-PSDRestPS -RestPSListenerPort $RestPSListenerPort -ClientCert $ClientCert
+    $result = Test-PSDRestPS -RestPSListenerPort $RestPSListenerPort
 
     switch ($result)
     {

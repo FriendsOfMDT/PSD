@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    PSDWizard Helper File
+    PSDWizard Intializer File
 .DESCRIPTION
     Script to initialize the new wizard content in PSD
 .LINK
@@ -13,13 +13,13 @@
     Contact: Dick Tracy (@PowershellCrack)
     Primary: Dick Tracy (@PowershellCrack)
     Created: 2020-01-12
-    Modified: 2025-02-08
-    Version: 2.3.6
+    Modified: 2024-05-10
+    Version: 2.3.5
 
     SEE CHANGELOG.MD
 #>
 [CmdletBinding()]
-param($Caller,$ScriptPath)
+param($Caller)
 
 #region FUNCTION: Check if running in WinPE
 Function Test-PSDWizardInPE{
@@ -28,17 +28,107 @@ Function Test-PSDWizardInPE{
 #endregion
 
 
+#region FUNCTION: Test-PSDWizardInISE
+Function Test-PSDWizardInISE {
+    <#
+    .SYNOPSIS
+    Check if running in ISE
+    #>
+    # Set-StrictMode -Version latest
+    try {
+        return ($null -ne $psISE);
+    }
+    catch {
+        return $false;
+    }
+}
+#endregion
+
+#region FUNCTION: Test-PSDWizardInVSC
+Function Test-PSDWizardInVSC {
+    <#
+    .SYNOPSIS
+        Check if running in Visual Studio Code
+    #>
+    if ($env:TERM_PROGRAM -eq 'vscode') {
+        return $true;
+    }
+    Else {
+        return $false;
+    }
+}
+#endregion
+
+#region FUNCTION: Get-PSDWizardScriptPath
+Function Get-PSDWizardScriptPath {
+    <#
+    .SYNOPSIS
+        Finds the current script path even in ISE or VSC
+    .LINK
+        Test-PSDWizardInVSC
+        Test-PSDWizardInISE
+    #>
+    param(
+        [switch]$Parent
+    )
+
+    Begin {}
+    Process {
+        Try {
+            if ($PSScriptRoot -eq "") {
+                if (Test-PSDWizardInISE) {
+                    $ScriptPath = $psISE.CurrentFile.FullPath
+                }
+                elseif (Test-PSDWizardInVSC) {
+                    $context = $psEditor.GetEditorContext()
+                    $ScriptPath = $context.CurrentFile.Path
+                }
+                Else {
+                    $ScriptPath = (Get-location).Path
+                }
+            }
+            else {
+                $ScriptPath = $PSCommandPath
+            }
+        }
+        Catch {$script:PSDWizardPath
+            $ScriptPath = '.'
+        }
+    }
+    End {
+
+        If ($Parent) {
+            Split-Path $ScriptPath -Parent
+        }
+        Else {
+            $ScriptPath
+        }
+    }
+
+}
+#endregion
+
+
 ##*========================================================================
 ##* VARIABLE DECLARATION
 ##*========================================================================
 #region VARIABLES: Building paths & values
-# Use function to get paths because Powershell ISE & other editors have different results
+# Use function to get paths because Powershell ISE & other editors have differnt results
+$ScriptPath = Get-PSDWizardScriptPath
+[string]$script:PSDWizardPath = Split-Path -Path $ScriptPath -Parent
 Try{
-    [string]$script:PSDDeployRoot = Get-PSDContent
     [string]$script:PSDScriptRoot = Get-PSDContent -Content "Scripts"
-    [string]$script:PSDContentRoot = Get-PSDContent -Content "Control"
-    [string]$script:PSDResourceRoot = Get-PSDContent -Content "PSDResources"
-    [string]$script:PSDWizardContentPath = Get-PSDContent -Content "Scripts\PSDWizardNew"
+    [string]$script:PSDContentPath = Get-PSDContent -Content "Control"
+
+    If($PSDDeBug -ne $true){
+        $PSDDeBug = $false
+    }
+
+    if ($PSDDeBug -eq $true) {
+        Write-PSDLog -Message ("{0}: PSDWizard path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDWizardPath) -LogLevel 1
+        Write-PSDLog -Message ("{0}: ScriptRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDScriptRoot) -LogLevel 1
+        Write-PSDLog -Message ("{0}: ContentRoot path is [{1}]" -f $MyInvocation.MyCommand, $script:PSDContentPath) -LogLevel 1
+    }
 }
 Catch{
     If($Caller){
@@ -47,33 +137,6 @@ Catch{
         Write-Host ("{0}: Unable to load PSD path; PSD modules will load during [Invoke-PSDTestEnv]" -f $MyInvocation.MyCommand) -ForegroundColor Yellow
     }
 }
-
-#if script root cannot be found overwrite with $ScriptPath
-If(-Not(Test-Path $script:PSDScriptRoot -ErrorAction SilentlyContinue))
-{
-    $DeploymentRoot = Split-Path $ScriptPath -Parent
-    [string]$script:PSDDeployRoot = $DeploymentRoot
-    [string]$script:PSDScriptRoot = $ScriptPath
-    [string]$script:PSDContentRoot = "$DeploymentRoot\Control"
-    [string]$script:PSDResourceRoot = "$DeploymentRoot\PSDResources"
-    [string]$script:PSDWizardContentPath = "$ScriptPath\PSDWizardNew"
-}
-
-If($PSDDeBug -ne $true){
-    $PSDDeBug = $false
-    Write-PSDLog -Message ("{0}: Debug mode is now: [{1}]" -f $MyInvocation.MyCommand, $PSDDeBug) -LogLevel 1
-    Write-PSDLog -Message ("{0}: DeployRoot path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDDeployRoot) -LogLevel 1
-    Write-PSDLog -Message ("{0}: ScriptRoot path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDScriptRoot) -LogLevel 1
-    Write-PSDLog -Message ("{0}: ContentRoot path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDContentRoot) -LogLevel 1
-    Write-PSDLog -Message ("{0}: PSDResourceRoot path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDResourceRoot) -LogLevel 1
-    Write-PSDLog -Message ("{0}: PSDWizardContentPath path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDWizardContentPath) -LogLevel 1
-}
-
-Write-Verbose ("{0}: DeployRoot path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDDeployRoot)
-Write-Verbose ("{0}: ScriptRoot path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDScriptRoot)
-Write-Verbose ("{0}: ContentRoot path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDContentRoot)
-Write-Verbose ("{0}: PSDResourceRoot path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDResourceRoot)
-Write-Verbose ("{0}: PSDWizardContentPath path is now: [{1}]" -f $MyInvocation.MyCommand, $script:PSDWizardContentPath)
 
 
 ##*========================================================================
@@ -193,10 +256,8 @@ Function Invoke-PSDLiteTouchEnvBeta{
 
      $PSDWizardNoSplashScreen = $true
 
-     $result = Show-PSDWizard -ResourcePath $PSDWizardPath -ScriptPath $script:PSDScriptRoot -AsAsyncJob:$false -Theme $PSDWizardTheme -NoSplashScreen:$PSDWizardNoSplashScreen -Passthru -Debug:$true 
+     $result = Show-PSDWizard -ResourcePath $PSDWizardPath -AsAsyncJob:$false -Theme $PSDWizardTheme -NoSplashScreen:$PSDWizardNoSplashScreen -Passthru -Debug:$true 
 }
-
-
 
 Function Reset-PSDEnv{
     $MDTRegPath = "HKLM:\SOFTWARE\Microsoft\Deployment 4"
@@ -367,7 +428,8 @@ Function Invoke-PSDWinPEEnv{
         
         $commands += @(
             "Import-Module `"`$Global:deployRoot\Tools\Modules\PSDWizardNew\PSDWizardNew.psm1`" -Global -Force"
-            "`$result = Show-PSDWizard -ResourcePath `"`$Global:deployRoot\Scripts\PSDWizardNew`" -ScriptPath `"`$script:PSDScriptRoot`" -AsAsyncJob:`$False -NoSplashScreen -Passthru -Debug:`$true -Theme $Theme"
+            "`$result = Show-PSDWizard -ResourcePath `"`$Global:deployRoot\Scripts\PSDWizardNew`" -AsAsyncJob:`$False -NoSplashScreen -Passthru -Debug:`$true -Theme $Theme"
+            #"`$result = Show-PSDWizard -ResourcePath `"`$Global:deployRoot\Scripts\PSDWizardNew`" -AsAsyncJob:`$True -NoSplashScreen -Passthru -Debug:`$true -Theme $Theme"
             "`$result"
         )
 
