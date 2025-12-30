@@ -13,8 +13,8 @@
     Contact: Dick Tracy (@PowershellCrack)
     Primary: Dick Tracy (@PowershellCrack)
     Created: 2020-01-12
-    Modified: 2025-02-08
-    Version: 2.3.7
+    Modified: 2024-12-29
+    Version: 2.3.6
 
     SEE CHANGELOG.MD
 
@@ -242,24 +242,23 @@ Function Format-PSDWizard {
         Build the XAML dynamically from definition file
 
     .EXAMPLE
-        $SourcePath = 'D:\DeploymentShares\PSD\scripts\PSDWizardNew'
+        $Path = 'D:\DeploymentShares\PSD\scripts\PSDWizardNew'
         $ThemeFile = 'Classic_Theme_Definitions_en-US.xml'
-        [Xml.XmlDocument]$LangDefinition = (Get-Content "$SourcePath\PSDWizard_Definitions_en-US.xml")
-        [Xml.XmlDocument]$ThemeDefinition = (Get-Content "$SourcePath\Themes\$ThemeFile")
-        Format-PSDWizard -SourcePath $SourcePath -LangDefinition $LangDefinition -ThemeDefinition $ThemeDefinition -Test -Passthru
+        [Xml.XmlDocument]$LangDefinition = (Get-Content "$Path\PSDWizard_Definitions_en-US.xml")
+        [Xml.XmlDocument]$ThemeDefinition = (Get-Content "$Path\Themes\$ThemeFile")
+        Format-PSDWizard -Path $Path -LangDefinition $LangDefinition -ThemeDefinition $ThemeDefinition -Test -Passthru
 
     .EXAMPLE
-        $SourcePath = 'D:\DeploymentShares\PSD\scripts\PSDWizardNew'
+        $Path = 'D:\DeploymentShares\PSD\scripts\PSDWizardNew'
         $ThemeFile = 'Refresh_Theme_Definitions_en-US.xml'
-        [Xml.XmlDocument]$LangDefinition = (Get-Content "$SourcePath\PSDWizard_Definitions_en-US.xml")
-        [Xml.XmlDocument]$ThemeDefinition = (Get-Content "$SourcePath\Themes\$ThemeFile")
-        Format-PSDWizard -SourcePath $SourcePath -LangDefinition $LangDefinition -ThemeDefinition $ThemeDefinition
+        [Xml.XmlDocument]$LangDefinition = (Get-Content "$Path\PSDWizard_Definitions_en-US.xml")
+        [Xml.XmlDocument]$ThemeDefinition = (Get-Content "$Path\Themes\$ThemeFile")
+        Format-PSDWizard -Path $Path -LangDefinition $LangDefinition -ThemeDefinition $ThemeDefinition
     #>
     [CmdletBinding()]
     Param(
         [parameter(Mandatory = $true)]
-        [Alias('Path')]
-        [string]$SourcePath,
+        [string]$Path,
 
         [parameter(Mandatory = $true)]
         [Xml.XmlDocument]$LangDefinition,
@@ -277,12 +276,12 @@ Function Format-PSDWizard {
 
     #determine if path is has a file in path or is just a container
     #Make the path the working path
-    If (Test-Path -Path $SourcePath -PathType Container) {
-        $WorkingPath = $SourcePath -replace '\\$', ''
+    If (Test-Path -Path $Path -PathType Container) {
+        $WorkingPath = $Path -replace '\\$', ''
     }
     Else {
         # we don't need the fie; just the path
-        $WorkingPath = Split-Path $SourcePath -Parent
+        $WorkingPath = Split-Path $Path -Parent
     }
     #build paths to resources and templates
     [string]$ResourcePath = (Join-Path -Path $WorkingPath -ChildPath 'Resources')
@@ -581,7 +580,7 @@ function Export-PSDWizardResult {
                     Write-PSDLog -Message ("{0}: TaskSequenceID is empty!!!" -f ${CmdletName})
                     Write-PSDLog -Message ("{0}: Re-Running Wizard, TaskSequenceID must not be empty..." -f ${CmdletName})
                     Show-PSDSimpleNotify -Message ("{0}: No Task Sequence selected, restarting wizard..." -f ${CmdletName})
-                    Show-PSDWizard -ResourcePath "$script:PSDScriptRoot\PSDWizardNew"
+                    Show-PSDWizard -ResourcePath "$(Get-PSDContent -Content "scripts")\PSDWizardNew"
                 }
                 Else {
                     Write-PSDLog -Message ("{0}: TaskSequenceID is now: {1}" -f ${CmdletName}, $value)
@@ -601,12 +600,12 @@ function Set-PSDWizardDefault {
 
     .EXAMPLE
         $Path = 'D:\DeploymentShares\PSD\scripts\PSDWizardNew\Scripts'
-        $PSDWizardContentPath = 'D:\DeploymentShares\PSD\scripts\PSDWizardNew'
-        [string]$LangDefinitionXml = Join-Path -Path $PSDWizardContentPath -ChildPath 'PSDWizard_Definitions_en-US.xml'
-        [string]$ThemeDefinitionXml = Join-Path -Path "$PSDWizardContentPath\Themes" -ChildPath 'Classic_Theme_Definitions_en-US.xml'
+        $ResourcePath = 'D:\DeploymentShares\PSD\scripts\PSDWizardNew'
+        [string]$LangDefinitionXml = Join-Path -Path $ResourcePath -ChildPath 'PSDWizard_Definitions_en-US.xml'
+        [string]$ThemeDefinitionXml = Join-Path -Path "$ResourcePath\Themes" -ChildPath 'Classic_Theme_Definitions_en-US.xml'
         [Xml.XmlDocument]$LangDefinitionXmlDoc = (Get-Content $LangDefinitionXml)
         [Xml.XmlDocument]$ThemeDefinitionXmlDoc = (Get-Content $ThemeDefinitionXml)
-        $XMLContent = Format-PSDWizard -SourcePath $PSDWizardContentPath -LangDefinition $LangDefinitionXmlDoc -ThemeDefinition $ThemeDefinitionXmlDoc
+        $XMLContent = Format-PSDWizard -Path $ResourcePath -LangDefinition $LangDefinitionXmlDoc -ThemeDefinition $ThemeDefinitionXmlDoc
         $Form = Invoke-PSDWizard -ScriptPath $Path -XamlContent $XMLContent -Version "2.0" -Passthru
         $VariablePrefix='TS_'
         Set-PSDWizardDefault -XMLContent $XMLContent -VariablePrefix $VariablePrefix -Form $Form
@@ -802,7 +801,7 @@ Function Invoke-PSDWizard {
 
     .EXAMPLE
         $XamlContent = $script:Xaml.OuterXml
-        $ScriptPath = $script:PSDScriptRoot
+        $ScriptPath = (Get-PSDContent scripts)
         $Version = 'v2'
         $Form = Invoke-PSDWizard -ScriptPath $ScriptPath -XamlContent $XMLContent -Version $Version -Passthru
     #>
@@ -913,7 +912,7 @@ Function Invoke-PSDWizard {
         }
 
         <#TODO: Need PSDDomainJoin.ps1 to enable feature
-        If('PSDDomainJoin.ps1' -notin $script:PSDScriptRoot){
+        If('PSDDomainJoin.ps1' -notin (Get-PSDContent -Content "Scripts" -Passthru)){
             $NetworkSelectionAvailable = $false
             Get-PSDWizardElement -Name "JoinDomain" -Wildcard | Set-PSDWizardElement -Visible:$False
         }
@@ -1999,7 +1998,7 @@ Function Invoke-PSDWizard {
     $CustomPanes = $_wizTabControl.items.Name -match '_wizCustomPane'
     If($CustomPanes.count -gt 0)
     {
-        $CustomScriptPath = "$script:PSDResourceRoot\CustomScripts"
+        $CustomScriptPath = (Get-PSDContent -Content 'PSDResources\CustomScripts')
 
         Foreach($CustomPane in $CustomPanes)
         {
@@ -2056,7 +2055,7 @@ Function Invoke-PSDWizard {
                         $MaxChecks=4
                         #$ReadinessPath = "X:\Deploy\Readiness"
                         $ReadinessScript = Get-PSDWizardTSEnvProperty -Name 'PSDReadinessScript' -ValueOnly
-                        $ReadinessPath = "$script:PSDResourceRoot\Readiness"
+                        $ReadinessPath = (Get-PSDContent -Content 'PSDResources\Readiness')
                         $RunChecks = $true
 
                         If(Test-Path "$ReadinessPath\$ReadinessScript")
@@ -2315,7 +2314,7 @@ Function Invoke-PSDWizard {
                     #RUN EVENTS ON PAGE LOAD
                     #Check what value is provided by computer name and rebuild it based on supported variables
                     # Any variables declared in CustoSettings.ini are supported + variables with %SERIAL% or %RAND%
-                    $TS_OSDComputerName.Text = (Get-PSDWizardComputerName -InputString (Get-PSDWizardTSEnvProperty 'OSDComputerName' -ValueOnly))
+                    $TS_OSDComputerName.Text = (Get-PSDWizardComputerName -Value (Get-PSDWizardTSEnvProperty 'OSDComputerName' -ValueOnly))
 
                     $ValidName = (Confirm-PSDWizardComputerName -ComputerNameObject $TS_OSDComputerName -OutputObject $_detTabValidation -Passthru)
                     Get-PSDWizardElement -Name "_wizNext" | Set-PSDWizardElement -Enable:$ValidName
@@ -2385,7 +2384,7 @@ Function Invoke-PSDWizard {
 
                     $CustomPaneScript = ($this.SelectedItem.Name).replace('_wizCustomPane','PSDWizard') + '.ps1'
                     #$CustomPaneScript = (Get-PSDWizardTSEnvProperty -Name ($this.SelectedItem.Name).replace('_wizCustomPane','PSDWizard') -ValueOnly)
-                    $CustomScriptPath = "$script:PSDResourceRoot\CustomScripts"
+                    $CustomScriptPath = (Get-PSDContent -Content 'PSDResources\CustomScripts')
 
                     If(Test-Path "$CustomScriptPath\$CustomPaneScript")
                     {
@@ -2776,7 +2775,7 @@ Function Invoke-PSDWizard {
             #Allow F5 to refresh wizard content
             'F5' {
                 #redownload control content
-                $null = $script:PSDContentRoot
+                $null = Get-PSDContent -Content 'control'
                 
                 If('_wizTaskSequence' -in $_wizTabControl.items.Name )
                 {
@@ -3168,16 +3167,16 @@ Function Show-PSDWizard {
         Start the wizard
 
     .EXAMPLE
-        $PSDWizardContentPath = $script:PSDWizardContentPath
+        $ResourcePath = (Get-PSDContent -Content 'scripts') + '\PSDWizardNew'
         $Language = 'en-US'
         $Theme = 'Classic'
-        Show-PSDWizard -PSDWizardContentPath $PSDWizardContentPath -Language $Language -Theme $Theme
+        Show-PSDWizard -ResourcePath $ResourcePath -Language $Language -Theme $Theme
     #>
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $true, Position = 0)]
-        [Alias('XamlPath','ResourcePath')]
-        [string]$PSDWizardContentPath,
+        [Alias('XamlPath')]
+        [string]$ResourcePath,
 
         [Parameter(Mandatory = $false, Position = 1)]
         [ValidateSet('en-US')]
@@ -3185,10 +3184,6 @@ Function Show-PSDWizard {
 
         [Parameter(Mandatory = $false, Position = 2)]
         [string]$Theme = 'Classic',
-        
-        [Parameter(Mandatory = $false, Position = 3)]
-        [Alias('ScriptRoot')]
-        [string]$ScriptPath = $script:PSDScriptRoot,
 
         [Parameter(Mandatory = $false)]
         $Page,
@@ -3210,17 +3205,17 @@ Function Show-PSDWizard {
         Update-PSDWizardProgressBar -Runspace $splashScreen -Indeterminate -Status "Initializing PSDWizard components..."
     }
 
-    $PSDWizardContentPath = $PSDWizardContentPath.TrimEnd('\')
+    $ResourcePath = $ResourcePath.TrimEnd('\')
 
     #Default to false
     $Global:WizardDialogResult = $false
     #Load functions from external file
-    Write-PSDLog -Message ("{0}: Loading PSD Wizard helper script [{1}\PSDWizard.Helper.ps1]" -f ${CmdletName}, $PSDWizardContentPath)
+    Write-PSDLog -Message ("{0}: Loading PSD Wizard helper script [{1}\PSDWizard.Helper.ps1]" -f ${CmdletName}, $ResourcePath)
     If($splashScreen.isLoaded){Update-PSDWizardProgressBar -Runspace $splashScreen -Indeterminate -Status "Loading PSDwizard helper file..."}
-    . "$PSDWizardContentPath\PSDWizard.Helper.ps1" -Caller ${CmdletName} -ScriptPath $ScriptPath
+    . "$ResourcePath\PSDWizard.Helper.ps1" -Caller ${CmdletName}
 
     #parse changelog for version for a more accurate version
-    $ChangeLogPath = Join-Path $PSDWizardContentPath 'CHANGELOG.MD'
+    $ChangeLogPath = Join-Path $ResourcePath 'CHANGELOG.MD'
     If (Test-Path $ChangeLogPath)
     {
         Write-PSDLog -Message ("{0}: ChangeLog found at [{1}]" -f ${CmdletName}, $ChangeLogPath)
@@ -3255,8 +3250,8 @@ Function Show-PSDWizard {
 
     #Build Path to definition files; if file not found, default to en-US version
     If($splashScreen.isLoaded){Update-PSDWizardProgressBar -Runspace $splashScreen -Indeterminate -Status ("Processing PSDWizard language definition: {0}..." -f $Language)}
-    [string]$LangDefinitionXml = Join-Path -Path $PSDWizardContentPath -ChildPath ('PSDWizard_Definitions_' + $Language + '.xml')
-    [string]$ThemeDefinitionXml = Join-Path -Path "$PSDWizardContentPath\Themes" -ChildPath ($SelectedTheme + '_Theme_Definitions_' + $Language + '.xml')
+    [string]$LangDefinitionXml = Join-Path -Path $ResourcePath -ChildPath ('PSDWizard_Definitions_' + $Language + '.xml')
+    [string]$ThemeDefinitionXml = Join-Path -Path "$ResourcePath\Themes" -ChildPath ($SelectedTheme + '_Theme_Definitions_' + $Language + '.xml')
 
     If ( (Test-Path $LangDefinitionXml) -and (Test-Path $ThemeDefinitionXml) )
     {
@@ -3270,8 +3265,8 @@ Function Show-PSDWizard {
     }
 
     #Rebuild Build path to language and theme definition (if paths aren't found)
-    [string]$LangDefinitionXml = Join-Path -Path $PSDWizardContentPath -ChildPath $XmlLangDefinitionFile
-    [string]$ThemeDefinitionXml = Join-Path -Path "$PSDWizardContentPath\Themes" -ChildPath $XmlThemeDefinitionFile
+    [string]$LangDefinitionXml = Join-Path -Path $ResourcePath -ChildPath $XmlLangDefinitionFile
+    [string]$ThemeDefinitionXml = Join-Path -Path "$ResourcePath\Themes" -ChildPath $XmlThemeDefinitionFile
 
 
     #Check again (Incase definition defaulted to en-US and ARE still missing)
@@ -3289,9 +3284,9 @@ Function Show-PSDWizard {
 
     If($splashScreen.isLoaded){Update-PSDWizardProgressBar -Runspace $splashScreen -Indeterminate -Status ("Formatting PSDWizard layout...")}
     #Build the XAML file based on definitions
-    Write-PSDLog -Message ("{0}: Running [Format-PSDWizard -SourcePath {1} -LangDefinition (xml:{2}) -ThemeDefinition (xml:{3})]" -f ${CmdletName}, $PSDWizardContentPath, $XmlLangDefinitionFile, $XmlThemeDefinitionFile)
+    Write-PSDLog -Message ("{0}: Running [Format-PSDWizard -Path {1} -LangDefinition (xml:{2}) -ThemeDefinition (xml:{3})]" -f ${CmdletName}, $ResourcePath, $XmlLangDefinitionFile, $XmlThemeDefinitionFile)
     Try{
-        $script:Xaml = Format-PSDWizard -SourcePath $PSDWizardContentPath -LangDefinition $LangDefinitionXmlDoc -ThemeDefinition $ThemeDefinitionXmlDoc
+        $script:Xaml = Format-PSDWizard -Path $ResourcePath -LangDefinition $LangDefinitionXmlDoc -ThemeDefinition $ThemeDefinitionXmlDoc
         If ( $PSDDeBug -eq $true ) {
             $Logpath = Split-Path $Global:PSDLogPath -Parent
             $script:Xaml.OuterXml | Out-File "$Logpath\PSDWizardNew_$($SelectedTheme)_$($Language).xaml" -Force
@@ -3304,9 +3299,9 @@ Function Show-PSDWizard {
 
     #load wizard
     If($splashScreen.isLoaded){Update-PSDWizardProgressBar -Runspace $splashScreen -Indeterminate -Status ("Importing PSDWizard content...")}
-    Write-PSDLog -Message ("{0}: Running [Invoke-PSDWizard -ScriptPath `"{2}`" -XamlContent `$script:Xaml -Version `"{1}`" -Passthru]" -f ${CmdletName}, $VersionTitle, $ScriptPath)
+    Write-PSDLog -Message ("{0}: Running [Invoke-PSDWizard -XamlContent `$script:Xaml -Version `"{1}`" -Passthru]" -f ${CmdletName}, $VersionTitle)
     try{
-        $script:PSDWizard = Invoke-PSDWizard -ScriptPath $ScriptPath -XamlContent $script:Xaml -Version "$VersionTitle" -Passthru
+        $script:PSDWizard = Invoke-PSDWizard -XamlContent $script:Xaml -Version "$VersionTitle" -Passthru
         If($script:PSDWizard.length -eq 0){
             If($splashScreen.isLoaded){Update-PSDWizardProgressBar -Runspace $splashScreen -PercentComplete 100 -Status ("Failed to Invoke PSDWizard") -Color Red}
             Write-PSDLog -Message ("{0}: Error loading PSDWizard: No content returned" -f ${CmdletName}) -LogLevel 3
@@ -3544,7 +3539,7 @@ Function Get-PSDWizardOSList{
     .SYNOPSIS
         Get OS list from OperatingSystems.xml
     .EXAMPLE
-        $Path = $script:PSDContentRoot
+        $Path = Get-PSDContent -Content 'control'
         Get-PSDWizardOSList
     #>
     [CmdletBinding()]
@@ -3814,12 +3809,12 @@ Function Expand-PSDWizardTSEnvValue {
             
             # Use switch statement for better readability
             switch ( $DynamicValue.ToLower() ) {
-                'deployroot' { $value = $script:PSDDeployRoot }
-                'scriptroot' { $value = $script:PSDScriptRoot }
-                'controlroot' { $value = $script:PSDContentRoot }
-                'psddeployroot' { $value = $script:PSDDeployRoot }
-                'psdscriptroot' { $value = $script:PSDScriptRoot }
-                'psdresourceroot' { $value = $script:PSDResourceRoot }
+                'deployroot' { $value = Get-PSDContent }
+                'scriptroot' { $value = Get-PSDContent -Content "scripts" }
+                'controlroot' { $value = Get-PSDContent -Content "control" }
+                'psddeployroot' { $value = Get-PSDContent }
+                'psdscriptroot' { $value = Get-PSDContent -Content "scripts" }
+                'psdresourceroot' { $value = Get-PSDContent -Content "psdresources" }
                 default { $value = (Get-Item TSEnv:$DynamicValue).Value }
             }
 
@@ -4460,7 +4455,6 @@ Function Get-PSDWizardComputerName {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true, Position = 0)]
-        [Alias('ComputerName','Value')]
         $InputString
     )
     ## Get the name of this function
