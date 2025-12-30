@@ -1,4 +1,27 @@
-﻿function Show-Menu{
+﻿<#
+.SYNOPSIS
+    Sample Prestart Menu
+.DESCRIPTION
+    Sample Prestart Menu, activated by configuring the following boostrap.ini settings
+    SkipBDDWelcome=NO
+    PSDPrestartMode=Native
+    
+.LINK
+    https://github.com/FriendsOfMDT/PSD
+.NOTES
+          FileName: PSDPrestartMenu.ps1
+          Solution: PowerShell Deployment for MDT
+          Author: PSD Development Team
+          Contact: @Mikael_Nystrom , @jarwidmark
+          Primary: @Mikael_Nystrom 
+          Created: 
+          Modified: 2025-12-30
+
+          Version - 1.0.0 - Mikael Nystrom - Finalized functional version 1.
+          Version - 1.0.1 - Johan Arwidmark - 2025-12-30 - Updated Wait-PSDPrompt to correctly reflect time
+#>
+
+function Show-Menu{
     param (
         [string]$Title = 'My Menu'
     )
@@ -25,30 +48,26 @@
     Write-Host ""
 }
 
-Function Wait-PSDPrompt{
+Function Wait-PSDPrompt {
     Param(
         $prompt,
-        $secondsToWait
+        [int]$secondsToWait
     )
+
     Write-Host -NoNewline $prompt
-    $secondsCounter = 0
-    $subCounter = 0
-    While ( (!$host.ui.rawui.KeyAvailable) -and ($count -lt $secondsToWait) ){
-        start-sleep -m 10
-        $subCounter = $subCounter + 10
-        if($subCounter -eq 1000)
-        {
-            $secondsCounter++
-            $subCounter = 0
-            Write-Host -NoNewline "."
-        }       
-        If ($secondsCounter -eq $secondsToWait) { 
+    $endTime = (Get-Date).AddSeconds($secondsToWait)
+
+    while ((Get-Date) -lt $endTime) {
+        if ($host.UI.RawUI.KeyAvailable) {
             Write-Host "`r`n"
-            return $false;
+            return $true
         }
+        Start-Sleep -seconds 1
+        Write-Host -NoNewline "."
     }
+
     Write-Host "`r`n"
-    return $true;
+    return $false
 }
 
 $val = Wait-PSDPrompt -prompt "Press any key run Pre PSD menu; will continue to PSD in 10 seconds" -secondsToWait 10
