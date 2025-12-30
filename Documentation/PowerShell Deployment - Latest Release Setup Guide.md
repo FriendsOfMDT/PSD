@@ -49,7 +49,7 @@ This guide provides step-by-step instructions for setting up the new release of 
 
 ## Review PSD Install
 
-One of the common things skipped is reviewing the `Install-PSD.log` file. This is important as some files may not have ben overwritten.
+One of the common things skipped is reviewing the `Install-PSD.log` file. This is important as some files may not have been overwritten.
 
 Here are a few checks to be sure you have the latest release installed:
 
