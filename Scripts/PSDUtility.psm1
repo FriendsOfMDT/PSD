@@ -23,7 +23,8 @@
           Version - 0.0.5 - (PC) - Fixed caller output incase running outside of TS
           Version - 0.0.6 - (Mikael_Nystrom) - Added Clear-PSDDisk, Set-PSDEFIDiskpartition, Set-PSDRecoveryPartitionForMBR
           Version - 0.0.7 - (Mikael_Nystrom) - Removed a few Write-PSDLog
-	  Version - 0.0.8 - (Mikael_Nystrom) - Added new fuctions for testing preflights (Get-PSDNetworkInformation,Test-PSDLocalDisk,Test-PSDNameResolution,Test-PSDIPvAddress,Test-PSDNetAdapter)
+	      Version - 0.0.8 - (Mikael_Nystrom) - Added new fuctions for testing preflights (Get-PSDNetworkInformation,Test-PSDLocalDisk,Test-PSDNameResolution,Test-PSDIPvAddress,Test-PSDNetAdapter)
+          Version - 0.0.9 - (Johan Arwidmark) - Changed Start-BitsTransfer authentication from Ntlm to Negotiate. Credits: @theQ23 on GitHub
 
           TODO:
           - Convert Forms into WPF and as separate runspace
@@ -401,7 +402,7 @@ Function Copy-PSDLogs {
 
             $RemoteFileName = $($env:COMPUTERNAME) + "-" + $Name + ".zip"
             try {
-                Start-BitsTransfer -Authentication Ntlm -Source $LogArchive -Destination $("$tsenv:SLshare/$RemoteFileName") -TransferType Upload -Credential $Credentials -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+                Start-BitsTransfer -Authentication Negotiate -Source $LogArchive -Destination $("$tsenv:SLshare/$RemoteFileName") -TransferType Upload -Credential $Credentials -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
             }
             catch {
             }

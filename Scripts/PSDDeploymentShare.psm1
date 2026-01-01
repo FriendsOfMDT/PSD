@@ -21,6 +21,7 @@
           Version - 0.1.3 - () - Minor cleanup
           Version - 0.1.4 - () - More minor cleanup
           Version - 0.1.4 - () - Modified error handling for downloading content from deploymentshare using WebDAV 
+          Version - 0.1.5 - (Johan Arwidmark) - Changed Start-BitsTransfer authentication from Ntlm to Negotiate. Credits: @theQ23 on GitHub
 
           TODO:
 
@@ -413,7 +414,7 @@ function Get-PSDContentWeb {
             }
             # Do the download using BITS
             Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Downloading files using BITS."
-            $bitsJob = Start-BitsTransfer -Authentication Ntlm -Credential $global:psddsCredential -Source $sourceUrl -Destination $destFile -TransferType Download -DisplayName "PSD Transfer" -Priority High
+            $bitsJob = Start-BitsTransfer -Authentication Negotiate -Credential $global:psddsCredential -Source $sourceUrl -Destination $destFile -TransferType Download -DisplayName "PSD Transfer" -Priority High
         }
     }
 }
