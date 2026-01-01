@@ -24,9 +24,7 @@
 		  Version - 0.0.6 - (PC) - Removed loging to show "TODO", no point in showing things that does not work yet
 		  Version - 0.0.7 - (MN) - Added rule to VMware modelalias section, all VMware modelalias will now be "WMware"
 		  Version - 0.0.8 - (MN) - Added rule to VMware modelalias section, replacing the "," with "_", replace " " with "_"
-
-          TODO:
-
+          Version - 0.0.9 - Added BitLocker info. Credits: BlackCatDeployment on GitHub (Part of closed PR 237)
 .Example
 #>
 
@@ -149,7 +147,6 @@ Function Get-PSDLocalInfo {
 			$LocalInfo['SupportsSLAT'] = $_.SecondLevelAddressTranslationExtensions
 		}
 
-		# TODO: Capable architecture
 
 		Get-CimInstance -ClassName Win32_ComputerSystem | ForEach-Object {
 			$LocalInfo['Manufacturer'] = $_.Manufacturer.Trim()
@@ -252,9 +249,21 @@ Function Get-PSDLocalInfo {
 			default {$LocalInfo['OSSku']="Not Supported";break}
 		}
 
-		# TODO: GetCurrentOSInfo
+		# BitLocker
+  		$bIsBDE = $false
+		If ([Int]$LocalInfo['OSCurrentBuild'] -ge 6000) {
+			$BitLockerVolumes = Get-CimInstance -Namespace "Root\CIMv2\Security\MicrosoftVolumeEncryption" -ClassName "Win32_EncryptableVolume" -ErrorAction SilentlyContinue
+			ForEach ($BitLockerVolume in $BitLockerVolumes) {
+				If ($BitLockerVolume.ConversionStatus -ne 0) {
+					If ([String]::IsNullOrEmpty($BitLockerVolume.DriveLetter)) { Write-Log "Encrypted drive found: $($BitLockerVolume.DeviceID), status = $($BitLockerVolume.ConversionStatus)" }
+					Else { Write-Log "Encrypted drive found: $($BitLockerVolume.DriveLetter), status = $($BitLockerVolume.ConversionStatus)" }
+					$bIsBDE = $true
+				}
+			}
+			If (-not $bIsBDE) { Write-Log "There is no encrypted drives" }
+		}
+		$LocalInfo['IsBDE'] = $bIsBDE
 
-		# TODO: BitLocker
 
 		# Generate ModelAlias, MakeAlias and SystemAlias
 		$LocalInfo['IsVM'] = "False"
