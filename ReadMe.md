@@ -1,5 +1,13 @@
 # README - PowerShell Deployment Extension Kit
 
+Jan 2026 (ver 0.2.3.2)
+- Changed Start-BitsTransfer authentication from Ntlm to Negotiate. Credits: @theQ23 on GitHub
+- BranchCache Installation Guide updated
+- Added BitLocker info. Credits: BlackCatDeployment on GitHub (Part of closed PR 237)
+- PowerShell Deployment - Operations Guide - Updated
+- Reverted upupdates to PSDWiward
+- Updated PSDPrestartMenu
+
 Dec 2025 (ver 0.2.3.1)
 - Added ZTIGather.xml (was missing for a long time)
 - Updated INI files
