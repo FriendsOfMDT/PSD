@@ -156,6 +156,7 @@ if ($env:SYSTEMDRIVE -eq "X:"){
 }
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PowerShell variable BootfromWinPE is now = $BootfromWinPE"
 
+<# Old single cert import logic
 # Install PSDRoot certificate if exist in WinPE
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering certificate block..."
 $Certificates = @()
@@ -176,6 +177,49 @@ foreach($Certificate in $Certificates){
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Failed to import $($Certificate.FullName)"
     }
 }
+#>
+
+# Install PSDRoot certificate if exist in WinPE
+  Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering certificate block..."
+  $Certificates = @()
+  $CertificateLocations = "$($env:SYSTEMDRIVE)\Deploy\Certificates","$($env:SYSTEMDRIVE)\MININT\Certificates"
+  
+  foreach ($CertificateLocation in $CertificateLocations) {
+      if (Test-Path -Path $CertificateLocation) {
+          Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Looking for certificates in $CertificateLocation"
+  
+          # Check for ROOT certificates
+          $RootCertPath = Join-Path -Path $CertificateLocation -ChildPath "Root"
+          if (Test-Path -Path $RootCertPath) {
+              $RootCerts = Get-ChildItem -Path $RootCertPath -Filter *.cer
+              foreach ($Certificate in $RootCerts) {
+                  Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($Certificate.FullName), trying to add as root certificate"
+                  $Return = Import-PSDCertificate -Path $Certificate.FullName -CertStoreScope "LocalMachine" -CertStoreName "Root"
+                  if ($Return -eq "0") {
+                      Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Successfully imported $($Certificate.FullName)"
+                  } else {
+                      Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Failed to import $($Certificate.FullName)"
+                  }
+              }
+          }
+  
+          # Check for Intermediate certificates
+          $InterCertPath = Join-Path -Path $CertificateLocation -ChildPath "Intermediate"
+          if (Test-Path -Path $InterCertPath) {
+              $InterCerts = Get-ChildItem -Path $InterCertPath -Filter *.cer
+              foreach ($Certificate in $InterCerts) {
+                  Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($Certificate.FullName), trying to add as intermediate certificate"
+                  $Return = Import-PSDCertificate -Path $Certificate.FullName -CertStoreScope "LocalMachine" -CertStoreName "CA"
+                  if ($Return -eq "0") {
+                      Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Successfully imported $($Certificate.FullName)"
+                  } else {
+                      Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Failed to import $($Certificate.FullName)"
+                  }
+              }
+          }
+      }
+  }
+
 
 # Set Command Window size
 # Reason for 99 is that 99 seems to use the screen in the best possible way, 100 is just one pixel to much
