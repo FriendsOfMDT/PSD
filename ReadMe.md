@@ -5,7 +5,7 @@ Jan 2026 (ver 0.2.3.2)
 - BranchCache Installation Guide updated
 - Added BitLocker info. Credits: BlackCatDeployment on GitHub (Part of closed PR 237)
 - PowerShell Deployment - Operations Guide - Updated
-- Reverted upupdates to PSDWiward
+- Reverted updates to PSDWiward
 - Updated PSDPrestartMenu
 
 Dec 2025 (ver 0.2.3.1)
