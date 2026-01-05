@@ -92,10 +92,7 @@ function Install-PSDApplication
     # Process dependencies (recursive)
     #Write-Verbose "$($MyInvocation.MyCommand.Name): Process dependencies (recursive)"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Process dependencies (recursive)"
-    if ($app.Dependency.Count -ne 0)
-    {
-        $app.Dependency | Install-PSDApplication
-    }
+    $app.Dependency | ForEach-Object { Install-PSDApplication $_ }
 
     # Check if the app has been installed already
     #Write-Verbose "$($MyInvocation.MyCommand.Name): Check if the app has been installed already"
