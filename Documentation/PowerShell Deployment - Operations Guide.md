@@ -31,19 +31,36 @@ Within MDT Deployment workbench, on the newly created PSD Deployment share, impo
 
 The PSD platform leverages a folder structure for driver packages inside the DeploymentShare\PSDResources\DriverPackages folder. This structure is depending on the DriverPath, GenericDriverPath, and FallBackDriverPath variables. 
 
-Here is an example for a Dell Latitude 5320, and the default DriverPath variable (Windows 11\%ModelAlias%)
+#### Make and Model Drivers
+Having Make and Model driver packages per OS Family is also called Total Control method...
+
+Here is an example for Windows 11 and a Dell Latitude 5320, and the default DriverPath variable (Windows 11\%ModelAlias%)
 
 Step 1: Create a folder that matches the DriverPath variable, OS Family and Hardware Model alias in this case. Windows_11_x64-Latitude_5320 
 
+Please note that the "\" character is replaced with "-", and space is using "_", see the following examples
+
 ![OperationsGuide_DriverStructure](.images/OperationsGuide_DriverStructure_1.png)
 
-Please note that the "\" character is replaced with "-", and space is using "_"
+Step 2: Add either a ZIP or WIM file with the drivers for your hardware model to the created folder. We recommend naming the file short and sweet, without any spaces. For example DriverPackage.wim
 
-As long as you add either a ZIP or WIM file with the drivers for your hardware model, and name the folder according to 
+Note: We recommend having only one file per folder, but technically PSD will inject drivers from multiple files if they exist.
 
-Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired drivers. After adding new drivers to MDT using the "total control method" (OS/Make/Model, or OS/Model, etc. ), you need to run the New-PSDDriverPackage.ps1 to generate the ZIP or WIM archives. One ZIP or WIM archive is created for each OS and Model.
+#### Generic Drivers
+Generic Drivers is a driver package that you would like to install regardless of model, for example a printer or smart card driver.
 
->PRO TIP: You can copy drivers from other MDT deployment shares. PSD also supports adding existing WIM or ZIP driver packages to the platform for seamless integration.
+The default path for the GenericDriverPath vaiable is Windows 11\Generic, meaning you place the drivers in the Windows_11-Generic folder.
+
+
+#### Fallback Drivers
+Fallback Drivers is a driver package that you would like to install if there is no make\model package available.
+
+The default path for the FallBackDriverPath vaiable is Windows 11\FallBack, meaning you place the drivers in the Windows_11-Fallback folder. A good example is commonly used network, storage or video drivers. This way you allow the OS to become somewhat functional and additional can be added later.
+
+#### Helper Scripts
+If you already have an existing MDT deployment share with drivers, we have created helper scripts that can convert those drivers into either ZIP or WIM files. 
+
+To "convert" an existing Out-Of-Box Drivers folder in a MDT Deployment workbench run the New-PSDDriverPackage.ps1 to generate the ZIP or WIM archives. One ZIP or WIM archive is created for each OS and Model.
 
 Sample syntax:
 ```powershell

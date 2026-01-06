@@ -129,7 +129,7 @@
       <step type="SMS_TaskSequence_SetVariableAction" name="Set FallBackDriverPath" description="" disable="false" continueOnError="false" successCodeList="0 3010">
         <defaultVarList>
           <variable name="VariableName" property="VariableName">FallBackDriverPath</variable>
-          <variable name="VariableValue" property="VariableValue">Windows 11\FallBack\%MakeAlias%</variable>
+          <variable name="VariableValue" property="VariableValue">Windows 11\FallBack</variable>
         </defaultVarList>
         <action>cscript.exe "%SCRIPTROOT%\ZTISetVariable.wsf"</action>
       </step>
