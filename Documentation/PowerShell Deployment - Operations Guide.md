@@ -29,6 +29,18 @@ Within MDT Deployment workbench, on the newly created PSD Deployment share, impo
 
 ### Import/Add Drivers
 
+The PSD platform leverages a folder structure for driver packages inside the DeploymentShare\PSDResources\DriverPackages folder. This structure is depending on the DriverPath, GenericDriverPath, and FallBackDriverPath variables. 
+
+Here is an example for a Dell Latitude 5320, and the default DriverPath variable (Windows 11\%ModelAlias%)
+
+Step 1: Create a folder that matches the DriverPath variable, OS Family and Hardware Model alias in this case. Windows_11_x64-Latitude_5320 
+
+![OperationsGuide_DriverStructure](.images/OperationsGuide_DriverStructure_1.png)
+
+Please note that the "\" character is replaced with "-", and space is using "_"
+
+As long as you add either a ZIP or WIM file with the drivers for your hardware model, and name the folder according to 
+
 Within MDT Deployment workbench, on the newly created PSD Deployment share, import/create/copy any desired drivers. After adding new drivers to MDT using the "total control method" (OS/Make/Model, or OS/Model, etc. ), you need to run the New-PSDDriverPackage.ps1 to generate the ZIP or WIM archives. One ZIP or WIM archive is created for each OS and Model.
 
 >PRO TIP: You can copy drivers from other MDT deployment shares. PSD also supports adding existing WIM or ZIP driver packages to the platform for seamless integration.
