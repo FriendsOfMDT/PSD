@@ -11,6 +11,7 @@ Jan 2026 (ver 0.2.3.2)
 - Added support for using Root And Intermidiate Certificates Credits to stefanweilguni-oss on (GitHub Part of Issue 265)
     Note: If you upgrade from previus version of PSD, please note that you need to move the PSDRoot.cer file to the Certificate\Root folder
 - Updated New-PSDRootCACert.ps1 to reflect changes in certificate konfiguration
+- Updated Operations Guide
 
 Dec 2025 (ver 0.2.3.1)
 - Added ZTIGather.xml (was missing for a long time)
