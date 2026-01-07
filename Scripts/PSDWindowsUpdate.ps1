@@ -12,8 +12,9 @@
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus
           Primary: @Mikael_Nystrom 
           Created: 
-          Modified: 2022-01-12
+          Modified: 2026-01-07
           Version:0.0.1 - () - Finalized functional version 1.
+		  Version:0.0.2 - Added support for local WSUS server
           TODO:
 
 .Example
@@ -25,9 +26,10 @@ param (
 )
 
 # Set scriptversion for logging
-$ScriptVersion = "0.0.1"
+$ScriptVersion = "0.0.2"
 
 # Load core modules
+Import-Module Microsoft.BDD.TaskSequenceModule -Scope Global -Verbose:$true
 Import-Module PSDUtility
 Import-Module PSDDeploymentShare
 
@@ -43,6 +45,28 @@ if($PSDDebug -eq $true)
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Starting: $($MyInvocation.MyCommand.Name) - Version $ScriptVersion"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): The task sequencer log is located at $("$tsenv:_SMSTSLogPath\SMSTS.LOG"). For task sequence failures, please consult this log."
 Write-PSDEvent -MessageID 41000 -severity 1 -Message "Starting: $($MyInvocation.MyCommand.Name)"
+
+# If WSUS Server is set, then use it
+$WsusServer = $TSEnv:WsusServer
+if([string]::IsNullOrEmpty($WsusServer)){
+	Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): No WSUS server defined, using Microsoft Update $($MyInvocation.MyCommand.Name)"
+} else {
+	Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): WSUS server defined: $WsusServer $($MyInvocation.MyCommand.Name)"
+	
+	# Configure the WSUS server in the registry.  This needs to be a URL (e.g. http://myserver)
+	Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Configuring client to use WSUS server $($MyInvocation.MyCommand.Name)"
+	$null = New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer" -Value $WsusServer -Type STRING -Force -ErrorAction SilentlyContinue
+	$null = New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate -Name "WUStatusServer" -Value $WsusServer -Type STRING -Force -ErrorAction SilentlyContinue
+
+	Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Configuring Windows Update settings (manual update, use server) $($MyInvocation.MyCommand.Name)"
+	$null = New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "UseWUServer" -Value 1 -Type DWORD -Force -ErrorAction SilentlyContinue
+	$null = New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoUpdate" -Value 1 -Type DWORD -Force -ErrorAction SilentlyContinue
+
+	# Restart the service to get the latest settings
+	Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Restarting WSUS Client $($MyInvocation.MyCommand.Name)"
+	Restart-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
+}
+
 
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Creating COM object for WU"
 $objServiceManager = New-Object -ComObject 'Microsoft.Update.ServiceManager';
