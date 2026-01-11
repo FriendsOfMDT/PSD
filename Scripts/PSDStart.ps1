@@ -36,6 +36,7 @@
           version - 0.1.3 - (mikael_nystrom) Removed legacy Wizared code and logic, fixed some typos
           version - 0.1.4 - (mikael_nystrom) Added support for UserExitScripts, you can extend the processing of PSDStart by adding a PowerShell script (or more) to the UserExit Scripts folder
           version - 2.3.2 - (mikael_nystrom) The version of PSDStart will now follow the actual version of the solution
+          version - 2.3.2.3 - Added varius updates, see readme for details
 
           TODO:
 
