@@ -55,10 +55,12 @@ if([string]::IsNullOrEmpty($WsusServer)){
 	
 	# Configure the WSUS server in the registry.  This needs to be a URL (e.g. http://myserver)
 	Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Configuring client to use WSUS server $($MyInvocation.MyCommand.Name)"
+	$null = New-Item HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate -Force -ErrorAction SilentlyContinue
 	$null = New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer" -Value $WsusServer -Type STRING -Force -ErrorAction SilentlyContinue
 	$null = New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate -Name "WUStatusServer" -Value $WsusServer -Type STRING -Force -ErrorAction SilentlyContinue
 
 	Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Configuring Windows Update settings (manual update, use server) $($MyInvocation.MyCommand.Name)"
+$null = New-Item HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU -Force -ErrorAction SilentlyContinue	
 	$null = New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "UseWUServer" -Value 1 -Type DWORD -Force -ErrorAction SilentlyContinue
 	$null = New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU -Name "NoAutoUpdate" -Value 1 -Type DWORD -Force -ErrorAction SilentlyContinue
 
