@@ -404,6 +404,10 @@ if ($tsInProgress){
     $scripts = Get-PSDContent -Content "Scripts"
     $env:ScriptRoot = $scripts
 
+    # Get full Tools location
+    $toolRoot = Get-PSDContent "Tools\$($tsenv:Architecture)"
+    $env:ToolRoot = $toolRoot
+
     # Set the PSModulePath
     $modules = Get-PSDContent -Content "Tools\Modules"
     $env:PSModulePath = $env:PSModulePath + ";$modules"
@@ -774,6 +778,10 @@ else{
     # Get full scripts location
     $scripts = Get-PSDContent -Content "Scripts"
     $env:ScriptRoot = $scripts
+
+    # Get full Tools location
+    $toolRoot = Get-PSDContent "Tools\$($tsenv:Architecture)"
+    $env:ToolRoot = $toolRoot
 
     # Set the PSModulePath
     $modules = Get-PSDContent -Content "Tools\Modules"
