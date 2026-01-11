@@ -1,6 +1,8 @@
 Write-PSDBootInfo -SleepSec 1 -Message "Processing UserExitScript001"
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Processing UserExitScript001"
 
+<#
+# Sample that sets the name to PC-SerialNumber
 [string]$SerialNumber = (Get-WmiObject win32_bios).Serialnumber
 $CleanSerialNumber =  $SerialNumber.Replace("/","").Replace("\","").Replace("|","").Replace("-","").Replace(" ","")
 $CutOfNumber = 10
@@ -11,4 +13,6 @@ $checklength = $CleanSerialNumber.Length
     Else{
         $numberx = $CutOfNumber
     }
+
 $tsenv:OSDComputername = "PC-$($CleanSerialNumber.Substring($CleanSerialNumber.Length - $numberx ))"
+#>
