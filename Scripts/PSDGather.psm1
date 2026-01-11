@@ -255,12 +255,16 @@ Function Get-PSDLocalInfo {
 			$BitLockerVolumes = Get-CimInstance -Namespace "Root\CIMv2\Security\MicrosoftVolumeEncryption" -ClassName "Win32_EncryptableVolume" -ErrorAction SilentlyContinue
 			ForEach ($BitLockerVolume in $BitLockerVolumes) {
 				If ($BitLockerVolume.ConversionStatus -ne 0) {
-					If ([String]::IsNullOrEmpty($BitLockerVolume.DriveLetter)) { Write-Log "Encrypted drive found: $($BitLockerVolume.DeviceID), status = $($BitLockerVolume.ConversionStatus)" }
-					Else { Write-Log "Encrypted drive found: $($BitLockerVolume.DriveLetter), status = $($BitLockerVolume.ConversionStatus)" }
+					If ([String]::IsNullOrEmpty($BitLockerVolume.DriveLetter)) { 
+						Write-PSDLog "Encrypted drive found: $($BitLockerVolume.DeviceID), status = $($BitLockerVolume.ConversionStatus)" 
+					}
+					Else { 
+						Write-PSDLog "Encrypted drive found: $($BitLockerVolume.DriveLetter), status = $($BitLockerVolume.ConversionStatus)" 
+					}
 					$bIsBDE = $true
 				}
 			}
-			If (-not $bIsBDE) { Write-Log "There is no encrypted drives" }
+			If (-not $bIsBDE) { Write-PSDLog "There is no encrypted drives" }
 		}
 		$LocalInfo['IsBDE'] = $bIsBDE
 
