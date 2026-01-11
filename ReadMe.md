@@ -1,5 +1,8 @@
 # README - PowerShell Deployment Extension Kit
 
+Jan 2026 (ver 0.2.3.3)
+- Fixed the %ToolRoot% path, allows for Run As user with the run Command Line step (Issue 252)
+
 Jan 2026 (ver 0.2.3.2)
 - Note: On January 6, 2026, MDT was removed from the Microsoft Download site. You can still find the download on Wayback Machine (Internet Archive), or ask a trustworthy friend, but be VERY careful where you download it from. We've already seen malware/ransomeware links published in the community.
 - Changed Start-BitsTransfer authentication from Ntlm to Negotiate. Credits: @theQ23 on GitHub
