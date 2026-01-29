@@ -252,7 +252,8 @@ Function Get-PSDLocalInfo {
 #>
 
 		# Simple OS Sku Name
-		$OSName = (Get-CimInstance -ClassName win32_operatingsystem).Name
+		$OSName = (Get-CimInstance -ClassName win32_operatingsystem).Caption.Trim()
+		$OSName = $OSName.Replace("Microsoft ","")
 		$LocalInfo['OSName'] = $OSName
 		
 		# BitLocker
