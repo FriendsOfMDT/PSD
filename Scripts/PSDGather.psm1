@@ -204,6 +204,7 @@ Function Get-PSDLocalInfo {
 			$LocalInfo['IsOnBattery'] = $true
 		}
 
+<#
 		#https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getproductinfo
 		$sku = (Get-CimInstance -ClassName win32_operatingsystem).OperatingSystemSKU
 		switch ($sku)
@@ -248,7 +249,12 @@ Function Get-PSDLocalInfo {
 			85		{$LocalInfo['OSSku']="Mobile Enterprise";break}
 			default {$LocalInfo['OSSku']="Not Supported";break}
 		}
+#>
 
+		# Simple OS Sku Name
+		$OSName = (Get-CimInstance -ClassName win32_operatingsystem).Name
+		$LocalInfo['OSName'] = $OSName
+		
 		# BitLocker
   		$bIsBDE = $false
 		If ([Int]$LocalInfo['OSCurrentBuild'] -ge 6000) {
