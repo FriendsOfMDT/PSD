@@ -1,5 +1,8 @@
 # README - PowerShell Deployment Extension Kit
 
+Feb 2026 (ver 0.2.3.4)
+- Fixed bug 288, OSSku was incorrect, we made the decision to remove OSSku and replace wityh OSName instead
+
 Jan 2026 (ver 0.2.3.3)
 - Fixed the %ToolRoot% path, allows for Run As user with the run Command Line step (Issue 252)
 - Added support for local WSUS server using the WSUSServer Property (use customsettings.ini or a task sequence variable)
