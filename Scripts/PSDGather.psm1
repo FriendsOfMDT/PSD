@@ -124,7 +124,8 @@ Function Get-PSDLocalInfo {
 		}
 
 		Get-CimInstance -ClassName Win32_BIOS | ForEach-Object {
-			$LocalInfo['SerialNumber'] = $_.SerialNumber.Trim()
+    		$SerialNumber = $_.SerialNumber
+    		$LocalInfo['SerialNumber'] = if ([string]::IsNullOrWhiteSpace($SerialNumber)) { "" } else { $SerialNumber.Trim() }
 		}
 
 		if ($env:PROCESSOR_ARCHITEW6432) {
