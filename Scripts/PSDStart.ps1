@@ -38,6 +38,7 @@
           version - 2.3.2 - (mikael_nystrom) The version of PSDStart will now follow the actual version of the solution
           version - 2.3.3 - Added varius updates, see readme for details
           version - 2.3.4 - Added varius updates, see readme for details
+          version - 2.3.5 - PSDGather.psm1 is updated to version 0.1.0, which includes some changes to the local info gathering
 
           TODO:
 

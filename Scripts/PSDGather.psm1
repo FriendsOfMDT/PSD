@@ -25,6 +25,7 @@
 		  Version - 0.0.7 - (MN) - Added rule to VMware modelalias section, all VMware modelalias will now be "WMware"
 		  Version - 0.0.8 - (MN) - Added rule to VMware modelalias section, replacing the "," with "_", replace " " with "_"
           Version - 0.0.9 - Added BitLocker info. Credits: BlackCatDeployment on GitHub (Part of closed PR 237)
+		  Version - 0.1.0 - Modified so that Hyper-V running in BIOS mode will now return SystemAlias as Hyper-V BIOS
 .Example
 #>
 
@@ -285,7 +286,11 @@ Function Get-PSDLocalInfo {
 				$LocalInfo['SystemAlias'] = Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemSKU
 				# Logic for Hyper-V Testing
 				If ($LocalInfo['ModelAlias'] -eq "Virtual Machine") {
-					$LocalInfo['SystemAlias'] = Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemVersion
+					if($Null -eq(Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemVersion)){
+						$LocalInfo['SystemAlias'] = "Hyper-V BIOS"
+					}else{
+						$LocalInfo['SystemAlias'] = (Get-CimInstance -ClassName MS_SystemInformation -Namespace root\wmi | Select-Object -ExpandProperty SystemVersion).Trim()
+					}
 					$LocalInfo['IsVM'] = "True"
 				}
 			}

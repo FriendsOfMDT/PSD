@@ -1,4 +1,6 @@
 # README - PowerShell Deployment Extension Kit
+Feb 2026 (ver 0.2.3.5)
+- Fixed bug 291 SystemAlias is blank on a Hyper-V gen 1 (BIOS) VM, it will now return "Hyper-V BIOS"
 
 Feb 2026 (ver 0.2.3.4)
 - Fixed bug 288, OSSku was incorrect, we made the decision to remove OSSku and replace wityh OSName instead
