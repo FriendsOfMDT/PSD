@@ -1,4 +1,8 @@
 # README - PowerShell Deployment Extension Kit
+March 2026 (ver 0.2.3.6)
+- Fixed Set-PSDWebInstance.ps1 so it can be executed multiple time to allow for multiple deploymentshare on the same OS
+- Fixed application deployment during wizard selection, (issue 179, 119)
+
 Feb 2026 (ver 0.2.3.5)
 - Fixed bug 291 SystemAlias is blank on a Hyper-V gen 1 (BIOS) VM, it will now return "Hyper-V BIOS"
 

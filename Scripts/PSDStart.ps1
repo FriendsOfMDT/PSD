@@ -39,6 +39,8 @@
           version - 2.3.3 - Added varius updates, see readme for details
           version - 2.3.4 - Added varius updates, see readme for details
           version - 2.3.5 - PSDGather.psm1 is updated to version 0.1.0, which includes some changes to the local info gathering
+          version - 2.3.5 - Fixed the Set-PSDWebInstance.ps1 to support multiple deployment shares, fixed support for wizard to be able to deploy application without having to use "dummy" apps in customsettings.ini
+          
 
           TODO:
 
