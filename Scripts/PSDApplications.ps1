@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
-    Installs the apps specified in task sequence variables Applications and MandatoryApplications.
+    Installs the apps specified in task sequence variables Applications and Mandatory Applications.
 .DESCRIPTION
-    Installs the apps specified in task sequence variables Applications and MandatoryApplications.
+    Installs the apps specified in task sequence variables Applications and Mandatory Applications.
 .LINK
     https://github.com/FriendsOfMDT/PSD
 .NOTES
@@ -12,11 +12,11 @@
           Contact: @Mikael_Nystrom , @jarwidmark , @mniehaus , @AndHammarskjold
           Primary: @jarwidmark 
           Created: 
-          Modified: 2019-05-17
-	  	    2024-09-10
+          Modified: 2026-03-19
 
           Version - 0.0.1 - () - Finalized functional version 1.
-	  Version - 0.0.2 - () - Return code Application installation
+	      Version - 0.0.2 - () - Return code Application installation
+          Version - 0.0.3 - () - Fix for dependency processing
 
           TODO:
 
@@ -29,7 +29,7 @@ param (
 )
 
 # Set scriptversion for logging
-$ScriptVersion = "0.0.1"
+$ScriptVersion = "0.0.3"
 
 # Load core modules
 Import-Module PSDUtility
@@ -92,7 +92,9 @@ function Install-PSDApplication
     # Process dependencies (recursive)
     #Write-Verbose "$($MyInvocation.MyCommand.Name): Process dependencies (recursive)"
     Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Process dependencies (recursive)"
-    $app.Dependency | ForEach-Object { Install-PSDApplication $_ }
+    $app.Dependency | ForEach-Object { 
+        Install-PSDApplication $_ 
+    }
 
     # Check if the app has been installed already
     #Write-Verbose "$($MyInvocation.MyCommand.Name): Check if the app has been installed already"
