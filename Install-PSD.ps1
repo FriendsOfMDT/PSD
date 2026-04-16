@@ -65,7 +65,7 @@ Param(
     [Parameter(Mandatory = $false, Position = 2,  HelpMessage = "Use this switch to upgrade an existing deployment share.")]
     [Switch]$Upgrade
 )
-$Script:DeploymentToolkitVersion = "2.2.8"
+$Script:DeploymentToolkitVersion = "0.2.3.6"
 
 # Do not include this in the param block!
 # Set PSDDrive prefix.

@@ -52,7 +52,7 @@ param (
     [switch] $Debug
 )
 
-$DeploymentToolkitVersion = "2.3.2"
+$DeploymentToolkitVersion = "0.2.3.6"
 # OSDProgress=Native
 # OSDProgress=Modern
 
