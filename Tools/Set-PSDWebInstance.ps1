@@ -1,7 +1,7 @@
 <#
 .Synopsis
     This script is designed to work with the PSD Toolkit to install and configure IIS as needed for the solution to deploy Windows over the internet. 
-    This script will install the IIS feature set and the components required for WEBDav
+    This script will create and configure the deployment share virtual directory
 
 .Description
     This script was written by Jordan Benzing @JordanTheITGuy in partnership with TrueSec and 2Pint. This script is for the friends of MDT deployment tools 
@@ -63,13 +63,13 @@
 							   - Logging an issue with not being able to hide the AppCMD output will update an issue tracking number tomorrow
 	Version 0.4.7 (2020-06-30) - Script separated into two diffrent scripts, this script will Configure WebDav.
                                - The script only works when running locally on the server.
-    	Version 0.4.8 (2022-09-29) - Added support for special characters in folder names (allow double escaping)
+    Version 0.4.8 (2022-09-29) - Added support for special characters in folder names (allow double escaping)
+    Version 0.4.9 (2026-02-25) - Generic cleanup, and fixed an issue that prevented the script from properly exiting when creating a second virtual directory (@jarwidmark)
 
 						
 
 .EXAMPLE
-	.\New-PSDWebInstance.Ps1 -PSvirtualDirectory "PSDExample01" -psDeploymentFolder "C:\MDT\MyDeploymentShare"
-	This will configure the needed webDAV components for the local server.
+	.\Set-PSDWebInstance.Ps1 -psDeploymentFolder "E:\PSDProduction" -psVirtualDirectory "PSDProduction"s
 
 #>
 
@@ -81,8 +81,7 @@ param(
 	[string]$psDeploymentFolder,
 
 	[parameter(HelpMessage = "Use this flag to specifiy the NAME of the PSD - NOTE - if you do not provide one the defualt value will be used.",Mandatory=$True)]
-	[string]$psVirtualDirectory,
-    [switch]$StartedFromHydration
+	[string]$psVirtualDirectory
 )
 begin
 {
@@ -159,7 +158,6 @@ function Write-PSDInstallLog{
     $Line = '<![LOG[{0}]LOG]!><time="{1}" date="{2}" component="{3}" context="" type="{4}" thread="" file="">'
     $LineFormat = $Message, $TimeGenerated, (Get-Date -Format MM-dd-yyyy), "$($MyInvocation.ScriptName | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)", $LogLevel
 	$Line = $Line -f $LineFormat
-	[system.GC]::Collect()
     Add-Content -Value $Line -Path $global:ScriptLogFilePath
 	if($writetoscreen)
 	{
@@ -225,12 +223,12 @@ function invoke-IISConfiguration{
 	if(!(Test-PSDRoleInstalled -RoleName "WEB-Server") -or !(Test-PSDRoleInstalled -RoleName "WebDav-Redirector"))
 		{
 			Write-PSDInstallLog -Message "The configuration attempt failed because a role was missing review the log for details" -LogLevel 3
-			break
+			Return
 		}
 	if(!(Test-Path -Path $psDeploymentFolder))
 	{
 		Write-PSDInstallLog -Message "The deployment share doesn't exist re-run the script with a share that exists" -LogLevel 3
-		break
+		Return
 	}
 	}
 	process
@@ -265,7 +263,7 @@ function invoke-IISConfiguration{
 			if(!($MRxDavserviceState) -or !($WebClientServiceState))
 			{
 				Write-PSDInstallLog -Message "Something went wrong with the installation, and the services are not appearing."
-				break
+				Return
 			}
 			Write-PSDInstallLog -Message "Succesfully Completed starting the required services."
 		}
@@ -282,20 +280,51 @@ function invoke-IISConfiguration{
 				$DuplicateCheck = Get-WebVirtualDirectory -Name $psVirtualDirectory
 				if($DuplicateCheck)
 				{
-					Write-PSDInstallLog -Message "The website $($psVirtualDirectory) already exits" -LogLevel 3
-					break
+					Write-PSDInstallLog -Message "The virtual directory $($psVirtualDirectory) already exists on $($DuplicateCheck.PhysicalPath). To reconfigure, remove the existing virtual directory first and re-run the script." -LogLevel 3 -writetoscreen $false
+					Write-Warning "The virtual directory '$psVirtualDirectory' already exists (mapped to $($DuplicateCheck.PhysicalPath)). To reconfigure, remove the existing virtual directory first and re-run the script."
+					Return
 				}
 				$VirtualDirectoryResults = New-WebVirtualDirectory -Site "Default Web Site" -Name "$($psVirtualDirectory)" -PhysicalPath $psDeploymentFolder
 				if($VirtualDirectoryResults)
 				{
 					Write-PSDInstallLog -Message "Succesfully created the Virtual Directory $($VirtualDirectoryResults.Name) this drive maps to $($VirtualDirectoryResults.PhysicalPath)"
 				}
-				Write-PSDInstallLog -Message "Now enabling WebDav"
-				$Result = Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/" -filter "system.webServer/webdav/authoring" -name "enabled" -value "True"
-				$HERE = @"
-				set config "Default Web Site/$($psVirtualDirectory)" /section:system.webServer/webdav/authoringRules /+[users='*',path='*',access='Read,Source'] /commit:apphost
-"@
-                $Result = Start-Process C:\Windows\System32\inetsrv\AppCMD.EXE -ArgumentList $HERE -NoNewWindow -RedirectStandardOutput "$env:TEMP\silentfile.txt"
+				Write-PSDInstallLog -Message "Now configuring WebDav"
+				$Result = Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' `
+                  -location "Default Web Site/" `
+                  -filter "system.webServer/webdav/authoring" `
+                  -name "enabled" `
+                  -value "True"
+
+                $sitePath = "Default Web Site/$psVirtualDirectory"
+
+                $appcmdPath = "$env:windir\System32\inetsrv\appcmd.exe"
+                $appcmdArgs = @(
+                    'set',
+                    'config',
+                    "`"$sitePath`"",
+                    '/section:system.webServer/webdav/authoringRules',
+                    "/+[users='*',path='*',access='Read,Source']",
+                    '/commit:apphost'
+                )
+                $stdOut = "$env:TEMP\silentfile-$psVirtualDirectory.txt"
+                $stdErr = "$env:TEMP\silentfile-$psVirtualDirectory.err"
+                $appcmdArgString = ($appcmdArgs | ForEach-Object { $_ }) -join ' '
+                & cmd.exe /c "`"$appcmdPath`" $appcmdArgString 1>`"$stdOut`" 2>`"$stdErr`""
+                $appcmdExitCode = $LASTEXITCODE
+
+                if ($appcmdExitCode -ne 0) {
+                  $appcmdStdErr = if (Test-Path $stdErr) { Get-Content -Path $stdErr -Raw } else { "No error output captured" }
+                  Write-PSDInstallLog -Message "AppCMD failed with exit code $appcmdExitCode. Error: $appcmdStdErr" -LogLevel 3
+                  throw "AppCMD failed with exit code $appcmdExitCode"
+                }
+                else {
+                  if (Test-Path $stdOut) {
+                    $appcmdStdOut = (Get-Content -Path $stdOut -Raw).Trim()
+                    if ($appcmdStdOut) { Write-PSDInstallLog -Message "AppCMD output: $appcmdStdOut" }
+                  }
+                }
+
 				Start-Sleep -Seconds 5
 				if(!((Get-WebConfigurationProperty -PSPath "IIS:\Sites\Default Web Site\$($psVirtualDirectory)" -Filter "system.webServer/staticContent" -Name ".").Collection | Where-Object {$_.fileExtension -eq ".*"}))
 				{
@@ -341,8 +370,7 @@ function invoke-IISConfiguration{
 				Write-PSDInstallLog -Message "Turning off the Request filtering for Verbs on WebDav"
 				Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/$($psVirtualDirectory)" -filter "system.webServer/security/requestFiltering/verbs" -name "applyToWebDav" -value "False"
 				Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "Default Web Site/" -filter "system.webServer/security/requestFiltering/verbs" -name "applyToWebDav" -value "False"
-				$hiddenSegments = Get-IISConfigSection -SectionPath 'system.webServer/security/requestFiltering' | Get-IISConfigElement -ChildElementName 'hiddenSegments'
-				Set-IISConfigAttributeValue -ConfigElement $hiddenSegments -AttributeName 'applyToWebDAV' -AttributeValue $false
+				Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.webServer/security/requestFiltering/hiddenSegments" -name "applyToWebDAV" -value "False"
 			}
 			if(!(Test-Path -Path $psDeploymentFolder))
 			{
@@ -396,7 +424,9 @@ process
 	#endregion ConfigureActions
 	############################################
 
-    Remove-Item -Path "$env:TEMP\silentfile.txt"
+    # Remove temporary files created by the AppCMD command to prevent clutter and potential confusion in future runs of the script. 
+	Write-PSDInstallLog -Message "Removing temporary files created by AppCMD"
+	Remove-Item "$env:TEMP\silentfile-$psVirtualDirectory.txt","$env:TEMP\silentfile-$psVirtualDirectory.err" -Force -ErrorAction SilentlyContinue
 
 	############################################
 	#region ShutdownChecks

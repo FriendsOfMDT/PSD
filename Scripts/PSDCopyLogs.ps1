@@ -15,6 +15,7 @@
           Modified: 2020-06-16
 
           Version - 0.0.1 - () - Finalized functional version 1.
+          Version - 0.0.2 - (Johan Arwidmark) - Changed Start-BitsTransfer authentication from Ntlm to Negotiate. Credits: @theQ23 on GitHub
           TODO:
 
 .Example
@@ -60,7 +61,7 @@ if ($tsenv:SLShare -ilike "http*"){
             $SourceFolderToZIP = "$Folder"
             $SourceFile = "$env:TEMP\$FolderName.zip"
             Compress-Archive -Path $SourceFolderToZIP -DestinationPath $SourceFile -Verbose -Force
-            Start-BitsTransfer -Authentication Ntlm -Source $SourceFile -Destination $("$tsenv:SLshare/$env:COMPUTERNAME-" + "$LogName" + ".zip") -TransferType Upload -Verbose -Credential $Credentials
+            Start-BitsTransfer -Authentication Negotiate -Source $SourceFile -Destination $("$tsenv:SLshare/$env:COMPUTERNAME-" + "$LogName" + ".zip") -TransferType Upload -Verbose -Credential $Credentials
         }
     }
 }

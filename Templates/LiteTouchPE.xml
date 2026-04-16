@@ -49,6 +49,8 @@
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%" dest="Deploy\Tools\%PLATFORM%" />
 	  <Copy source="%DEPLOYROOT%\PSDResources\BootImageFiles\%PLATFORM%" dest="Deploy\Tools\%PLATFORM%" />
 	  <Copy source="%DEPLOYROOT%\PSDResources\Certificates" dest="Deploy\Certificates" />
+	  <Copy source="%DEPLOYROOT%\PSDResources\Certificates\Root" dest="Deploy\Certificates\Root" />
+	  <Copy source="%DEPLOYROOT%\PSDResources\Certificates\Intermediate" dest="Deploy\Certificates\Intermediate" />
       <Copy source="%DEPLOYROOT%\PSDResources\Prestart" dest="Deploy\Prestart" />
 	  <Copy source="%DEPLOYROOT%\Tools\%PLATFORM%\BGInfo.exe" dest="Windows\system32\BGInfo.exe" />
 	  <Copy source="%DEPLOYROOT%\PSDResources\BGInfo\PSD.bgi" dest="Windows\System32\PSD.bgi" />	  

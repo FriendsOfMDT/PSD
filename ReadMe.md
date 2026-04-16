@@ -1,4 +1,42 @@
 # README - PowerShell Deployment Extension Kit
+March 2026 (ver 0.2.3.6) 
+- Added support for application dependencies (Issue 279)
+
+March 2026 (ver 0.2.3.6)
+- Fixed Set-PSDWebInstance.ps1 so it can be executed multiple time to allow for multiple deploymentshare on the same OS
+- Fixed application deployment during wizard selection, (issue 179, 119)
+
+Feb 2026 (ver 0.2.3.5)
+- Fixed bug 291 SystemAlias is blank on a Hyper-V gen 1 (BIOS) VM, it will now return "Hyper-V BIOS"
+
+Feb 2026 (ver 0.2.3.4)
+- Fixed bug 288, OSSku was incorrect, we made the decision to remove OSSku and replace wityh OSName instead
+
+Jan 2026 (ver 0.2.3.3)
+- Fixed the %ToolRoot% path, allows for Run As user with the run Command Line step (Issue 252)
+- Added support for local WSUS server using the WSUSServer Property (use customsettings.ini or a task sequence variable)
+- Modified UserExistScript001.ps1 to not do anything, mofify if you want to use it
+
+Jan 2026 (ver 0.2.3.2)
+- Note: On January 6, 2026, MDT was removed from the Microsoft Download site. You can still find the download on Wayback Machine (Internet Archive), or ask a trustworthy friend, but be VERY careful where you download it from. We've already seen malware/ransomeware links published in the community.
+- Changed Start-BitsTransfer authentication from Ntlm to Negotiate. Credits: @theQ23 on GitHub
+- BranchCache Installation Guide updated
+- Added BitLocker info. Credits: BlackCatDeployment on GitHub (Part of closed Issue 237)
+- PowerShell Deployment - Operations Guide - Updated
+- Reverted updates to PSDWiward
+- Updated PSDPrestartMenu
+- Added support for using Root And Intermidiate Certificates Credits to stefanweilguni-oss on (GitHub Part of Issue 265)
+    Note: If you upgrade from previus version of PSD, please note that you need to move the PSDRoot.cer file to the Certificate\Root folder
+- Updated New-PSDRootCACert.ps1 to reflect changes in certificate konfiguration
+- Updated Operations Guide
+
+
+Dec 2025 (ver 0.2.3.1)
+- Added ZTIGather.xml (was missing for a long time)
+- Updated INI files
+- Updated PSDStart (Legacy Wizard is removed, Support for UserExitScripts)
+- Updated PSDutility to suuport new functions in PSDStart
+- UserExitScripts folder with sample exists in the PSDresource folder
 
 Dec 2025 (ver 0.2.3.1)
 - Added ZTIGather.xml (was missing for a long time)

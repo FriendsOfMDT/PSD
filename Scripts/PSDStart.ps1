@@ -35,7 +35,12 @@
           version - 0.1.2 - (mikael_nystrom) Added preflight checks for disk 0 and for network adapter before starting the wizard, if no network or no disk is found, it will not continue
           version - 0.1.3 - (mikael_nystrom) Removed legacy Wizared code and logic, fixed some typos
           version - 0.1.4 - (mikael_nystrom) Added support for UserExitScripts, you can extend the processing of PSDStart by adding a PowerShell script (or more) to the UserExit Scripts folder
-
+          version - 2.3.2 - (mikael_nystrom) The version of PSDStart will now follow the actual version of the solution
+          version - 2.3.3 - Added varius updates, see readme for details
+          version - 2.3.4 - Added varius updates, see readme for details
+          version - 2.3.5 - PSDGather.psm1 is updated to version 0.1.0, which includes some changes to the local info gathering
+          version - 2.3.5 - Fixed the Set-PSDWebInstance.ps1 to support multiple deployment shares, fixed support for wizard to be able to deploy application without having to use "dummy" apps in customsettings.ini
+          
 
           TODO:
 
@@ -47,7 +52,7 @@ param (
     [switch] $Debug
 )
 
-$DeploymentToolkitVersion = "2.2.8"
+$DeploymentToolkitVersion = "0.2.3.6"
 # OSDProgress=Native
 # OSDProgress=Modern
 
@@ -160,22 +165,60 @@ Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): PowerShell variable Boot
 Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Entering certificate block..."
 $Certificates = @()
 $CertificateLocations = "$($env:SYSTEMDRIVE)\Deploy\Certificates","$($env:SYSTEMDRIVE)\MININT\Certificates"
-foreach($CertificateLocation in $CertificateLocations){
-    if((Test-Path -Path $CertificateLocation) -eq $true){
+
+foreach ($CertificateLocation in $CertificateLocations) {
+    if (Test-Path -Path $CertificateLocation) {
         Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Looking for certificates in $CertificateLocation"
-        $Certificates += Get-ChildItem -Path "$CertificateLocation" -Filter *.cer
+  
+        # Check for ROOT certificates in two locations
+        # Both directly in the Certificates folder (like in previous versions), and in Certificates\Root
+
+        $CertPaths = @(
+            $CertificateLocation
+            (Join-Path -Path $CertificateLocation -ChildPath "Root")
+        )
+
+        foreach ($CertPath in $CertPaths) {
+            if (-not (Test-Path -Path $CertPath)) {
+                continue
+            }
+
+            $Certificates = Get-ChildItem -Path $CertPath -Filter *.cer -File
+
+            foreach ($Certificate in $Certificates) {
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($Certificate.FullName), trying to add as root certificate"
+
+                $Return = Import-PSDCertificate `
+                    -Path $Certificate.FullName `
+                    -CertStoreScope "LocalMachine" `
+                    -CertStoreName "Root"
+
+                if ($Return -eq "0") {
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Successfully imported $($Certificate.FullName)"
+                }
+                else {
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Failed to import $($Certificate.FullName)"
+                }
+            }
+        }
+
+        # Check for Intermediate certificates
+        $InterCertPath = Join-Path -Path $CertificateLocation -ChildPath "Intermediate"
+        if (Test-Path -Path $InterCertPath) {
+            $InterCerts = Get-ChildItem -Path $InterCertPath -Filter *.cer
+            foreach ($Certificate in $InterCerts) {
+                Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($Certificate.FullName), trying to add as intermediate certificate"
+                $Return = Import-PSDCertificate -Path $Certificate.FullName -CertStoreScope "LocalMachine" -CertStoreName "CA"
+                if ($Return -eq "0") {
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Successfully imported $($Certificate.FullName)"
+                } else {
+                    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Failed to import $($Certificate.FullName)"
+                }
+            }
+        }
     }
 }
-foreach($Certificate in $Certificates){
-    Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Found $($Certificate.FullName), trying to add as root certificate"
-    $Return = Import-PSDCertificate -Path $Certificate.FullName -CertStoreScope "LocalMachine" -CertStoreName "Root"
-    If($Return -eq "0"){
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Succesfully imported $($Certificate.FullName)"
-    }
-    else{
-        Write-PSDLog -Message "$($MyInvocation.MyCommand.Name): Failed to import $($Certificate.FullName)"
-    }
-}
+
 
 # Set Command Window size
 # Reason for 99 is that 99 seems to use the screen in the best possible way, 100 is just one pixel to much
@@ -365,6 +408,10 @@ if ($tsInProgress){
     # Get full scripts location
     $scripts = Get-PSDContent -Content "Scripts"
     $env:ScriptRoot = $scripts
+
+    # Get full Tools location
+    $toolRoot = Get-PSDContent "Tools\$($tsenv:Architecture)"
+    $env:ToolRoot = $toolRoot
 
     # Set the PSModulePath
     $modules = Get-PSDContent -Content "Tools\Modules"
@@ -736,6 +783,10 @@ else{
     # Get full scripts location
     $scripts = Get-PSDContent -Content "Scripts"
     $env:ScriptRoot = $scripts
+
+    # Get full Tools location
+    $toolRoot = Get-PSDContent "Tools\$($tsenv:Architecture)"
+    $env:ToolRoot = $toolRoot
 
     # Set the PSModulePath
     $modules = Get-PSDContent -Content "Tools\Modules"
