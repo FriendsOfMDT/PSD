@@ -1,0 +1,84 @@
+/* Homepage hero styles */
+.heroBanner {
+  padding: 4rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0165cc 0%, #003a80 100%);
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.badgeRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Features section */
+.features {
+  padding: 3rem 0;
+  background-color: var(--ifm-background-surface-color);
+}
+
+/* Quick start section */
+.quickStart {
+  padding: 3rem 0;
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+[data-theme='dark'] .quickStart {
+  background-color: var(--ifm-background-surface-color);
+}
+
+.codeBlock {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.codeBlock pre {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+.codeBlock code {
+  color: #d4d4d4;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Doc links cards section */
+.docLinks {
+  padding: 3rem 0 4rem;
+}
+
+.docCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.docCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}

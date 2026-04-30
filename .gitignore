@@ -243,3 +243,9 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+# Ignore local .docusaurus directory
+.pages/.docusaurus/
+
+# Ignore local node_modules directory
+.pages/node_modules/

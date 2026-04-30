@@ -1,0 +1,38 @@
+/**
+ * PSD Docusaurus - Custom CSS
+ * Colors inspired by PowerShell blue theme
+ */
+
+/* === Brand Colors === */
+:root {
+  --ifm-color-primary: #0165cc;
+  --ifm-color-primary-dark: #015bb7;
+  --ifm-color-primary-darker: #0156ad;
+  --ifm-color-primary-darkest: #01478f;
+  --ifm-color-primary-light: #016fe1;
+  --ifm-color-primary-lighter: #0174eb;
+  --ifm-color-primary-lightest: #1a87f5;
+  --ifm-code-font-size: 93%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #4da6ff;
+  --ifm-color-primary-dark: #2a96ff;
+  --ifm-color-primary-darker: #198eff;
+  --ifm-color-primary-darkest: #006ee6;
+  --ifm-color-primary-light: #70b7ff;
+  --ifm-color-primary-lighter: #82beff;
+  --ifm-color-primary-lightest: #b8d9ff;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* === Admonition Tweaks === */
+.alert--warning {
+  --ifm-alert-border-color: #f59e0b;
+}
+
+/* === Code blocks: highlight PowerShell keywords === */
+.token.keyword {
+  font-weight: bold;
+}
