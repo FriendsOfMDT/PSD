@@ -69,7 +69,7 @@ $tsTree.AddHandler([System.Windows.Controls.TreeViewItem]::ExpandedEvent,$expand
 $tsTree.add_SelectedItemChanged({
     if ($this.SelectedItem.Tag.PSIsContainer -ne $true)
     {
-        $TS_TaskSequenceID.Text = $this.SelectedItem.Tag.ID
-        #$TS_TaskSequenceName = $TS_TaskSequenceID.Text
+        $TSEnv_TaskSequenceID.Text = $this.SelectedItem.Tag.ID
+        #$TSEnv_TaskSequenceName = $TSEnv_TaskSequenceID.Text
     }
 })

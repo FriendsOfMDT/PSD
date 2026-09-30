@@ -14,8 +14,8 @@
 
 	<Label x:Name="_roleTabSubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top" Content="@SubTitle"/>
 
-	<ComboBox x:Name="_cmbDeviceRole" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="436" Height="28" FontSize="18"/>
-	<TextBox x:Name="TS_DeviceRole" Margin="10,145,44,377" FontSize="18" IsEnabled="False" />
+	<ComboBox x:Name="TSEnvList_DeviceRole" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="436" Height="28" FontSize="18"/>
+	<TextBox x:Name="TSEnv_DeviceRole" Margin="10,145,44,377" FontSize="18" IsEnabled="False" />
 	
     <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
 	

@@ -31,6 +31,7 @@
 		<Pane id="DeviceDetails" reference="Classic\PSDWizard_DeviceDetails_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="CustomPane_DeviceName" reference="Classic\PSDWizard_DeviceName_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="DeviceRole" reference="Classic\PSDWizard_DeviceRole_en-US.xaml" margin="0,0,0,0" />	
+		<Pane id="RolesAndFeatures" reference="Classic\PSDWizard_RolesAndFeatures_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="IntuneGroup" reference="Classic\PSDWizard_IntuneGroup_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="CustomPane_IntuneCategory" reference="Classic\PSDWizard_IntuneCategory_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="AdminAccount" reference="Classic\PSDWizard_AdminCreds_en-US.xaml" margin="0,0,0,0"/>

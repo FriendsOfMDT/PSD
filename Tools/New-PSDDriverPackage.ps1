@@ -14,16 +14,16 @@
         The compression type for the driver packages. The script supports WIM and ZIP. The default is WIM.
 
     .EXAMPLE
-        .\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType WIM
+        .\New-PSDDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType WIM
     
     .EXAMPLE
-        .\New-MDTDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType ZIP
+        .\New-PSDDriverPackage.ps1 -psDeploymentFolder E:\PSDProduction -CompressionType ZIP
 
     .LINK
         https://github.com/FriendsOfMDT/PSD
 
     .NOTES
-        FileName: New-MDTDriverPackage.ps1
+        FileName: New-PSDDriverPackage.ps1
         Solution: PowerShell Deployment for MDT
         Author: PSD Development Team
         Contact: @Mikael_Nystrom , @jarwidmark

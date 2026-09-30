@@ -33,7 +33,7 @@
         </Rectangle>
     </Canvas>
 
-    <TextBox x:Name="TS_TaskSequenceID" Margin="342,139,14,386" IsEnabled="False" />
+    <TextBox x:Name="TSEnv_TaskSequenceID" Margin="342,139,14,386" IsEnabled="False" />
     <TreeView x:Name="_tsTabTree" HorizontalAlignment="Left" Height="371" Margin="10,169,0,0" VerticalAlignment="Top" Width="467" FontSize="14"  
                     ItemContainerStyle="{StaticResource TreeViewItemStandard}" 
                     ItemTemplate="{StaticResource CheckBoxItemTemplate}"  >

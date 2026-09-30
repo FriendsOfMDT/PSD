@@ -13,56 +13,56 @@
     <Label x:Name="_depSelectionProfilesLabel" Content="Profiles:" FontSize="14" HorizontalAlignment="Left" Margin="12,87,0,0" VerticalAlignment="Top" />
     <ComboBox x:Name="_depSelectionProfilesCmb" HorizontalAlignment="Left" Margin="78,87,0,0" VerticalAlignment="Top" Width="401" Height="28" FontSize="18" />
 
-    <Canvas x:Name="_depTabValidation01" Grid.Column="0" Margin="10,121,10,379" Background="LightGreen" Visibility="Visible">
+    <Canvas x:Name="_depTabValidation01" Grid.Column="0" Margin="10,121,10,379" Background="#2D2D30" Visibility="Hidden">
         <TextBox x:Name="_depTabValidation01_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Width="376" Height="30" Text="test" />
-        <Rectangle x:Name="_depTabValidation01_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" Canvas.Left="430" Canvas.Top="9" Visibility="Visible">
+        <Rectangle x:Name="_depTabValidation01_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" Canvas.Left="430" Canvas.Top="9" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
             </Rectangle.OpacityMask>
         </Rectangle>
-        <Rectangle x:Name="_depTabValidation01_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Visible">
+        <Rectangle x:Name="_depTabValidation01_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
             </Rectangle.OpacityMask>
         </Rectangle>
     </Canvas>
 
-    <Canvas x:Name="_depTabValidation02" Grid.Column="0" Margin="10,176,10,324" Background="LightGreen" Visibility="Visible">
+    <Canvas x:Name="_depTabValidation02" Grid.Column="0" Margin="10,176,10,324" Background="#2D2D30" Visibility="Hidden">
         <TextBox x:Name="_depTabValidation02_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Width="376" Height="30" Text="test" />
-        <Rectangle x:Name="_depTabValidation02_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" Canvas.Left="430" Canvas.Top="9" Visibility="Visible">
+        <Rectangle x:Name="_depTabValidation02_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" Canvas.Left="430" Canvas.Top="9" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
             </Rectangle.OpacityMask>
         </Rectangle>
-        <Rectangle x:Name="_depTabValidation02_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Visible">
+        <Rectangle x:Name="_depTabValidation02_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
             </Rectangle.OpacityMask>
         </Rectangle>
     </Canvas>
 
-    <Canvas x:Name="_depTabValidation03" Grid.Column="0" Margin="10,231,10,268" Background="LightGreen" Visibility="Visible">
+    <Canvas x:Name="_depTabValidation03" Grid.Column="0" Margin="10,231,10,268" Background="#2D2D30" Visibility="Hidden">
         <TextBox x:Name="_depTabValidation03_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Width="376" Height="30" Text="test" />
-        <Rectangle x:Name="_depTabValidation03_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" Canvas.Left="430" Canvas.Top="9" Visibility="Visible">
+        <Rectangle x:Name="_depTabValidation03_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" Canvas.Left="430" Canvas.Top="9" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
             </Rectangle.OpacityMask>
         </Rectangle>
-        <Rectangle x:Name="_depTabValidation03_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Visible">
+        <Rectangle x:Name="_depTabValidation03_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
             </Rectangle.OpacityMask>
         </Rectangle>
     </Canvas>
 
-    <Canvas x:Name="_depTabValidation04" Grid.Column="0" Margin="9,287,11,214" Background="LightGreen" Visibility="Visible">
+    <Canvas x:Name="_depTabValidation04" Grid.Column="0" Margin="9,287,11,214" Background="#2D2D30" Visibility="Hidden">
         <TextBox x:Name="_depTabValidation04_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Height="30" Width="376" Text="test" />
-        <Rectangle x:Name="_depTabValidation04_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" Canvas.Left="430" Canvas.Top="9" Visibility="Visible">
+        <Rectangle x:Name="_depTabValidation04_Alert" Grid.Column="0" Width="30" Height="30" Fill="Red" Canvas.Left="430" Canvas.Top="9" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_alert}"/>
             </Rectangle.OpacityMask>
         </Rectangle>
-        <Rectangle x:Name="_depTabValidation04_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Visible">
+        <Rectangle x:Name="_depTabValidation04_Check" Grid.Column="0" Width="30" Height="30" Fill="Green" Canvas.Left="430" Canvas.Top="10" Visibility="Hidden">
             <Rectangle.OpacityMask>
                 <VisualBrush Stretch="Fill" Visual="{DynamicResource icons_check}"/>
             </Rectangle.OpacityMask>
@@ -82,13 +82,13 @@
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <Label Content="Manufacturer:" Grid.Column="0" HorizontalAlignment="Left" FontSize="16"  VerticalAlignment="Center"  Height="35" Width="160" HorizontalContentAlignment="Right" Margin="10,0,0,0" />
-        <TextBox x:Name="TS_Make" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True" Margin="0,5,0,4" Width="287" Style="{DynamicResource TextBoxDarkTheme}"/>
+        <TextBox x:Name="TSEnv_Make" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True" Margin="0,5,0,4" Width="287" Style="{DynamicResource TextBoxDarkTheme}"/>
         <Label Content="Model:"  Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" FontSize="16" VerticalAlignment="Center" Height="34" Width="160" HorizontalContentAlignment="Right" Margin="10,0,0,0"/>
-        <TextBox x:Name="TS_Model" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True" Margin="0,4,0,5" Width="287" Style="{DynamicResource TextBoxDarkTheme}"/>
+        <TextBox x:Name="TSEnv_Model" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True" Margin="0,4,0,5" Width="287" Style="{DynamicResource TextBoxDarkTheme}"/>
         <Label Content="Serial Number:" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left" FontSize="16"  VerticalAlignment="Center" Height="35" Width="160" HorizontalContentAlignment="Right" Margin="10,0,0,0"/>
-        <TextBox x:Name="TS_SerialNumber" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True" Margin="0,5,0,4" Width="287" Style="{DynamicResource TextBoxDarkTheme}"/>
+        <TextBox x:Name="TSEnv_SerialNumber" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True" Margin="0,5,0,4" Width="287" Style="{DynamicResource TextBoxDarkTheme}"/>
         <Label Content="Asset Tag:" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Left" FontSize="16" VerticalAlignment="Center" Height="34" Width="160" HorizontalContentAlignment="Right" Margin="10,0,0,0"/>
-        <TextBox x:Name="TS_AssetTag" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True" Margin="0,4,0,5" Width="287" Style="{DynamicResource TextBoxDarkTheme}"/>
+        <TextBox x:Name="TSEnv_AssetTag" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="16" IsReadOnly="True" Margin="0,4,0,5" Width="287" Style="{DynamicResource TextBoxDarkTheme}"/>
     </Grid>
 
     <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />

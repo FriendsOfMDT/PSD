@@ -13,7 +13,7 @@
     <Label Content="Local administrator password" FontSize="18" HorizontalAlignment="Left" Margin="10,98,0,0" VerticalAlignment="Top" Width="466"/>
 
     <Label Content="Password:" HorizontalAlignment="Right" FontSize="14" Margin="0,138,332,378"/>
-    <PasswordBox x:Name="TS_AdminPassword" Margin="164,138,14,378" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center"/>
+    <PasswordBox x:Name="TSEnv_AdminPassword" Margin="164,138,14,378" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center"/>
     <Label Content="Confirm Password:" FontSize="14" Margin="35,177,324,340"/>
     <PasswordBox x:Name="_ConfirmAdminPassword"  Margin="164,177,14,340" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center"/>
 
@@ -33,7 +33,7 @@
 
     <Label x:Name="_admOSDAddAdminText" Content="Administrator user accounts" FontSize="18" HorizontalAlignment="Left" Margin="10,326,0,0" VerticalAlignment="Top" Width="466"/>
     <Label x:Name="_admOSDAddAdminLabel" Content="Admin Accounts(s)" HorizontalAlignment="Right" FontSize="14" Margin="0,364,330,152" Width="126"/>
-    <TextBox x:Name="TS_OSDAddAdmin" Margin="165,364,14,152" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" IsEnabled="False"/>
+    <TextBox x:Name="TSEnv_OSDAddAdmin" Margin="165,364,14,152" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" IsEnabled="False"/>
 
     <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray"/>
     <TextBlock x:Name="_admTabMoreInfo" Grid.Column="1" HorizontalAlignment="Left" Margin="10,89,0,0" Width="136" TextWrapping="Wrap" VerticalAlignment="Top" Height="422">

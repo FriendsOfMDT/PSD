@@ -21,21 +21,20 @@
     <Button x:Name="_appTabSelectAll" Content="Select All" Height="25" Width="113" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="12,0,0,353" />
     <Button x:Name="_appTabSelectNone" Content="Select None" Height="25" Width="114" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="10" Padding="2" Margin="130,0,0,353" />
 
-    <TextBox x:Name="TS_Applications" Margin="341,129,13.5,379" IsEnabled="False" Visibility="Hidden"/>
+    <TextBox x:Name="TSEnv_Applications" Margin="341,129,13.5,379" IsEnabled="False" Visibility="Hidden"/>
 
     <ListBox x:Name="_appTabList" HorizontalAlignment="Left" Height="338" Margin="10,202,0,0" VerticalAlignment="Top" Width="466" SelectionMode="Multiple">
         <ListBox.ItemContainerStyle>
             <Style TargetType="ListBoxItem">
-                <Setter Property="IsSelected" Value="{Binding Selected}" />
+                <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay}" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             </Style>
         </ListBox.ItemContainerStyle>
-        <!--<ListBox.ItemTemplate>
+        <ListBox.ItemTemplate>
             <DataTemplate>
-                <ListBoxItem>
-                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ListBoxItem, Mode=FindAncestor}}"/>
-                </ListBoxItem>
+                <CheckBox Content="{Binding DisplayName}" IsChecked="{Binding Selected, Mode=TwoWay}" IsEnabled="{Binding IsSelectable}" VerticalAlignment="Center" Padding="4,2" />
             </DataTemplate>
-        </ListBox.ItemTemplate>-->
+        </ListBox.ItemTemplate>
     </ListBox>
 
     <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />

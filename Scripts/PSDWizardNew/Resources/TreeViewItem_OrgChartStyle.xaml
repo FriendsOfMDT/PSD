@@ -1,0 +1,94 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+  <Style x:Key="TreeViewItemOrgChart" TargetType="TreeViewItem">
+    <Style.Resources>
+      <LinearGradientBrush x:Key="ItemAreaBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
+        <GradientStop Color="#66000000" Offset="0" />
+        <GradientStop Color="#22000000" Offset="1" />
+      </LinearGradientBrush>
+      <LinearGradientBrush x:Key="SelectedItemAreaBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
+        <GradientStop Color="Orange" Offset="0" />
+        <GradientStop Color="OrangeRed" Offset="1" />
+      </LinearGradientBrush>
+      <LinearGradientBrush x:Key="ItemBorderBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
+        <GradientStop Color="LightGray" Offset="0" />
+        <GradientStop Color="Gray" Offset="1" />
+      </LinearGradientBrush>
+      <LinearGradientBrush x:Key="SelectedItemBorderBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
+        <GradientStop Color="Yellow" Offset="0" />
+        <GradientStop Color="Black" Offset="1" />
+      </LinearGradientBrush>
+      <DropShadowBitmapEffect x:Key="DropShadowEffect" />
+    </Style.Resources>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TreeViewItem">
+          <Grid Margin="2">
+            <Grid.RowDefinitions>
+              <!--The top row contains the item's content.-->
+              <RowDefinition Height="Auto" />
+              <!--The bottom row contains the item's children.-->
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- This Border and ContentPresenter displays the content of the TreeViewItem. -->
+            <Border Name="Bd" 
+              Background="{StaticResource ItemAreaBrush}"
+              BorderBrush="{StaticResource ItemBorderBrush}" 
+              BorderThickness="0.6" 
+              CornerRadius="8"
+              Padding="6"
+              >
+              <ContentPresenter Name="PART_Header"                  
+                ContentSource="Header"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" />
+            </Border>
+
+            <!-- The ItemsPresenter displays the item's children. -->
+            <ItemsPresenter Grid.Row="1"/>
+          </Grid>
+
+          <ControlTemplate.Triggers>
+            <!--When the item is selected in the TreeView, use the 
+                  "selected" colors and give it a drop shadow. -->
+            <Trigger Property="IsSelected" Value="True">
+              <Setter
+                TargetName="Bd"
+                Property="Panel.Background"                     
+                Value="{StaticResource SelectedItemAreaBrush}" />
+              <Setter
+                TargetName="Bd"
+                Property="Border.BorderBrush"                     
+                Value="{StaticResource SelectedItemBorderBrush}" />
+              <Setter
+                TargetName="Bd"
+                Property="TextElement.Foreground"                   
+                Value="{DynamicResource 
+                  {x:Static SystemColors.HighlightTextBrushKey}}" />
+              <Setter
+                TargetName="Bd"
+                Property="Border.BitmapEffect"                  
+                Value="{StaticResource DropShadowEffect}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+
+    <!-- Make each TreeViewItem show it's children 
+           in a horizontal StackPanel. -->
+    <Setter Property="ItemsPanel">
+      <Setter.Value>
+        <ItemsPanelTemplate>
+          <StackPanel 
+            HorizontalAlignment="Center" 
+            IsItemsHost="True" 
+            Margin="4,6" 
+            Orientation="Horizontal"  />
+        </ItemsPanelTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

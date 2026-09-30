@@ -1,10 +1,43 @@
 # Change log for PSDWizardNew
 
+## 3.0.0 - Sept 27, 2026
+
+- PSDWizardNew is now a runspace; making it more responsive.
+- Filter selectable applications using `WizardSelectionProfile` and build custom wizard option lists from processed numbered task-sequence variables.
+- Complete without opening a blank wizard when processed TSEnv settings skip every pane.
+- Validate `TaskSequenceID` and its `ts.xml` before starting the task-sequence engine.
+- Detect an active task sequence from the `TSEnv:` PSDrive when the SMS TSEnvironment COM object is unavailable.
+- Use PSD's `TSEnv:` PSDrive for all production TSEnv reads, writes, and clears without COM fallback.
+- Require explicit `-DevelopmentMode` for local simulation; fail clearly if a normal wizard launch has no PSD `TSEnv:` drive.
+- Bind Classic and Dark `TSEnv_*` XAML controls from a synchronized, case-insensitive snapshot of PSD's processed `TSEnv:` values.
+- Reprocess the selected Task Sequence's `CustomSettings.ini` section and refresh dependent fields, OU presentation, domain/workgroup mode, applications, and role pages.
+- Restore inherited numbered choice lists and role-skip defaults when a selected Task Sequence omits its own values.
+- Validate each active page before allowing Next; enforce computer-name and administrator-password confirmation rules, and resolve wildcard `Properties()` pane validations.
+- Run readiness checks from zero-padded `PSDReadinessCheck###` entries, show results, and honor skip/bypass only on the Readiness page.
+- Add Classic and Dark Roles and Features panes using `SkipRoleSelection` and the selected OS's Windows 11 or ServerManager catalog.
+- Navigate only visible panes so Task Sequence-specific Role visibility does not break Next, Back, or Finish.
+- Resolve Readiness scripts from PSD's deployment-root `PSDResources` folder.
+- Derive the DevelopmentMode `Control` folder from `ResourcePath` instead of probing machine-specific drive paths.
+- Normalize DevelopmentMode and production inputs before one shared `SyncHash`/Control-data/locale initialization path.
+- Write Wizard messages to a dedicated `PSDWizardNew.log` alongside the standard PSD log.
+- Preselect locale dropdowns from culture aliases and normalize valid `KeyboardLocale` values to the catalog keyboard layout.
+- Display applications as checkboxes in Classic and Dark themes, with preselected and mandatory applications checked.
+- Evaluate Device Role, Roles and Features, and Applications visibility from the selected Task Sequence's skip properties, then navigate only visible panes.
+- Discover panes after Task Sequence from the language definitions, retain collapsed shells during interactive selection, and reevaluate each pane's XML conditions after selection. Applications visibility also follows the selected Task Sequence and available catalog; navigation skips hidden panes.
+- Allow checkbox-templated application lists to initialize without aborting the remaining wizard setup, including readiness and locale controls.
+- Refresh dependent list, locale, time-zone, and target-disk selections after Task Sequence rules change.
+- Document additional PSDWizardNew helpers and register domain-account validation before focus so valid preloaded accounts are not flagged until the field is revisited.
+- Add dependency-backed application bundle selection from Applications.xml, including preselected locked rows for hidden dependencies.
+- Add bundle diagnostics for discovery, dependency resolution, hidden dependency rows, and exported application GUIDs.
+- Hide dependency-bearing bundle parents from the application checklist while preserving the parent and dependencies in Applications### exports and Summary.
+- Synchronize selected application GUIDs to TSEnvList:Applications as well as Applications### properties consumed by Summary.
+- Mask password and credential properties in Summary and export-preview fallback data.
+- Bind Roles and Features selections to TSEnv_OptionalOSRoles, TSEnv_OptionalOSRoleServices, and TSEnv_OptionalOSFeatures fields in both themes.
+
 # 2.3.6 - Dec 29, 2024
 
 - Fixed issue with trimming off serial (https://github.com/FriendsOfMDT/PSD/issues/196)
 - Added native MACADDRESS and ASSETTAG support in computername (https://github.com/FriendsOfMDT/PSD/issues/167)
-
 
 ## 2.3.3 - May 1, 2024
 
@@ -28,7 +61,7 @@
 ## 2.3.0 - April 6, 2024
 
 - (PC) Added custom pane control by external scripts. Allows dynamic pages
-- (PC) Cleaned up theme fonts and readiness fonts. 
+- (PC) Cleaned up theme fonts and readiness fonts.
 - (PC) Renamed PSDWizard.Initialize.ps1 to PSDWizard.Helper.ps1
 - (PC) Add PSDWizardCollapseTSList to collapse large TS list (https://github.com/FriendsOfMDT/PSD/issues/127)
 - (PC) Fixed change log version check n PSDWizard

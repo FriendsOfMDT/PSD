@@ -49,13 +49,13 @@ Note: We recommend having only one file per folder, but technically PSD will inj
 #### Generic Drivers
 Generic Drivers is a driver package that you would like to install regardless of model, for example a printer or smart card driver.
 
-The default path for the GenericDriverPath vaiable is Windows 11\Generic, meaning you place the drivers in the Windows_11-Generic folder.
+The default path for the GenericDriverPath variable is Windows 11\Generic, meaning you place the drivers in the Windows_11-Generic folder.
 
 
 #### Fallback Drivers
 Fallback Drivers is a driver package that you would like to install if there is no make\model package available.
 
-The default path for the FallBackDriverPath vaiable is Windows 11\FallBack, meaning you place the drivers in the Windows_11-Fallback folder. A good example is commonly used network, storage or video drivers. This way you allow the OS to become somewhat functional and additional can be added later.
+The default path for the FallBackDriverPath variable is Windows 11\FallBack, meaning you place the drivers in the Windows_11-Fallback folder. Include the storage and network drivers required for unknown hardware or virtual machines. `New-PSDDriverPackage.ps1` creates the matching package under `PSDResources\DriverPackages`; review its log to confirm that the WIM or ZIP was generated and selected during deployment.
 
 #### Helper Scripts
 If you already have an existing MDT deployment share with drivers, we have created helper scripts that can convert those drivers into either ZIP or WIM files. 
@@ -64,9 +64,9 @@ To "convert" an existing Out-Of-Box Drivers folder in a MDT Deployment workbench
 
 Sample syntax:
 ```powershell
-.\New-MDTDriverPackage.ps1 -psDeploymentFolder "E:\PSDProduction" -CompressionType WIM
+.\New-PSDDriverPackage.ps1 -psDeploymentFolder "E:\PSDProduction" -CompressionType WIM
 
-.\New-MDTDriverPackage.ps1 -psDeploymentFolder "E:\PSDProduction" -CompressionType ZIP
+.\New-PSDDriverPackage.ps1 -psDeploymentFolder "E:\PSDProduction" -CompressionType ZIP
 ```
 
 ### Check Deployment Share Permissions

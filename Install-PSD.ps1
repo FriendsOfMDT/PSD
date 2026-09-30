@@ -13,6 +13,8 @@
     Use this switch to upgrade an existing deployment share.
     In order to use this switch, upgrade an existing deployment share, the parameters psDeploymentFolder and psDeploymentShare must have valid values.
     If this parameter is not used the script asumes that it is a new deployment.
+.PARAMETER PreserveUserExit
+    During an upgrade, preserves an existing Scripts\PSDUpdateExit.ps1 file in the deployment share.
 .LINK
 .NOTES
           FileName: Install.ps1
@@ -63,7 +65,9 @@ Param(
     [Parameter(Mandatory = $true, Position = 1,  HelpMessage = "Specify the share name that this deployment's solution data will be accessible from the network.")]
     [string]$psDeploymentShare,
     [Parameter(Mandatory = $false, Position = 2,  HelpMessage = "Use this switch to upgrade an existing deployment share.")]
-    [Switch]$Upgrade
+    [Switch]$Upgrade,
+    [Parameter(Mandatory = $false, HelpMessage = "Preserve the existing PSDUpdateExit.ps1 during an upgrade.")]
+    [Switch]$PreserveUserExit
 )
 $Script:DeploymentToolkitVersion = "0.2.3.6"
 
@@ -342,16 +346,25 @@ foreach ($filter in $filters) {
 }
 
 # Copy the scripts directly in the scripts folder (no recursive)
-'*.ps1','*.xaml','*.xml'| ForEach-Object { 
-    Copy-Item "$PSScriptRoot\Scripts\$($_)" "$psDeploymentFolder\Scripts"
-    Get-ChildItem -Path "$psDeploymentFolder\Scripts\$($_)" | Unblock-File 
+Get-ChildItem -Path "$PSScriptRoot\Scripts" -File | Where-Object { $_.Extension -in '.ps1', '.xaml', '.xml' } | ForEach-Object {
+    if ($Upgrade -and $PreserveUserExit -and $_.Name -eq 'PSDUpdateExit.ps1') {
+        Write-PSDInstallLog -Message "Preserving customized Scripts\PSDUpdateExit.ps1"
+        return
     }
+
+    Copy-Item $_.FullName "$psDeploymentFolder\Scripts" -Force
+    Unblock-File -Path (Join-Path "$psDeploymentFolder\Scripts" $_.Name)
+}
 
 # Copy the Wizard folders
 #Copy-PSDFolder "$PSScriptRoot\Scripts\PSDWizard" "$psDeploymentFolder\Scripts\PSDWizard"
 Copy-PSDFolder "$PSScriptRoot\Scripts\PSDWizardNew" "$psDeploymentFolder\Scripts\PSDWizardNew"
 #Get-ChildItem -Path "$psDeploymentFolder\Scripts\PSDWizard\*" -Recurse | Unblock-File
 Get-ChildItem -Path "$psDeploymentFolder\Scripts\PSDWizardNew\*" -Recurse | Unblock-File
+#remove PSDWizard.initialize.ps1
+If(test-path "$psDeploymentFolder\Scripts\PSDWizardNew\PSDWizard.initialize.ps1"){
+    Remove-Item -Path "$psDeploymentFolder\Scripts\PSDWizardNew\PSDWizard.initialize.ps1" -Force
+}
 
 # Copy the templates
 Copy-PSDFolder "$PSScriptRoot\Templates" "$psDeploymentFolder\Templates"

@@ -48,7 +48,7 @@
 	</StackPanel>
 	<Label Content="@Context" HorizontalAlignment="Left" FontWeight="Bold" FontSize="16"  Height="31" HorizontalContentAlignment="Left" Margin="3,378,0,141" />
 	<ComboBox x:Name="_cmbTargetDisk" HorizontalAlignment="Left" Margin="10,414,0,0" VerticalAlignment="Top" Width="87" Height="28" FontSize="18"/>
-	<TextBox x:Name="TS_OSDDiskIndex" Margin="10,447,393,75" FontSize="18" IsEnabled="False" />
+	<TextBox x:Name="TSEnv_OSDDiskIndex" Margin="10,447,393,75" FontSize="18" IsEnabled="False" />
 
 	<Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />
 

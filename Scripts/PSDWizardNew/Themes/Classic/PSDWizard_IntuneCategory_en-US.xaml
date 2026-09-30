@@ -13,8 +13,8 @@
 
 	<Label x:Name="_catTabSubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top" Content="@SubTitle"/>
 
-	<ComboBox Name="_cmbIntuneCategory" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="340" Height="28" FontSize="18" />
-	<TextBox Name="TS_IntuneCategory" Margin="10,145,44,377" IsEnabled="False" />
+	<ComboBox Name="TSEnvList_IntuneCategory" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="340" Height="28" FontSize="18" />
+	<TextBox Name="TSEnv_IntuneCategory" Margin="10,145,44,377" IsEnabled="False" />
 	<Button Name="_btnIntuneCheck" Content="Get Categories" Height="30" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="12" Padding="2" Margin="0,0,34,418" />
 	
     <Label Content="More Info" Grid.Column="1" FontSize="14" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Foreground="LightSlateGray" />

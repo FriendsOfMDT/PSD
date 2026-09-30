@@ -12,7 +12,7 @@
 			<Feature Name="RoleSelection" ElementName="" Enabled="False" />
 		</EnableFeatureSupport>
 		-->
-		<TSVariableFieldPrefix>TS_</TSVariableFieldPrefix>
+		<TSVariableFieldPrefix>TSEnv_</TSVariableFieldPrefix>
 	</Global>
 
     <WelcomeWizard id="Welcome" title="Start">
@@ -58,10 +58,17 @@
 	</Pane>
 
 	<Pane id="DeviceRole" title="Device Role">
-		<Condition><![CDATA[UCase(Property("SkipRoleSelection")) == "NO"]]></Condition>
+		<Condition><![CDATA[UCase(Property("SkipDeviceRole")) == "NO"]]></Condition>
 		<MainTitle><![CDATA[ "Select a Role" ]]></MainTitle>
 		<SubTitle><![CDATA[ "You must select a role from the dropdown" ]]></SubTitle>
 		<Help><![CDATA[ "Selecting an Role will only set the TSEnv property [Role].&#xa;&#xa;A custom action must be taken within the Task Sequence" ]]></Help>
+	</Pane>
+
+	<Pane id="RolesAndFeatures" title="Roles and Features">
+		<Condition><![CDATA[UCase(Property("SkipRoleSelection")) == "NO"]]></Condition>
+		<MainTitle><![CDATA[ "Select Roles and Features" ]]></MainTitle>
+		<SubTitle><![CDATA[ "Choose optional Windows features for this deployment" ]]></SubTitle>
+		<Help><![CDATA[ "Select the Windows features to include. The available list is based on the selected operating system." ]]></Help>
 	</Pane>
 
 	<Pane id="IntuneGroup" title="Intune Group">
@@ -114,7 +121,6 @@
 	</Pane>
 
 	<Pane id="Applications" title="Applications">
-		<Condition><![CDATA[ UCase(Property("DeploymentType")) <> "REPLACE" ]]></Condition>
 		<Condition><![CDATA[ UCase(Property("SkipApplications")) <> "YES" ]]></Condition>
 		<Condition><![CDATA[ Test-PSDWizardApplicationExist ]]></Condition>
 		<MainTitle><![CDATA[ "Select Applications" ]]></MainTitle>

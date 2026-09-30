@@ -27,58 +27,32 @@
     </Style>
     <!--#endregion TextBlock-->
     <!--#region Textbox -->
-    <Style x:Key="TextBoxDarkTheme" TargetType="{x:Type TextBoxBase}">
+    <Style x:Key="TextBoxDarkTheme" TargetType="{x:Type TextBox}">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="MinWidth" Value="120"/>
         <Setter Property="MinHeight" Value="23.5"/>
+        <Setter Property="BorderBrush" Value="#A0A0A0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="#202020"/>
+        <Setter Property="Foreground" Value="#EBEBEB"/>
+        <Setter Property="CaretBrush" Value="#EBEBEB"/>
         <Setter Property="AllowDrop" Value="true"/>
         <Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
         <Setter Property="Tag" Value="{DynamicResource {x:Static SystemParameters.HighContrastKey}}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding RelativeSource= {x:Static RelativeSource.Self}, Path=Tag}" Value="False">
+                <Setter Property="Background" Value="#202020"/>
                 <Setter Property="Foreground" Value="#EBEBEB"/>
                 <Setter Property="CaretBrush" Value="#EBEBEB"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type TextBoxBase}">
-                            <Border Name="Border" Padding="2,0,2,0" Background="#343447" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" >
-                                <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter TargetName="Border" Property="Background" Value="#343447"/>
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="Transparent"/>
-                                    <Setter Property="Foreground" Value="#2C2C2C"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
             </DataTrigger>
             <DataTrigger Binding="{Binding RelativeSource= {x:Static RelativeSource.Self},  Path=Tag}" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowColor}}"/>
                 <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextColor}}"/>
                 <Setter Property="CaretBrush" Value="{DynamicResource {x:Static SystemColors.WindowTextColor}}"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type TextBoxBase}">
-                            <Border Name="Border" Padding="2,0,2,0" Background="{DynamicResource {x:Static SystemColors.WindowColor}}" BorderBrush="{TemplateBinding BorderBrush}"  BorderThickness="1" >
-                                <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.InactiveBorderBrushKey}}"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -86,7 +60,6 @@
     <!--#region Passwordbox -->
     <Style x:Key="PasswordDarkTheme" TargetType="{x:Type PasswordBox}">
         <Setter Property="SnapsToDevicePixels" Value="true"/>
-        <Setter Property="OverridesDefaultStyle" Value="true"/>
         <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="FontSize" Value="14"/>
@@ -94,48 +67,23 @@
         <Setter Property="PasswordChar" Value="●"/>
         <Setter Property="MinWidth" Value="120"/>
         <Setter Property="MinHeight" Value="23.5"/>
+        <Setter Property="BorderBrush" Value="#A0A0A0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="#202020"/>
+        <Setter Property="Foreground" Value="#EBEBEB"/>
+        <Setter Property="CaretBrush" Value="#EBEBEB"/>
         <Setter Property="AllowDrop" Value="true"/>
         <Setter Property="Tag" Value="{DynamicResource {x:Static SystemParameters.HighContrastKey}}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding RelativeSource= {x:Static RelativeSource.Self}, Path=Tag}" Value="False">
+                <Setter Property="Background" Value="#202020"/>
                 <Setter Property="Foreground" Value="#EBEBEB"/>
                 <Setter Property="CaretBrush" Value="#EBEBEB"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type PasswordBox}">
-                            <Border Name="Border" Padding="2,0,2,0" Background="#343447" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" >
-                                <ScrollViewer x:Name="PART_ContentHost" />
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter TargetName="Border" Property="Background" Value="#343447"/>
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="Transparent"/>
-                                    <Setter Property="Foreground" Value="#A0A0A0"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
             </DataTrigger>
             <DataTrigger Binding="{Binding RelativeSource= {x:Static RelativeSource.Self},  Path=Tag}" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowColor}}"/>
                 <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextColor}}"/>
                 <Setter Property="CaretBrush" Value="{DynamicResource {x:Static SystemColors.WindowTextColor}}"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type PasswordBox}">
-                            <Border Name="Border" Padding="2,0,2,0" Background="{DynamicResource {x:Static SystemColors.WindowColor}}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" >
-                                <ScrollViewer x:Name="PART_ContentHost" />
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static SystemColors.InactiveBorderBrushKey}}"/>
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.InactiveBorderBrush}}"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
             </DataTrigger>
         </Style.Triggers>
     </Style>

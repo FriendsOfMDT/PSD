@@ -1957,6 +1957,7 @@ Function New-PSDStartLoaderPrestartMenu
         ResizeMode="NoResize"
         Height="480" Width="120"
         AllowsTransparency="True"
+        Focusable="True"
         WindowStyle="None">
     <Window.Resources>
         <ResourceDictionary>
@@ -2051,6 +2052,10 @@ Function New-PSDStartLoaderPrestartMenu
     <Grid>
 
         <StackPanel x:Name="stackButtons" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+            <Border x:Name="dragHandle" Width="100" Height="22" Margin="5" Background="#FFE8EDF9" Cursor="SizeAll" ToolTip="Drag menu">
+                <TextBlock Text="::::" Foreground="#666666" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
 
             <Button x:Name="btnWipeDisk" Style="{DynamicResource ButtonLightGrayRounded}" Width="100" HorizontalAlignment="Right" Margin="5" >
                 <StackPanel Width="91" Height="44">
@@ -2248,21 +2253,27 @@ Function New-PSDStartLoaderPrestartMenu
         }
 
         $syncHash.btnWipeDisk.Add_Click({
+            param($sender, $eventArgs)
             # Temporarily disable this button to prevent re-entry.
-            $this.IsEnabled = $false
-            #$syncHash.Window.Dispatcher.Invoke([action]{ 
-                $syncHash.WipeDiskMenu = Invoke-Command -ScriptBlock $syncHash.CleanWindow 
-            #},'Normal')
-            $this.IsEnabled = $syncHash.WipeDiskMenu.isClosed
+            $sender.IsEnabled = $false
+            try {
+                $syncHash.WipeDiskMenu = Invoke-Command -ScriptBlock $syncHash.CleanWindow
+            }
+            finally {
+                $sender.IsEnabled = $true
+            }
         })
 
         $syncHash.btnOpenDisk.Add_Click({
+            param($sender, $eventArgs)
             # Temporarily disable this button to prevent re-entry.
-            $this.IsEnabled = $false
-            #$syncHash.btnOpenDisk.Dispatcher.Invoke([action]{
+            $sender.IsEnabled = $false
+            try {
                 $syncHash.DiskViewerMenu = Invoke-Command -ScriptBlock $syncHash.DiskWindow
-            #},'Normal')
-            $this.IsEnabled = $syncHash.DiskViewerMenu.isClosed
+            }
+            finally {
+                $sender.IsEnabled = $true
+            }
         })
 
         #action for poshwindow button
@@ -2299,38 +2310,51 @@ Function New-PSDStartLoaderPrestartMenu
         })
 
         $syncHash.btnDartPE.Add_Click({
+            param($sender, $eventArgs)
             # Temporarily disable this button to prevent re-entry.
-            $this.IsEnabled = $false
-            If($syncHash.DartTools){
-                $syncHash.OpenDaRT = Start-Process 'X:\Sources\Recovery\Tools\MsDartTools.exe' -Wait -PassThru
+            $sender.IsEnabled = $false
+            try {
+                If($syncHash.DartTools){
+                    $syncHash.OpenDaRT = Start-Process 'X:\Sources\Recovery\Tools\MsDartTools.exe' -Wait -PassThru
+                }
+                # Hide in case this button becomes visible without DaRT installed.
+                Else{
+                    $sender.Visibility = 'Collapsed'
+                    $syncHash.OpenDaRT = $false
+                }
             }
-            #hide incase this button shows back up and its clicked but no Dart is installed
-            Else{
-                $syncHash.btnDartPE.Visibility = 'Collapsed'
-                $syncHash.OpenDaRT = $false
+            finally {
+                $sender.IsEnabled = $true
             }
-            $this.IsEnabled = $true
         })
 
         $syncHash.btnAddStaticIP.Add_Click({
-            #$syncHash.btnAddStaticIP.Dispatcher.Invoke([action]{
-                # Temporarily disable this button to prevent re-entry.
-                $this.IsEnabled = $false
+            param($sender, $eventArgs)
+            # Temporarily disable this button to prevent re-entry.
+            $sender.IsEnabled = $false
+            try {
                 $syncHash.NicConfigMenu = Invoke-Command -ScriptBlock $syncHash.NicWindow
-                $this.IsEnabled = $syncHash.NicConfigMenu.isClosed
-            #},'Normal')
+            }
+            finally {
+                $sender.IsEnabled = $true
+            }
         })
 
         #action for exit button
         $syncHash.btnShutdown.Add_Click({
+            param($sender, $eventArgs)
             # Temporarily disable this button to prevent re-entry.
-            $this.IsEnabled = $false
-            If($syncHash.InPE){
-                $syncHash.ConfirmWindow = Invoke-Command -ScriptBlock $syncHash.PEShutdownConfirm
-            }Else{
-                $syncHash.ConfirmWindow = Invoke-Command -ScriptBlock $syncHash.OSShutdownConfirm
+            $sender.IsEnabled = $false
+            try {
+                If($syncHash.InPE){
+                    $syncHash.ConfirmWindow = Invoke-Command -ScriptBlock $syncHash.PEShutdownConfirm
+                }Else{
+                    $syncHash.ConfirmWindow = Invoke-Command -ScriptBlock $syncHash.OSShutdownConfirm
+                }
             }
-            $this.IsEnabled = $syncHash.ConfirmWindow
+            finally {
+                $sender.IsEnabled = $true
+            }
         })
 
         #action for exit button
@@ -2338,10 +2362,46 @@ Function New-PSDStartLoaderPrestartMenu
             Close-PSDStartLoaderDebugMenu
         })
 
-        #change position of menu based on arrow keys
-        $syncHash.Window.Add_KeyDown( {
-            Set-MenuPosition -Runspace $syncHash -Location $_.Key
+        # Capture arrows before focused buttons and drag from non-button menu space.
+        $syncHash.Window.Add_PreviewKeyDown({
+            param($sender, $eventArgs)
+            $location = switch ($eventArgs.Key) {
+                ([System.Windows.Input.Key]::Up) { 'Up'; break }
+                ([System.Windows.Input.Key]::Down) { 'Down'; break }
+                ([System.Windows.Input.Key]::Left) { 'Left'; break }
+                ([System.Windows.Input.Key]::Right) { 'Right'; break }
+                default { $null }
+            }
+            if ($location) {
+                Set-MenuPosition -Runspace $syncHash -Location $location
+                $eventArgs.Handled = $true
+            }
         })
+        $syncHash.Window.Add_PreviewMouseLeftButtonDown({
+            param($sender, $eventArgs)
+            $visual = $eventArgs.OriginalSource
+            $button = $null
+            while ($visual -and $visual -is [System.Windows.DependencyObject]) {
+                if ($visual -is [System.Windows.Controls.Button]) {
+                    $button = $visual
+                    break
+                }
+                $visual = [System.Windows.Media.VisualTreeHelper]::GetParent($visual)
+            }
+            if (-not $button) {
+                $sender.DragMove()
+                $eventArgs.Handled = $true
+            }
+        })
+        $dragHandle = $syncHash.Window.FindName('dragHandle')
+        if ($dragHandle) {
+            $dragHandle.Add_MouseLeftButtonDown({
+                param($sender, $eventArgs)
+                $syncHash.Window.DragMove()
+                $eventArgs.Handled = $true
+            })
+        }
+        $syncHash.Window.Focus() | Out-Null
 
         #Add smooth closing for Window
         $syncHash.Window.Add_Loaded({ $syncHash.isLoaded = $True })
@@ -2362,32 +2422,37 @@ Function New-PSDStartLoaderPrestartMenu
 
     #invoke scriptblock in runspace
     $PowerShellCommand.Runspace = $PSDRunSpace
+    If(-Not($Wait)) {
+        # Register before BeginInvoke so an immediate Continue cannot outrun cleanup.
+        Register-ObjectEvent -InputObject $syncHash.Runspace `
+            -EventName 'AvailabilityChanged' `
+            -MessageData $PowerShellCommand `
+            -Action {
+                if($Sender.RunspaceAvailability -eq "Available")
+                {
+                    $Event.MessageData.Dispose()
+                    $Sender.Close()
+                    $Sender.Dispose()
+                    Unregister-Event -SubscriptionId $EventSubscriber.SubscriptionId -ErrorAction SilentlyContinue
+                }
+            } | Out-Null
+    }
+
     $AsyncHandle = $PowerShellCommand.BeginInvoke()
 
     If($Wait){
-        #wait until runspace is completed before ending
-        do {
-            Start-sleep -m 100
+        try {
+            # Continue closes the dialog, which completes the asynchronous invocation.
+            $null = $PowerShellCommand.EndInvoke($AsyncHandle)
         }
-        while (!$AsyncHandle.IsCompleted)
-        #end invoked process
-        $null = $PowerShellCommand.EndInvoke($AsyncHandle)
+        finally {
+            # Synchronous callers own cleanup so no prestart runspace survives into PSDWizard or task-sequence reboot.
+            $PowerShellCommand.Dispose()
+            $PSDRunSpace.Close()
+            $PSDRunSpace.Dispose()
+            $syncHash.RunspaceDisposed = $true
+        }
     }
-    #cleanup registered object
-    Register-ObjectEvent -InputObject $syncHash.Runspace `
-            -EventName 'AvailabilityChanged' `
-            -Action {
-
-                    if($Sender.RunspaceAvailability -eq "Available")
-                    {
-                        $Sender.Closeasync()
-                        $Sender.Dispose()
-                        # Speed up resource release by calling the garbage collector explicitly.
-                        # Note that this will pause *all* threads briefly.
-                        [GC]::Collect()
-                    }
-
-                } | Out-Null
 
     If($Data.Error){Write-PSDLog -Message ("{0}: Debug Menu errored: {1}" -f ${CmdletName}, $Data.Error) -LogLevel 3}
     Else{Write-PSDLog -Message ("{0}: Debug Menu closed" -f ${CmdletName})}
@@ -2430,7 +2495,7 @@ Function New-PSDStartLoader
     #$syncHash.TSProgressStatus = {Get-PSDStartTSProgress}
     $syncHash.DartTools = Test-PSDStartLoaderHasDartPE
     $syncHash.MenuPosition = $MenuPosition
-    $syncHash.ShowPrestartMenu = {New-PSDStartLoaderPrestartMenu -Position $args[0] -OnTop}
+    $syncHash.ShowPrestartMenu = {New-PSDStartLoaderPrestartMenu -Position $args[0] -OnTop -Wait}
     $syncHash.CheckboxStyle = Add-PSDStartLoaderCheckboxStyle
     $syncHash.DeviceInfoCommand = {Get-PSDLocalInfo -PassThru}
     $syncHash.NetworkInfoCommand  = {Get-PSDStartLoaderInterfaceDetails}
@@ -2791,22 +2856,8 @@ Function New-PSDStartLoader
     #invoke scriptblock in runspace
     $PowerShellCommand.Runspace = $PSDRunSpace
     $AsyncHandle = $PowerShellCommand.BeginInvoke()
-
-    #cleanup registered object
-    Register-ObjectEvent -InputObject $syncHash.Runspace `
-            -EventName 'AvailabilityChanged' `
-            -Action {
-
-                    if($Sender.RunspaceAvailability -eq "Available")
-                    {
-                        $Sender.Closeasync()
-                        $Sender.Dispose()
-                        # Speed up resource release by calling the garbage collector explicitly.
-                        # Note that this will pause *all* threads briefly.
-                        [GC]::Collect()
-                    }
-
-                } | Out-Null
+    $syncHash.PowerShell = $PowerShellCommand
+    $syncHash.AsyncHandle = $AsyncHandle
 
     If($Data.Error){Write-PSDLog -Message ("{0}: PSDStartLoader errored: {1}" -f ${CmdletName}, $Data.Error) -LogLevel 3}
     Else{Write-PSDLog -Message ("{0}: PSDStartLoader closed" -f ${CmdletName})}
@@ -3199,9 +3250,33 @@ function Close-PSDStartLoader
     [string]${CmdletName} = $MyInvocation.MyCommand
 
     Write-PSDLog -Message ("{0}: Closing PSDStartLoader" -f ${CmdletName})
-    $Runspace.Window.Dispatcher.Invoke([action]{
-      $Runspace.$Dispatcher.close()
-    },'Normal')
+    # Make repeated cleanup calls harmless after the pre-wizard handoff has already disposed the loader.
+    if ($Runspace.RunspaceDisposed) {
+        return
+    }
+
+    try {
+        if ($Runspace.Window -and -not $Runspace.isClosed) {
+            $Runspace.Window.Dispatcher.Invoke([action]{
+                $Runspace.$Dispatcher.Close()
+            },'Normal')
+        }
+
+        if ($Runspace.PowerShell -and $Runspace.AsyncHandle) {
+            $null = $Runspace.PowerShell.EndInvoke($Runspace.AsyncHandle)
+        }
+    }
+    finally {
+        if ($Runspace.PowerShell) {
+            $Runspace.PowerShell.Dispose()
+        }
+        if ($Runspace.Runspace) {
+            $Runspace.Runspace.Close()
+            $Runspace.Runspace.Dispose()
+        }
+        $Runspace.RunspaceDisposed = $true
+        Write-PSDLog -Message ("{0}: PSDStartLoader runspace disposed" -f ${CmdletName})
+    }
 
 }
 #endregion

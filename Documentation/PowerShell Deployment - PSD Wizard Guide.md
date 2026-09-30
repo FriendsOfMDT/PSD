@@ -70,8 +70,8 @@ DeploymentShare
 - **OSDComputerName**: Even though this is a standard MDT variable, the PSD wizard supports some dynamic values:
   - **_%SERIALNUMBER%_**: Replaced with the device's serial number.
   - **_%SERIAL%_**: Replaced with the device's serial number.
-  - **_%SERIAL:\<NUM\>%_**: Replaced with the last **num**bers of the serial number (e.g., %SERIAL:7%).
-  - **_%\<NUM\>:SERIAL%_**: Replaced with the first **num**bers of the serial number (e.g., %7:SERIAL%).
+    - **_%SERIAL:\<NUM\>%_**: Replaced with the first **num**bers of the serial number; characters are trimmed from the right (e.g., %SERIAL:7%).
+    - **_%\<NUM\>:SERIAL%_**: Replaced with the last **num**bers of the serial number; characters are trimmed from the left (e.g., %7:SERIAL%).
   - **_%RAND:\<NUM\>%_**: Replaced with an alphanumeric character of **num**bers (e.g., %RAND:7%).
 
 > NOTE: **AssetTag** property is be developed on
@@ -98,7 +98,7 @@ DeploymentShare
 - **PSDWizardLogo**: Adds a logo to the top left corner of the wizard and the Welcome page (e.g., PSDWizardLogo=%SCRIPTROOT%\powershell.png).
 - **SkipPSDWelcome**: YES or NO. Toggles the Welcome splash screen.
 - **SkipDeployReadiness**: YES or NO. Toggles the deployment readiness page.
-- **SkipReadinessCheck**: YES or NO. Skips any readiness checks. This option is ignored if SkipDeployReadiness is NO, and the readiness check will not run.
+- **SkipReadinessCheck**: YES or NO. When set to YES, omits the Deployment Readiness page. The legacy SkipDeployReadiness=YES setting also omits this page.
 - **SkipPSDWizardSplashScreen**: YES or NO. Toggles the splash screen before launching the wizard. If ZeroTouch deployment is performed, be sure to disable this too.
 - **PSDReadinessAllowBypass**: YES or NO. Allows the PSD Wizard to continue even if the readiness check returns false.
 - **PSDReadinessScript**: Place PowerShell script in %DEPLOYROOT%\PSDResources\Readiness folder.
@@ -177,19 +177,37 @@ It is possible to add or remove pages in the PSD Wizard. Since a UDI wizard is n
 
 ## NEW FEATURES
 
-In addition to the new wizard, there is another module released:
-
-- PSDStartLoader
+Included in PSD 2.30, another module is used called: **PSDStartLoader**
 
 The PSDStartLoader is a UI driven prestart menu (replaces the CLI prestart menu). This module can be activated within the bootstrap.ini
 
-- **PSDPrestartMode** --> _Native_,_PrestartMenu_, or _FullScreen_. The Prestartmenu launches a menu within the boot sequence that provides other menus such as diskinfo, diskwipe, and static ip configuration. It can also detect if DART and CMtrace is installed in PE and will display a button for each
+- **SkipPSDPrestartMenu** --> _YES_ or _NO_. Controls only the PSD prestart menu. When omitted, `SkipBDDWelcome` is used for backward compatibility.
+- **PSDPrestartMode** --> _Native_, _PrestartMenu_, or _FullScreen_. The PrestartMenu launches before PSDWizard and provides disk information, disk wipe, static IP configuration, DaRT, and CMTrace actions. Select Continue to close and dispose the menu before PSDWizard starts.
 
 > **IMPORTANT**: The _FullScreen_ option is still in BETA; it replaces the bginfo background with a UI backdrop (that will eventually monitor the TaskSequence in a modern fashion potentially replacing the task sequence progress bar). It to will present the prestart menu as well. _Native_ puts it back to CLI version.
 
 While the menu is loaded; you can use the keyboard's arrow keys to control the position of the menu. It defaults to the right side of screen. To preset the position, set the variable **PSDPrestartPosition** with one of these values: _VerticalLeft_, _VerticalRight_, _HorizontalTop_, _HorizontalBottom_
 
 ![menuonly](.images/prestartmenuloader_menuonly.png)
+
+In addition to the PSDStartLoader, a new feature was added to the PSDWizard called: **PSDWizard Profile Selection Screen**
+
+The screen allows you to preconfigure sections within the CustomeSettings.ini to preload the PSDWizard with rules. This is ran BEFORE the PSDWizard loads allowing the Wziard to look different for each profile
+The section must not exist in Priority list within the _Settings_ section, this is becuase it would be processed normally. 
+
+>TIP: In a way this replaces the custom MDT mod for loading different CustomSettings.ini files.
+
+> NOTE: Current process will overwrite any conflicting rules that are process during boot up. Any defualt section rules not overwritten will still be processed. 
+
+An example for this would be: _Server deployments_. Where you could preselect a tasksequence, computer name, and don't display the applications and Intune group pages
+
+To enable this feature set: 
+
+**SkipPSDWizardProfileSelection** --> YES
+
+If it fins a section, it will display it in a dropdown list
+
+
 
 ### Hidden Features
 

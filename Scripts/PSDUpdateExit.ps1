@@ -118,6 +118,97 @@ function set-PSDDefaultLogPath{
 	}
 }
 
+function Get-PSDIniValue {
+    <#
+    .SYNOPSIS
+        Reads the last active value for an INI setting.
+    .DESCRIPTION
+        Returns the final non-commented key/value match in an INI file. This
+        supports the simple keyboard settings needed while servicing a boot WIM.
+    .PARAMETER Path
+        Path to the INI file.
+    .PARAMETER Name
+        Name of the setting to retrieve.
+    .OUTPUTS
+        The setting value, or $null when no active value is present.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [Parameter(Mandatory = $true)]
+        [string]$Name
+    )
+
+    if (-not (Test-Path $Path)) {
+        return $null
+    }
+
+    $match = Get-Content -Path $Path | Where-Object {
+        $_ -notmatch '^\s*[;#]' -and $_ -match "^\s*$([regex]::Escape($Name))\s*=\s*(.+?)\s*$"
+    } | Select-Object -Last 1
+
+    if ($match) {
+        return ($match -split '=', 2)[1].Trim()
+    }
+}
+
+function Get-PSDWinPEInputLocale {
+    <#
+    .SYNOPSIS
+        Resolves the WinPE input locale configured for a deployment share.
+    .DESCRIPTION
+        Prioritizes KeyboardLocalePE over KeyboardLocale and Bootstrap.ini over
+        CustomSettings.ini. Culture values such as fr-FR are mapped to a DISM
+        input-locale value using PSDListOfLanguages.xml.
+    .PARAMETER DeployRoot
+        Root path of the deployment share being updated.
+    .OUTPUTS
+        A DISM-compatible locale such as 040c:0000040c, or $null.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$DeployRoot
+    )
+
+    $bootstrapPath = Join-Path $DeployRoot 'Control\Bootstrap.ini'
+    $customSettingsPath = Join-Path $DeployRoot 'Control\CustomSettings.ini'
+    $inputLocale = Get-PSDIniValue -Path $bootstrapPath -Name 'KeyboardLocalePE'
+
+    if ([string]::IsNullOrWhiteSpace($inputLocale)) {
+        $inputLocale = Get-PSDIniValue -Path $customSettingsPath -Name 'KeyboardLocalePE'
+    }
+
+    if ([string]::IsNullOrWhiteSpace($inputLocale)) {
+        $inputLocale = Get-PSDIniValue -Path $bootstrapPath -Name 'KeyboardLocale'
+    }
+
+    if ([string]::IsNullOrWhiteSpace($inputLocale)) {
+        $inputLocale = Get-PSDIniValue -Path $customSettingsPath -Name 'KeyboardLocale'
+    }
+
+    if ([string]::IsNullOrWhiteSpace($inputLocale)) {
+        return $null
+    }
+
+    if ($inputLocale -match '^[0-9A-Fa-f]{4}:[0-9A-Fa-f]{8}$') {
+        return $inputLocale
+    }
+
+    $languageFile = Join-Path $DeployRoot 'Scripts\PSDListOfLanguages.xml'
+    if (Test-Path $languageFile) {
+        [xml]$languages = Get-Content -Path $languageFile
+        $locale = $languages.Locales.Locale | Where-Object { $_.Culture -eq $inputLocale } | Select-Object -First 1
+        if ($locale) {
+            return $locale.KeyboardLayout
+        }
+    }
+
+    Write-PSDInstallLog -Message "Unable to resolve KeyboardLocale '$inputLocale' to an input locale." -LogLevel 2
+    return $null
+}
+
 # Start logging
 set-PSDDefaultLogPath -defaultLogLocation $false -LogLocation "$Env:DEPLOYROOT"
 
@@ -134,6 +225,26 @@ If ($Env:STAGE -eq "WIM") {
     # CONTENT environment variable contains the path to the mounted WIM
     Write-PSDInstallLog -Message "Entering the $Env:STAGE phase"
     Write-PSDInstallLog -Message "CONTENT = $Env:CONTENT"
+
+    $inputLocale = Get-PSDWinPEInputLocale -DeployRoot $Env:DEPLOYROOT
+    if ($inputLocale -and $inputLocale -ne '0409:00000409') {
+        $DismArgs = @(
+            ('/Image:"{0}"' -f $Env:CONTENT)
+            "/Set-InputLocale:$inputLocale"
+        )
+        Write-PSDInstallLog -Message "Setting WinPE input locale to $inputLocale"
+        $dism = Start-Process -FilePath dism.exe -ArgumentList $DismArgs -Wait -PassThru -NoNewWindow
+
+        if ($dism.ExitCode -eq 0) {
+            Write-PSDInstallLog -Message "WinPE input locale set to $inputLocale"
+        }
+        else {
+            Write-PSDInstallLog -Message "Failed to set WinPE input locale to $inputLocale. DISM exit code: $($dism.ExitCode)" -LogLevel 3
+        }
+    }
+    else {
+        Write-PSDInstallLog -Message "WinPE input locale remains the default US layout."
+    }
 }
 
 # Do any desired customizations (right after the WIM changes are committed)

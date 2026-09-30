@@ -19,7 +19,7 @@
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <Label Content="Device Name:" Grid.Column="0" FontSize="14" HorizontalAlignment="Left" HorizontalContentAlignment="Right" VerticalAlignment="Center" Width="114" Height="30"/>
-        <TextBox x:Name="TS_OSDComputerName" Grid.Column="1" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="NoWrap" VerticalContentAlignment="Center" Height="30"/>
+        <TextBox x:Name="TSEnv_OSDComputerName" Grid.Column="1" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="NoWrap" VerticalContentAlignment="Center" Height="30"/>
 
         <Canvas x:Name="_detTabValidation"  Grid.Column="0" Margin="0,40,0,-57" Background="LightGreen" Grid.ColumnSpan="2" Visibility="Hidden" >
             <TextBox x:Name="_detTabValidation_Name" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True" Canvas.Left="10" Canvas.Top="10" Height="30" />
@@ -66,18 +66,18 @@
                 <RowDefinition Height="34*"></RowDefinition>
             </Grid.RowDefinitions>
             <Label Content="Domain to Join:" FontSize="14" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-            <TextBox x:Name="TS_JoinDomain" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,2,0,5"/>
+            <TextBox x:Name="TSEnv_JoinDomain" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,2,0,5"/>
             <Label Content="Org Unit:" FontSize="14" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-            <TextBox x:Name="TS_MachineObjectOU" Grid.Column="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2"/>
-            <ComboBox x:Name="_DomainOUs" Grid.Column="1" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2" Visibility="Hidden"/>
-            <Label Content="Domain Admin:" FontSize="14" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
-            <TextBox x:Name="TS_DomainAdmin" Grid.Column="1" Grid.Row="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,33,0,5" Grid.RowSpan="2"/>
+            <TextBox x:Name="TSEnv_MachineObjectOU" Grid.Column="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2"/>
+            <ComboBox x:Name="TSEnvList_DomainOUs" Grid.Column="1" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" Width="295" Margin="0,33,0,5" Grid.RowSpan="2" Visibility="Hidden"/>
+            <Label Content="Domain Join Account:" FontSize="14" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
+            <TextBox x:Name="TSEnv_DomainAdmin" Grid.Column="1" Grid.Row="1" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,33,0,5" Grid.RowSpan="2"/>
             <Label Content="Password:" FontSize="14" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>
-            <PasswordBox x:Name="TS_DomainAdminPassword" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center" Width="295" Margin="0,0,0,5"/>
+            <PasswordBox x:Name="TSEnv_DomainAdminPassword" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center" Width="295" Margin="0,0,0,5"/>
             <Label Content="Confirm Password:" FontSize="14" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right"/>
             <PasswordBox x:Name="_DomainAdminConfirmPassword" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="4" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center" Width="295" Margin="0,0,0,5"/>
             <Label Content="Domain:" FontSize="14" Grid.Column="0" Grid.Row="5"  HorizontalAlignment="Right"/>
-            <TextBox x:Name="TS_DomainAdminDomain" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="4" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Width="295" Margin="0,33,0,4" Grid.RowSpan="2"/>
+            <TextBox x:Name="TSEnv_DomainAdminDomain" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="4" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Width="295" Margin="0,33,0,4" Grid.RowSpan="2"/>
         </Grid>
 
         <RadioButton x:Name="_JoinWorkgroupRadio" GroupName="joinoption" Content="Join a workgroup" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="14" Margin="11,7,51,7" Width="111"/>
@@ -90,7 +90,7 @@
                 <RowDefinition Height="34*"></RowDefinition>
             </Grid.RowDefinitions>
             <Label Content="Workgroup:" FontSize="14" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-            <TextBox x:Name="TS_JoinWorkgroup" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,0,0,4"/>
+            <TextBox x:Name="TSEnv_JoinWorkgroup" Grid.Column="1" Grid.Row="0" FontSize="14" FontWeight="Bold" TextWrapping="NoWrap" VerticalContentAlignment="Center" Margin="0,0,0,4"/>
         </Grid>
         <Canvas x:Name="_detTabValidation2" Grid.ColumnSpan="2" Grid.Row="4" Margin="0,36,0,0" Visibility="Hidden" Grid.RowSpan="2">
             <TextBox x:Name="_detTabValidation2_Name" Background="Transparent" BorderThickness="0" TextWrapping="NoWrap" FontSize="18" IsReadOnly="True"  VerticalContentAlignment="Center" Canvas.Left="10" Canvas.Top="10" Width="376" Height="30" />

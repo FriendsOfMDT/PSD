@@ -11,7 +11,7 @@
     </Rectangle>
     <Label x:Name="_readyTabSubTitle" Content="@SubTitle" FontSize="14" HorizontalAlignment="Left" Margin="10,73,0,0" VerticalAlignment="Top" />
 
-    <ListView x:Name="_summary" HorizontalAlignment="Left" Height="404" Margin="10,107,0,0"  VerticalAlignment="Top" Width="466">
+    <ListView x:Name="TSEnv" HorizontalAlignment="Left" Height="404" Margin="10,107,0,0"  VerticalAlignment="Top" Width="466">
         <ListView.View>
             <GridView>
                 <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />

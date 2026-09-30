@@ -30,6 +30,7 @@
 		<Pane id="TargetDisk" reference="Dark\PSDWizard_TargetDisk_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="DeviceDetails" reference="Dark\PSDWizard_DeviceDetails_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="DeviceRole" reference="Dark\PSDWizard_DeviceRole_en-US.xaml" margin="0,0,0,0" />	
+		<Pane id="RolesAndFeatures" reference="Dark\PSDWizard_RolesAndFeatures_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="IntuneGroup" reference="Dark\PSDWizard_IntuneGroup_en-US.xaml" margin="0,0,0,0" />
 		<Pane id="AdminAccount" reference="Dark\PSDWizard_AdminCreds_en-US.xaml" margin="0,0,0,0"/>
 		<Pane id="LocaleTime" reference="Dark\PSDWizard_Locale_en-US.xaml" margin="0,0,0,0"/>

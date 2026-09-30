@@ -57,7 +57,7 @@ Sample syntax for the New-PSDServerCert.ps1 script:
 To enable server side logging via BITS Upload, IIS need to be configured to allow that. To create a BITS Upload folder and virtual directory, run the Set-PSDLogInstance.ps1 script. Sample syntax:
 
 ```powershell
-.\Set-PSDLogInstance.ps1 -psLogFolder "E:\PSDProductionLogs" -psVirtualDirectory "PSDProductionLogs"
+.\Set-PSDLogInstance.ps1 -psLogFolder "E:\PSDProductionLogs" -psVirtualLogDirectory "PSDProductionLogs"
 ```
 
 In addition the following rules must be added to the CustomSettings.ini file, and the account specified has to be created in either the local SAM account database, or in Active Directory depending on your setup:

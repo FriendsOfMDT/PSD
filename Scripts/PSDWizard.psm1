@@ -71,10 +71,10 @@ function Get-PSDWizard{
     return $script:Wizard
 }
 function Save-PSDWizardResult{
-    $script:Xaml.SelectNodes("//*[@Name]") | ? { $_.Name -like "TS_*" } | % {
+    $script:Xaml.SelectNodes("//*[@Name]") | ? { $_.Name -like "TSEnv_*" } | % {
         $name = $_.Name.Substring(3)
         $control = $script:Wizard.FindName($_.Name)
-        if($_.Name -eq "TS_DomainAdminPassword" -or $_.Name -eq "TS_AdminPassword"){
+        if($_.Name -eq "TSEnv_DomainAdminPassword" -or $_.Name -eq "TSEnv_AdminPassword"){
             $value = $control.Password
             Set-Item -Path tsenv:$name -Value $value 
         }
@@ -95,10 +95,10 @@ function Save-PSDWizardResult{
     }
 }
 function Set-PSDWizardDefault{
-    $script:Xaml.SelectNodes("//*[@Name]") | ? { $_.Name -like "TS_*" } | % {
+    $script:Xaml.SelectNodes("//*[@Name]") | ? { $_.Name -like "TSEnv_*" } | % {
         $name = $_.Name.Substring(3)
         $control = $script:Wizard.FindName($_.Name)
-        if($_.Name -eq "TS_DomainAdminPassword" -or $_.Name -eq "TS_AdminPassword"){
+        if($_.Name -eq "TSEnv_DomainAdminPassword" -or $_.Name -eq "TSEnv_AdminPassword"){
             $value = $control.Password
             $control.Password = (Get-Item tsenv:$name).Value
         }

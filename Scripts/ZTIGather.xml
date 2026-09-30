@@ -162,6 +162,7 @@
 	<property id="SkipSummary" type="string" overwrite="false" description="Flag to skip the final wizard summary screen (if set to YES, default is blank)" />
 	<property id="SkipFinalSummary" type="string" overwrite="false" description="Flag to skip the Summary_Definition_XXX.xml screen (if set to YES, default is blank)" />
 	<property id="SkipBDDWelcome" type="string" overwrite="false" description="Flag to skip the BDD Welcome screen (if set to YES, default is blank)" />
+	<property id="SkipPSDPrestartMenu" type="string" overwrite="false" description="Flag to skip the PSD prestart menu (if set to YES, default is blank)" />
 	<property id="SkipTimeZone" type="string" overwrite="false" description="Flag to skip the TimeZone screen (if set to YES, default is blank)" />
 	<property id="SkipTaskSequence" type="string" overwrite="false" description="Flag to skip the Task Sequence (OS Selection) screen (if set to YES, default is blank)" />
 	<property id="SkipBuild" type="string" overwrite="false" description="Flag to skip the Build (OS Selection) screen (if set to YES, default is blank)" />

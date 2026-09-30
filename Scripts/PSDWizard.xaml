@@ -12,40 +12,40 @@ HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid Height="500" Margin="10,5,0,0" VerticalAlignment="Top" Width="460">
 
                     <Label Content="TaskSequenceID" HorizontalAlignment="Left" Height="26" Margin="0,0,0,0" VerticalAlignment="Top"/>
-                    <TextBox FontWeight="Bold" Name="TS_TaskSequenceID" HorizontalAlignment="Center" Height="20" Margin="125,4,0,0" VerticalAlignment="Top" Width="310"/>
+                    <TextBox FontWeight="Bold" Name="TSEnv_TaskSequenceID" HorizontalAlignment="Center" Height="20" Margin="125,4,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="Deployroot" HorizontalAlignment="Left" Height="26" Margin="0,25,0,0" VerticalAlignment="Top"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Deployroot" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,29,0,0" VerticalAlignment="Top" Width="310"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TSEnv_Deployroot" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,29,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="Model" HorizontalAlignment="Left" Height="26" Margin="0,50,0,0" VerticalAlignment="Top"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_Model" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,54,0,0" VerticalAlignment="Top" Width="310"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TSEnv_Model" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,54,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="SerialNumber" HorizontalAlignment="Left" Height="26" Margin="0,75,0,0" VerticalAlignment="Top"/>
-                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TS_SerialNumber" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,79,0,0" VerticalAlignment="Top" Width="310"/>
+                    <TextBox FontWeight="Bold" IsReadOnly="True" Name="TSEnv_SerialNumber" Text="1234567890" HorizontalAlignment="Center" Height="20" Margin="125,79,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="ComputerName" HorizontalAlignment="Left" Height="26" Margin="0,100,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_OSDComputerName" HorizontalAlignment="Center" Height="20" Margin="125,104,0,0" VerticalAlignment="Top" Width="310" MaxLength="15"/>
+                    <TextBox Name="TSEnv_OSDComputerName" HorizontalAlignment="Center" Height="20" Margin="125,104,0,0" VerticalAlignment="Top" Width="310" MaxLength="15"/>
 
                     <Label Content="Admin Password" HorizontalAlignment="Left" Height="26" Margin="0,125,0,0" VerticalAlignment="Top"/>
-                    <PasswordBox Name="TS_AdminPassword" HorizontalAlignment="Center" Height="20" Margin="125,129,0,0" VerticalAlignment="Top" Width="310"/>
+                    <PasswordBox Name="TSEnv_AdminPassword" HorizontalAlignment="Center" Height="20" Margin="125,129,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="Domain" HorizontalAlignment="Left" Height="26" Margin="0,150,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_JoinDomain" HorizontalAlignment="Center" Height="20" Margin="125,154,0,0" VerticalAlignment="Top" Width="310"/>
+                    <TextBox Name="TSEnv_JoinDomain" HorizontalAlignment="Center" Height="20" Margin="125,154,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="JoinAccount Name" HorizontalAlignment="Left" Height="26" Margin="0,175,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_DomainAdmin" HorizontalAlignment="Center" Height="20" Margin="125,179,0,0" VerticalAlignment="Top" Width="310"/>
+                    <TextBox Name="TSEnv_DomainAdmin" HorizontalAlignment="Center" Height="20" Margin="125,179,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="JoinAccount Password" HorizontalAlignment="Left" Height="26" Margin="0,200,0,0" VerticalAlignment="Top"/>
-                    <PasswordBox Name="TS_DomainAdminPassword" HorizontalAlignment="Center" Height="20" Margin="125,204,0,0" VerticalAlignment="Top" Width="310"/>
+                    <PasswordBox Name="TSEnv_DomainAdminPassword" HorizontalAlignment="Center" Height="20" Margin="125,204,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="JoinAccount Domain" HorizontalAlignment="Left" Height="26" Margin="0,225,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_DomainAdminDomain" HorizontalAlignment="Center" Height="20" Margin="125,229,0,0" VerticalAlignment="Top" Width="310"/>
+                    <TextBox Name="TSEnv_DomainAdminDomain" HorizontalAlignment="Center" Height="20" Margin="125,229,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="OSDisk index" HorizontalAlignment="Left" Height="26" Margin="0,250,0,0" VerticalAlignment="Top"/>
-                    <TextBox Name="TS_OSDDiskIndex" HorizontalAlignment="Center" Height="20" Margin="125,254,0,0" VerticalAlignment="Top" Width="310"/>
+                    <TextBox Name="TSEnv_OSDDiskIndex" HorizontalAlignment="Center" Height="20" Margin="125,254,0,0" VerticalAlignment="Top" Width="310"/>
 
                     <Label Content="Role" HorizontalAlignment="Left" Height="26" Margin="0,275,0,0" VerticalAlignment="Top"/>
-                    <ComboBox Name="TS_PSDRole" HorizontalAlignment="Center" Height="20" Margin="125,279,0,0" VerticalAlignment="Top" Width="310">
+                    <ComboBox Name="TSEnv_PSDRole" HorizontalAlignment="Center" Height="20" Margin="125,279,0,0" VerticalAlignment="Top" Width="310">
                         <ComboBoxItem>Configuration 001</ComboBoxItem>
                         <ComboBoxItem>Configuration 002</ComboBoxItem>
                         <ComboBoxItem>Configuration 003</ComboBoxItem>
@@ -58,7 +58,7 @@ HorizontalAlignment="Center" VerticalAlignment="Center">
                     </ComboBox>
                     
                     <Label Content="Language install" HorizontalAlignment="Left" Height="26" Margin="0,300,0,0" VerticalAlignment="Top"/>
-                    <ComboBox Name="TS_PSDLanguage" HorizontalAlignment="Center" Height="20" Margin="125,304,0,0" VerticalAlignment="Top" Width="310">
+                    <ComboBox Name="TSEnv_PSDLanguage" HorizontalAlignment="Center" Height="20" Margin="125,304,0,0" VerticalAlignment="Top" Width="310">
                         <ComboBoxItem>Arabic (Saudi Arabia)</ComboBoxItem>
                         <ComboBoxItem>Bulgarian (Bulgaria)</ComboBoxItem>
                         <ComboBoxItem>Chinese (PRC)</ComboBoxItem>
@@ -100,7 +100,7 @@ HorizontalAlignment="Center" VerticalAlignment="Center">
                     </ComboBox>
                     
                     <Label Content="Locale setting" HorizontalAlignment="Left" Height="26" Margin="0,325,0,0" VerticalAlignment="Top"/>
-                    <ComboBox Name="TS_PSDLocale" HorizontalAlignment="Center" Height="20" Margin="125,329,0,0" VerticalAlignment="Top" Width="310">
+                    <ComboBox Name="TSEnv_PSDLocale" HorizontalAlignment="Center" Height="20" Margin="125,329,0,0" VerticalAlignment="Top" Width="310">
                         <ComboBoxItem>Arabic (Saudi Arabia)</ComboBoxItem>
                         <ComboBoxItem>Bulgarian (Bulgaria)</ComboBoxItem>
                         <ComboBoxItem>Chinese (PRC)</ComboBoxItem>
@@ -142,7 +142,7 @@ HorizontalAlignment="Center" VerticalAlignment="Center">
                     </ComboBox>
                     
                     <Label Content="Keyboard layout" HorizontalAlignment="Left" Height="26" Margin="0,350,0,0" VerticalAlignment="Top"/>
-                    <ComboBox Name="TS_PSDKeyboard" HorizontalAlignment="Center" Height="20" Margin="125,354,0,0" VerticalAlignment="Top" Width="310">
+                    <ComboBox Name="TSEnv_PSDKeyboard" HorizontalAlignment="Center" Height="20" Margin="125,354,0,0" VerticalAlignment="Top" Width="310">
                         <ComboBoxItem>Arabic (Saudi Arabia)</ComboBoxItem>
                         <ComboBoxItem>Bulgarian (Bulgaria)</ComboBoxItem>
                         <ComboBoxItem>Chinese (PRC)</ComboBoxItem>
@@ -184,7 +184,7 @@ HorizontalAlignment="Center" VerticalAlignment="Center">
                     </ComboBox>
 
                     <Label Content="Time Zone" HorizontalAlignment="Left" Height="26" Margin="0,375,0,0" VerticalAlignment="Top"/>
-                    <ComboBox Name="TS_PSDTimeZoneName" HorizontalAlignment="Center" Height="20" Margin="125,379,0,0" VerticalAlignment="Top" Width="310">
+                    <ComboBox Name="TSEnv_PSDTimeZoneName" HorizontalAlignment="Center" Height="20" Margin="125,379,0,0" VerticalAlignment="Top" Width="310">
                         <ComboBoxItem>(UTC) Casablanca</ComboBoxItem>
                         <ComboBoxItem>(UTC) Coordinated Universal Time</ComboBoxItem>
                         <ComboBoxItem>(UTC) Dublin, Edinburgh, Lisbon, London</ComboBoxItem>
